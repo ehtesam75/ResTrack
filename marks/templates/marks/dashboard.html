@@ -1,0 +1,385 @@
+{% extends 'marks/base.html' %}
+
+{% block title %}Dashboard - Marks Tracking System{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 animate-fade-in-up">
+        <div>
+            <h1 class="text-2xl font-bold gradient-text">Analytics Dashboard</h1>
+            <p class="text-sm text-gray-600 mt-1">Track performance and insights</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <a href="{% url 'add_exam' %}" class="bg-purple-100 text-purple-700 px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-purple-200 transform hover:-translate-y-0.5 transition-all duration-200">Record Exam Result</a>
+            <a href="{% url 'add_points_spent' %}" class="bg-orange-100 text-orange-700 px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-orange-200 transform hover:-translate-y-0.5 transition-all duration-200">Record Points Spent</a>
+        </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in-up" style="animation-delay: 0.1s;">
+        <div class="stat-card" style="border-left: 3px solid #93C5FD;">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-xs font-medium uppercase tracking-wide">Total Exams</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ summary.total_exams }}</p>
+                </div>
+                <div class="rounded-lg p-2.5 shadow-md" style="background: #DBEAFE;">
+                    <span class="text-2xl">📝</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card" style="border-left: 3px solid #86EFAC;">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-xs font-medium uppercase tracking-wide">Total Subjects</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ summary.total_subjects }}</p>
+                </div>
+                <div class="rounded-lg p-2.5 shadow-md" style="background: #D1FAE5;">
+                    <span class="text-2xl">📚</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card" style="border-left: 3px solid #BAE6FD;">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-xs font-medium uppercase tracking-wide">Total Students</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ summary.total_students }}</p>
+                </div>
+                <div class="rounded-lg p-2.5 shadow-md" style="background: #E0F2FE;">
+                    <span class="text-2xl">🎓</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card" style="border-left: 3px solid #FED7AA;">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-xs font-medium uppercase tracking-wide">Best Student</p>
+                    <p class="text-base font-bold text-gray-900 mt-1">
+                        {% if summary.best_student %}
+                            <a href="{% url 'student_detail' summary.best_student.id %}" class="gradient-text hover:opacity-80 transition-opacity">
+                                {{ summary.best_student.name }}
+                            </a>
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="rounded-lg p-2.5 shadow-md" style="background: #FFEDD5;">
+                    <span class="text-2xl">🏆</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaderboards Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 animate-fade-in-up" style="animation-delay: 0.2s;">
+        <!-- Top Performers by Total Marks -->
+        <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-green-50 to-emerald-50">
+            <h2 class="text-base font-bold gradient-text mb-3">🥇 Top by Total Marks</h2>
+            <div class="space-y-2">
+                {% for item in total_marks_leaderboard %}
+                <div class="flex items-center justify-between p-2 bg-white rounded-lg hover:shadow-sm transition-all duration-200">
+                    <div class="flex items-center">
+                        <span class="gradient-green text-white font-semibold text-xs w-5 h-5 rounded flex items-center justify-center mr-2 shadow-sm">{{ forloop.counter }}</span>
+                        <a href="{% url 'student_detail' item.student.id %}" class="text-sm text-gray-800 hover:text-purple-600 font-medium transition-colors">
+                            {{ item.student.name }}
+                        </a>
+                    </div>
+                    <span class="font-bold gradient-text text-sm">{{ item.total_marks|floatformat:0 }}</span>
+                </div>
+                {% empty %}
+                <p class="text-gray-500 text-center text-sm py-4">No data available</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Top Performers by Average -->
+        <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-blue-50 to-indigo-50">
+            <h2 class="text-base font-bold gradient-text mb-3">⭐ Top by Average</h2>
+            <div class="space-y-2">
+                {% for item in average_leaderboard %}
+                <div class="flex items-center justify-between p-2 bg-white rounded-lg hover:shadow-sm transition-all duration-200">
+                    <div class="flex items-center">
+                        <span class="gradient-blue text-white font-semibold text-xs w-5 h-5 rounded flex items-center justify-center mr-2 shadow-sm">{{ forloop.counter }}</span>
+                        <a href="{% url 'student_detail' item.student.id %}" class="text-sm text-gray-800 hover:text-purple-600 font-medium transition-colors">
+                            {{ item.student.name }}
+                        </a>
+                    </div>
+                    <span class="font-bold gradient-text text-sm">{{ item.average|floatformat:1 }}%</span>
+                </div>
+                {% empty %}
+                <p class="text-gray-500 text-center text-sm py-4">No data available</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Top by Lifetime Points -->
+        <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-purple-50 to-pink-50">
+            <h2 class="text-base font-bold gradient-text mb-3">💎 Lifetime Points</h2>
+            <div class="space-y-2">
+                {% for item in points_leaderboard %}
+                <div class="flex items-center justify-between p-2 bg-white rounded-lg hover:shadow-sm transition-all duration-200">
+                    <div class="flex items-center">
+                        <span class="gradient-purple text-white font-semibold text-xs w-5 h-5 rounded flex items-center justify-center mr-2 shadow-sm">{{ forloop.counter }}</span>
+                        <a href="{% url 'student_detail' item.student.id %}" class="text-sm text-gray-800 hover:text-purple-600 font-medium transition-colors">
+                            {{ item.student.name }}
+                        </a>
+                    </div>
+                    <span class="font-bold gradient-text text-sm">{{ item.total_points }}</span>
+                </div>
+                {% empty %}
+                <p class="text-gray-500 text-center text-sm py-4">No data available</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-fade-in-up" style="animation-delay: 0.3s;">
+        <!-- Subject Performance Table -->
+        <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300">
+            <h2 class="text-base font-bold gradient-text mb-3">📈 Subject Performance</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                        <tr class="gradient-primary text-white">
+                            <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide rounded-tl-lg">Subject</th>
+                            <th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide">Avg Score</th>
+                            <th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide rounded-tr-lg">Exams</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for item in subject_performance %}
+                        <tr class="hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 transition-all duration-200">
+                            <td class="px-3 py-2">
+                                <a href="{% url 'subject_detail' item.subject.id %}" class="text-sm font-medium hover:text-purple-600 transition-colors">
+                                    {{ item.subject.name }}
+                                </a>
+                            </td>
+                            <td class="px-3 py-2 font-bold gradient-text text-sm text-center">{{ item.average_percentage|floatformat:1 }}%</td>
+                            <td class="px-3 py-2 text-gray-600 text-sm text-center">{{ item.total_exams }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="px-3 py-4 text-center text-gray-500 text-sm">No subjects available</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Subject Performance Chart -->
+        <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col">
+            <h2 class="text-base font-bold gradient-text mb-3">📈 Subject Performance Chart</h2>
+            <div class="flex-1" style="min-height: 300px; position: relative;">
+                <canvas id="subjectPerformanceChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Tables -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-fade-in-up" style="animation-delay: 0.4s;">
+        <!-- Grade Distribution Chart -->
+        <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300">
+            <h2 class="text-base font-bold gradient-text mb-3">📊 Grade Distribution</h2>
+            <div style="max-height: 150px; position: relative;">
+                <canvas id="gradeDistributionChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Exam Type Performance Table -->
+        <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300">
+            <h2 class="text-base font-bold gradient-text mb-3">📈 Exam Type Performance</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                        <tr class="gradient-primary text-white">
+                            <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide rounded-tl-lg">Exam Type</th>
+                            <th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide">Avg Score</th>
+                            <th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide rounded-tr-lg">Total Exams</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for item in exam_type_performance %}
+                        <tr class="hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 transition-all duration-200">
+                            <td class="px-3 py-2 font-medium text-gray-700 text-sm">{{ item.exam_type.name }}</td>
+                            <td class="px-3 py-2 font-bold gradient-text text-sm text-center">{{ item.average_percentage|floatformat:1 }}%</td>
+                            <td class="px-3 py-2 text-gray-600 text-sm text-center">{{ item.total_exams }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="px-3 py-4 text-center text-gray-500 text-sm">No exam types available</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Exams -->
+    <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in-up" style="animation-delay: 0.5s;">
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="text-base font-bold gradient-text">🕒 Recent Exams</h2>
+            <a href="{% url 'all_exams' %}" class="text-purple-600 hover:text-purple-800 text-xs font-semibold transition-colors">View All →</a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead>
+                    <tr class="gradient-primary text-white">
+                        <th class="px-4 py-2 text-center text-xs font-semibold uppercase tracking-wide rounded-tl-lg">ID</th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide">Date</th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide">Student</th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide">Subject</th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide">Type</th>
+                        <th class="px-4 py-2 text-center text-xs font-semibold uppercase tracking-wide">Chapter</th>
+                        <th class="px-4 py-2 text-center text-xs font-semibold uppercase tracking-wide">Marks</th>
+                        <th class="px-4 py-2 text-center text-xs font-semibold uppercase tracking-wide">Score</th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide rounded-tr-lg">Grade</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for exam in recent_exams %}
+                    <tr class="hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 transition-all duration-200">
+                        <td class="px-4 py-2 text-xs text-center font-semibold text-purple-600">{{ exam.exam_id|default:"N/A" }}</td>
+                        <td class="px-4 py-2 text-xs text-gray-600">{{ exam.date|date:"M d, Y" }}</td>
+                        <td class="px-4 py-2">
+                            <a href="{% url 'student_detail' exam.student.id %}" class="text-sm font-medium hover:text-purple-600 transition-colors">
+                                {{ exam.student.name }}
+                            </a>
+                        </td>
+                        <td class="px-4 py-2 font-medium text-sm">{{ exam.subject.name }}</td>
+                        <td class="px-4 py-2 text-xs text-gray-600">{{ exam.exam_type.name }}</td>
+                        <td class="px-4 py-2 text-xs text-gray-600 text-center">{{ exam.chapter|default:"—" }}</td>
+                        <td class="px-4 py-2 font-semibold text-sm text-center">{{ exam.mark_obtained|floatformat:0 }}/{{ exam.total_marks|floatformat:0 }}</td>
+                        <td class="px-4 py-2 font-bold gradient-text text-sm text-center">{{ exam.percentage|floatformat:1 }}%</td>
+                        <td class="px-4 py-2">
+                            <span class="grade-badge text-gray-900 text-xs" style="background-color: {{ exam.grade_color }};">
+                                {{ exam.grade }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="px-3 py-4 text-center text-gray-500 text-sm">No exams recorded yet</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Grade Distribution Chart
+    fetch('{% url "api_overall_grade_distribution" %}')
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('gradeDistributionChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        data: data.data,
+                        backgroundColor: data.colors,
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error loading grade distribution:', error);
+            document.getElementById('gradeDistributionChart').parentElement.innerHTML = '<p class="text-gray-500 text-center py-8">No grade data available</p>';
+        });
+
+    // Subject Performance Chart
+    const subjectData = {{ subject_performance_json|safe }};
+    if (subjectData.length > 0) {
+        const subjectLabels = subjectData.map(item => item.subject.name);
+        const subjectValues = subjectData.map(item => parseFloat(item.average_percentage));
+        
+        const ctx2 = document.getElementById('subjectPerformanceChart').getContext('2d');
+        new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: subjectLabels,
+                datasets: [{
+                    label: 'Average Score',
+                    data: subjectValues,
+                    backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 2,
+                    maxBarThickness: 200,
+                    minBarLength: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            padding: 5
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            padding: 5
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Average Score: ' + context.parsed.y.toFixed(1) + '%';
+                            }
+                        }
+                    }
+                },
+                layout: {
+                    padding: {
+                        left: 20,
+                        right: 20,
+                        top: 10,
+                        bottom: 10
+                    }
+                }
+            }
+        });
+    } else {
+        document.getElementById('subjectPerformanceChart').parentElement.innerHTML = '<p class="text-gray-500 text-center py-8">No subject data available</p>';
+    }
+</script>
+{% endblock %}

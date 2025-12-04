@@ -1,0 +1,477 @@
+{% extends 'marks/base.html' %}
+
+{% block title %}{{ student.name }} - Student Profile{% endblock %}
+
+{% block content %}
+<div class="space-y-4">
+    <!-- Header -->
+    <div class="flex justify-between items-center animate-fade-in-up">
+        <div>
+            <h1 class="text-2xl font-bold gradient-text">{{ student.name }}</h1>
+            {% if student.class_number or student.roll %}
+            <p class="text-sm text-gray-600 mt-1">
+                {% if student.class_name %}Class: <span class="font-semibold">{{ student.class_name }}</span>{% endif %}
+                {% if student.class_name and student.roll %}&nbsp;&nbsp;{% endif %}
+                {% if student.roll %}Roll: <span class="font-semibold">{{ student.roll }}</span>{% endif %}
+            </p>
+            {% endif %}
+        </div>
+        <div class="flex gap-2">
+            <a href="{% url 'compare_students' student.id 0 %}" class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-blue-200 transform hover:-translate-y-0.5 transition-all duration-200">
+                Compare
+            </a>
+            <a href="{% url 'add_exam' %}" class="bg-purple-100 text-purple-700 px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-purple-200 transform hover:-translate-y-0.5 transition-all duration-200">
+                Add Exam
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in-up" style="animation-delay: 0.1s;">
+        <div class="stat-card" style="border-left: 3px solid #FED7AA;">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-xs font-medium uppercase tracking-wide">Rank</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1">#{{ student.rank }}</p>
+                </div>
+                <div class="rounded-lg p-2.5 shadow-md" style="background: #FFEDD5;">
+                    <span class="text-2xl">🏆</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card" style="border-left: 3px solid #86EFAC;">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-xs font-medium uppercase tracking-wide">Total Marks</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ student.total_marks }}</p>
+                </div>
+                <div class="rounded-lg p-2.5 shadow-md" style="background: #D1FAE5;">
+                    <span class="text-2xl">📊</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card" style="border-left: 3px solid #C4B5FD;">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-xs font-medium uppercase tracking-wide">Average Score</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ student.average_percentage|floatformat:1 }}%</p>
+                </div>
+                <div class="rounded-lg p-2.5 shadow-md" style="background: #EDE9FE;">
+                    <span class="text-2xl">📈</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card" style="border-left: 3px solid #93C5FD;">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-xs font-medium uppercase tracking-wide">Total Exams</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ student.total_exams }}</p>
+                </div>
+                <div class="rounded-lg p-2.5 shadow-md" style="background: #DBEAFE;">
+                    <span class="text-2xl">📝</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Achievement Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in-up" style="animation-delay: 0.15s;">
+        <div class="stat-card" style="border-left: 3px solid #FCD34D;">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-xs font-medium uppercase tracking-wide">Excellence Rate</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ excellence_rate|floatformat:1 }}%</p>
+                </div>
+                <div class="rounded-lg p-2.5 shadow-md" style="background: #FEF3C7;">
+                    <span class="text-2xl">⭐</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card" style="border-left: 3px solid #F472B6;">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-xs font-medium uppercase tracking-wide">Monthly Wins</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ monthly_winner_count }}</p>
+                </div>
+                <div class="rounded-lg p-2.5 shadow-md" style="background: #FCE7F3;">
+                    <span class="text-2xl">🥇</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card" style="border-left: 3px solid #A78BFA;">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-xs font-medium uppercase tracking-wide">Subject Tops</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ subject_champion_count }}</p>
+                </div>
+                <div class="rounded-lg p-2.5 shadow-md" style="background: #EDE9FE;">
+                    <span class="text-2xl">👑</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card" style="border-left: 3px solid #34D399;">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-xs font-medium uppercase tracking-wide">Best Month</p>
+                    {% if best_5_months %}
+                    <p class="text-lg font-bold text-gray-900 mt-1">{{ best_5_months.0.month_name }}</p>
+                    {% else %}
+                    <p class="text-lg font-bold text-gray-900 mt-1">N/A</p>
+                    {% endif %}
+                </div>
+                <div class="rounded-lg p-2.5 shadow-md" style="background: #D1FAE5;">
+                    <span class="text-2xl">🔥</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lifetime Points -->
+    {% if lifetime_points %}
+    <div class="glass-effect rounded-xl shadow-lg border border-gray-200 animate-fade-in-up overflow-hidden" style="animation-delay: 0.2s;">
+        <div class="bg-gradient-to-r from-slate-700 to-slate-800 px-4 py-2">
+            <div class="flex items-center space-x-2">
+                <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                </svg>
+                <h3 class="text-white text-xs font-semibold tracking-wide">Lifetime Performance Points</h3>
+            </div>
+        </div>
+        <div class="p-4 bg-gradient-to-br from-gray-50 to-white">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-gradient-to-br from-slate-700 to-slate-900 rounded-lg px-5 py-3 shadow-lg text-center mr-2">
+                        <div class="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">Total Points</div>
+                        <div class="text-3xl font-bold text-white">{{ lifetime_points.total_points }}</div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <div class="text-center">
+                            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Remaining</div>
+                            <div class="text-xl font-bold text-emerald-600">{{ lifetime_points.points_remaining }}</div>
+                        </div>
+                        <div class="h-10 w-px bg-gray-300"></div>
+                        <div class="text-center">
+                            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Spent</div>
+                            <div class="text-xl font-bold text-rose-600">{{ lifetime_points.points_spent }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ml-4 hidden lg:block">
+                    <div class="w-14 h-14 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg">
+                        <svg class="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-fade-in-up" style="animation-delay: 0.3s;">
+        <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300">
+            <h2 class="text-base font-bold gradient-text mb-3">📊 Marks Over Time</h2>
+            <div style="max-height: 250px; position: relative;">
+                <canvas id="marksOverTimeChart"></canvas>
+            </div>
+        </div>
+
+        <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300">
+            <h2 class="text-base font-bold gradient-text mb-3">📊 Subject Performance</h2>
+            <div style="max-height: 250px; position: relative;">
+                <canvas id="subjectPerformanceChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-fade-in-up" style="animation-delay: 0.4s;">
+        <!-- Grade Distribution -->
+        <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300">
+            <h2 class="text-base font-bold gradient-text mb-3">📊 Grade Distribution</h2>
+            <div style="max-height: 140px; position: relative;">
+                <canvas id="gradeDistributionChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Exam Type Summary -->
+        <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300">
+            <h2 class="text-base font-bold gradient-text mb-3">📊 Exam Type Summary</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {% for item in exam_type_summary %}
+                <div class="border border-gray-200 rounded-lg p-2.5 bg-gradient-to-br from-purple-50 to-blue-50">
+                    <h3 class="font-semibold text-gray-900 mb-1.5 text-sm">{{ item.exam_type.name }}</h3>
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-600">Exams:</span>
+                            <span class="font-semibold">{{ item.exam_count }}</span>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-600">Total:</span>
+                            <span class="font-semibold gradient-text">{{ item.total_marks|floatformat:0 }}</span>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-600">Avg Score:</span>
+                            <span class="font-semibold gradient-text">{{ item.average_percentage|floatformat:1 }}%</span>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-gray-500 col-span-full text-center text-sm py-2">No exam type data available</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Subject-wise Summary -->
+    <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in-up" style="animation-delay: 0.5s;">
+        <h2 class="text-base font-bold gradient-text mb-3">📊 Subject-wise Summary</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5">
+            {% for item in subject_summary %}
+            <div class="border-l-3 border-purple-500 bg-gradient-to-r from-purple-50 to-blue-50 p-3 rounded">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-bold text-gray-900 text-sm">{{ item.subject.name }}</h3>
+                    <div class="flex flex-col gap-1 items-end">
+                        <span class="text-xs gradient-orange text-white px-2 py-0.5 rounded font-semibold shadow-sm whitespace-nowrap">Rank #{{ item.rank }}</span>
+                        <span class="text-xs gradient-blue text-white px-2 py-0.5 rounded shadow-sm whitespace-nowrap">{{ item.exam_count }} exams</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <p class="text-xs text-gray-600">Total Marks</p>
+                        <p class="text-base font-bold gradient-text">{{ item.total_marks|floatformat:0 }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-600">Average Score</p>
+                        <p class="text-base font-bold gradient-text">{{ item.average_percentage|floatformat:1 }}%</p>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-gray-500 col-span-full text-center text-sm py-2">No subject data available</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Top 5 Best Months -->
+    {% if best_5_months %}
+    <div class="glass-effect rounded-xl shadow-lg border border-gray-200 animate-fade-in-up overflow-hidden" style="animation-delay: 0.55s;">
+        <div class="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 px-4 py-2">
+            <div class="flex items-center space-x-2">
+                <span class="text-xl">🏆</span>
+                <h3 class="text-white text-xs font-semibold tracking-wide">Top 5 Best Months</h3>
+            </div>
+        </div>
+        <div class="p-3 bg-gradient-to-br from-gray-50 to-white">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                {% for month in best_5_months %}
+                <div class="border-l-4 {% if forloop.counter == 1 %}border-yellow-500 bg-gradient-to-br from-yellow-50 to-orange-50{% elif forloop.counter == 2 %}border-gray-400 bg-gradient-to-br from-gray-50 to-slate-50{% elif forloop.counter == 3 %}border-orange-600 bg-gradient-to-br from-orange-50 to-amber-50{% else %}border-blue-400 bg-gradient-to-br from-blue-50 to-indigo-50{% endif %} rounded-lg p-2.5 shadow-md hover:shadow-lg transition-all duration-200">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <h4 class="font-bold text-gray-900 text-sm">{{ month.month_name }}</h4>
+                        <span class="text-xl">{% if forloop.counter == 1 %}🥇{% elif forloop.counter == 2 %}🥈{% elif forloop.counter == 3 %}🥉{% else %}{{ forloop.counter }}{% endif %}</span>
+                    </div>
+                    <div class="space-y-0.5">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-gray-600">Average:</span>
+                            <span class="font-bold text-sm gradient-text">{{ month.average_percentage|floatformat:1 }}%</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-gray-600">Exams:</span>
+                            <span class="font-semibold text-xs text-gray-900">{{ month.exams_count }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-gray-600">Points:</span>
+                            <span class="font-semibold text-xs text-purple-600">{{ month.points_earned }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Recent Exams -->
+    <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in-up" style="animation-delay: 0.6s;">
+        <h2 class="text-base font-bold gradient-text mb-3">🕒 Recent Exams</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead>
+                    <tr class="gradient-primary text-white">
+                        <th class="px-4 py-2 text-center text-xs font-semibold uppercase tracking-wide rounded-tl-lg">ID</th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide">Date</th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide">Subject</th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide">Type</th>
+                        <th class="px-4 py-2 text-center text-xs font-semibold uppercase tracking-wide">Chapter</th>
+                        <th class="px-4 py-2 text-center text-xs font-semibold uppercase tracking-wide">Marks</th>
+                        <th class="px-4 py-2 text-center text-xs font-semibold uppercase tracking-wide">Score</th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide rounded-tr-lg">Grade</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for exam in recent_exams %}
+                    <tr class="hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 transition-all duration-200">
+                        <td class="px-4 py-2 text-xs text-center font-semibold text-purple-600">{{ exam.exam_id|default:"N/A" }}</td>
+                        <td class="px-4 py-2 text-xs text-gray-600">{{ exam.date|date:"M d, Y" }}</td>
+                        <td class="px-4 py-2 font-medium text-sm">{{ exam.subject.name }}</td>
+                        <td class="px-4 py-2 text-xs text-gray-600">{{ exam.exam_type.name }}</td>
+                        <td class="px-4 py-2 text-xs text-gray-600 text-center">{{ exam.chapter|default:"—" }}</td>
+                        <td class="px-4 py-2 font-semibold text-sm text-center">{{ exam.mark_obtained|floatformat:0 }}/{{ exam.total_marks|floatformat:0 }}</td>
+                        <td class="px-4 py-2 font-bold gradient-text text-sm text-center">{{ exam.percentage|floatformat:1 }}%</td>
+                        <td class="px-4 py-2">
+                            <span class="grade-badge text-gray-900 text-xs" style="background-color: {{ exam.grade_color }};">
+                                {{ exam.grade }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="px-4 py-4 text-center text-gray-500 text-sm">No exams recorded</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Marks Over Time Chart
+    fetch('{% url "api_marks_over_time" student.id %}')
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('marksOverTimeChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Score',
+                        data: data.data,
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        },
+                        x: {
+                            ticks: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Score: ' + context.parsed.y.toFixed(1) + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+
+    // Subject Performance Chart
+    fetch('{% url "api_subject_performance" student.id %}')
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('subjectPerformanceChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Average Score',
+                        data: data.data,
+                        backgroundColor: 'rgba(34, 197, 94, 0.6)',
+                        borderColor: 'rgba(34, 197, 94, 1)',
+                        borderWidth: 2,
+                        categoryPercentage: 0.8,
+                        barPercentage: 0.9
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Average Score: ' + context.parsed.y.toFixed(1) + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+
+    // Grade Distribution Chart
+    fetch('{% url "api_grade_distribution" student.id %}')
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('gradeDistributionChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        data: data.data,
+                        backgroundColor: data.colors,
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+</script>
+{% endblock %}
