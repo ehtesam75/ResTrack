@@ -1,5 +1,5 @@
 
-# 🎓 ResTrack: Student Marks Tracking & Analysis System
+# 🎓 ResTrack: A Student Marks Tracking & Analysis System
 
 > NOTICE: This project was originally **developed by a chatbot**. I’ve put in considerable effort fixing logic issues, resolving bugs, and contributing feature ideas to ensure everything works properly.
 
