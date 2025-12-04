@@ -1,5 +1,15 @@
 from django.db.models import Sum, Avg, Count, Q
 from .models import Student, Subject, ExamType, Exam, GradeScale
+
+# Default color mapping for grades (from GradeScale table for consistency)
+DEFAULT_GRADE_COLORS = {
+    'Average': '#FEF08A',
+    'Fail': '#FECACA',
+    'Good': '#D1FAE5',
+    'Horrible': '#FCA5A5',
+    'Poor': '#FDE68A',
+    'Superb': '#A7F3D0',
+}
 from collections import Counter
 
 
@@ -214,17 +224,20 @@ class DashboardService:
         exams = Exam.objects.all()
         grades = [exam.grade for exam in exams]
         distribution = Counter(grades)
-        
-        # Get color codes for each grade
+
+        # Get color codes for each grade, fallback to default mapping
         grade_data = []
         for grade_name, count in distribution.items():
             grade_scale = GradeScale.objects.filter(grade_name=grade_name).first()
+            if grade_scale:
+                color = grade_scale.color_code
+            else:
+                color = DEFAULT_GRADE_COLORS.get(grade_name, '#000000')
             grade_data.append({
                 'grade': grade_name,
                 'count': count,
-                'color': grade_scale.color_code if grade_scale else '#000000'
+                'color': color
             })
-        
         return grade_data
     
     @staticmethod
@@ -271,17 +284,20 @@ class ChartDataService:
             student = Student.objects.get(id=student_id)
         except Student.DoesNotExist:
             return {'labels': [], 'data': [], 'colors': []}
-        
+
         grade_freq = student.grade_frequency()
         labels = list(grade_freq.keys())
         data = list(grade_freq.values())
-        
-        # Get colors for each grade
+
+        # Get colors for each grade, fallback to default mapping
         colors = []
         for grade_name in labels:
             grade_scale = GradeScale.objects.filter(grade_name=grade_name).first()
-            colors.append(grade_scale.color_code if grade_scale else '#000000')
-        
+            if grade_scale:
+                color = grade_scale.color_code
+            else:
+                color = DEFAULT_GRADE_COLORS.get(grade_name, '#000000')
+            colors.append(color)
         return {'labels': labels, 'data': data, 'colors': colors}
     
     @staticmethod
