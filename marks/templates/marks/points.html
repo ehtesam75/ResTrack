@@ -1,0 +1,299 @@
+{% extends 'marks/base.html' %}
+
+{% block title %}Points Management{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <div class="mb-6 flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold gradient-text">💎 Points Management</h1>
+            <p class="text-sm text-gray-600 mt-1">View points spending history and student points summary</p>
+        </div>
+        <a 
+            href="{% url 'add_points_spent' %}" 
+            class="bg-purple-100 text-purple-700 px-6 py-2.5 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-purple-200 transition-all"
+        >
+            Record Points Spent
+        </a>
+    </div>
+
+    <!-- Student Points Summary Table -->
+    <div class="glass-effect rounded-xl p-6 border border-gray-200 shadow-lg mb-6 animate-fade-in-up" style="animation-delay: 0.1s;">
+        <h2 class="text-base font-bold gradient-text mb-4">📊 Student Points Summary</h2>
+        
+        {% if student_summary %}
+            <div class="overflow-x-auto max-h-96 overflow-y-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50 sticky top-0">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student Name</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Lifetime Points Earned</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Total Points Spent</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Remaining Points</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for item in student_summary %}
+                        <tr class="hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 transition-all duration-200">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                {% if forloop.counter == 1 %}🥇
+                                {% elif forloop.counter == 2 %}🥈
+                                {% elif forloop.counter == 3 %}🥉
+                                {% else %}{{ forloop.counter }}{% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <a href="{% url 'student_detail' item.student.id %}" class="text-purple-600 hover:text-purple-800 font-medium">
+                                    {{ item.student.name }}
+                                </a>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600 text-center">
+                                {{ item.points_earned }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-rose-600 text-center">
+                                {{ item.points_spent }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-emerald-600 text-center">
+                                {{ item.points_remaining }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student Name</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Lifetime Points Earned</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Total Points Spent</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Remaining Points</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr>
+                            <td colspan="4" class="px-6 py-4 text-center text-gray-500 text-sm">
+                                No students found
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Points Spent History Table -->
+    <div class="glass-effect rounded-xl p-6 border border-gray-200 shadow-lg mb-6 animate-fade-in-up" style="animation-delay: 0.2s;">
+        <h2 class="text-base font-bold gradient-text mb-4">📊 Points Spent History</h2>
+        
+        <!-- Filters -->
+        <form method="get" class="mb-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label for="filter_student" class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Filter by Student
+                    </label>
+                    <select 
+                        id="filter_student" 
+                        name="student" 
+                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white hover:bg-gray-50 transition-colors"
+                    >
+                        <option value="">All Students</option>
+                        {% for student in students %}
+                        <option value="{{ student.id }}" {% if request.GET.student == student.id|stringformat:"s" %}selected{% endif %}>
+                            {{ student.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label for="from_date" class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        From Date
+                    </label>
+                    <input 
+                        type="date" 
+                        id="from_date" 
+                        name="from_date" 
+                        value="{{ request.GET.from_date }}"
+                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white hover:bg-gray-50 transition-colors"
+                    >
+                </div>
+
+                <div>
+                    <label for="to_date" class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        To Date
+                    </label>
+                    <input 
+                        type="date" 
+                        id="to_date" 
+                        name="to_date" 
+                        value="{{ request.GET.to_date }}"
+                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white hover:bg-gray-50 transition-colors"
+                    >
+                </div>
+
+                <div>
+                    <label for="min_spent" class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Min Points Spent
+                    </label>
+                    <input 
+                        type="number" 
+                        id="min_spent" 
+                        name="min_spent" 
+                        value="{{ request.GET.min_spent }}"
+                        min="0"
+                        placeholder="e.g., 10"
+                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white hover:bg-gray-50 transition-colors"
+                    >
+                </div>
+            </div>
+
+            <div class="flex gap-3 mt-4">
+                <button 
+                    type="submit" 
+                    class="bg-purple-100 text-purple-700 px-6 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-purple-200 transition-all"
+                >
+                    Apply Filters
+                </button>
+                {% if request.GET.student or request.GET.from_date or request.GET.to_date or request.GET.min_spent %}
+                <a 
+                    href="{% url 'points' %}" 
+                    class="bg-gray-100 text-gray-700 px-6 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-gray-200 transition-all"
+                >
+                    Clear Filters
+                </a>
+                {% endif %}
+            </div>
+        </form>
+        
+        <!-- Results Summary -->
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 mt-6">
+            <p class="text-sm text-blue-700">
+                Found <span class="font-semibold">{{ points_history.count }}</span> points spent record{% if points_history.count != 1 %}s{% endif %}
+                {% if request.GET.student or request.GET.from_date or request.GET.to_date or request.GET.min_spent %}
+                    <span class="font-medium">(with active filters)</span>
+                {% endif %}
+            </p>
+        </div>
+
+        <!-- Statistics Summary -->
+        {% if points_history %}
+        <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-white rounded-lg shadow-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="rounded-md bg-blue-500 p-2.5">
+                            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4 w-0 flex-1">
+                        <dl>
+                            <dt class="text-xs font-medium text-gray-500 truncate">Total Points Spent</dt>
+                            <dd class="text-xl font-semibold text-gray-900">{{ total_points_spent }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="rounded-md bg-green-500 p-2.5">
+                            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4 w-0 flex-1">
+                        <dl>
+                            <dt class="text-xs font-medium text-gray-500 truncate">Average Spent</dt>
+                            <dd class="text-xl font-semibold text-gray-900">{{ average_spent|floatformat:1 }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="rounded-md bg-yellow-500 p-2.5">
+                            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4 w-0 flex-1">
+                        <dl>
+                            <dt class="text-xs font-medium text-gray-500 truncate">Highest Spent</dt>
+                            <dd class="text-xl font-semibold text-gray-900">{{ highest_spent }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="rounded-md bg-red-500 p-2.5">
+                            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4 w-0 flex-1">
+                        <dl>
+                            <dt class="text-xs font-medium text-gray-500 truncate">Lowest Spent</dt>
+                            <dd class="text-xl font-semibold text-gray-900">{{ lowest_spent }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Points Spent</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for record in points_history %}
+                    <tr class="hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 transition-all duration-200">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ record.date|date:"M d, Y" }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            <a href="{% url 'student_detail' record.student.id %}" class="text-purple-600 hover:text-purple-800 font-medium">
+                                {{ record.student.name }}
+                            </a>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-rose-600 text-center">
+                            {{ record.points_spent }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-700">
+                            {{ record.description }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="px-6 py-4 text-center text-gray-500 text-sm">
+                            No points spent records found
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

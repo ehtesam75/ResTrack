@@ -1,0 +1,226 @@
+{% extends 'marks/base.html' %}
+
+{% block title %}Record Points Spent{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="glass-effect rounded-xl p-6 border border-gray-200 shadow-lg">
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold gradient-text">📝 Record Points Spent</h1>
+            <p class="text-sm text-gray-600 mt-1">Record when a student spends their points</p>
+        </div>
+        
+        <form method="post" class="space-y-4" id="pointsForm">
+            {% csrf_token %}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label for="student" class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Student <span class="text-red-500">*</span>
+                    </label>
+                    <select 
+                        id="student" 
+                        name="student" 
+                        required
+                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white hover:bg-gray-50 transition-colors"
+                    >
+                        <option value="">Select Student</option>
+                        {% for student in students %}
+                        <option value="{{ student.id }}" data-points="{{ student.lifetimepoints.points_remaining }}">
+                            {{ student.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label for="points_spent" class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Points Spent <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        type="number" 
+                        id="points_spent" 
+                        name="points_spent" 
+                        min="1"
+                        required
+                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white hover:bg-gray-50 transition-colors"
+                        placeholder="e.g., 10"
+                        disabled
+                    >
+                    <p class="text-xs mt-1" id="available-points"></p>
+                    <p class="text-xs text-red-600 mt-1 hidden" id="error-message"></p>
+                </div>
+
+                <div>
+                    <label for="description" class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Description <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="description" 
+                        name="description" 
+                        maxlength="15"
+                        required
+                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white hover:bg-gray-50 transition-colors"
+                        placeholder="e.g., Prize"
+                    >
+                    <p class="text-xs text-gray-500 mt-1">Max 15 characters</p>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button 
+                    type="submit"
+                    id="submitBtn"
+                    disabled
+                    class="bg-purple-100 text-purple-700 px-6 py-2.5 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-purple-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    Submit
+                </button>
+                <a 
+                    href="{% url 'points' %}" 
+                    class="bg-gray-100 text-gray-700 px-6 py-2.5 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-gray-200 transition-all"
+                >
+                    Back to Points
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Show available points when student is selected
+    const studentSelect = document.getElementById('student');
+    const pointsInput = document.getElementById('points_spent');
+    const descriptionInput = document.getElementById('description');
+    const availablePointsText = document.getElementById('available-points');
+    const errorMessage = document.getElementById('error-message');
+    const submitBtn = document.getElementById('submitBtn');
+    const form = document.getElementById('pointsForm');
+
+    // Validate all fields
+    function validateForm() {
+        const selectedOption = studentSelect.options[studentSelect.selectedIndex];
+        const availablePoints = parseInt(selectedOption.getAttribute('data-points'));
+        const pointsToSpend = parseInt(pointsInput.value);
+        let hasError = false;
+        let allRequiredFilled = true;
+
+        // Check if all required fields are filled
+        if (!studentSelect.value || !pointsInput.value || !descriptionInput.value) {
+            allRequiredFilled = false;
+        }
+
+        // Check if student has insufficient points
+        if (selectedOption.value && availablePoints !== undefined && availablePoints <= 0) {
+            hasError = true;
+        }
+
+        // Check if points exceed available or are invalid
+        if (pointsInput.value) {
+            if (pointsToSpend <= 0) {
+                hasError = true;
+            } else if (availablePoints > 0 && pointsToSpend > availablePoints) {
+                hasError = true;
+            }
+        }
+
+        submitBtn.disabled = hasError || !allRequiredFilled;
+    }
+
+    studentSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const availablePoints = parseInt(selectedOption.getAttribute('data-points'));
+        
+        if (selectedOption.value && availablePoints !== undefined) {
+            // Check if student has negative or zero points
+            if (availablePoints <= 0) {
+                availablePointsText.textContent = '';
+                errorMessage.textContent = 'Unable to spend points - insufficient balance';
+                errorMessage.classList.remove('hidden');
+                pointsInput.disabled = true;
+                pointsInput.value = '';
+            } else {
+                availablePointsText.textContent = `Available: ${availablePoints} points`;
+                availablePointsText.className = 'text-xs text-gray-600 mt-1';
+                errorMessage.classList.add('hidden');
+                pointsInput.disabled = false;
+                pointsInput.max = availablePoints;
+            }
+        } else {
+            availablePointsText.textContent = '';
+            errorMessage.classList.add('hidden');
+            pointsInput.disabled = true;
+            pointsInput.value = '';
+        }
+        
+        validateForm();
+    });
+
+    // Real-time validation as user types
+    pointsInput.addEventListener('input', function() {
+        const selectedOption = studentSelect.options[studentSelect.selectedIndex];
+        const availablePoints = parseInt(selectedOption.getAttribute('data-points'));
+        const pointsToSpend = parseInt(this.value);
+
+        if (!pointsToSpend || pointsToSpend <= 0) {
+            errorMessage.classList.add('hidden');
+            this.classList.add('border-red-500');
+        } else if (pointsToSpend > availablePoints) {
+            errorMessage.textContent = 'Cannot exceed available points';
+            errorMessage.classList.remove('hidden');
+            this.classList.add('border-red-500');
+        } else {
+            errorMessage.classList.add('hidden');
+            this.classList.remove('border-red-500');
+        }
+        
+        validateForm();
+    });
+
+    // Validate on description input
+    descriptionInput.addEventListener('input', validateForm);
+
+    // Initial validation check
+    validateForm();
+
+    // Validate points before submission
+    form.addEventListener('submit', function(e) {
+        const selectedOption = studentSelect.options[studentSelect.selectedIndex];
+        const availablePoints = parseInt(selectedOption.getAttribute('data-points'));
+        const pointsToSpend = parseInt(pointsInput.value);
+
+        // Prevent submission if no student selected
+        if (!selectedOption.value) {
+            e.preventDefault();
+            alert('Please select a student.');
+            studentSelect.focus();
+            return false;
+        }
+
+        // Prevent submission if student has insufficient points
+        if (availablePoints <= 0) {
+            e.preventDefault();
+            alert('This student has insufficient points and cannot spend any points.');
+            return false;
+        }
+
+        // Prevent submission if points is 0 or negative
+        if (pointsToSpend <= 0) {
+            e.preventDefault();
+            alert('Points spent must be greater than 0.');
+            pointsInput.focus();
+            return false;
+        }
+
+        // Prevent submission if points exceeds available
+        if (pointsToSpend > availablePoints) {
+            e.preventDefault();
+            alert(`Cannot spend ${pointsToSpend} points. Only ${availablePoints} points available.`);
+            pointsInput.focus();
+            return false;
+        }
+    });
+</script>
+{% endblock %}

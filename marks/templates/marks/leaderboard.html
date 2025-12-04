@@ -1,0 +1,270 @@
+{% extends 'marks/base.html' %}
+
+{% block title %}Leaderboard{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <div class="mb-4 flex justify-between items-start">
+        <div>
+            <h1 class="text-xl font-bold gradient-text">🏆 Leaderboard</h1>
+            <p class="text-xs text-gray-600 mt-1">Top performers and rankings across the platform</p>
+        </div>
+        
+        <!-- Class Filter -->
+        <div class="flex items-center gap-2">
+            <label for="class-filter" class="text-sm font-medium text-gray-700">Class:</label>
+            <select id="class-filter" onchange="filterByClass()" class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                <option value="all" {% if selected_class == 'all' %}selected{% endif %}>Overall</option>
+                {% for class_num in available_classes %}
+                <option value="{{ class_num }}" {% if selected_class == class_num|stringformat:"s" %}selected{% endif %}>Class {{ class_num }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="mb-4 border-b border-gray-200">
+        <nav class="-mb-px flex space-x-6">
+            <button onclick="showTab('overall')" id="tab-overall" class="tab-button active border-b-2 border-purple-500 py-3 px-1 text-sm font-medium text-purple-600">
+                Overall Rankings
+            </button>
+            <button onclick="showTab('subject')" id="tab-subject" class="tab-button border-b-2 border-transparent py-3 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                Subject Leaders
+            </button>
+            <button onclick="showTab('monthly')" id="tab-monthly" class="tab-button border-b-2 border-transparent py-3 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                Monthly Champions
+            </button>
+        </nav>
+    </div>
+
+    <!-- Overall Rankings Tab -->
+    <div id="content-overall" class="tab-content">
+        <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg animate-fade-in-up">
+            <h2 class="text-sm font-bold gradient-text mb-3">📊 Overall Rankings</h2>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                            <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Total Exams</th>
+                            <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Score</th>
+                            <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Total Points</th>
+                            <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Excellence Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for item in overall_rankings %}
+                        <tr class="hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 transition-all duration-200">
+                            <td class="px-4 py-2.5 whitespace-nowrap text-center">
+                                {% if item.rank == 1 %}
+                                    <span class="text-xl">🥇</span>
+                                {% elif item.rank == 2 %}
+                                    <span class="text-xl">🥈</span>
+                                {% elif item.rank == 3 %}
+                                    <span class="text-xl">🥉</span>
+                                {% else %}
+                                    <span class="text-xs font-semibold text-gray-700">#{{ item.rank }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-2.5 whitespace-nowrap">
+                                <a href="{% url 'student_detail' item.student.id %}" class="text-purple-600 hover:text-purple-800 font-medium text-sm">
+                                    {{ item.student.name }}
+                                </a>
+                            </td>
+                            <td class="px-4 py-2.5 whitespace-nowrap text-xs text-center font-semibold text-gray-900">
+                                {{ item.total_exams }}
+                            </td>
+                            <td class="px-4 py-2.5 whitespace-nowrap text-center">
+                                <span class="font-bold gradient-text text-xs">{{ item.average_percentage|floatformat:1 }}%</span>
+                            </td>
+                            <td class="px-4 py-2.5 whitespace-nowrap text-center">
+                                <span class="font-semibold text-xs {% if item.total_points >= 0 %}text-green-600{% else %}text-red-600{% endif %}">
+                                    {{ item.total_points|stringformat:"+d" }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-2.5 whitespace-nowrap text-center">
+                                <span class="font-semibold text-xs text-blue-600">{{ item.excellence_rate|floatformat:0 }}%</span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="px-4 py-3 text-center text-gray-500 text-xs">
+                                No data available
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subject Leaders Tab -->
+    <div id="content-subject" class="tab-content hidden">
+        <div class="space-y-4">
+            {% for subject_data in subject_leaders %}
+            <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg animate-fade-in-up">
+                <h2 class="text-sm font-bold gradient-text mb-3">📚 {{ subject_data.subject.name }} - Top Performers</h2>
+                
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Exams Taken</th>
+                                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Score</th>
+                                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Best Score</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for item in subject_data.leaders %}
+                            <tr class="hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 transition-all duration-200">
+                                <td class="px-4 py-2.5 whitespace-nowrap text-center">
+                                    {% if item.rank == 1 %}
+                                        <span class="text-xl">🥇</span>
+                                    {% elif item.rank == 2 %}
+                                        <span class="text-xl">🥈</span>
+                                    {% elif item.rank == 3 %}
+                                        <span class="text-xl">🥉</span>
+                                    {% else %}
+                                        <span class="text-xs font-semibold text-gray-700">#{{ item.rank }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-4 py-2.5 whitespace-nowrap">
+                                    <a href="{% url 'student_detail' item.student.id %}" class="text-purple-600 hover:text-purple-800 font-medium text-sm">
+                                        {{ item.student.name }}
+                                    </a>
+                                </td>
+                                <td class="px-4 py-2.5 whitespace-nowrap text-xs text-center font-semibold text-gray-900">
+                                    {{ item.exams_count }}
+                                </td>
+                                <td class="px-4 py-2.5 whitespace-nowrap text-center">
+                                    <span class="font-bold gradient-text text-xs">{{ item.average_percentage|floatformat:1 }}%</span>
+                                </td>
+                                <td class="px-4 py-2.5 whitespace-nowrap text-center">
+                                    <span class="font-semibold text-xs text-green-600">{{ item.best_score|floatformat:1 }}%</span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="px-4 py-3 text-center text-gray-500 text-xs">
+                                    No data available for this subject
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% empty %}
+            <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg text-center text-gray-500 text-xs">
+                No subjects found
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Monthly Champions Tab -->
+    <div id="content-monthly" class="tab-content hidden">
+        <div class="space-y-4">
+            {% for month_data in monthly_champions %}
+            <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg animate-fade-in-up">
+                <h2 class="text-sm font-bold gradient-text mb-3">📅 {{ month_data.month_name }} - Top Performers</h2>
+                
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Exams This Month</th>
+                                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Score</th>
+                                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Points Earned</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for item in month_data.champions %}
+                            <tr class="hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 transition-all duration-200">
+                                <td class="px-4 py-2.5 whitespace-nowrap text-center">
+                                    {% if item.rank == 1 %}
+                                        <span class="text-xl">🥇</span>
+                                    {% elif item.rank == 2 %}
+                                        <span class="text-xl">🥈</span>
+                                    {% elif item.rank == 3 %}
+                                        <span class="text-xl">🥉</span>
+                                    {% else %}
+                                        <span class="text-xs font-semibold text-gray-700">#{{ item.rank }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-4 py-2.5 whitespace-nowrap">
+                                    <a href="{% url 'student_detail' item.student.id %}" class="text-purple-600 hover:text-purple-800 font-medium text-sm">
+                                        {{ item.student.name }}
+                                    </a>
+                                </td>
+                                <td class="px-4 py-2.5 whitespace-nowrap text-xs text-center font-semibold text-gray-900">
+                                    {{ item.exams_count }}
+                                </td>
+                                <td class="px-4 py-2.5 whitespace-nowrap text-center">
+                                    <span class="font-bold gradient-text text-xs">{{ item.average_percentage|floatformat:1 }}%</span>
+                                </td>
+                                <td class="px-4 py-2.5 whitespace-nowrap text-center">
+                                    <span class="font-semibold text-xs {% if item.points_earned >= 0 %}text-green-600{% else %}text-red-600{% endif %}">
+                                        {{ item.points_earned|stringformat:"+d" }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="px-4 py-3 text-center text-gray-500 text-xs">
+                                    No data available for this month
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% empty %}
+            <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg text-center text-gray-500 text-xs">
+                No monthly data available
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function showTab(tabName) {
+        // Hide all tab contents
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.add('hidden');
+        });
+        
+        // Remove active class from all tabs
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.classList.remove('active', 'border-purple-500', 'text-purple-600');
+            button.classList.add('border-transparent', 'text-gray-500');
+        });
+        
+        // Show selected tab content
+        document.getElementById('content-' + tabName).classList.remove('hidden');
+        
+        // Add active class to selected tab
+        const activeTab = document.getElementById('tab-' + tabName);
+        activeTab.classList.add('active', 'border-purple-500', 'text-purple-600');
+        activeTab.classList.remove('border-transparent', 'text-gray-500');
+    }
+    
+    function filterByClass() {
+        const selectedClass = document.getElementById('class-filter').value;
+        const url = new URL(window.location.href);
+        url.searchParams.set('class_number', selectedClass);
+        window.location.href = url.toString();
+    }
+</script>
+{% endblock %}

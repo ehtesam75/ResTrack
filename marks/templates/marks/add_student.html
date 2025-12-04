@@ -1,0 +1,105 @@
+{% extends 'marks/base.html' %}
+
+{% block title %}Add Student{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <div class="glass-effect rounded-xl p-6 border border-gray-200 shadow-lg">
+        <div class="mb-5">
+            <h1 class="text-2xl font-bold gradient-text">Add New Student</h1>
+            <p class="text-sm text-gray-600 mt-1">Enter student details below</p>
+        </div>
+        
+        <form method="post" class="space-y-5">
+            {% csrf_token %}
+            
+            <div>
+                <label for="name" class="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">
+                    Student Name <span class="text-red-500">*</span>
+                </label>
+                <input 
+                    type="text" 
+                    id="name" 
+                    name="name" 
+                    required
+                    oninput="validateStudentForm()"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all"
+                    placeholder="Enter student name"
+                >
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="class_number" class="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">
+                        Class <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        type="number" 
+                        id="class_number" 
+                        name="class_number"
+                        required
+                        oninput="validateStudentForm()"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all"
+                        placeholder="Enter class number"
+                        min="1"
+                        max="12"
+                    >
+                </div>
+
+                <div>
+                    <label for="roll" class="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">
+                        Roll Number <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="roll" 
+                        name="roll"
+                        required
+                        oninput="validateStudentForm()"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all"
+                        placeholder="Enter roll number"
+                    >
+                </div>
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <button 
+                    type="submit"
+                    id="submitBtn"
+                    disabled
+                    class="flex-1 bg-blue-100 text-blue-700 font-semibold py-2.5 rounded-lg transition-all shadow-sm text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-200 hover:shadow-md transform hover:-translate-y-0.5 disabled:hover:transform-none"
+                >
+                    Add Student
+                </button>
+                <a 
+                    href="{% url 'student_list' %}"
+                    class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 rounded-lg text-center transition-all shadow-sm hover:shadow-md text-sm"
+                >
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function validateStudentForm() {
+        const name = document.getElementById('name').value.trim();
+        const classNumber = document.getElementById('class_number').value.trim();
+        const roll = document.getElementById('roll').value.trim();
+        const submitBtn = document.getElementById('submitBtn');
+        
+        // Enable submit button only if all required fields are filled
+        if (name && classNumber && roll) {
+            submitBtn.disabled = false;
+        } else {
+            submitBtn.disabled = true;
+        }
+    }
+    
+    // Initial validation on page load
+    validateStudentForm();
+</script>
+{% endblock %}

@@ -1,0 +1,174 @@
+{% extends 'marks/base.html' %}
+
+{% block title %}{{ subject.name }} - Subject Details{% endblock %}
+
+{% block content %}
+<div class="space-y-4">
+    <!-- Header -->
+    <div class="flex justify-between items-center animate-fade-in-up">
+        <div>
+            <h1 class="text-2xl font-bold gradient-text">{{ subject.name }}</h1>
+            <p class="text-sm text-gray-600 mt-1">Subject Performance Dashboard</p>
+        </div>
+        <div>
+            <a href="{% url 'add_exam' %}" class="bg-purple-100 text-purple-700 px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-purple-200 transform hover:-translate-y-0.5 transition-all duration-200">
+                Add Exam
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 animate-fade-in-up" style="animation-delay: 0.1s;">
+        <div class="stat-card" style="border-left: 3px solid #93C5FD;">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-xs font-medium uppercase tracking-wide">Average Score</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ average_marks|floatformat:1 }}%</p>
+                </div>
+                <div class="rounded-lg p-2.5 shadow-md" style="background: #DBEAFE;">
+                    <span class="text-2xl">📊</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card" style="border-left: 3px solid #86EFAC;">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-xs font-medium uppercase tracking-wide">Total Exams</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ total_exams }}</p>
+                </div>
+                <div class="rounded-lg p-2.5 shadow-md" style="background: #D1FAE5;">
+                    <span class="text-2xl">📝</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card" style="border-left: 3px solid #C084FC;">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-xs font-medium uppercase tracking-wide">Excellence Rate</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ excellence_rate }}%</p>
+                </div>
+                <div class="rounded-lg p-2.5 shadow-md" style="background: #E9D5FF;">
+                    <span class="text-2xl">⭐</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card" style="border-left: 3px solid #FED7AA;">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-xs font-medium uppercase tracking-wide">Best Student</p>
+                    {% if best_student %}
+                    <p class="text-base font-bold text-gray-900 mt-1">
+                        <a href="{% url 'student_detail' best_student.id %}" class="gradient-text hover:opacity-80 transition-opacity">
+                            {{ best_student.name }}
+                        </a>
+                    </p>
+                    {% else %}
+                    <p class="text-base font-bold text-gray-400 mt-1">N/A</p>
+                    {% endif %}
+                </div>
+                <div class="rounded-lg p-2.5 shadow-md" style="background: #FFEDD5;">
+                    <span class="text-2xl">🏆</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exam Type Performance Table -->
+    <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in-up" style="animation-delay: 0.2s;">
+        <h2 class="text-base font-bold gradient-text mb-3">📊 Exam Type Performance</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead>
+                    <tr class="gradient-primary text-white">
+                        <th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide">Type</th>
+                        <th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide">Exam Count</th>
+                        <th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide">Average Score</th>
+                        <th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide">Excellence Rate</th>
+                        <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide rounded-tr-lg">Best Student</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <!-- CQ Row -->
+                    <tr class="hover:bg-blue-50 transition-colors duration-200">
+                        <td class="px-3 py-2 font-bold text-blue-600 text-sm">CQ</td>
+                        <td class="px-3 py-2 text-sm text-gray-700 text-center">{{ cq_stats.exam_count }}</td>
+                        <td class="px-3 py-2 font-bold text-blue-600 text-sm text-center">{{ cq_stats.average|floatformat:1 }}%</td>
+                        <td class="px-3 py-2 font-semibold text-blue-600 text-sm text-center">{{ cq_stats.excellence_rate|floatformat:1 }}%</td>
+                        <td class="px-3 py-2 text-sm">
+                            {% if cq_stats.best_student %}
+                            <a href="{% url 'student_detail' cq_stats.best_student.id %}" class="font-medium hover:text-blue-600 transition-colors">
+                                {{ cq_stats.best_student.name }}
+                            </a>
+                            {% else %}
+                            <span class="text-gray-400">N/A</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <!-- MCQ Row -->
+                    <tr class="hover:bg-green-50 transition-colors duration-200">
+                        <td class="px-3 py-2 font-bold text-green-600 text-sm">MCQ</td>
+                        <td class="px-3 py-2 text-sm text-gray-700 text-center">{{ mcq_stats.exam_count }}</td>
+                        <td class="px-3 py-2 font-bold text-green-600 text-sm text-center">{{ mcq_stats.average|floatformat:1 }}%</td>
+                        <td class="px-3 py-2 font-semibold text-green-600 text-sm text-center">{{ mcq_stats.excellence_rate|floatformat:1 }}%</td>
+                        <td class="px-3 py-2 text-sm">
+                            {% if mcq_stats.best_student %}
+                            <a href="{% url 'student_detail' mcq_stats.best_student.id %}" class="font-medium hover:text-green-600 transition-colors">
+                                {{ mcq_stats.best_student.name }}
+                            </a>
+                            {% else %}
+                            <span class="text-gray-400">N/A</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Student Performance Table -->
+    <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in-up" style="animation-delay: 0.3s;">
+        <h2 class="text-base font-bold gradient-text mb-3">🎓 Student Performance</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead>
+                    <tr class="gradient-primary text-white">
+                        <th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide rounded-tl-lg">Rank</th>
+                        <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide">Student</th>
+                        <th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide">Exam Attended</th>
+                        <th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide">Marks</th>
+                        <th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide">Average Score</th>
+                        <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide rounded-tr-lg">Performance</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for item in student_performance %}
+                    <tr class="hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 transition-all duration-200">
+                        <td class="px-3 py-2 font-bold text-gray-600 text-sm text-center">{{ forloop.counter }}</td>
+                        <td class="px-3 py-2">
+                            <a href="{% url 'student_detail' item.student.id %}" class="font-medium hover:text-purple-600 transition-colors text-sm">
+                                {{ item.student.name }}
+                            </a>
+                        </td>
+                        <td class="px-3 py-2 text-sm text-gray-600 text-center">{{ item.exam_count }}</td>
+                        <td class="px-3 py-2 text-sm text-gray-700 font-medium text-center">{{ item.total_marks_obtained|floatformat:0 }} / {{ item.total_possible_marks|floatformat:0 }}</td>
+                        <td class="px-3 py-2 font-bold gradient-text text-sm text-center">{{ item.average|floatformat:1 }}%</td>
+                        <td class="px-3 py-2">
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="gradient-primary h-2 rounded-full" style="width: {{ item.average }}%"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-3 py-4 text-center text-gray-500 text-sm">No student data available</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
