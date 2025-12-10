@@ -1,16 +1,28 @@
 from pathlib import Path
-import dj_database_url 
-import os # for grabing environment variables
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+import os
+import dj_database_url
+
+# Build paths inside the project
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("SECRET_KEY")
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
+# ======================
+# Core Security Settings
+# ======================
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS').split(" ")
+SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key")
+
+DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
+
+ALLOWED_HOSTS = os.environ.get(
+    "ALLOWED_HOSTS",
+    "localhost 127.0.0.1"
+).split()
+
+
+# ==============
+# Applications
+# ==============
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -21,6 +33,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'marks',
 ]
+
+
+# ===========
+# Middleware
+# ===========
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -33,7 +50,17 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+
+# =========
+# URLs
+# =========
+
 ROOT_URLCONF = 'ResTrack.urls'
+
+
+# ==========
+# Templates
+# ==========
 
 TEMPLATES = [
     {
@@ -50,19 +77,30 @@ TEMPLATES = [
     },
 ]
 
+
+# ========
+# WSGI
+# ========
+
 WSGI_APPLICATION = 'ResTrack.wsgi.application'
 
+
+# ===========
+# Database
+# ===========
+# Render -> PostgreSQL (DATABASE_URL exists)
+# Local  -> SQLite (fallback)
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    "default": dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
+    )
 }
 
-database_url = os.environ.get("DATABASE_URL")
-DATABASES['default'] = dj_database_url.parse(database_url)
 
-
+# =========================
+# Password Validation
+# =========================
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -79,19 +117,32 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
+# =================
+# Internationalization
+# =================
+
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
-
 USE_TZ = True
+
+
+# ==============
+# Static Files
+# ==============
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+
+# =================
+# Misc
+# =================
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
