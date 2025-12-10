@@ -7,6 +7,9 @@ class StudentAdmin(admin.ModelAdmin):
     list_display = ['name', 'roll', 'class_name', 'total_marks', 'total_exams', 'average_percentage']
     search_fields = ['name', 'roll']
     list_filter = ['class_name']
+    fields = ['name', 'roll', 'class_name']
+    list_display_links = ['class_name']
+    list_editable = ['name', 'roll']
 
 
 @admin.register(Subject)
