@@ -274,7 +274,15 @@
                 <div class="border-l-4 {% if forloop.counter == 1 %}border-yellow-500 bg-gradient-to-br from-yellow-50 to-orange-50{% elif forloop.counter == 2 %}border-gray-400 bg-gradient-to-br from-gray-50 to-slate-50{% elif forloop.counter == 3 %}border-orange-600 bg-gradient-to-br from-orange-50 to-amber-50{% else %}border-blue-400 bg-gradient-to-br from-blue-50 to-indigo-50{% endif %} rounded-lg p-2.5 shadow-md hover:shadow-lg transition-all duration-200">
                     <div class="flex items-center justify-between mb-1.5">
                         <h4 class="font-bold text-gray-900 text-sm">{{ month.month_name }}</h4>
-                        <span class="text-xl">{% if forloop.counter == 1 %}🥇{% elif forloop.counter == 2 %}🥈{% elif forloop.counter == 3 %}🥉{% else %}{{ forloop.counter }}{% endif %}</span>
+                        {% if forloop.counter == 1 %}
+                            <span class="text-xl">🥇</span>
+                        {% elif forloop.counter == 2 %}
+                            <span class="text-xl">🥈</span>
+                        {% elif forloop.counter == 3 %}
+                            <span class="text-xl">🥉</span>
+                        {% else %}
+                            <span class="text-xs font-semibold text-gray-500 align-top">#{{ forloop.counter }}</span>
+                        {% endif %}
                     </div>
                     <div class="space-y-0.5">
                         <div class="flex justify-between items-center">
