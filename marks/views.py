@@ -127,7 +127,7 @@ def student_detail(request, student_id):
         month_rankings = []
         for s in students_in_month:
             month_exams = s.exam_set.filter(date__year=year, date__month=month)
-            exams_count = month_exams.count()
+            exams_count = month_exams.values('exam_id').distinct().count()
             
             if exams_count > 0:
                 total_marks = sum(float(e.mark_obtained) for e in month_exams)
@@ -340,7 +340,7 @@ def compare_students(request, student1_id, student2_id):
             subject_rankings = []
             for s in students_in_subject:
                 subject_exams = s.exam_set.filter(subject=subject)
-                exams_count = subject_exams.count()
+                exams_count = subject_exams.values('exam_id').distinct().count()
                 if exams_count > 0:
                     total_m = sum(float(e.mark_obtained) for e in subject_exams)
                     total_p = sum(float(e.total_marks) for e in subject_exams)
@@ -378,7 +378,7 @@ def compare_students(request, student1_id, student2_id):
         
         for year, month in student_months_set:
             month_exams = student.exam_set.filter(date__year=year, date__month=month)
-            exams_count = count_unique_exams(month_exams)
+            exams_count = month_exams.values('exam_id').distinct().count()
             if exams_count > 0:
                 total_m = sum(float(e.mark_obtained) for e in month_exams)
                 total_p = sum(float(e.total_marks) for e in month_exams)
@@ -655,19 +655,18 @@ def add_exam(request):
         total_marks = request.POST.get('total_marks')
         mark_obtained = request.POST.get('mark_obtained')
         
-        if all([student_id, subject_id, exam_type_name, date, class_number, total_marks, mark_obtained]):
+        exam_id = request.POST.get('exam_id')
+        if all([student_id, subject_id, exam_type_name, date, class_number, total_marks, mark_obtained, exam_id]):
             try:
                 student = Student.objects.get(id=student_id)
                 subject = Subject.objects.get(id=subject_id)
-                
                 # Get or create exam type (CQ or MCQ)
                 exam_type, created = ExamType.objects.get_or_create(name=exam_type_name)
-                
                 # Convert to integers
                 class_number = int(class_number)
                 total_marks = int(total_marks)
                 mark_obtained = int(mark_obtained)
-                
+                exam_id = int(exam_id)
                 exam = Exam.objects.create(
                     student=student,
                     subject=subject,
@@ -676,9 +675,9 @@ def add_exam(request):
                     chapter=chapter if chapter else None,
                     class_number=class_number,
                     total_marks=total_marks,
-                    mark_obtained=mark_obtained
+                    mark_obtained=mark_obtained,
+                    exam_id=exam_id
                 )
-                
                 messages.success(request, 'Exam added successfully!')
                 return redirect('student_detail', student_id=student.id)
             except Exception as e:
@@ -713,48 +712,46 @@ def add_bulk_exam(request):
             class_number = request.POST.get('class_number')
             total_marks = request.POST.get('total_marks')
             
-            try:
-                subject = Subject.objects.get(id=subject_id)
-                
-                # Get or create exam type (CQ or MCQ)
-                exam_type, created = ExamType.objects.get_or_create(name=exam_type_name)
-                
-                class_number = int(class_number)
-                total_marks = int(total_marks)
-                
-                # Generate unique group ID for this exam session
-                import uuid
-                from datetime import datetime
-                group_id = f"bulk_{datetime.now().strftime('%Y%m%d%H%M%S')}_{uuid.uuid4().hex[:8]}"
-                
-                # Create exams for all students
-                created_count = 0
-                for i in range(1, student_count + 1):
-                    student_id = request.POST.get(f'student_{i}')
-                    mark_obtained = request.POST.get(f'marks_{i}')
-                    
-                    if student_id and mark_obtained:
-                        student = Student.objects.get(id=student_id)
-                        mark_obtained = int(mark_obtained)
-                        
-                        Exam.objects.create(
-                            student=student,
-                            subject=subject,
-                            exam_type=exam_type,
-                            date=date,
-                            chapter=chapter if chapter else None,
-                            class_number=class_number,
-                            total_marks=total_marks,
-                            mark_obtained=mark_obtained,
-                            group_id=group_id
-                        )
-                        created_count += 1
-                
-                messages.success(request, f'Successfully added 1 exam with {created_count} student results!')
-                return redirect('all_exams')
-                
-            except Exception as e:
-                messages.error(request, f'Error adding exams: {str(e)}')
+            exam_id = request.POST.get('exam_id')
+            if all([subject_id, exam_type_name, date, class_number, total_marks, exam_id]):
+                try:
+                    subject = Subject.objects.get(id=subject_id)
+                    # Get or create exam type (CQ or MCQ)
+                    exam_type, created = ExamType.objects.get_or_create(name=exam_type_name)
+                    class_number = int(class_number)
+                    total_marks = int(total_marks)
+                    exam_id = int(exam_id)
+                    # Generate unique group ID for this exam session
+                    import uuid
+                    from datetime import datetime
+                    group_id = f"bulk_{datetime.now().strftime('%Y%m%d%H%M%S')}_{uuid.uuid4().hex[:8]}"
+                    # Create exams for all students
+                    created_count = 0
+                    for i in range(1, student_count + 1):
+                        student_id = request.POST.get(f'student_{i}')
+                        mark_obtained = request.POST.get(f'marks_{i}')
+                        if student_id and mark_obtained:
+                            student = Student.objects.get(id=student_id)
+                            mark_obtained = int(mark_obtained)
+                            Exam.objects.create(
+                                student=student,
+                                subject=subject,
+                                exam_type=exam_type,
+                                date=date,
+                                chapter=chapter if chapter else None,
+                                class_number=class_number,
+                                total_marks=total_marks,
+                                mark_obtained=mark_obtained,
+                                group_id=group_id,
+                                exam_id=exam_id
+                            )
+                            created_count += 1
+                    messages.success(request, f'Successfully added 1 exam with {created_count} student results!')
+                    return redirect('all_exams')
+                except Exception as e:
+                    messages.error(request, f'Error adding exams: {str(e)}')
+            else:
+                messages.error(request, 'All required fields must be filled!')
         else:
             # Step 1: Get student count and show the form
             student_count = int(request.POST.get('student_count', 0))
@@ -1149,7 +1146,8 @@ def leaderboard(request):
             else:
                 exams = student.exam_set.filter(subject=subject)
                 
-            exams_count = exams.count()
+            from .services import count_unique_exams
+            exams_count = count_unique_exams(exams)
             
             if exams_count > 0:
                 total_marks = sum(float(e.mark_obtained) for e in exams)
@@ -1241,7 +1239,8 @@ def leaderboard(request):
             else:
                 exams = student.exam_set.filter(date__year=year, date__month=month)
                 
-            exams_count = exams.count()
+            from .services import count_unique_exams
+            exams_count = count_unique_exams(exams)
             
             if exams_count > 0:
                 total_marks = sum(float(e.mark_obtained) for e in exams)
