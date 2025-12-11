@@ -24,15 +24,8 @@ def count_unique_exams(queryset):
     Returns:
         int: Count of unique exams
     """
-    grouped_count = queryset.exclude(
-        Q(group_id__isnull=True) | Q(group_id='')
-    ).values('group_id').distinct().count()
-    
-    individual_count = queryset.filter(
-        Q(group_id__isnull=True) | Q(group_id='')
-    ).count()
-    
-    return grouped_count + individual_count
+    # Count total unique exam_id values only
+    return queryset.values('exam_id').distinct().count()
 
 
 class LeaderboardService:

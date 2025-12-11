@@ -14,7 +14,8 @@ def recalculate_points_on_save(sender, instance, **kwargs):
 @receiver(pre_save, sender=Exam)
 def assign_exam_id(sender, instance, **kwargs):
     """Automatically assign exam_id before saving"""
-    if not instance.exam_id:
+    # Only assign exam_id if not provided manually
+    if instance.exam_id is None:
         if instance.group_id:
             # Check if other exams with same group_id exist
             existing = Exam.objects.filter(group_id=instance.group_id).exclude(pk=instance.pk).first()

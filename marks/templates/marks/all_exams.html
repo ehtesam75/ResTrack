@@ -105,7 +105,7 @@
     <!-- Results Summary -->
     <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 animate-fade-in-up" style="animation-delay: 0.2s;">
         <p class="text-sm text-blue-700">
-            Found <span class="font-semibold">{{ unique_exams_count }}</span> exam{% if unique_exams_count != 1 %}s{% endif %} and <span class="font-semibold">{{ total_records_count }}</span> result record{% if total_records_count != 1 %}s{% endif %}.
+            Found <span class="font-semibold">{{ unique_exams_count }}</span> unique exam{% if unique_exams_count != 1 %}s{% endif %} and <span class="font-semibold">{{ total_records_count }}</span> result record{% if total_records_count != 1 %}s{% endif %}.
             {% if request.GET.student or request.GET.subject or request.GET.exam_type %}
                 (with active filters)
             {% endif %}
@@ -126,7 +126,7 @@
                     </div>
                     <div class="ml-4 w-0 flex-1">
                         <dl>
-                            <dt class="text-xs font-medium text-gray-500 truncate">Total Exams</dt>
+                            <dt class="text-xs font-medium text-gray-500 truncate">Unique Exams</dt>
                             <dd class="text-xl font-semibold text-gray-900">{{ unique_exams_count }}</dd>
                         </dl>
                     </div>

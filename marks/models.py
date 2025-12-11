@@ -16,23 +16,9 @@ class Student(models.Model):
     def _count_unique_exams(queryset):
         """
         Helper method to count unique exams in a queryset.
-        Grouped exams (bulk entries) count as 1, individual exams count as 1 each.
-        
-        Args:
-            queryset: Django QuerySet of Exam objects
-            
-        Returns:
-            int: Count of unique exams
+        Returns total unique exam_id only.
         """
-        grouped_count = queryset.exclude(
-            Q(group_id__isnull=True) | Q(group_id='')
-        ).values('group_id').distinct().count()
-        
-        individual_count = queryset.filter(
-            Q(group_id__isnull=True) | Q(group_id='')
-        ).count()
-        
-        return grouped_count + individual_count
+        return queryset.values('exam_id').distinct().count()
 
     def calculate_monthly_wins(self):
         """
