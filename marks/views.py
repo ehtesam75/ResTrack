@@ -812,6 +812,8 @@ def all_exams(request):
     month_filter = request.GET.get('month')
     exam_id_from = request.GET.get('exam_id_from')
     exam_id_to = request.GET.get('exam_id_to')
+    date_from = request.GET.get('date_from')
+    date_to = request.GET.get('date_to')
     
     # Apply filters
     if student_filter:
@@ -830,6 +832,10 @@ def all_exams(request):
         exams = exams.filter(exam_id__gte=exam_id_from)
     if exam_id_to:
         exams = exams.filter(exam_id__lte=exam_id_to)
+    if date_from:
+        exams = exams.filter(date__gte=date_from)
+    if date_to:
+        exams = exams.filter(date__lte=date_to)
     
     # Count unique exams and total records
     unique_exams_count = count_unique_exams(exams)
