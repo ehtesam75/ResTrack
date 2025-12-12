@@ -88,14 +88,36 @@ WSGI_APPLICATION = 'ResTrack.wsgi.application'
 # ===========
 # Database
 # ===========
-# Render -> PostgreSQL (DATABASE_URL exists)
-# Local  -> SQLite (fallback)
 
+# -------------------------
+# OLD RENDER DATABASE SETUP
+# (Kept for future use)
+# -------------------------
+#
+# DATABASES = {
+#     "default": dj_database_url.config(
+#         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
+#     )
+# }
+#
+# To re-enable Render’s internal PostgreSQL in the future:
+# - Remove the comment marks above
+# - Set DATABASE_URL in Render dashboard
+# -------------------------
+
+
+# -------------------------
+# NEW NEON DATABASE SETUP
+# (Active configuration)
+# -------------------------
 DATABASES = {
     "default": dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",  # fallback for local dev
+        conn_max_age=600,       # keeps DB connection alive on Render
+        ssl_require=True        # required for Neon PostgreSQL
     )
 }
+# -------------------------
 
 
 # =========================
