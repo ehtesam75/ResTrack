@@ -78,13 +78,27 @@ WSGI_APPLICATION = 'ResTrack.wsgi.application'
 # ======================
 # Local dev: SQLite
 # Production (Render): Neon PostgreSQL
-DATABASES = {
-    "default": dj_database_url.config(
-        default=os.environ.get("DATABASE_URL", f"sqlite:///{BASE_DIR / 'db.sqlite3'}"),
-        conn_max_age=600,
-        ssl_require=True  # Neon requires SSL
-    )
-}
+
+# Parse the DATABASE_URL if it exists
+if os.environ.get("DATABASE_URL"):
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=os.environ.get("DATABASE_URL"),
+            conn_max_age=600
+        )
+    }
+    # Add SSL requirement for PostgreSQL (Neon)
+    DATABASES['default']['OPTIONS'] = {
+        'sslmode': 'require'
+    }
+else:
+    # Local SQLite fallback
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 # ======================
 # Password Validation
