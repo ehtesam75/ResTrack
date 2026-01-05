@@ -40,28 +40,6 @@
                 </div>
 
                 <div>
-                    <label for="subject" class="block text-xs font-semibold text-gray-700 mb-1.5">
-                        Subject <span class="text-red-500">*</span>
-                    </label>
-                    <select 
-                        id="subject" 
-                        name="subject" 
-                        required
-                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors"
-                    >
-                        <option value="">Select Subject</option>
-                        {% for subject in subjects %}
-                        <option value="{{ subject.id }}">{{ subject.name }}</option>
-                        {% endfor %}
-                    </select>
-                    <p class="text-xs text-gray-500 mt-1">
-                        <a href="{% url 'add_subject' %}" class="text-purple-600 hover:text-purple-800 hover:underline">+ Add new subject</a>
-                    </p>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
                     <label for="exam_id" class="block text-xs font-semibold text-gray-700 mb-1.5">
                         Exam ID <span class="text-red-500">*</span>
                     </label>
@@ -75,20 +53,20 @@
                         placeholder="Enter exam ID manually"
                     >
                 </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label for="exam_type" class="block text-xs font-semibold text-gray-700 mb-1.5">
-                        Exam Type <span class="text-red-500">*</span>
+                    <label for="date" class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Date <span class="text-red-500">*</span>
                     </label>
-                    <select 
-                        id="exam_type" 
-                        name="exam_type" 
+                    <input 
+                        type="date" 
+                        id="date" 
+                        name="date" 
                         required
                         class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors"
                     >
-                        <option value="">Select Exam Type</option>
-                        <option value="CQ">CQ</option>
-                        <option value="MCQ">MCQ</option>
-                    </select>
                 </div>
 
                 <div>
@@ -110,16 +88,23 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label for="date" class="block text-xs font-semibold text-gray-700 mb-1.5">
-                        Date <span class="text-red-500">*</span>
+                    <label for="subject" class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Subject <span class="text-red-500">*</span>
                     </label>
-                    <input 
-                        type="date" 
-                        id="date" 
-                        name="date" 
+                    <select 
+                        id="subject" 
+                        name="subject" 
                         required
                         class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors"
                     >
+                        <option value="">Select Subject</option>
+                        {% for subject in subjects %}
+                        <option value="{{ subject.id }}">{{ subject.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1">
+                        <a href="{% url 'add_subject' %}" class="text-purple-600 hover:text-purple-800 hover:underline">+ Add new subject</a>
+                    </p>
                 </div>
 
                 <div>
@@ -139,6 +124,22 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
+                    <label for="exam_type" class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Exam Type <span class="text-red-500">*</span>
+                    </label>
+                    <select 
+                        id="exam_type" 
+                        name="exam_type" 
+                        required
+                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors"
+                    >
+                        <option value="">Select Exam Type</option>
+                        <option value="CQ">CQ</option>
+                        <option value="MCQ">MCQ</option>
+                    </select>
+                </div>
+
+                <div>
                     <label for="total_marks" class="block text-xs font-semibold text-gray-700 mb-1.5">
                         Total Marks <span class="text-red-500">*</span>
                     </label>
@@ -153,6 +154,9 @@
                         placeholder="e.g., 100"
                     >
                 </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                 <div>
                     <label for="mark_obtained" class="block text-xs font-semibold text-gray-700 mb-1.5">

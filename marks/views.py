@@ -758,7 +758,9 @@ def add_bulk_exam(request):
                 messages.error(request, 'All required fields must be filled!')
         else:
             # Step 1: Get student count and show the form
-            student_count = int(request.POST.get('student_count', 0))
+            student_count_str = request.POST.get('student_count')
+            if student_count_str:
+                student_count = int(student_count_str)
     
     students = Student.objects.all().order_by('name')
     subjects = Subject.objects.all().order_by('name')
@@ -814,6 +816,7 @@ def all_exams(request):
     exam_type_filter = request.GET.get('exam_type')
     class_filter = request.GET.get('class_number')
     month_filter = request.GET.get('month')
+    chapter_filter = request.GET.get('chapter')
     exam_id_from = request.GET.get('exam_id_from')
     exam_id_to = request.GET.get('exam_id_to')
     date_from = request.GET.get('date_from')
@@ -832,6 +835,8 @@ def all_exams(request):
         # month_filter format: "YYYY-MM"
         year, month = month_filter.split('-')
         exams = exams.filter(date__year=year, date__month=month)
+    if chapter_filter:
+        exams = exams.filter(chapter__icontains=chapter_filter)
     if exam_id_from:
         exams = exams.filter(exam_id__gte=exam_id_from)
     if exam_id_to:

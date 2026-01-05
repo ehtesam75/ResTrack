@@ -8,20 +8,24 @@ class StudentAdmin(admin.ModelAdmin):
     search_fields = ['name', 'roll']
     list_filter = ['class_name']
     fields = ['name', 'roll', 'class_name']
-    list_display_links = ['class_name']
-    list_editable = ['name', 'roll']
+    list_display_links = ['total_marks']
+    list_editable = ['name', 'roll', 'class_name']
 
 
 @admin.register(Subject)
 class SubjectAdmin(admin.ModelAdmin):
     list_display = ['name', 'average_marks']
     search_fields = ['name']
+    list_display_links = ['average_marks']
+    list_editable = ['name']
 
 
 @admin.register(ExamType)
 class ExamTypeAdmin(admin.ModelAdmin):
     list_display = ['name', 'created_at']
     search_fields = ['name']
+    list_display_links = ['created_at']
+    list_editable = ['name']
 
 
 @admin.register(Exam)
@@ -74,6 +78,7 @@ class ExamAdmin(admin.ModelAdmin):
 class GradeScaleAdmin(admin.ModelAdmin):
     list_display = ['grade_name', 'points', 'color_code']
     ordering = ['grade_name']
+    list_editable = ['points', 'color_code']
 
 
 @admin.register(LifetimePoints)
@@ -93,6 +98,7 @@ class PointsSpentAdmin(admin.ModelAdmin):
     search_fields = ['student__name', 'description']
     date_hierarchy = 'date'
     readonly_fields = ['created_at']
+    list_editable = ['points_spent', 'description']
     
     def delete_queryset(self, request, queryset):
         """Override bulk delete to update student points"""
