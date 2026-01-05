@@ -578,6 +578,9 @@ def subject_detail(request, subject_id):
         if mcq_student_avgs:
             mcq_stats['best_student'] = max(mcq_student_avgs, key=mcq_student_avgs.get)
     
+    # Get recent exams for this subject
+    recent_exams = exams.order_by('-date', '-exam_id')[:10]
+    
     context = {
         'subject': subject,
         'average_marks': subject.average_marks,
@@ -587,6 +590,7 @@ def subject_detail(request, subject_id):
         'excellence_rate': round(excellence_rate, 1),
         'cq_stats': cq_stats,
         'mcq_stats': mcq_stats,
+        'recent_exams': recent_exams,
     }
     
     return render(request, 'marks/subject_detail.html', context)
@@ -656,7 +660,7 @@ def add_exam(request):
         mark_obtained = request.POST.get('mark_obtained')
         
         exam_id = request.POST.get('exam_id')
-        if all([student_id, subject_id, exam_type_name, date, class_number, total_marks, mark_obtained, exam_id]):
+        if all([student_id, subject_id, exam_type_name, date, chapter, class_number, total_marks, mark_obtained, exam_id]):
             try:
                 student = Student.objects.get(id=student_id)
                 subject = Subject.objects.get(id=subject_id)
@@ -672,7 +676,7 @@ def add_exam(request):
                     subject=subject,
                     exam_type=exam_type,
                     date=date,
-                    chapter=chapter if chapter else None,
+                    chapter=chapter,
                     class_number=class_number,
                     total_marks=total_marks,
                     mark_obtained=mark_obtained,
@@ -713,7 +717,7 @@ def add_bulk_exam(request):
             total_marks = request.POST.get('total_marks')
             
             exam_id = request.POST.get('exam_id')
-            if all([subject_id, exam_type_name, date, class_number, total_marks, exam_id]):
+            if all([subject_id, exam_type_name, date, chapter, class_number, total_marks, exam_id]):
                 try:
                     subject = Subject.objects.get(id=subject_id)
                     # Get or create exam type (CQ or MCQ)
@@ -738,7 +742,7 @@ def add_bulk_exam(request):
                                 subject=subject,
                                 exam_type=exam_type,
                                 date=date,
-                                chapter=chapter if chapter else None,
+                                chapter=chapter,
                                 class_number=class_number,
                                 total_marks=total_marks,
                                 mark_obtained=mark_obtained,

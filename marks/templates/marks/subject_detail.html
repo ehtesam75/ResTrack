@@ -170,5 +170,55 @@
             </table>
         </div>
     </div>
+
+    <!-- Recent Exams Table -->
+    <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in-up" style="animation-delay: 0.4s;">
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="text-base font-bold gradient-text">🕒 Recent Exams</h2>
+            <a href="{% url 'all_exams' %}?subject={{ subject.id }}" class="text-purple-600 hover:text-purple-800 text-xs font-semibold transition-colors">View All →</a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead>
+                    <tr class="gradient-primary text-white">
+                        <th class="px-4 py-2 text-center text-xs font-semibold uppercase tracking-wide rounded-tl-lg">ID</th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide">Date</th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide">Student</th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide">Type</th>
+                        <th class="px-4 py-2 text-center text-xs font-semibold uppercase tracking-wide">Chapter</th>
+                        <th class="px-4 py-2 text-center text-xs font-semibold uppercase tracking-wide">Marks</th>
+                        <th class="px-4 py-2 text-center text-xs font-semibold uppercase tracking-wide">Score</th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide rounded-tr-lg">Grade</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for exam in recent_exams %}
+                    <tr class="hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 transition-all duration-200">
+                        <td class="px-4 py-2 text-xs text-center font-semibold text-purple-600">{{ exam.exam_id|default:"N/A" }}</td>
+                        <td class="px-4 py-2 text-xs text-gray-600">{{ exam.date|date:"M d, Y" }}</td>
+                        <td class="px-4 py-2">
+                            <a href="{% url 'student_detail' exam.student.id %}" class="text-sm font-medium hover:text-purple-600 transition-colors">
+                                {{ exam.student.name }}
+                            </a>
+                        </td>
+                        <td class="px-4 py-2 text-xs text-gray-600">{{ exam.exam_type.name }}</td>
+                        <td class="px-4 py-2 text-xs text-gray-600 text-center">{{ exam.chapter|default:"—" }}</td>
+                        <td class="px-4 py-2 font-semibold text-sm text-center">{{ exam.mark_obtained|floatformat:0 }}/{{ exam.total_marks|floatformat:0 }}</td>
+                        <td class="px-4 py-2 font-bold gradient-text text-sm text-center">{{ exam.percentage|floatformat:1 }}%</td>
+                        <td class="px-4 py-2">
+                            <span class="grade-badge text-gray-900 text-xs" style="background-color: {{ exam.grade_color }};">
+                                {{ exam.grade }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="px-3 py-4 text-center text-gray-500 text-sm">No exams recorded yet for this subject</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 {% endblock %}
