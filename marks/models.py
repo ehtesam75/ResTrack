@@ -44,6 +44,12 @@ class Student(models.Model):
                     months_set.add((exam_date.year, exam_date.month))
         
         for year, month in months_set:
+            # Get total unique exams conducted in this month
+            total_month_exams = Exam.objects.filter(
+                date__year=year,
+                date__month=month
+            ).values('exam_id').distinct().count()
+            
             # Get all students who had exams in this month
             students_in_month = Student.objects.filter(
                 exam__date__year=year,
@@ -53,9 +59,13 @@ class Student(models.Model):
             month_rankings = []
             for s in students_in_month:
                 month_exams = s.exam_set.filter(date__year=year, date__month=month)
-                exams_count = month_exams.count()
+                student_exams_count = month_exams.values('exam_id').distinct().count()
                 
-                if exams_count > 0:
+                # Check eligibility: ≥40% attendance AND ≥3 exams
+                attendance_percentage = (student_exams_count / total_month_exams * 100) if total_month_exams > 0 else 0
+                is_eligible = (attendance_percentage >= 40) and (student_exams_count >= 3)
+                
+                if is_eligible:
                     total_marks = sum(float(e.mark_obtained) for e in month_exams)
                     total_possible = sum(float(e.total_marks) for e in month_exams)
                     avg_percentage = (total_marks * 100 / total_possible) if total_possible > 0 else 0

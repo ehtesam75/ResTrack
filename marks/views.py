@@ -118,6 +118,12 @@ def student_detail(request, student_id):
                 months_set.add((exam_date.year, exam_date.month))
     
     for year, month in months_set:
+        # Get total unique exams conducted in this month
+        total_month_exams = Exam.objects.filter(
+            date__year=year,
+            date__month=month
+        ).values('exam_id').distinct().count()
+        
         # Get all students who had exams in this month
         students_in_month = Student.objects.filter(
             exam__date__year=year,
@@ -127,9 +133,13 @@ def student_detail(request, student_id):
         month_rankings = []
         for s in students_in_month:
             month_exams = s.exam_set.filter(date__year=year, date__month=month)
-            exams_count = month_exams.values('exam_id').distinct().count()
+            student_exams_count = month_exams.values('exam_id').distinct().count()
             
-            if exams_count > 0:
+            # Check eligibility: ≥40% attendance AND ≥3 exams
+            attendance_percentage = (student_exams_count / total_month_exams * 100) if total_month_exams > 0 else 0
+            is_eligible = (attendance_percentage >= 40) and (student_exams_count >= 3)
+            
+            if is_eligible:
                 total_marks = sum(float(e.mark_obtained) for e in month_exams)
                 total_possible = sum(float(e.total_marks) for e in month_exams)
                 avg_percentage = (total_marks * 100 / total_possible) if total_possible > 0 else 0
@@ -298,6 +308,12 @@ def compare_students(request, student1_id, student2_id):
                     months_set.add((exam_date.year, exam_date.month))
         
         for year, month in months_set:
+            # Get total unique exams conducted in this month
+            total_month_exams = Exam.objects.filter(
+                date__year=year,
+                date__month=month
+            ).values('exam_id').distinct().count()
+            
             students_in_month = Student.objects.filter(
                 exam__date__year=year,
                 exam__date__month=month
@@ -306,8 +322,13 @@ def compare_students(request, student1_id, student2_id):
             month_rankings = []
             for s in students_in_month:
                 month_exams = s.exam_set.filter(date__year=year, date__month=month)
-                exams_count = month_exams.count()
-                if exams_count > 0:
+                student_exams_count = month_exams.values('exam_id').distinct().count()
+                
+                # Check eligibility: ≥40% attendance AND ≥3 exams
+                attendance_percentage = (student_exams_count / total_month_exams * 100) if total_month_exams > 0 else 0
+                is_eligible = (attendance_percentage >= 40) and (student_exams_count >= 3)
+                
+                if is_eligible:
                     total_m = sum(float(e.mark_obtained) for e in month_exams)
                     total_p = sum(float(e.total_marks) for e in month_exams)
                     avg_p = (total_m * 100 / total_p) if total_p > 0 else 0
@@ -1303,10 +1324,75 @@ def leaderboard(request):
             'champions': champions[:10],  # Top 10 per month
         })
     
+    # Current Month Top Performers (separate from monthly champions)
+    current_month_performers = []
+    month_name = datetime(current_year, current_month, 1).strftime('%B %Y')
+    
+    # Get all students who have exams in the current month (with class filter)
+    if class_filter != 'all':
+        students_current_month = Student.objects.filter(
+            exam__date__year=current_year,
+            exam__date__month=current_month,
+            exam__class_number=int(class_filter)
+        ).distinct()
+    else:
+        students_current_month = Student.objects.filter(
+            exam__date__year=current_year,
+            exam__date__month=current_month
+        ).distinct()
+    
+    for student in students_current_month:
+        # Filter by class
+        if class_filter != 'all':
+            exams = student.exam_set.filter(
+                date__year=current_year,
+                date__month=current_month,
+                class_number=int(class_filter)
+            )
+        else:
+            exams = student.exam_set.filter(date__year=current_year, date__month=current_month)
+            
+        from .services import count_unique_exams
+        exams_count = count_unique_exams(exams)
+        
+        if exams_count > 0:
+            total_marks = sum(float(e.mark_obtained) for e in exams)
+            total_possible = sum(float(e.total_marks) for e in exams)
+            avg_percentage = (total_marks * 100 / total_possible) if total_possible > 0 else 0
+            points_earned = sum(e.points_earned for e in exams)
+            
+            current_month_performers.append({
+                'student': student,
+                'exams_count': exams_count,
+                'total_marks': total_marks,
+                'average_percentage': avg_percentage,
+                'points_earned': points_earned,
+            })
+    
+    # Sort by average score (primary), then total marks (tie-breaker)
+    current_month_performers.sort(key=lambda x: (x['average_percentage'], x['total_marks']), reverse=True)
+    
+    # Add ranks with tie handling
+    current_rank = 1
+    for idx, performer in enumerate(current_month_performers):
+        if idx > 0:
+            prev = current_month_performers[idx - 1]
+            # If same score AND same total marks, keep same rank
+            if (abs(performer['average_percentage'] - prev['average_percentage']) < 0.01 and
+                performer['total_marks'] == prev['total_marks']):
+                performer['rank'] = current_rank  # Share rank
+            else:
+                current_rank = idx + 1
+                performer['rank'] = current_rank
+        else:
+            performer['rank'] = 1
+    
     context = {
         'overall_rankings': overall_rankings,
         'subject_leaders': subject_leaders,
         'monthly_champions': monthly_champions,
+        'current_month_performers': current_month_performers[:10],  # Top 10 for current month
+        'current_month_name': month_name,
         'available_classes': available_classes,
         'selected_class': class_filter,
     }
