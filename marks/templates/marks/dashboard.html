@@ -176,8 +176,10 @@
         <!-- Subject Performance Chart -->
         <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col">
             <h2 class="text-base font-bold gradient-text mb-3">📈 Subject Performance Chart</h2>
-            <div class="flex-1" style="min-height: 300px; position: relative;">
-                <canvas id="subjectPerformanceChart"></canvas>
+            <div class="flex-1 overflow-x-auto" style="min-height: 300px; position: relative;">
+                <div style="min-width: 500px; height: 100%;">
+                    <canvas id="subjectPerformanceChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
