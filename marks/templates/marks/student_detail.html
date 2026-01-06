@@ -27,14 +27,14 @@
     </div>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in-up" style="animation-delay: 0.1s;">
+    <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in-up" style="animation-delay: 0.1s;">
         <div class="stat-card" style="border-left: 3px solid #FED7AA;">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-gray-600 text-xs font-medium uppercase tracking-wide">Rank</p>
                     <p class="text-2xl font-bold text-gray-900 mt-1">#{{ student.rank }}</p>
                 </div>
-                <div class="rounded-lg p-2.5 shadow-md" style="background: #FFEDD5;">
+                <div class="hidden sm:block rounded-lg p-2.5 shadow-md" style="background: #FFEDD5;">
                     <span class="text-2xl">🏆</span>
                 </div>
             </div>
@@ -46,7 +46,7 @@
                     <p class="text-gray-600 text-xs font-medium uppercase tracking-wide">Total Marks</p>
                     <p class="text-2xl font-bold text-gray-900 mt-1">{{ student.total_marks }}</p>
                 </div>
-                <div class="rounded-lg p-2.5 shadow-md" style="background: #D1FAE5;">
+                <div class="hidden sm:block rounded-lg p-2.5 shadow-md" style="background: #D1FAE5;">
                     <span class="text-2xl">📊</span>
                 </div>
             </div>
@@ -58,7 +58,7 @@
                     <p class="text-gray-600 text-xs font-medium uppercase tracking-wide">Average Score</p>
                     <p class="text-2xl font-bold text-gray-900 mt-1">{{ student.average_percentage|floatformat:1 }}%</p>
                 </div>
-                <div class="rounded-lg p-2.5 shadow-md" style="background: #EDE9FE;">
+                <div class="hidden sm:block rounded-lg p-2.5 shadow-md" style="background: #EDE9FE;">
                     <span class="text-2xl">📈</span>
                 </div>
             </div>
@@ -70,7 +70,7 @@
                     <p class="text-gray-600 text-xs font-medium uppercase tracking-wide">Unique Exams</p>
                     <p class="text-2xl font-bold text-gray-900 mt-1">{{ student.total_exams }}</p>
                 </div>
-                <div class="rounded-lg p-2.5 shadow-md" style="background: #DBEAFE;">
+                <div class="hidden sm:block rounded-lg p-2.5 shadow-md" style="background: #DBEAFE;">
                     <span class="text-2xl">📝</span>
                 </div>
             </div>
@@ -78,14 +78,14 @@
     </div>
 
     <!-- Achievement Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in-up" style="animation-delay: 0.15s;">
+    <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in-up" style="animation-delay: 0.15s;">
         <div class="stat-card" style="border-left: 3px solid #FCD34D;">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-gray-600 text-xs font-medium uppercase tracking-wide">Excellence Rate</p>
                     <p class="text-2xl font-bold text-gray-900 mt-1">{{ excellence_rate|floatformat:1 }}%</p>
                 </div>
-                <div class="rounded-lg p-2.5 shadow-md" style="background: #FEF3C7;">
+                <div class="hidden sm:block rounded-lg p-2.5 shadow-md" style="background: #FEF3C7;">
                     <span class="text-2xl">⭐</span>
                 </div>
             </div>
@@ -97,7 +97,7 @@
                     <p class="text-gray-600 text-xs font-medium uppercase tracking-wide">Monthly Wins</p>
                     <p class="text-2xl font-bold text-gray-900 mt-1">{{ monthly_winner_count }}</p>
                 </div>
-                <div class="rounded-lg p-2.5 shadow-md" style="background: #FCE7F3;">
+                <div class="hidden sm:block rounded-lg p-2.5 shadow-md" style="background: #FCE7F3;">
                     <span class="text-2xl">🥇</span>
                 </div>
             </div>
@@ -109,7 +109,7 @@
                     <p class="text-gray-600 text-xs font-medium uppercase tracking-wide">Subject Tops</p>
                     <p class="text-2xl font-bold text-gray-900 mt-1">{{ subject_champion_count }}</p>
                 </div>
-                <div class="rounded-lg p-2.5 shadow-md" style="background: #EDE9FE;">
+                <div class="hidden sm:block rounded-lg p-2.5 shadow-md" style="background: #EDE9FE;">
                     <span class="text-2xl">👑</span>
                 </div>
             </div>
@@ -125,7 +125,7 @@
                     <p class="text-lg font-bold text-gray-900 mt-1">N/A</p>
                     {% endif %}
                 </div>
-                <div class="rounded-lg p-2.5 shadow-md" style="background: #D1FAE5;">
+                <div class="hidden sm:block rounded-lg p-2.5 shadow-md" style="background: #D1FAE5;">
                     <span class="text-2xl">🔥</span>
                 </div>
             </div>

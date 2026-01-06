@@ -302,4 +302,10 @@ html {
     .hide-mobile {
         display: none !important;
     }
+    
+    /* Smaller page titles on mobile */
+    h1.text-2xl {
+        font-size: 1.25rem !important;
+        line-height: 1.75rem !important;
+    }
 }

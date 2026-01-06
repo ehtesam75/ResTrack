@@ -30,7 +30,7 @@
             <div class="flex justify-between h-16">
                 <div class="flex flex-1 sm:flex-none justify-center sm:justify-start">
                     <div class="flex-shrink-0 flex items-center">
-                        <a href="{% url 'dashboard' %}" class="text-2xl sm:text-xl font-bold gradient-text hover:opacity-80 transition-opacity">ResTrack</a>
+                        <a href="{% url 'dashboard' %}" class="text-xl font-bold gradient-text hover:opacity-80 transition-opacity">ResTrack</a>
                     </div>
                     <div class="hidden sm:ml-8 sm:flex sm:space-x-6">
                         <a href="{% url 'dashboard' %}" class="{% if request.path == '/' %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors nav-link">
@@ -57,7 +57,7 @@
                     </div>
                 </div>
                 <div class="flex items-center">
-                    <div class="hidden sm:ml-6 sm:flex sm:items-center">
+                    <div class="hidden sm:ml-6 sm:flex sm:items-center" id="admin-panel-btn">
                         <a href="/admin/" target="_blank" rel="noopener noreferrer" class="text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md transition-all" style="background-color: #8B5CC5;">
                             Admin Panel
                         </a>
@@ -135,6 +135,16 @@
         menuButton.addEventListener('click', openMenu);
         menuClose.addEventListener('click', closeMenu);
         overlay.addEventListener('click', closeMenu);
+        
+        // Hide admin panel button in production
+        (function() {
+            const host = window.location.hostname;
+            const isLocal = host === 'localhost' || host === '127.0.0.1';
+            if (!isLocal) {
+                const adminBtn = document.getElementById('admin-panel-btn');
+                if (adminBtn) adminBtn.style.display = 'none';
+            }
+        })();
     </script>
 
     <!-- Messages -->
