@@ -73,53 +73,71 @@
                 </div>
             </div>
         </div>
-        
-        <!-- Mobile menu dropdown -->
-        <div class="mobile-menu hidden sm:hidden" id="mobile-menu">
-            <div class="px-2 pt-2 pb-3 space-y-1">
-                <a href="{% url 'dashboard' %}" class="{% if request.path == '/' %}bg-purple-50 border-purple-500 text-purple-600{% else %}border-transparent text-gray-700 hover:bg-gray-50 hover:text-purple-600{% endif %} block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-colors">
-                    📊 Dashboard
-                </a>
-                <a href="{% url 'student_list' %}" class="{% if 'students' in request.path %}bg-purple-50 border-purple-500 text-purple-600{% else %}border-transparent text-gray-700 hover:bg-gray-50 hover:text-purple-600{% endif %} block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-colors">
-                    🎓 Students
-                </a>
-                <a href="{% url 'subject_list' %}" class="{% if 'subjects' in request.path %}bg-purple-50 border-purple-500 text-purple-600{% else %}border-transparent text-gray-700 hover:bg-gray-50 hover:text-purple-600{% endif %} block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-colors">
-                    📚 Subjects
-                </a>
-                <a href="{% url 'all_exams' %}" class="{% if request.path == '/exams/' %}bg-purple-50 border-purple-500 text-purple-600{% else %}border-transparent text-gray-700 hover:bg-gray-50 hover:text-purple-600{% endif %} block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-colors">
-                    📝 Exams
-                </a>
-                <a href="{% url 'points' %}" class="{% if 'points' in request.path %}bg-purple-50 border-purple-500 text-purple-600{% else %}border-transparent text-gray-700 hover:bg-gray-50 hover:text-purple-600{% endif %} block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-colors">
-                    💎 Points
-                </a>
-                <a href="{% url 'leaderboard' %}" class="{% if 'leaderboard' in request.path %}bg-purple-50 border-purple-500 text-purple-600{% else %}border-transparent text-gray-700 hover:bg-gray-50 hover:text-purple-600{% endif %} block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-colors">
-                    🏆 Leaderboard
-                </a>
-                <a href="{% url 'guide' %}" class="{% if 'guide' in request.path %}bg-purple-50 border-purple-500 text-purple-600{% else %}border-transparent text-gray-700 hover:bg-gray-50 hover:text-purple-600{% endif %} block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-colors">
-                    📖 Guide
-                </a>
-                <a href="/admin/" target="_blank" rel="noopener noreferrer" class="border-transparent text-gray-700 hover:bg-gray-50 hover:text-purple-600 block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-colors">
-                    ⚙️ Admin Panel
-                </a>
-            </div>
-        </div>
     </nav>
+
+    <!-- Mobile menu overlay -->
+    <div class="mobile-menu-overlay hidden" id="mobile-menu-overlay"></div>
+    
+    <!-- Mobile menu slide-in panel -->
+    <div class="mobile-menu-panel" id="mobile-menu">
+        <div class="flex justify-between items-center p-4 border-b border-gray-200">
+            <span class="text-lg font-bold gradient-text">Menu</span>
+            <button type="button" class="p-2 rounded-md text-gray-700 hover:text-purple-600 hover:bg-gray-100 transition-colors" id="mobile-menu-close">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <div class="px-2 pt-4 pb-3 space-y-1">
+            <a href="{% url 'dashboard' %}" class="{% if request.path == '/' %}bg-purple-50 border-purple-500 text-purple-600{% else %}border-transparent text-gray-700 hover:bg-gray-50 hover:text-purple-600{% endif %} block pl-3 pr-4 py-3 border-l-4 text-base font-medium transition-colors rounded-r-lg">
+                📊 Dashboard
+            </a>
+            <a href="{% url 'student_list' %}" class="{% if 'students' in request.path %}bg-purple-50 border-purple-500 text-purple-600{% else %}border-transparent text-gray-700 hover:bg-gray-50 hover:text-purple-600{% endif %} block pl-3 pr-4 py-3 border-l-4 text-base font-medium transition-colors rounded-r-lg">
+                🎓 Students
+            </a>
+            <a href="{% url 'subject_list' %}" class="{% if 'subjects' in request.path %}bg-purple-50 border-purple-500 text-purple-600{% else %}border-transparent text-gray-700 hover:bg-gray-50 hover:text-purple-600{% endif %} block pl-3 pr-4 py-3 border-l-4 text-base font-medium transition-colors rounded-r-lg">
+                📚 Subjects
+            </a>
+            <a href="{% url 'all_exams' %}" class="{% if request.path == '/exams/' %}bg-purple-50 border-purple-500 text-purple-600{% else %}border-transparent text-gray-700 hover:bg-gray-50 hover:text-purple-600{% endif %} block pl-3 pr-4 py-3 border-l-4 text-base font-medium transition-colors rounded-r-lg">
+                📝 Exams
+            </a>
+            <a href="{% url 'points' %}" class="{% if 'points' in request.path %}bg-purple-50 border-purple-500 text-purple-600{% else %}border-transparent text-gray-700 hover:bg-gray-50 hover:text-purple-600{% endif %} block pl-3 pr-4 py-3 border-l-4 text-base font-medium transition-colors rounded-r-lg">
+                💎 Points
+            </a>
+            <a href="{% url 'leaderboard' %}" class="{% if 'leaderboard' in request.path %}bg-purple-50 border-purple-500 text-purple-600{% else %}border-transparent text-gray-700 hover:bg-gray-50 hover:text-purple-600{% endif %} block pl-3 pr-4 py-3 border-l-4 text-base font-medium transition-colors rounded-r-lg">
+                🏆 Leaderboard
+            </a>
+            <a href="{% url 'guide' %}" class="{% if 'guide' in request.path %}bg-purple-50 border-purple-500 text-purple-600{% else %}border-transparent text-gray-700 hover:bg-gray-50 hover:text-purple-600{% endif %} block pl-3 pr-4 py-3 border-l-4 text-base font-medium transition-colors rounded-r-lg">
+                📖 Guide
+            </a>
+            <a href="/admin/" target="_blank" rel="noopener noreferrer" class="border-transparent text-gray-700 hover:bg-gray-50 hover:text-purple-600 block pl-3 pr-4 py-3 border-l-4 text-base font-medium transition-colors rounded-r-lg">
+                ⚙️ Admin Panel
+            </a>
+        </div>
+    </div>
     
     <script>
         // Mobile menu toggle
-        document.getElementById('mobile-menu-button').addEventListener('click', function() {
-            const menu = document.getElementById('mobile-menu');
-            menu.classList.toggle('hidden');
-        });
+        const menuButton = document.getElementById('mobile-menu-button');
+        const menuClose = document.getElementById('mobile-menu-close');
+        const menu = document.getElementById('mobile-menu');
+        const overlay = document.getElementById('mobile-menu-overlay');
         
-        // Close menu when clicking outside
-        document.addEventListener('click', function(event) {
-            const menu = document.getElementById('mobile-menu');
-            const button = document.getElementById('mobile-menu-button');
-            if (!menu.contains(event.target) && !button.contains(event.target)) {
-                menu.classList.add('hidden');
-            }
-        });
+        function openMenu() {
+            menu.classList.add('open');
+            overlay.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeMenu() {
+            menu.classList.remove('open');
+            overlay.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+        
+        menuButton.addEventListener('click', openMenu);
+        menuClose.addEventListener('click', closeMenu);
+        overlay.addEventListener('click', closeMenu);
     </script>
 
     <!-- Messages -->
