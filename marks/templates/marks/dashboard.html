@@ -352,7 +352,18 @@
                             display: false
                         },
                         ticks: {
-                            padding: 5
+                            padding: 5,
+                            maxRotation: 0,
+                            minRotation: 0,
+                            autoSkip: false,
+                            callback: function(value, index, ticks) {
+                                const label = this.getLabelForValue(value);
+                                // Truncate long labels
+                                if (label.length > 15) {
+                                    return label.substring(0, 15) + '...';
+                                }
+                                return label;
+                            }
                         }
                     }
                 },
