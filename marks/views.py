@@ -619,6 +619,9 @@ def subject_detail(request, subject_id):
 
 def add_student(request):
     """Add a new student"""
+    host = request.get_host()
+    is_production = not (host.startswith('localhost') or host.startswith('127.0.0.1'))
+    
     if request.method == 'POST':
         name = request.POST.get('name')
         roll = request.POST.get('roll')
@@ -635,11 +638,14 @@ def add_student(request):
         else:
             messages.error(request, 'Student name, class, and roll number are all required!')
     
-    return render(request, 'marks/add_student.html')
+    return render(request, 'marks/add_student.html', {'is_production': is_production})
 
 
 def add_subject(request):
     """Add a new subject"""
+    host = request.get_host()
+    is_production = not (host.startswith('localhost') or host.startswith('127.0.0.1'))
+    
     if request.method == 'POST':
         name = request.POST.get('name')
         
@@ -650,7 +656,7 @@ def add_subject(request):
         else:
             messages.error(request, 'Subject name is required!')
     
-    return render(request, 'marks/add_subject.html')
+    return render(request, 'marks/add_subject.html', {'is_production': is_production})
 
 
 def add_exam_type(request):
@@ -998,6 +1004,9 @@ def points(request):
 
 def add_points_spent(request):
     """Form to record points spent by a student"""
+    host = request.get_host()
+    is_production = not (host.startswith('localhost') or host.startswith('127.0.0.1'))
+    
     if request.method == 'POST':
         student_id = request.POST.get('student')
         points_spent = request.POST.get('points_spent')
@@ -1034,6 +1043,7 @@ def add_points_spent(request):
     
     context = {
         'students': students,
+        'is_production': is_production,
     }
     
     return render(request, 'marks/add_points_spent.html', context)
