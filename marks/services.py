@@ -257,18 +257,64 @@ class ChartDataService:
         return {'labels': labels, 'data': data}
     
     @staticmethod
+    def shorten_subject_name(name):
+        """Shorten subject name for chart labels"""
+        # Common abbreviations
+        abbreviations = {
+            'Mathematics': 'Math',
+            'Science': 'Science',
+            'English 1st Paper': 'Eng 1st',
+            'English 2nd Paper': 'Eng 2nd',
+            'Bangla 1st Paper': 'Ban 1st',
+            'Bangla 2nd Paper': 'Ban 2nd',
+            'Bangladesh and Global Studies': 'BGS',
+            'Information and Communication Technology': 'ICT',
+            'Information & Communication Technology': 'ICT',
+            'Physical Education': 'Phys Ed',
+            'Religious Studies': 'Religion',
+            'Islam and Moral Education': 'Islam',
+            'Hindu and Moral Education': 'Hindu',
+            'Home Economics': 'Home Ec',
+            'Agricultural Studies': 'Agri',
+            'Higher Mathematics': 'H. Math',
+            'General Science': 'Gen Sci',
+            'Social Science': 'Soc Sci',
+        }
+        
+        # Check for exact match first
+        if name in abbreviations:
+            return abbreviations[name]
+        
+        # Check for partial matches
+        name_lower = name.lower()
+        if '1st paper' in name_lower:
+            prefix = name.split()[0][:3]  # First 3 chars of first word
+            return f"{prefix} 1st"
+        if '2nd paper' in name_lower:
+            prefix = name.split()[0][:3]
+            return f"{prefix} 2nd"
+        
+        # If name is already short, return as is
+        if len(name) <= 8:
+            return name
+        
+        # Otherwise truncate
+        return name[:7] + '.'
+    
+    @staticmethod
     def subject_performance_chart(student_id):
         """Generate chart data for per-subject performance"""
         try:
             student = Student.objects.get(id=student_id)
         except Student.DoesNotExist:
-            return {'labels': [], 'data': []}
+            return {'labels': [], 'data': [], 'fullLabels': []}
         
         subject_summary = student.subject_wise_summary()
-        labels = [item['subject'].name for item in subject_summary]
+        labels = [ChartDataService.shorten_subject_name(item['subject'].name) for item in subject_summary]
+        full_labels = [item['subject'].name for item in subject_summary]
         data = [float(item['average_percentage']) for item in subject_summary]
         
-        return {'labels': labels, 'data': data}
+        return {'labels': labels, 'data': data, 'fullLabels': full_labels}
     
     @staticmethod
     def grade_distribution_chart(student_id):

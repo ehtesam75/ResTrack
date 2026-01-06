@@ -60,13 +60,13 @@
                 <div>
                     <p class="text-gray-600 text-xs font-medium uppercase tracking-wide">Best Student</p>
                     {% if best_student %}
-                    <p class="text-base font-bold text-gray-900 mt-1">
+                    <p class="text-lg sm:text-base font-bold text-gray-900 mt-1">
                         <a href="{% url 'student_detail' best_student.id %}" class="gradient-text hover:opacity-80 transition-opacity">
                             {{ best_student.name }}
                         </a>
                     </p>
                     {% else %}
-                    <p class="text-base font-bold text-gray-400 mt-1">N/A</p>
+                    <p class="text-lg sm:text-base font-bold text-gray-400 mt-1">N/A</p>
                     {% endif %}
                 </div>
                 <div class="hidden sm:block rounded-lg p-2.5 shadow-md" style="background: #FFEDD5;">

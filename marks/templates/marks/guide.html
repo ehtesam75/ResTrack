@@ -3,130 +3,162 @@
 {% block title %}User Guide - ResTrack{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-6 max-w-5xl">
+<div class="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-5xl">
     <!-- Page Header -->
-    <div class="mb-8 animate-fade-in-up" style="animation-delay: 0.05s;">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2 flex items-center">
-            <span class="mr-2">📚</span> User Guide
+    <div class="mb-4 sm:mb-8 animate-fade-in-up" style="animation-delay: 0.05s;">
+        <h1 class="text-xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2 flex items-center">
+            <span class="mr-2 text-lg sm:text-2xl">📚</span> User Guide
         </h1>
-        <p class="text-base text-gray-600">Comprehensive overview of ResTrack's grading system, points allocation, and performance metrics</p>
+        <p class="text-xs sm:text-base text-gray-600">Comprehensive overview of ResTrack's grading system, points allocation, and performance metrics</p>
     </div>
 
     <!-- Table of Contents -->
-    <div class="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-lg shadow-sm p-6 mb-6 border border-gray-200 animate-fade-in-up" style="animation-delay: 0.1s;">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">Table of Contents</h2>
-        <div class="grid md:grid-cols-3 gap-3">
-            <a href="#about" class="flex items-center text-sm text-blue-600 hover:text-blue-800 hover:underline transition group">
-                <span class="mr-2 text-blue-500 group-hover:text-blue-700">→</span>
-                <span>About This Project</span>
+    <div class="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-6 border border-gray-200 animate-fade-in-up" style="animation-delay: 0.1s;">
+        <h2 class="text-sm sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Table of Contents</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+            <a href="#about" class="flex items-center text-xs sm:text-sm text-blue-600 hover:text-blue-800 transition group p-2 sm:p-0 rounded-lg hover:bg-blue-50 sm:hover:bg-transparent">
+                <span class="mr-1.5 sm:mr-2 text-blue-500 group-hover:text-blue-700">→</span>
+                <span>About</span>
             </a>
-            <a href="#grading" class="flex items-center text-sm text-blue-600 hover:text-blue-800 hover:underline transition group">
-                <span class="mr-2 text-blue-500 group-hover:text-blue-700">→</span>
-                <span>Grading System</span>
+            <a href="#grading" class="flex items-center text-xs sm:text-sm text-blue-600 hover:text-blue-800 transition group p-2 sm:p-0 rounded-lg hover:bg-blue-50 sm:hover:bg-transparent">
+                <span class="mr-1.5 sm:mr-2 text-blue-500 group-hover:text-blue-700">→</span>
+                <span>Grading</span>
             </a>
-            <a href="#points" class="flex items-center text-sm text-blue-600 hover:text-blue-800 hover:underline transition group">
-                <span class="mr-2 text-blue-500 group-hover:text-blue-700">→</span>
-                <span>Points System</span>
+            <a href="#points" class="flex items-center text-xs sm:text-sm text-blue-600 hover:text-blue-800 transition group p-2 sm:p-0 rounded-lg hover:bg-blue-50 sm:hover:bg-transparent">
+                <span class="mr-1.5 sm:mr-2 text-blue-500 group-hover:text-blue-700">→</span>
+                <span>Points</span>
             </a>
-            <a href="#monthly-wins" class="flex items-center text-sm text-blue-600 hover:text-blue-800 hover:underline transition group">
-                <span class="mr-2 text-blue-500 group-hover:text-blue-700">→</span>
-                <span>Monthly Wins Bonus</span>
+            <a href="#monthly-wins" class="flex items-center text-xs sm:text-sm text-blue-600 hover:text-blue-800 transition group p-2 sm:p-0 rounded-lg hover:bg-blue-50 sm:hover:bg-transparent">
+                <span class="mr-1.5 sm:mr-2 text-blue-500 group-hover:text-blue-700">→</span>
+                <span>Monthly Wins</span>
             </a>
-            <a href="#excellence" class="flex items-center text-sm text-blue-600 hover:text-blue-800 hover:underline transition group">
-                <span class="mr-2 text-blue-500 group-hover:text-blue-700">→</span>
-                <span>Excellence Rate</span>
+            <a href="#excellence" class="flex items-center text-xs sm:text-sm text-blue-600 hover:text-blue-800 transition group p-2 sm:p-0 rounded-lg hover:bg-blue-50 sm:hover:bg-transparent">
+                <span class="mr-1.5 sm:mr-2 text-blue-500 group-hover:text-blue-700">→</span>
+                <span>Excellence</span>
             </a>
-            <a href="#rankings" class="flex items-center text-sm text-blue-600 hover:text-blue-800 hover:underline transition group">
-                <span class="mr-2 text-blue-500 group-hover:text-blue-700">→</span>
-                <span>Rankings & Leaderboards</span>
+            <a href="#rankings" class="flex items-center text-xs sm:text-sm text-blue-600 hover:text-blue-800 transition group p-2 sm:p-0 rounded-lg hover:bg-blue-50 sm:hover:bg-transparent">
+                <span class="mr-1.5 sm:mr-2 text-blue-500 group-hover:text-blue-700">→</span>
+                <span>Rankings</span>
             </a>
-            <a href="#terminology" class="flex items-center text-sm text-blue-600 hover:text-blue-800 hover:underline transition group">
-                <span class="mr-2 text-blue-500 group-hover:text-blue-700">→</span>
+            <a href="#terminology" class="col-span-2 sm:col-span-1 flex items-center text-xs sm:text-sm text-blue-600 hover:text-blue-800 transition group p-2 sm:p-0 rounded-lg hover:bg-blue-50 sm:hover:bg-transparent">
+                <span class="mr-1.5 sm:mr-2 text-blue-500 group-hover:text-blue-700">→</span>
                 <span>Key Terminology</span>
             </a>
         </div>
     </div>
 
     <!-- About This Project -->
-    <div id="about" class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg shadow-sm p-6 mb-5 border-2 border-purple-200 animate-fade-in-up" style="animation-delay: 0.15s;">
-        <h2 class="text-2xl font-bold text-gray-900 mb-2">🚀 About This Project</h2>
-        <div class="h-0.5 w-16 bg-purple-600 mb-4"></div>
+    <div id="about" class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-5 border border-purple-200 animate-fade-in-up" style="animation-delay: 0.15s;">
+        <h2 class="text-lg sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">🚀 About This Project</h2>
+        <div class="h-0.5 w-12 sm:w-16 bg-purple-600 mb-3 sm:mb-4"></div>
         
-        <div class="space-y-4">
-            <p class="text-sm text-gray-700 leading-relaxed">
+        <div class="space-y-3 sm:space-y-4">
+            <p class="text-xs sm:text-sm text-gray-700 leading-relaxed">
                 <strong class="text-purple-700">ResTrack</strong> (Results Tracking System) is a comprehensive student performance monitoring and analytics platform designed to help teachers and students track academic progress effectively.
             </p>
 
-            <div class="bg-white border-l-4 border-purple-500 p-4 rounded">
+            <div class="bg-white border-l-4 border-purple-500 p-3 sm:p-4 rounded-lg">
                 <h3 class="text-base font-semibold text-gray-900 mb-2">🎯 Purpose</h3>
                 <p class="text-sm text-gray-700 leading-relaxed">
                     ResTrack transforms traditional grade tracking into an engaging, gamified learning experience. By converting exam performance into points and rewards, students are motivated to excel academically while teachers gain powerful insights into class performance trends.
                 </p>
             </div>
 
-            <div class="bg-white border-l-4 border-blue-500 p-4 rounded">
-                <h3 class="text-base font-semibold text-gray-900 mb-2">⚙️ How It Works</h3>
-                <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
-                    <li>Teachers enter exam results for students (CQ and MCQ exam types)</li>
-                    <li>The system automatically calculates scores, grades, and points based on performance</li>
-                    <li>Students earn points for good performance and lose points for poor results</li>
-                    <li>Bonus points are awarded for monthly achievements and top rankings</li>
-                    <li>Comprehensive analytics show trends, rankings, and performance across subjects</li>
-                    <li>Students can track their progress through detailed dashboards and charts</li>
+            <div class="bg-white border-l-4 border-blue-500 p-3 sm:p-4 rounded-lg">
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 mb-2">⚙️ How It Works</h3>
+                <ul class="text-xs sm:text-sm text-gray-700 space-y-1.5 sm:space-y-1">
+                    <li class="flex items-start"><span class="text-blue-500 mr-2">•</span>Teachers enter exam results for students</li>
+                    <li class="flex items-start"><span class="text-blue-500 mr-2">•</span>System calculates scores, grades, and points</li>
+                    <li class="flex items-start"><span class="text-blue-500 mr-2">•</span>Earn points for good performance</li>
+                    <li class="flex items-start"><span class="text-blue-500 mr-2">•</span>Bonus points for monthly achievements</li>
+                    <li class="flex items-start"><span class="text-blue-500 mr-2">•</span>Analytics show trends and rankings</li>
                 </ul>
             </div>
 
-            <div class="bg-white border-l-4 border-green-500 p-4 rounded">
-                <h3 class="text-base font-semibold text-gray-900 mb-2">🌟 Key Features</h3>
-                <div class="grid md:grid-cols-2 gap-3 text-sm text-gray-700">
-                    <div>
-                        <p class="font-medium text-green-700">• Automated Grading</p>
-                        <p class="text-xs ml-3">Instant score and grade calculation</p>
+            <div class="bg-white border-l-4 border-green-500 p-3 sm:p-4 rounded-lg">
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 mb-2">🌟 Key Features</h3>
+                <div class="grid grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm text-gray-700">
+                    <div class="bg-green-50 rounded-lg p-2 sm:p-0 sm:bg-transparent">
+                        <p class="font-medium text-green-700 text-[11px] sm:text-sm">Automated Grading</p>
+                        <p class="text-[10px] sm:text-xs text-gray-500 sm:ml-0">Instant calculation</p>
                     </div>
-                    <div>
-                        <p class="font-medium text-green-700">• Points & Rewards</p>
-                        <p class="text-xs ml-3">Gamified learning with real rewards</p>
+                    <div class="bg-green-50 rounded-lg p-2 sm:p-0 sm:bg-transparent">
+                        <p class="font-medium text-green-700 text-[11px] sm:text-sm">Points & Rewards</p>
+                        <p class="text-[10px] sm:text-xs text-gray-500 sm:ml-0">Gamified learning</p>
                     </div>
-                    <div>
-                        <p class="font-medium text-green-700">• Performance Analytics</p>
-                        <p class="text-xs ml-3">Charts, trends, and insights</p>
+                    <div class="bg-green-50 rounded-lg p-2 sm:p-0 sm:bg-transparent">
+                        <p class="font-medium text-green-700 text-[11px] sm:text-sm">Analytics</p>
+                        <p class="text-[10px] sm:text-xs text-gray-500 sm:ml-0">Charts & insights</p>
                     </div>
-                    <div>
-                        <p class="font-medium text-green-700">• Multiple Rankings</p>
-                        <p class="text-xs ml-3">Overall, subject-wise, and monthly</p>
-                    </div>
-                    <div>
-                        <p class="font-medium text-green-700">• Student Comparison</p>
-                        <p class="text-xs ml-3">Side-by-side performance analysis</p>
-                    </div>
-                    <div>
-                        <p class="font-medium text-green-700">• Bulk Entry</p>
-                        <p class="text-xs ml-3">Add multiple student results quickly</p>
+                    <div class="bg-green-50 rounded-lg p-2 sm:p-0 sm:bg-transparent">
+                        <p class="font-medium text-green-700 text-[11px] sm:text-sm">Rankings</p>
+                        <p class="text-[10px] sm:text-xs text-gray-500 sm:ml-0">Multiple categories</p>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
-                <p class="text-sm text-gray-700">
-                    <strong class="text-yellow-800">💡 Pro Tip:</strong> The points earned in ResTrack translate to real-world rewards! See the <a href="#points" class="text-blue-600 hover:underline font-medium">Points System</a> section below to learn how points convert to money and how students can benefit from their academic achievements.
+            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-3 sm:p-4 rounded-lg">
+                <p class="text-xs sm:text-sm text-gray-700">
+                    <strong class="text-yellow-800">💡 Pro Tip:</strong> Points earned translate to real rewards! See <a href="#points" class="text-blue-600 hover:underline font-medium">Points System</a> below.
                 </p>
             </div>
         </div>
     </div>
 
     <!-- Grading System -->
-    <div id="grading" class="bg-white rounded-lg shadow-sm p-6 mb-5 border border-gray-200 animate-fade-in-up" style="animation-delay: 0.2s;">
-        <h2 class="text-2xl font-bold text-gray-900 mb-2">Grading System</h2>
-        <div class="h-0.5 w-16 bg-blue-600 mb-4"></div>
+    <div id="grading" class="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-5 border border-gray-200 animate-fade-in-up" style="animation-delay: 0.2s;">
+        <h2 class="text-lg sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">📊 Grading System</h2>
+        <div class="h-0.5 w-12 sm:w-16 bg-blue-600 mb-3 sm:mb-4"></div>
         
-        <p class="text-sm text-gray-700 mb-5 leading-relaxed">
+        <p class="text-xs sm:text-sm text-gray-700 mb-3 sm:mb-5 leading-relaxed">
             ResTrack employs distinct grading scales for different exam types. Each grade is associated with a specific percentage threshold and corresponding point value.
         </p>
 
         <!-- CQ Grading -->
-        <div class="mb-5">
-            <h3 class="text-lg font-semibold text-gray-800 mb-3">CQ (Creative Questions) Grading</h3>
-            <div class="overflow-x-auto">
+        <div class="mb-4 sm:mb-5">
+            <h3 class="text-sm sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">CQ (Creative Questions) Grading</h3>
+            
+            <!-- Mobile: Card Layout -->
+            <div class="sm:hidden space-y-2">
+                <div class="flex items-center justify-between p-2.5 rounded-lg bg-green-100">
+                    <div>
+                        <span class="text-xs font-semibold text-green-800">Superb</span>
+                        <p class="text-[10px] text-gray-600">≥ 85%</p>
+                    </div>
+                    <span class="text-xs font-bold text-green-700">+20 pts</span>
+                </div>
+                <div class="flex items-center justify-between p-2.5 rounded-lg bg-green-50">
+                    <div>
+                        <span class="text-xs font-semibold text-green-700">Good</span>
+                        <p class="text-[10px] text-gray-600">70% - 84.99%</p>
+                    </div>
+                    <span class="text-xs font-bold text-green-600">+15 pts</span>
+                </div>
+                <div class="flex items-center justify-between p-2.5 rounded-lg bg-yellow-50">
+                    <div>
+                        <span class="text-xs font-semibold text-yellow-700">Average</span>
+                        <p class="text-[10px] text-gray-600">55% - 69.99%</p>
+                    </div>
+                    <span class="text-xs font-bold text-yellow-600">+5 pts</span>
+                </div>
+                <div class="flex items-center justify-between p-2.5 rounded-lg bg-orange-50">
+                    <div>
+                        <span class="text-xs font-semibold text-orange-700">Poor</span>
+                        <p class="text-[10px] text-gray-600">35% - 54.99%</p>
+                    </div>
+                    <span class="text-xs font-bold text-orange-600">-10 pts</span>
+                </div>
+                <div class="flex items-center justify-between p-2.5 rounded-lg bg-red-50">
+                    <div>
+                        <span class="text-xs font-semibold text-red-700">Very Poor</span>
+                        <p class="text-[10px] text-gray-600">< 35%</p>
+                    </div>
+                    <span class="text-xs font-bold text-red-600">-15 pts</span>
+                </div>
+            </div>
+            
+            <!-- Desktop: Table -->
+            <div class="hidden sm:block overflow-x-auto">
                 <table class="min-w-full border-collapse border border-gray-300">
                     <thead>
                         <tr class="bg-gray-100">
@@ -172,9 +204,57 @@
         </div>
 
         <!-- MCQ Grading -->
-        <div class="mb-5">
-            <h3 class="text-lg font-semibold text-gray-800 mb-3">MCQ (Multiple Choice Questions) Grading</h3>
-            <div class="overflow-x-auto">
+        <div class="mb-4 sm:mb-5">
+            <h3 class="text-sm sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">MCQ (Multiple Choice Questions) Grading</h3>
+            
+            <!-- Mobile: Card Layout -->
+            <div class="sm:hidden space-y-2">
+                <div class="flex items-center justify-between p-2.5 rounded-lg bg-green-100">
+                    <div>
+                        <span class="text-xs font-semibold text-green-800">Superb</span>
+                        <p class="text-[10px] text-gray-600">≥ 93%</p>
+                    </div>
+                    <span class="text-xs font-bold text-green-700">+20 pts</span>
+                </div>
+                <div class="flex items-center justify-between p-2.5 rounded-lg bg-green-50">
+                    <div>
+                        <span class="text-xs font-semibold text-green-700">Good</span>
+                        <p class="text-[10px] text-gray-600">77% - 92.99%</p>
+                    </div>
+                    <span class="text-xs font-bold text-green-600">+15 pts</span>
+                </div>
+                <div class="flex items-center justify-between p-2.5 rounded-lg bg-yellow-50">
+                    <div>
+                        <span class="text-xs font-semibold text-yellow-700">Average</span>
+                        <p class="text-[10px] text-gray-600">55% - 76.99%</p>
+                    </div>
+                    <span class="text-xs font-bold text-gray-600">0 pts</span>
+                </div>
+                <div class="flex items-center justify-between p-2.5 rounded-lg bg-orange-50">
+                    <div>
+                        <span class="text-xs font-semibold text-orange-700">Poor</span>
+                        <p class="text-[10px] text-gray-600">40% - 54.99%</p>
+                    </div>
+                    <span class="text-xs font-bold text-orange-600">-10 pts</span>
+                </div>
+                <div class="flex items-center justify-between p-2.5 rounded-lg bg-red-50">
+                    <div>
+                        <span class="text-xs font-semibold text-red-700">Fail</span>
+                        <p class="text-[10px] text-gray-600">30% - 39.99%</p>
+                    </div>
+                    <span class="text-xs font-bold text-red-600">-15 pts</span>
+                </div>
+                <div class="flex items-center justify-between p-2.5 rounded-lg bg-red-100">
+                    <div>
+                        <span class="text-xs font-semibold text-red-800">Horrible</span>
+                        <p class="text-[10px] text-gray-600">< 30%</p>
+                    </div>
+                    <span class="text-xs font-bold text-red-700">-20 pts</span>
+                </div>
+            </div>
+            
+            <!-- Desktop: Table -->
+            <div class="hidden sm:block overflow-x-auto">
                 <table class="min-w-full border-collapse border border-gray-300">
                     <thead>
                         <tr class="bg-gray-100">
@@ -219,275 +299,262 @@
             </div>
         </div>
 
-        <div class="bg-blue-50 border-l-4 border-blue-600 p-4">
-            <p class="text-sm text-gray-700">
-                <strong>Note:</strong> MCQ exams have higher percentage thresholds due to their typically higher scoring potential compared to creative questions.
+        <div class="bg-blue-50 border-l-4 border-blue-600 p-3 sm:p-4 rounded-lg">
+            <p class="text-xs sm:text-sm text-gray-700">
+                <strong>Note:</strong> MCQ exams have higher thresholds due to their typically higher scoring potential.
             </p>
         </div>
     </div>
 
     <!-- Points System -->
-    <div id="points" class="bg-white rounded-lg shadow-sm p-6 mb-5 border border-gray-200 animate-fade-in-up" style="animation-delay: 0.25s;">
-        <h2 class="text-2xl font-bold text-gray-900 mb-2">Points System</h2>
-        <div class="h-0.5 w-16 bg-blue-600 mb-4"></div>
+    <div id="points" class="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-5 border border-gray-200 animate-fade-in-up" style="animation-delay: 0.25s;">
+        <h2 class="text-lg sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">💰 Points System</h2>
+        <div class="h-0.5 w-12 sm:w-16 bg-blue-600 mb-3 sm:mb-4"></div>
         
-        <p class="text-sm text-gray-700 mb-5 leading-relaxed">
-            Lifetime points are calculated based on exam performance and achievement bonuses. Points have real monetary value and can be withdrawn as rewards!
+        <p class="text-xs sm:text-sm text-gray-700 mb-3 sm:mb-5 leading-relaxed">
+            Lifetime points are calculated based on exam performance and achievement bonuses. Points have real monetary value!
         </p>
 
         <!-- Points to Money Conversion -->
-        <div class="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-400 p-5 mb-4 rounded-lg">
-            <h3 class="text-base font-bold text-green-800 mb-3 flex items-center">
-                💰 Points = Real Money!
+        <div class="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-400 p-3 sm:p-5 mb-3 sm:mb-4 rounded-xl">
+            <h3 class="text-sm sm:text-base font-bold text-green-800 mb-2 sm:mb-3 flex items-center">
+                💵 Points = Real Money!
             </h3>
-            <div class="space-y-2 text-sm text-gray-700">
-                <p class="font-semibold text-green-700 text-base">
+            <div class="space-y-2 text-xs sm:text-sm text-gray-700">
+                <p class="font-semibold text-green-700 text-sm sm:text-base">
                     <strong>1 Point = 1 BDT (Bangladeshi Taka)</strong>
                 </p>
-                <p>
-                    Every point you earn in ResTrack has real monetary value. Your academic achievements directly translate to financial rewards!
+                <p class="text-[11px] sm:text-sm">
+                    Every point you earn has real monetary value. Academic achievements = financial rewards!
                 </p>
-                <div class="bg-white border-l-4 border-green-600 p-3 mt-3 rounded">
-                    <p class="font-semibold text-gray-900 mb-1">💵 How Withdrawals Work:</p>
-                    <ul class="list-disc list-inside space-y-1 text-xs">
-                        <li>If you have <strong>more than 0 points remaining</strong>, you may request a withdrawal</li>
-                        <li>The amount (in BDT) will be provided by your teacher/admin</li>
-                        <li><strong>Spent Points:</strong> Points you've already withdrawn or used</li>
-                        <li><strong>Remaining Points:</strong> Points available for withdrawal (your current balance)</li>
+                <div class="bg-white border-l-4 border-green-600 p-2.5 sm:p-3 mt-2 sm:mt-3 rounded-lg">
+                    <p class="font-semibold text-gray-900 mb-1 text-xs sm:text-sm">💵 Withdrawals:</p>
+                    <ul class="space-y-1 text-[10px] sm:text-xs">
+                        <li class="flex items-start"><span class="text-green-600 mr-1.5">•</span>Request withdrawal if points > 0</li>
+                        <li class="flex items-start"><span class="text-green-600 mr-1.5">•</span>Amount (BDT) provided by teacher</li>
+                        <li class="flex items-start"><span class="text-green-600 mr-1.5">•</span><strong>Spent:</strong> Points already used</li>
+                        <li class="flex items-start"><span class="text-green-600 mr-1.5">•</span><strong>Remaining:</strong> Available balance</li>
                     </ul>
                 </div>
-                <p class="text-xs text-green-700 mt-2 italic">
-                    <strong>Example:</strong> If you have 100 lifetime points and spent 30, you have 70 points (70 BDT) available to withdraw!
+                <p class="text-[10px] sm:text-xs text-green-700 mt-2 italic">
+                    <strong>Example:</strong> 100 lifetime - 30 spent = 70 points (70 BDT) available!
                 </p>
             </div>
         </div>
 
-        <div class="space-y-3">
-            <div class="bg-green-50 border-l-4 border-green-600 p-4">
-                <h3 class="text-sm font-semibold text-gray-900 mb-1">Exam Points</h3>
-                <p class="text-sm text-gray-700">
-                    Each exam contributes points based on the achieved grade. The cumulative sum of all exam points forms the base of your lifetime total.
+        <div class="space-y-2 sm:space-y-3">
+            <div class="bg-green-50 border-l-4 border-green-600 p-3 sm:p-4 rounded-lg">
+                <h3 class="text-xs sm:text-sm font-semibold text-gray-900 mb-1">Exam Points</h3>
+                <p class="text-[11px] sm:text-sm text-gray-700">
+                    Each exam contributes points based on achieved grade. Cumulative sum forms your lifetime total.
                 </p>
-                <p class="text-sm text-gray-600 mt-2">
-                    <strong>Example:</strong> Scoring 88% on a CQ exam (Superb grade) awards +20 points (20 BDT), while 45% on an MCQ exam (Poor grade) results in -10 points (-10 BDT).
-                </p>
-            </div>
-
-            <div class="bg-purple-50 border-l-4 border-purple-600 p-4">
-                <h3 class="text-sm font-semibold text-gray-900 mb-1">Bonus Points</h3>
-                <p class="text-sm text-gray-700">
-                    You can earn additional bonus points (extra BDT!) through special achievements like monthly wins.
+                <p class="text-xs sm:text-sm text-gray-600 mt-2">
+                    <strong>Example:</strong> 88% on CQ (Superb) = +20 pts, while 45% MCQ (Poor) = -10 pts.
                 </p>
             </div>
 
-            <div class="bg-gray-50 border border-gray-300 p-4">
-                <h3 class="text-sm font-semibold text-gray-900 mb-1">Total Lifetime Points</h3>
-                <p class="text-sm text-gray-700 mb-2">
+            <div class="bg-purple-50 border-l-4 border-purple-600 p-3 sm:p-4 rounded-lg">
+                <h3 class="text-xs sm:text-sm font-semibold text-gray-900 mb-1">Bonus Points</h3>
+                <p class="text-[11px] sm:text-sm text-gray-700">
+                    Earn additional bonus points through achievements like monthly wins.
+                </p>
+            </div>
+
+            <div class="bg-gray-50 border border-gray-300 p-3 sm:p-4 rounded-lg">
+                <h3 class="text-xs sm:text-sm font-semibold text-gray-900 mb-1">Total Lifetime Points</h3>
+                <p class="text-[11px] sm:text-sm text-gray-700 mb-1 sm:mb-2">
                     <strong>Formula:</strong> Lifetime Points = Exam Points + Bonus Points
                 </p>
-                <p class="text-sm text-gray-600">
-                    Lifetime points determine leaderboard position and reflect overall academic performance throughout the tracking period.
+                <p class="text-[10px] sm:text-sm text-gray-600">
+                    Determines leaderboard position and reflects overall academic performance.
                 </p>
             </div>
         </div>
     </div>
 
     <!-- Monthly Wins Bonus -->
-    <div id="monthly-wins" class="bg-white rounded-lg shadow-sm p-6 mb-5 border border-gray-200 animate-fade-in-up" style="animation-delay: 0.3s;">
-        <h2 class="text-2xl font-bold text-gray-900 mb-2">Monthly Wins Bonus</h2>
-        <div class="h-0.5 w-16 bg-blue-600 mb-4"></div>
+    <div id="monthly-wins" class="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-5 border border-gray-200 animate-fade-in-up" style="animation-delay: 0.3s;">
+        <h2 class="text-lg sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">🏆 Monthly Wins Bonus</h2>
+        <div class="h-0.5 w-12 sm:w-16 bg-blue-600 mb-3 sm:mb-4"></div>
         
-        <p class="text-sm text-gray-700 mb-5 leading-relaxed">
-            Students who achieve first rank in any completed month receive a performance bonus, provided they meet the eligibility criteria.
+        <p class="text-xs sm:text-sm text-gray-700 mb-3 sm:mb-5 leading-relaxed">
+            Students achieving first rank in any completed month receive a performance bonus.
         </p>
 
-        <div class="bg-yellow-50 border-l-4 border-yellow-600 p-4 mb-3">
-            <h3 class="text-sm font-semibold text-gray-900 mb-2">40 Points per Monthly Win</h3>
-            <p class="text-sm text-gray-700 mb-3">
-                Each month where a student achieves first rank (highest average score) earns a <strong>40-point bonus</strong> added to their lifetime total.
+        <div class="bg-yellow-50 border-l-4 border-yellow-600 p-3 sm:p-4 mb-3 rounded-lg">
+            <h3 class="text-xs sm:text-sm font-semibold text-gray-900 mb-2">🎖️ 40 Points per Monthly Win</h3>
+            <p class="text-[11px] sm:text-sm text-gray-700 mb-3">
+                Each month with first rank (highest avg score) earns a <strong>40-point bonus</strong>.
             </p>
             
-            <div class="bg-red-50 border-l-4 border-red-600 p-4 mb-3">
-                <h4 class="text-sm font-semibold text-red-900 mb-2">🎯 Eligibility Requirements (Both Required)</h4>
-                <p class="text-sm text-gray-700 mb-2">
-                    To qualify for a Monthly Champion bonus, a student <strong>MUST</strong> meet BOTH of the following conditions:
-                </p>
-                <ul class="list-disc list-inside text-gray-700 space-y-2 text-sm">
-                    <li><strong>Minimum 40% Exam Attendance:</strong> The student must have attended at least 40% of the unique exams held in that month.</li>
-                    <li><strong>Minimum 3 Exams:</strong> The student must have attended at least 3 unique exams in that month.</li>
+            <div class="bg-red-50 border-l-4 border-red-600 p-2.5 sm:p-4 mb-3 rounded-lg">
+                <h4 class="text-xs sm:text-sm font-semibold text-red-900 mb-2">🎯 Eligibility (Both Required)</h4>
+                <ul class="space-y-1.5 sm:space-y-2 text-[11px] sm:text-sm text-gray-700">
+                    <li class="flex items-start"><span class="text-red-500 mr-1.5">•</span><strong>40% Attendance:</strong> At least 40% of month's unique exams</li>
+                    <li class="flex items-start"><span class="text-red-500 mr-1.5">•</span><strong>Min 3 Exams:</strong> At least 3 unique exams attended</li>
                 </ul>
-                <p class="text-sm text-red-700 font-semibold mt-3">
-                    ⚠️ If either condition is not met, the student will NOT receive the monthly win bonus, even if they have the highest average score.
+                <p class="text-[10px] sm:text-sm text-red-700 font-semibold mt-2 sm:mt-3">
+                    ⚠️ Both conditions required to receive bonus, even with highest avg.
                 </p>
             </div>
             
-            <div class="bg-white border border-gray-200 p-3 mb-3">
-                <h4 class="text-sm font-semibold text-gray-900 mb-2">Monthly Ranking Methodology</h4>
-                <ul class="list-disc list-inside text-gray-700 space-y-1 text-sm">
-                    <li>Only <strong>completed months</strong> are evaluated (current month excluded from bonus calculation)</li>
-                    <li>Average score is calculated for all exams within the month</li>
-                    <li>The student with the highest monthly average is declared the winner</li>
-                    <li>Eligibility criteria (40% attendance AND 3+ exams) are checked before awarding bonus</li>
-                    <li>Each eligible monthly win awards +40 bonus points</li>
+            <div class="bg-white border border-gray-200 p-2.5 sm:p-3 mb-3 rounded-lg">
+                <h4 class="text-xs sm:text-sm font-semibold text-gray-900 mb-2">Monthly Ranking Method</h4>
+                <ul class="space-y-1 text-[10px] sm:text-sm text-gray-700">
+                    <li class="flex items-start"><span class="text-gray-500 mr-1.5">•</span>Only completed months evaluated</li>
+                    <li class="flex items-start"><span class="text-gray-500 mr-1.5">•</span>Avg score calculated for all exams</li>
+                    <li class="flex items-start"><span class="text-gray-500 mr-1.5">•</span>Highest avg = winner (if eligible)</li>
+                    <li class="flex items-start"><span class="text-gray-500 mr-1.5">•</span>Each win = +40 bonus points</li>
                 </ul>
             </div>
 
-            <div class="bg-blue-50 border border-blue-200 p-3">
-                <p class="text-sm text-gray-700">
-                    <strong>Example:</strong> If a student achieved first rank in January (5 exams attended, 8 total), February (4 exams attended, 10 total), and April (6 exams attended, 7 total), they receive <strong>3 × 40 = 120 bonus points</strong> because all three months meet both eligibility criteria (≥40% attendance AND ≥3 exams).
+            <div class="bg-blue-50 border border-blue-200 p-2.5 sm:p-3 rounded-lg">
+                <p class="text-[10px] sm:text-sm text-gray-700">
+                    <strong>Example:</strong> First rank in Jan (5/8 exams), Feb (4/10), Apr (6/7) = <strong>3 × 40 = 120 bonus points</strong>
                 </p>
             </div>
         </div>
 
-        <div class="bg-gray-100 p-3">
-            <h4 class="text-sm font-semibold text-gray-900 mb-2">Automatic Calculation</h4>
-            <p class="text-sm text-gray-700">
-                Monthly wins bonus is calculated automatically whenever:
+        <div class="bg-gray-100 p-2.5 sm:p-3 rounded-lg">
+            <h4 class="text-xs sm:text-sm font-semibold text-gray-900 mb-1 sm:mb-2">⚡ Automatic Calculation</h4>
+            <p class="text-[10px] sm:text-sm text-gray-700">
+                Bonus updates automatically when exams are added, edited, deleted, or points recalculated.
             </p>
-            <ul class="list-disc list-inside text-sm text-gray-600 mt-1 space-y-0.5">
-                <li>A new exam is added or edited</li>
-                <li>An exam is deleted</li>
-                <li>An admin recalculates points</li>
-            </ul>
         </div>
     </div>
 
     <!-- Excellence Rate -->
-    <div id="excellence" class="bg-white rounded-lg shadow-sm p-6 mb-5 border border-gray-200 animate-fade-in-up" style="animation-delay: 0.35s;">
-        <h2 class="text-2xl font-bold text-gray-900 mb-2">Excellence Rate</h2>
-        <div class="h-0.5 w-16 bg-blue-600 mb-4"></div>
+    <div id="excellence" class="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-5 border border-gray-200 animate-fade-in-up" style="animation-delay: 0.35s;">
+        <h2 class="text-lg sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">⭐ Excellence Rate</h2>
+        <div class="h-0.5 w-12 sm:w-16 bg-blue-600 mb-3 sm:mb-4"></div>
         
-        <p class="text-sm text-gray-700 mb-5 leading-relaxed">
-            Excellence Rate quantifies the proportion of exams where excellent performance was achieved.
+        <p class="text-xs sm:text-sm text-gray-700 mb-3 sm:mb-5 leading-relaxed">
+            Excellence Rate measures the proportion of exams with excellent performance.
         </p>
 
-        <div class="grid md:grid-cols-2 gap-3 mb-4">
-            <div class="bg-purple-50 border-l-4 border-purple-600 p-3">
-                <h3 class="text-sm font-semibold text-gray-900 mb-1">CQ Excellence Threshold</h3>
-                <p class="text-sm text-gray-700">≥ 80% on CQ exams</p>
+        <div class="grid grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
+            <div class="bg-purple-50 border-l-4 border-purple-600 p-2.5 sm:p-3 rounded-lg">
+                <h3 class="text-[11px] sm:text-sm font-semibold text-gray-900 mb-0.5 sm:mb-1">CQ Threshold</h3>
+                <p class="text-xs sm:text-sm text-gray-700 font-bold">≥ 80%</p>
             </div>
-            <div class="bg-indigo-50 border-l-4 border-indigo-600 p-3">
-                <h3 class="text-sm font-semibold text-gray-900 mb-1">MCQ Excellence Threshold</h3>
-                <p class="text-sm text-gray-700">≥ 85% on MCQ exams</p>
+            <div class="bg-indigo-50 border-l-4 border-indigo-600 p-2.5 sm:p-3 rounded-lg">
+                <h3 class="text-[11px] sm:text-sm font-semibold text-gray-900 mb-0.5 sm:mb-1">MCQ Threshold</h3>
+                <p class="text-xs sm:text-sm text-gray-700 font-bold">≥ 85%</p>
             </div>
         </div>
 
-        <div class="bg-green-50 border border-green-200 p-4 mb-3">
-            <h3 class="text-sm font-semibold text-gray-900 mb-2">Calculation Formula</h3>
-            <p class="text-sm text-gray-700 mb-2">
-                Excellence Rate = (Number of Excellent Exams ÷ Total Exams) × 100%
+        <div class="bg-green-50 border border-green-200 p-3 sm:p-4 mb-3 rounded-lg">
+            <h3 class="text-xs sm:text-sm font-semibold text-gray-900 mb-1 sm:mb-2">📊 Calculation Formula</h3>
+            <p class="text-[11px] sm:text-sm text-gray-700 mb-1 sm:mb-2">
+                Excellence Rate = (Excellent Exams ÷ Total Exams) × 100%
             </p>
-            <p class="text-sm text-gray-600">
-                <strong>Example:</strong> 7 excellent performances out of 10 total exams yields a 70% excellence rate.
+            <p class="text-[10px] sm:text-sm text-gray-600">
+                <strong>Example:</strong> 7 excellent / 10 total = 70% excellence rate
             </p>
         </div>
 
-        <div class="bg-blue-50 border-l-4 border-blue-600 p-3">
-            <p class="text-sm text-gray-700">
-                <strong>Significance:</strong> Excellence rate measures consistency in high-level performance rather than isolated achievements. A high excellence rate (80%+) demonstrates sustained mastery across multiple assessments.
+        <div class="bg-blue-50 border-l-4 border-blue-600 p-2.5 sm:p-3 rounded-lg">
+            <p class="text-[10px] sm:text-sm text-gray-700">
+                <strong>Significance:</strong> Measures consistency in high-level performance. 80%+ demonstrates sustained mastery.
             </p>
         </div>
     </div>
 
     <!-- Rankings & Leaderboards -->
-    <div id="rankings" class="bg-white rounded-lg shadow-sm p-6 mb-5 border border-gray-200 animate-fade-in-up" style="animation-delay: 0.4s;">
-        <h2 class="text-2xl font-bold text-gray-900 mb-2">Rankings & Leaderboards</h2>
-        <div class="h-0.5 w-16 bg-blue-600 mb-4"></div>
+    <div id="rankings" class="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-5 border border-gray-200 animate-fade-in-up" style="animation-delay: 0.4s;">
+        <h2 class="text-lg sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">🏅 Rankings & Leaderboards</h2>
+        <div class="h-0.5 w-12 sm:w-16 bg-blue-600 mb-3 sm:mb-4"></div>
         
-        <div class="space-y-3">
-            <div class="bg-blue-50 border-l-4 border-blue-600 p-4">
-                <h3 class="text-sm font-semibold text-gray-900 mb-1">Overall Leaderboard</h3>
-                <p class="text-sm text-gray-700 mb-1">Students ranked by <strong>lifetime points</strong> (exam points + bonus points)</p>
-                <p class="text-sm text-gray-600">Higher point totals correspond to superior leaderboard positions</p>
+        <div class="space-y-2 sm:space-y-3">
+            <div class="bg-blue-50 border-l-4 border-blue-600 p-2.5 sm:p-4 rounded-lg">
+                <h3 class="text-xs sm:text-sm font-semibold text-gray-900 mb-0.5 sm:mb-1">Overall Leaderboard</h3>
+                <p class="text-[11px] sm:text-sm text-gray-700">Ranked by <strong>lifetime points</strong> (exam + bonus)</p>
             </div>
 
-            <div class="bg-green-50 border-l-4 border-green-600 p-4">
-                <h3 class="text-sm font-semibold text-gray-900 mb-1">Subject Rankings</h3>
-                <p class="text-sm text-gray-700 mb-1">Students ranked within each subject by <strong>average score</strong></p>
-                <p class="text-sm text-gray-600">Indicates relative performance compared to peers in specific subjects</p>
+            <div class="bg-green-50 border-l-4 border-green-600 p-2.5 sm:p-4 rounded-lg">
+                <h3 class="text-xs sm:text-sm font-semibold text-gray-900 mb-0.5 sm:mb-1">Subject Rankings</h3>
+                <p class="text-[11px] sm:text-sm text-gray-700">Ranked within each subject by <strong>average score</strong></p>
             </div>
 
-            <div class="bg-purple-50 border-l-4 border-purple-600 p-4">
-                <h3 class="text-sm font-semibold text-gray-900 mb-1">Monthly Rankings</h3>
-                <p class="text-sm text-gray-700 mb-1">Monthly ranking based on <strong>average score</strong> for all exams within that period</p>
-                <p class="text-sm text-gray-600">First-ranked student receives a 40-point bonus for the month</p>
+            <div class="bg-purple-50 border-l-4 border-purple-600 p-2.5 sm:p-4 rounded-lg">
+                <h3 class="text-xs sm:text-sm font-semibold text-gray-900 mb-0.5 sm:mb-1">Monthly Rankings</h3>
+                <p class="text-[11px] sm:text-sm text-gray-700">By monthly <strong>average score</strong>. #1 gets 40 bonus pts</p>
             </div>
 
-            <div class="bg-orange-50 border-l-4 border-orange-600 p-4">
-                <h3 class="text-sm font-semibold text-gray-900 mb-1">Best Student per Subject</h3>
-                <p class="text-sm text-gray-700 mb-1">Top performer in each subject by <strong>weighted average score</strong></p>
-                <p class="text-sm text-gray-600">Formula: (Total Marks Obtained ÷ Total Possible Marks) × 100%</p>
+            <div class="bg-orange-50 border-l-4 border-orange-600 p-2.5 sm:p-4 rounded-lg">
+                <h3 class="text-xs sm:text-sm font-semibold text-gray-900 mb-0.5 sm:mb-1">Best Student per Subject</h3>
+                <p class="text-[11px] sm:text-sm text-gray-700">Top performer by <strong>weighted avg</strong> in each subject</p>
             </div>
         </div>
     </div>
 
     <!-- Key Terminology -->
-    <div id="terminology" class="bg-white rounded-lg shadow-sm p-6 mb-5 border border-gray-200 animate-fade-in-up" style="animation-delay: 0.45s;">
-        <h2 class="text-2xl font-bold text-gray-900 mb-2">Key Terminology</h2>
-        <div class="h-0.5 w-16 bg-blue-600 mb-4"></div>
+    <div id="terminology" class="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-5 border border-gray-200 animate-fade-in-up" style="animation-delay: 0.45s;">
+        <h2 class="text-lg sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">📖 Key Terminology</h2>
+        <div class="h-0.5 w-12 sm:w-16 bg-blue-600 mb-3 sm:mb-4"></div>
         
-        <div class="space-y-3">
+        <div class="space-y-2 sm:space-y-3">
             <div class="border-b border-gray-200 pb-2">
-                <h3 class="text-sm font-bold text-gray-900 mb-1">Average Score</h3>
-                <p class="text-gray-700 text-sm">
-                    Your weighted average across all exams. Calculated as: (Total Marks Obtained ÷ Total Possible Marks) × 100%
+                <h3 class="text-xs sm:text-sm font-bold text-gray-900 mb-0.5 sm:mb-1">Average Score</h3>
+                <p class="text-gray-700 text-[10px] sm:text-sm">
+                    Weighted average = (Total Marks Obtained ÷ Total Possible) × 100%
                 </p>
             </div>
 
             <div class="border-b border-gray-200 pb-2">
-                <h3 class="text-sm font-bold text-gray-900 mb-1">Exam Points</h3>
-                <p class="text-gray-700 text-sm">
-                    Points earned (or lost) based on your grade in each individual exam. Ranges from -20 to +20 per exam.
+                <h3 class="text-xs sm:text-sm font-bold text-gray-900 mb-0.5 sm:mb-1">Exam Points</h3>
+                <p class="text-gray-700 text-[10px] sm:text-sm">
+                    Points per exam based on grade. Range: -20 to +20 per exam.
                 </p>
             </div>
 
             <div class="border-b border-gray-200 pb-2">
-                <h3 class="text-sm font-bold text-gray-900 mb-1">Lifetime Points</h3>
-                <p class="text-gray-700 text-sm">
-                    Total accumulated points from all exams plus any bonus points.
+                <h3 class="text-xs sm:text-sm font-bold text-gray-900 mb-0.5 sm:mb-1">Lifetime Points</h3>
+                <p class="text-gray-700 text-[10px] sm:text-sm">
+                    Total = all exam points + bonus points
                 </p>
             </div>
 
             <div class="border-b border-gray-200 pb-2">
-                <h3 class="text-sm font-bold text-gray-900 mb-1">Bonus Points</h3>
-                <p class="text-gray-700 text-sm">
-                    Additional points earned through achievements like monthly wins. Currently: 40 points per monthly #1 ranking.
+                <h3 class="text-xs sm:text-sm font-bold text-gray-900 mb-0.5 sm:mb-1">Bonus Points</h3>
+                <p class="text-gray-700 text-[10px] sm:text-sm">
+                    Achievement rewards. 40 pts per monthly #1 rank.
                 </p>
             </div>
 
             <div class="border-b border-gray-200 pb-2">
-                <h3 class="text-sm font-bold text-gray-900 mb-1">Best Month</h3>
-                <p class="text-gray-700 text-sm">
-                    The month where you achieved your highest average score. Displayed in your student profile to highlight peak performance.
+                <h3 class="text-xs sm:text-sm font-bold text-gray-900 mb-0.5 sm:mb-1">Best Month</h3>
+                <p class="text-gray-700 text-[10px] sm:text-sm">
+                    Month with your highest average score.
                 </p>
             </div>
 
             <div class="border-b border-gray-200 pb-2">
-                <h3 class="text-sm font-bold text-gray-900 mb-1">Bulk Entry</h3>
-                <p class="text-gray-700 text-sm">
-                    Feature that allows adding multiple exam records at once for all students in a single operation, saving time when entering exam results.
+                <h3 class="text-xs sm:text-sm font-bold text-gray-900 mb-0.5 sm:mb-1">Bulk Entry</h3>
+                <p class="text-gray-700 text-[10px] sm:text-sm">
+                    Add multiple exam records at once for all students.
                 </p>
             </div>
 
             <div class="border-b border-gray-200 pb-2">
-                <h3 class="text-sm font-bold text-gray-900 mb-1">Monthly Wins</h3>
-                <p class="text-gray-700 text-sm">
-                    The number of completed months where you achieved the #1 rank (highest average score). Each win = 40 bonus points.
+                <h3 class="text-xs sm:text-sm font-bold text-gray-900 mb-0.5 sm:mb-1">Monthly Wins</h3>
+                <p class="text-gray-700 text-[10px] sm:text-sm">
+                    Months with #1 rank. Each win = 40 bonus pts.
                 </p>
             </div>
 
             <div class="pb-2">
-                <h3 class="text-sm font-bold text-gray-900 mb-1">Subject Tops</h3>
-                <p class="text-gray-700 text-sm">
-                    The number of subjects where you hold rank #1. Displayed in your student profile to show how many subjects you are topping.
+                <h3 class="text-xs sm:text-sm font-bold text-gray-900 mb-0.5 sm:mb-1">Subject Tops</h3>
+                <p class="text-gray-700 text-[10px] sm:text-sm">
+                    Number of subjects where you hold rank #1.
                 </p>
             </div>
         </div>
     </div>
 
     <!-- Back to Dashboard -->
-    <div class="text-center mt-8 animate-fade-in-up" style="animation-delay: 0.5s;">
-        <a href="{% url 'dashboard' %}" class="inline-block bg-blue-600 text-white text-sm font-semibold px-6 py-2.5 rounded-lg hover:bg-blue-700 transition duration-200 shadow-md">
+    <div class="text-center mt-6 sm:mt-8 animate-fade-in-up" style="animation-delay: 0.5s;">
+        <a href="{% url 'dashboard' %}" class="inline-block bg-blue-600 text-white text-xs sm:text-sm font-semibold px-5 sm:px-6 py-2 sm:py-2.5 rounded-xl hover:bg-blue-700 transition duration-200 shadow-md">
             ← Back to Dashboard
         </a>
     </div>

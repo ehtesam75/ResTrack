@@ -4,16 +4,31 @@
 
 {% block content %}
 <div class="max-w-7xl mx-auto">
-    <div class="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+    <!-- Mobile Header -->
+    <div class="sm:hidden mb-4 flex items-center justify-between">
         <div>
-            <h1 class="text-xl font-bold gradient-text">Leaderboard</h1>
-            <p class="text-xs text-gray-600 mt-1 hidden sm:block">Top performers and rankings across the platform</p>
+            <h1 class="text-2xl font-bold gradient-text">Leaderboard</h1>
+            <p class="text-sm text-gray-600 mt-1">Top performers and rankings</p>
+        </div>
+        <select id="class-filter-mobile" onchange="filterByClass(this)" class="px-2 py-1 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+            <option value="all" {% if selected_class == 'all' %}selected{% endif %}>All Classes</option>
+            {% for class_num in available_classes %}
+            <option value="{{ class_num }}" {% if selected_class == class_num|stringformat:"s" %}selected{% endif %}>Class {{ class_num }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <!-- Desktop Header -->
+    <div class="hidden sm:flex mb-4 flex-row justify-between items-center gap-2">
+        <div>
+            <h1 class="text-2xl font-bold gradient-text">Leaderboard</h1>
+            <p class="text-sm text-gray-600 mt-1">Top performers and rankings across the platform</p>
         </div>
         
         <!-- Class Filter -->
         <div class="flex items-center gap-2">
             <label for="class-filter" class="text-sm font-medium text-gray-700">Class:</label>
-            <select id="class-filter" onchange="filterByClass()" class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+            <select id="class-filter" onchange="filterByClass(this)" class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent">
                 <option value="all" {% if selected_class == 'all' %}selected{% endif %}>Overall</option>
                 {% for class_num in available_classes %}
                 <option value="{{ class_num }}" {% if selected_class == class_num|stringformat:"s" %}selected{% endif %}>Class {{ class_num }}</option>
@@ -444,8 +459,8 @@
         activeTab.classList.remove('border-transparent', 'text-gray-500');
     }
     
-    function filterByClass() {
-        const selectedClass = document.getElementById('class-filter').value;
+    function filterByClass(selectElement) {
+        const selectedClass = selectElement.value;
         const url = new URL(window.location.href);
         url.searchParams.set('class_number', selectedClass);
         window.location.href = url.toString();

@@ -8,7 +8,7 @@
     <div class="mb-4 animate-fade-in-up flex justify-between items-center">
         <div>
             <h1 class="text-2xl font-bold gradient-text">All Exam Records</h1>
-            <p class="hidden sm:block mt-1 text-sm text-gray-600">Complete list of all exam entries with filtering options</p>
+            <p class="text-sm text-gray-600 mt-1">Complete list of all exam entries</p>
         </div>
         <div class="flex items-center gap-2">
             <!-- Mobile: Clear Filter Button (shows when filters active) -->
@@ -37,7 +37,7 @@
 
     <!-- Mobile: Filter Overlay -->
     <div id="filter-overlay" class="sm:hidden fixed inset-0 bg-black bg-opacity-50 z-40 hidden"></div>
-    <div id="filter-panel" class="sm:hidden fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-white z-50 shadow-2xl transform -translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
+    <div id="filter-panel" class="sm:hidden fixed top-0 left-0 h-full w-72 max-w-[80vw] bg-white z-50 shadow-2xl transform -translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
         <div class="p-4">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-bold gradient-text flex items-center">
@@ -119,15 +119,6 @@
                         {% endfor %}
                     </select>
                 </div>
-                
-                <!-- Clear Filters Button (only shows when filters are active) -->
-                {% if request.GET.student or request.GET.subject or request.GET.exam_type or request.GET.class_number or request.GET.month or request.GET.chapter or request.GET.exam_id_from or request.GET.exam_id_to or request.GET.date_from or request.GET.date_to %}
-                <div class="pt-4 border-t border-gray-200">
-                    <a href="{% url 'all_exams' %}" class="block w-full text-center bg-gray-100 text-gray-700 px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-200 transition-all">
-                        Clear All Filters
-                    </a>
-                </div>
-                {% endif %}
             </form>
         </div>
     </div>
@@ -259,76 +250,74 @@
 
     <!-- Statistics Summary -->
     {% if exams %}
-        <div class="mb-6 grid grid-cols-2 md:grid-cols-4 gap-4 animate-fade-in-up" style="animation-delay: 0.25s;">
-            <div class="bg-white rounded-lg shadow-md p-4">
+        <div class="mb-4 sm:mb-6 grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 animate-fade-in-up" style="animation-delay: 0.25s;">
+            <div class="bg-white rounded-lg shadow-md p-2.5 sm:p-4">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <div class="rounded-md bg-blue-500 p-2.5">
-                            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="rounded-md bg-blue-500 p-1.5 sm:p-2.5">
+                            <svg class="h-3.5 w-3.5 sm:h-5 sm:w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                             </svg>
                         </div>
                     </div>
-                    <div class="ml-4 w-0 flex-1">
+                    <div class="ml-2 sm:ml-4 w-0 flex-1">
                         <dl>
-                            <dt class="text-xs font-medium text-gray-500 truncate">Unique Exams</dt>
-                            <dd class="text-xl font-semibold text-gray-900">{{ unique_exams_count }}</dd>
+                            <dt class="text-[10px] sm:text-xs font-medium text-gray-500">Exams</dt>
+                            <dd class="text-base sm:text-xl font-semibold text-gray-900">{{ unique_exams_count }}</dd>
                         </dl>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white rounded-lg shadow-md p-4">
+            <div class="bg-white rounded-lg shadow-md p-2.5 sm:p-4">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <div class="rounded-md bg-green-500 p-2.5">
-                            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="rounded-md bg-green-500 p-1.5 sm:p-2.5">
+                            <svg class="h-3.5 w-3.5 sm:h-5 sm:w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
                         </div>
                     </div>
-                    <div class="ml-4 w-0 flex-1">
+                    <div class="ml-2 sm:ml-4 w-0 flex-1">
                         <dl>
-                            <dt class="text-xs font-medium text-gray-500 truncate">Average Score</dt>
-                            <dd class="text-xl font-semibold text-gray-900">
-                                {{ average_percentage|floatformat:1 }}%
-                            </dd>
+                            <dt class="text-[10px] sm:text-xs font-medium text-gray-500">Average</dt>
+                            <dd class="text-base sm:text-xl font-semibold text-gray-900">{{ average_percentage|floatformat:1 }}%</dd>
                         </dl>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white rounded-lg shadow-md p-4">
+            <div class="bg-white rounded-lg shadow-md p-2.5 sm:p-4">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <div class="rounded-md bg-yellow-500 p-2.5">
-                            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="rounded-md bg-yellow-500 p-1.5 sm:p-2.5">
+                            <svg class="h-3.5 w-3.5 sm:h-5 sm:w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
                             </svg>
                         </div>
                     </div>
-                    <div class="ml-4 w-0 flex-1">
+                    <div class="ml-2 sm:ml-4 w-0 flex-1">
                         <dl>
-                            <dt class="text-xs font-medium text-gray-500 truncate">Highest Score</dt>
-                            <dd class="text-xl font-semibold text-gray-900">{{ highest_percentage|floatformat:1 }}%</dd>
+                            <dt class="text-[10px] sm:text-xs font-medium text-gray-500">Highest</dt>
+                            <dd class="text-base sm:text-xl font-semibold text-gray-900">{{ highest_percentage|floatformat:1 }}%</dd>
                         </dl>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white rounded-lg shadow-md p-4">
+            <div class="bg-white rounded-lg shadow-md p-2.5 sm:p-4">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <div class="rounded-md bg-red-500 p-2.5">
-                            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="rounded-md bg-red-500 p-1.5 sm:p-2.5">
+                            <svg class="h-3.5 w-3.5 sm:h-5 sm:w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
                             </svg>
                         </div>
                     </div>
-                    <div class="ml-4 w-0 flex-1">
+                    <div class="ml-2 sm:ml-4 w-0 flex-1">
                         <dl>
-                            <dt class="text-xs font-medium text-gray-500 truncate">Lowest Score</dt>
-                            <dd class="text-xl font-semibold text-gray-900">{{ lowest_percentage|floatformat:1 }}%</dd>
+                            <dt class="text-[10px] sm:text-xs font-medium text-gray-500">Lowest</dt>
+                            <dd class="text-base sm:text-xl font-semibold text-gray-900">{{ lowest_percentage|floatformat:1 }}%</dd>
                         </dl>
                     </div>
                 </div>
@@ -342,26 +331,26 @@
             <!-- Mobile: Card Layout -->
             <div class="sm:hidden divide-y divide-gray-100">
                 {% for exam in exams %}
-                <div class="p-4 hover:bg-gray-50">
+                <div class="p-3 hover:bg-gray-50">
                     <!-- Row 1: Exam ID, Date & Grade Badge -->
-                    <div class="flex items-center justify-between mb-1">
-                        <div class="flex items-center gap-2">
-                            <span class="text-sm font-bold text-purple-600">#{{ exam.exam_id|default:"?" }}</span>
-                            <span class="text-xs text-gray-400">{{ exam.date|date:"M d" }}</span>
+                    <div class="flex items-center justify-between mb-0.5">
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-xs font-bold text-purple-600">#{{ exam.exam_id|default:"?" }}</span>
+                            <span class="text-[11px] text-gray-400">{{ exam.date|date:"M d" }}</span>
                         </div>
-                        <span class="px-2 py-0.5 text-xs font-semibold rounded-full" style="background-color: {{ exam.grade_color }};">{{ exam.grade }}</span>
+                        <span class="px-1.5 py-0.5 text-[10px] font-semibold rounded-full" style="background-color: {{ exam.grade_color }};">{{ exam.grade }}</span>
                     </div>
                     <!-- Row 2: Student Name & Score -->
                     <div class="flex items-center justify-between">
-                        <a href="{% url 'student_detail' exam.student.id %}" class="font-semibold text-gray-900">{{ exam.student.name }}</a>
-                        <span class="text-base font-bold" style="color: {% if exam.percentage >= 80 %}#10B981{% elif exam.percentage >= 60 %}#3B82F6{% elif exam.percentage >= 40 %}#F59E0B{% else %}#EF4444{% endif %};">{{ exam.percentage|floatformat:1 }}%</span>
+                        <a href="{% url 'student_detail' exam.student.id %}" class="text-sm font-semibold text-gray-900">{{ exam.student.name }}</a>
+                        <span class="text-sm font-bold" style="color: #6D67CA;">{{ exam.percentage|floatformat:1 }}%</span>
                     </div>
                     <!-- Row 3: Subject & Marks -->
-                    <div class="flex items-center justify-between mt-0.5">
-                        <p class="text-xs text-gray-500">
+                    <div class="flex items-center justify-between">
+                        <p class="text-[11px] text-gray-500">
                             <a href="{% url 'subject_detail' exam.subject.id %}" class="text-gray-500">{{ exam.subject.name }}</a> · Ch {{ exam.chapter|default:"—" }}
                         </p>
-                        <span class="text-xs text-gray-400">{{ exam.mark_obtained|floatformat:0 }}/{{ exam.total_marks|floatformat:0 }}</span>
+                        <span class="text-[11px] text-gray-400">{{ exam.mark_obtained|floatformat:0 }}/{{ exam.total_marks|floatformat:0 }}</span>
                     </div>
                 </div>
                 {% endfor %}

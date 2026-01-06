@@ -120,7 +120,7 @@
                 <div>
                     <p class="text-gray-600 text-xs font-medium uppercase tracking-wide">Best Month</p>
                     {% if best_5_months %}
-                    <p class="text-lg font-bold text-gray-900 mt-1">{{ best_5_months.0.month_name }}</p>
+                    <p class="text-lg font-bold text-gray-900 mt-1">{{ best_5_months.0.month_name|slice:":3" }} '{{ best_5_months.0.month_name|slice:"-2:" }}</p>
                     {% else %}
                     <p class="text-lg font-bold text-gray-900 mt-1">N/A</p>
                     {% endif %}
@@ -185,8 +185,10 @@
 
         <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300">
             <h2 class="text-base font-bold gradient-text mb-3">📊 Subject Performance</h2>
-            <div style="max-height: 250px; position: relative;">
-                <canvas id="subjectPerformanceChart"></canvas>
+            <div class="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+                <div class="min-w-[400px] sm:min-w-0" style="height: 250px; position: relative;">
+                    <canvas id="subjectPerformanceChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -230,9 +232,38 @@
     </div>
 
     <!-- Subject-wise Summary -->
-    <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in-up" style="animation-delay: 0.5s;">
-        <h2 class="text-base font-bold gradient-text mb-3">📊 Subject-wise Summary</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5">
+    <div class="glass-effect rounded-xl p-3 sm:p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in-up" style="animation-delay: 0.5s;">
+        <h2 class="text-sm sm:text-base font-bold gradient-text mb-2 sm:mb-3">📊 Subject-wise Summary</h2>
+        
+        <!-- Mobile: Card Layout -->
+        <div class="sm:hidden space-y-2">
+            {% for item in subject_summary %}
+            <div class="bg-white rounded-lg p-3 border border-gray-100 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold text-purple-600">#{{ item.rank }}</span>
+                        <span class="font-semibold text-sm text-gray-900">{{ item.subject.name }}</span>
+                    </div>
+                    <span class="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-medium">{{ item.exam_count }} exams</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] text-gray-500">Total Marks</p>
+                        <p class="text-sm font-bold text-gray-900">{{ item.total_marks|floatformat:0 }}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] text-gray-500">Average</p>
+                        <p class="text-sm font-bold" style="color: #6D67CA;">{{ item.average_percentage|floatformat:1 }}%</p>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center text-gray-500 text-xs py-4">No subject data available</div>
+            {% endfor %}
+        </div>
+        
+        <!-- Desktop: Grid Layout -->
+        <div class="hidden sm:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5">
             {% for item in subject_summary %}
             <div class="border-l-3 border-purple-500 bg-gradient-to-r from-purple-50 to-blue-50 p-3 rounded">
                 <div class="flex justify-between items-center mb-2">
@@ -262,14 +293,42 @@
     <!-- Top 5 Best Months -->
     {% if best_5_months %}
     <div class="glass-effect rounded-xl shadow-lg border border-gray-200 animate-fade-in-up overflow-hidden" style="animation-delay: 0.55s;">
-        <div class="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 px-4 py-2">
+        <div class="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 px-3 sm:px-4 py-2">
             <div class="flex items-center space-x-2">
-                <span class="text-xl">🏆</span>
+                <span class="text-lg sm:text-xl">🏆</span>
                 <h3 class="text-white text-xs font-semibold tracking-wide">Top 5 Best Months</h3>
             </div>
         </div>
-        <div class="p-3 bg-gradient-to-br from-gray-50 to-white">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        <div class="p-2.5 sm:p-3 bg-gradient-to-br from-gray-50 to-white">
+            <!-- Mobile: Compact Card Layout -->
+            <div class="sm:hidden space-y-2">
+                {% for month in best_5_months %}
+                <div class="bg-white rounded-lg p-2.5 border border-gray-100 shadow-sm flex items-center gap-3">
+                    <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full {% if forloop.counter == 1 %}bg-yellow-100{% elif forloop.counter == 2 %}bg-gray-100{% elif forloop.counter == 3 %}bg-orange-100{% else %}bg-blue-50{% endif %}">
+                        {% if forloop.counter == 1 %}
+                            <span class="text-base">🥇</span>
+                        {% elif forloop.counter == 2 %}
+                            <span class="text-base">🥈</span>
+                        {% elif forloop.counter == 3 %}
+                            <span class="text-base">🥉</span>
+                        {% else %}
+                            <span class="text-xs font-bold text-blue-600">#{{ forloop.counter }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-semibold text-sm text-gray-900">{{ month.month_name }}</p>
+                        <p class="text-[10px] text-gray-500">{{ month.exams_count }} exams · {{ month.points_earned }} pts</p>
+                    </div>
+                    <div class="text-right flex-shrink-0">
+                        <p class="text-sm font-bold" style="color: #6D67CA;">{{ month.average_percentage|floatformat:1 }}%</p>
+                        <p class="text-[10px] text-gray-400">avg</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Desktop: Grid Layout -->
+            <div class="hidden sm:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                 {% for month in best_5_months %}
                 <div class="border-l-4 {% if forloop.counter == 1 %}border-yellow-500 bg-gradient-to-br from-yellow-50 to-orange-50{% elif forloop.counter == 2 %}border-gray-400 bg-gradient-to-br from-gray-50 to-slate-50{% elif forloop.counter == 3 %}border-orange-600 bg-gradient-to-br from-orange-50 to-amber-50{% else %}border-blue-400 bg-gradient-to-br from-blue-50 to-indigo-50{% endif %} rounded-lg p-2.5 shadow-md hover:shadow-lg transition-all duration-200">
                     <div class="flex items-center justify-between mb-1.5">
@@ -432,6 +491,15 @@
         .then(response => response.json())
         .then(data => {
             const ctx = document.getElementById('subjectPerformanceChart').getContext('2d');
+            // Calculate minimum width based on number of bars (50px per bar minimum)
+            const numBars = data.labels.length;
+            const minWidth = Math.max(numBars * 50, 300);
+            const container = document.getElementById('subjectPerformanceChart').parentElement;
+            container.style.minWidth = minWidth + 'px';
+            
+            // Store full labels for tooltip
+            const fullLabels = data.fullLabels || data.labels;
+            
             new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -442,8 +510,9 @@
                         backgroundColor: 'rgba(34, 197, 94, 0.6)',
                         borderColor: 'rgba(34, 197, 94, 1)',
                         borderWidth: 2,
-                        categoryPercentage: 0.8,
-                        barPercentage: 0.9
+                        categoryPercentage: 0.7,
+                        barPercentage: 0.8,
+                        fullLabels: fullLabels  // Store for tooltip access
                     }]
                 },
                 options: {
@@ -462,13 +531,8 @@
                                 maxRotation: 0,
                                 minRotation: 0,
                                 autoSkip: false,
-                                callback: function(value, index, ticks) {
-                                    const label = this.getLabelForValue(value);
-                                    // Truncate long labels
-                                    if (label.length > 15) {
-                                        return label.substring(0, 15) + '...';
-                                    }
-                                    return label;
+                                font: {
+                                    size: 11
                                 }
                             }
                         }
@@ -479,6 +543,11 @@
                         },
                         tooltip: {
                             callbacks: {
+                                title: function(context) {
+                                    // Show full label in tooltip
+                                    const index = context[0].dataIndex;
+                                    return fullLabels[index];
+                                },
                                 label: function(context) {
                                     return 'Average Score: ' + context.parsed.y.toFixed(1) + '%';
                                 }
