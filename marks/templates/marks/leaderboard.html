@@ -4,10 +4,10 @@
 
 {% block content %}
 <div class="max-w-7xl mx-auto">
-    <div class="mb-4 flex justify-between items-start">
+    <div class="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
         <div>
             <h1 class="text-xl font-bold gradient-text">Leaderboard</h1>
-            <p class="text-xs text-gray-600 mt-1">Top performers and rankings across the platform</p>
+            <p class="text-xs text-gray-600 mt-1 hidden sm:block">Top performers and rankings across the platform</p>
         </div>
         
         <!-- Class Filter -->
@@ -23,26 +23,64 @@
     </div>
 
     <!-- Tab Navigation -->
-    <div class="mb-4 border-b border-gray-200">
-        <nav class="-mb-px flex space-x-6">
-            <button onclick="showTab('overall')" id="tab-overall" class="tab-button active border-b-2 border-purple-500 py-3 px-1 text-sm font-medium text-purple-600">
-                Overall Rankings
+    <div class="mb-4 border-b border-gray-200 overflow-x-auto sm:overflow-visible">
+        <nav class="-mb-px flex space-x-4 sm:space-x-6 min-w-max sm:min-w-0">
+            <button onclick="showTab('overall')" id="tab-overall" class="tab-button active border-b-2 border-purple-500 py-2 sm:py-3 px-1 text-xs sm:text-sm font-medium text-purple-600 whitespace-nowrap">
+                Overall
             </button>
-            <button onclick="showTab('subject')" id="tab-subject" class="tab-button border-b-2 border-transparent py-3 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                Subject Leaders
+            <button onclick="showTab('subject')" id="tab-subject" class="tab-button border-b-2 border-transparent py-2 sm:py-3 px-1 text-xs sm:text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap">
+                By Subject
             </button>
-            <button onclick="showTab('monthly')" id="tab-monthly" class="tab-button border-b-2 border-transparent py-3 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                Monthly Champions
+            <button onclick="showTab('monthly')" id="tab-monthly" class="tab-button border-b-2 border-transparent py-2 sm:py-3 px-1 text-xs sm:text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap">
+                Monthly
             </button>
         </nav>
     </div>
 
     <!-- Overall Rankings Tab -->
     <div id="content-overall" class="tab-content">
-        <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg animate-fade-in-up">
-            <h2 class="text-sm font-bold gradient-text mb-3">📊 Overall Rankings</h2>
+        <div class="glass-effect rounded-xl p-3 sm:p-4 border border-gray-200 shadow-lg animate-fade-in-up">
+            <h2 class="text-sm font-bold gradient-text mb-3 hidden sm:block">📊 Overall Rankings</h2>
             
-            <div class="overflow-x-auto">
+            <!-- Mobile: Card Layout -->
+            <div class="sm:hidden space-y-2">
+                {% for item in overall_rankings %}
+                <a href="{% url 'student_detail' item.student.id %}" class="block bg-white rounded-lg p-3 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex items-center gap-3">
+                        <!-- Rank -->
+                        <div class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full {% if item.rank == 1 %}bg-yellow-100{% elif item.rank == 2 %}bg-gray-100{% elif item.rank == 3 %}bg-orange-100{% else %}bg-purple-50{% endif %}">
+                            {% if item.rank == 1 %}
+                                <span class="text-lg">🥇</span>
+                            {% elif item.rank == 2 %}
+                                <span class="text-lg">🥈</span>
+                            {% elif item.rank == 3 %}
+                                <span class="text-lg">🥉</span>
+                            {% else %}
+                                <span class="text-sm font-bold text-purple-600">#{{ item.rank }}</span>
+                            {% endif %}
+                        </div>
+                        <!-- Name & Stats -->
+                        <div class="flex-1 min-w-0">
+                            <p class="font-semibold text-gray-900 text-sm truncate">{{ item.student.name }}</p>
+                            <div class="flex items-center gap-3 mt-1">
+                                <span class="text-xs text-gray-500">{{ item.total_exams }} exams</span>
+                                <span class="text-xs font-bold gradient-text">{{ item.average_percentage|floatformat:1 }}% avg</span>
+                            </div>
+                        </div>
+                        <!-- Points -->
+                        <div class="text-right flex-shrink-0">
+                            <p class="text-sm font-bold {% if item.total_points >= 0 %}text-green-600{% else %}text-red-600{% endif %}">{{ item.total_points|stringformat:"+d" }} pts</p>
+                            <p class="text-xs text-blue-600">{{ item.excellence_rate|floatformat:0 }}% excellent</p>
+                        </div>
+                    </div>
+                </a>
+                {% empty %}
+                <div class="text-center text-gray-500 text-xs py-4">No data available</div>
+                {% endfor %}
+            </div>
+            
+            <!-- Desktop: Table Layout -->
+            <div class="hidden sm:block overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
@@ -103,12 +141,36 @@
 
     <!-- Subject Leaders Tab -->
     <div id="content-subject" class="tab-content hidden">
-        <div class="space-y-4">
+        <div class="space-y-3 sm:space-y-4">
             {% for subject_data in subject_leaders %}
-            <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg animate-fade-in-up">
-                <h2 class="text-sm font-bold gradient-text mb-3">📚 {{ subject_data.subject.name }} - Top Performers</h2>
+            <div class="glass-effect rounded-xl p-3 sm:p-4 border border-gray-200 shadow-lg animate-fade-in-up">
+                <h2 class="text-sm font-bold gradient-text mb-2 sm:mb-3">📚 {{ subject_data.subject.name }}</h2>
                 
-                <div class="overflow-x-auto">
+                <!-- Mobile: Compact List -->
+                <div class="sm:hidden space-y-2">
+                    {% for item in subject_data.leaders %}
+                    <a href="{% url 'student_detail' item.student.id %}" class="flex items-center gap-2 p-2 bg-white rounded-lg border border-gray-100">
+                        <div class="w-7 h-7 flex items-center justify-center rounded-full {% if item.rank == 1 %}bg-yellow-100{% elif item.rank == 2 %}bg-gray-100{% elif item.rank == 3 %}bg-orange-100{% else %}bg-purple-50{% endif %}">
+                            {% if item.rank == 1 %}
+                                <span class="text-sm">🥇</span>
+                            {% elif item.rank == 2 %}
+                                <span class="text-sm">🥈</span>
+                            {% elif item.rank == 3 %}
+                                <span class="text-sm">🥉</span>
+                            {% else %}
+                                <span class="text-xs font-bold text-purple-600">#{{ item.rank }}</span>
+                            {% endif %}
+                        </div>
+                        <span class="flex-1 font-medium text-sm text-gray-900 truncate">{{ item.student.name }}</span>
+                        <span class="text-xs font-bold gradient-text">{{ item.average_percentage|floatformat:1 }}% avg</span>
+                    </a>
+                    {% empty %}
+                    <div class="text-center text-gray-500 text-xs py-2">No data</div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Desktop: Table -->
+                <div class="hidden sm:block overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
@@ -169,17 +231,47 @@
 
     <!-- Monthly Champions Tab -->
     <div id="content-monthly" class="tab-content hidden">
-        <div class="space-y-4">
+        <div class="space-y-3 sm:space-y-4">
             <!-- Current Month Top Performers -->
             {% if current_month_performers %}
-            <div class="glass-effect rounded-xl p-4 border-2 border-green-400 shadow-lg animate-fade-in-up bg-gradient-to-r from-green-50 to-emerald-50">
-                <div class="flex items-center justify-between mb-3">
-                    <h2 class="text-sm font-bold gradient-text">📅 {{ current_month_name }} - Current Month Top Performers</h2>
-                    <span class="px-2 py-1 bg-green-600 text-white text-xs font-semibold rounded-full">LIVE</span>
+            <div class="glass-effect rounded-xl p-3 sm:p-4 border-2 border-green-400 shadow-lg animate-fade-in-up bg-gradient-to-r from-green-50 to-emerald-50">
+                <div class="flex items-center justify-between mb-2 sm:mb-3">
+                    <h2 class="text-xs sm:text-sm font-bold gradient-text">📅 {{ current_month_name }}</h2>
+                    <span class="px-2 py-0.5 sm:py-1 bg-green-600 text-white text-[10px] sm:text-xs font-semibold rounded-full">LIVE</span>
                 </div>
-                <p class="text-xs text-gray-600 mb-3 italic">⚠️ Current month rankings are provisional and not eligible for Monthly Champion bonus until the month completes.</p>
+                <p class="text-[10px] sm:text-xs text-gray-600 mb-2 sm:mb-3 italic hidden sm:block">⚠️ Current month rankings are provisional and not eligible for Monthly Champion bonus until the month completes.</p>
                 
-                <div class="overflow-x-auto">
+                <!-- Mobile: Card Layout -->
+                <div class="sm:hidden space-y-2">
+                    {% for item in current_month_performers %}
+                    <a href="{% url 'student_detail' item.student.id %}" class="flex items-center gap-2 p-2 bg-white/80 rounded-lg border border-green-200">
+                        <div class="w-7 h-7 flex items-center justify-center rounded-full {% if item.rank == 1 %}bg-yellow-100{% elif item.rank == 2 %}bg-gray-100{% elif item.rank == 3 %}bg-orange-100{% else %}bg-green-100{% endif %}">
+                            {% if item.rank == 1 %}
+                                <span class="text-sm">🥇</span>
+                            {% elif item.rank == 2 %}
+                                <span class="text-sm">🥈</span>
+                            {% elif item.rank == 3 %}
+                                <span class="text-sm">🥉</span>
+                            {% else %}
+                                <span class="text-xs font-bold text-green-600">#{{ item.rank }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <span class="font-medium text-sm text-gray-900 truncate block">{{ item.student.name }}</span>
+                            <span class="text-[10px] text-gray-500">{{ item.exams_count }} exams</span>
+                        </div>
+                        <div class="text-right flex-shrink-0">
+                            <span class="text-xs font-bold gradient-text block">{{ item.average_percentage|floatformat:1 }}% avg</span>
+                            <span class="text-[10px] font-semibold {% if item.points_earned >= 0 %}text-green-600{% else %}text-red-600{% endif %}">{{ item.points_earned|stringformat:"+d" }} pts</span>
+                        </div>
+                    </a>
+                    {% empty %}
+                    <div class="text-center text-gray-500 text-xs py-2">No data</div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Desktop: Table -->
+                <div class="hidden sm:block overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
@@ -236,10 +328,40 @@
             
             <!-- Past Monthly Champions -->
             {% for month_data in monthly_champions %}
-            <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg animate-fade-in-up">
-                <h2 class="text-sm font-bold gradient-text mb-3">📅 {{ month_data.month_name }} - Top Performers</h2>
+            <div class="glass-effect rounded-xl p-3 sm:p-4 border border-gray-200 shadow-lg animate-fade-in-up">
+                <h2 class="text-xs sm:text-sm font-bold gradient-text mb-2 sm:mb-3">📅 {{ month_data.month_name }}</h2>
                 
-                <div class="overflow-x-auto">
+                <!-- Mobile: Card Layout -->
+                <div class="sm:hidden space-y-2">
+                    {% for item in month_data.champions %}
+                    <a href="{% url 'student_detail' item.student.id %}" class="flex items-center gap-2 p-2 bg-white rounded-lg border border-gray-100">
+                        <div class="w-7 h-7 flex items-center justify-center rounded-full {% if item.rank == 1 %}bg-yellow-100{% elif item.rank == 2 %}bg-gray-100{% elif item.rank == 3 %}bg-orange-100{% else %}bg-purple-50{% endif %}">
+                            {% if item.rank == 1 %}
+                                <span class="text-sm">🥇</span>
+                            {% elif item.rank == 2 %}
+                                <span class="text-sm">🥈</span>
+                            {% elif item.rank == 3 %}
+                                <span class="text-sm">🥉</span>
+                            {% else %}
+                                <span class="text-xs font-bold text-purple-600">#{{ item.rank }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <span class="font-medium text-sm text-gray-900 truncate block">{{ item.student.name }}</span>
+                            <span class="text-[10px] text-gray-500">{{ item.exams_count }} exams</span>
+                        </div>
+                        <div class="text-right flex-shrink-0">
+                            <span class="text-xs font-bold gradient-text block">{{ item.average_percentage|floatformat:1 }}% avg</span>
+                            <span class="text-[10px] font-semibold {% if item.points_earned >= 0 %}text-green-600{% else %}text-red-600{% endif %}">{{ item.points_earned|stringformat:"+d" }} pts</span>
+                        </div>
+                    </a>
+                    {% empty %}
+                    <div class="text-center text-gray-500 text-xs py-2">No data</div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Desktop: Table -->
+                <div class="hidden sm:block overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>

@@ -77,27 +77,27 @@
     </div>
 
     <!-- Exam Type Performance Table -->
-    <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in-up" style="animation-delay: 0.2s;">
-        <h2 class="text-base font-bold gradient-text mb-3">📊 Exam Type Performance</h2>
+    <div class="glass-effect rounded-xl p-3 sm:p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in-up" style="animation-delay: 0.2s;">
+        <h2 class="text-sm sm:text-base font-bold gradient-text mb-2 sm:mb-3">📊 Exam Type Performance</h2>
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead>
                     <tr class="gradient-primary text-white">
-                        <th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide">Type</th>
-                        <th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide">Exam Count</th>
-                        <th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide">Average Score</th>
-                        <th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide">Excellence Rate</th>
-                        <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide rounded-tr-lg">Best Student</th>
+                        <th class="px-2 sm:px-3 py-1.5 sm:py-2 text-center text-[10px] sm:text-xs font-semibold uppercase tracking-wide">Type</th>
+                        <th class="px-2 sm:px-3 py-1.5 sm:py-2 text-center text-[10px] sm:text-xs font-semibold uppercase tracking-wide">Exam Count</th>
+                        <th class="px-2 sm:px-3 py-1.5 sm:py-2 text-center text-[10px] sm:text-xs font-semibold uppercase tracking-wide">Average Score</th>
+                        <th class="px-2 sm:px-3 py-1.5 sm:py-2 text-center text-[10px] sm:text-xs font-semibold uppercase tracking-wide">Excellence Rate</th>
+                        <th class="px-2 sm:px-3 py-1.5 sm:py-2 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wide rounded-tr-lg hidden sm:table-cell">Best Student</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     <!-- CQ Row -->
                     <tr class="hover:bg-blue-50 transition-colors duration-200">
-                        <td class="px-3 py-2 font-bold text-blue-600 text-sm">CQ</td>
-                        <td class="px-3 py-2 text-sm text-gray-700 text-center">{{ cq_stats.exam_count }}</td>
-                        <td class="px-3 py-2 font-bold text-blue-600 text-sm text-center">{{ cq_stats.average|floatformat:1 }}%</td>
-                        <td class="px-3 py-2 font-semibold text-blue-600 text-sm text-center">{{ cq_stats.excellence_rate|floatformat:1 }}%</td>
-                        <td class="px-3 py-2 text-sm">
+                        <td class="px-2 sm:px-3 py-1.5 sm:py-2 font-bold text-blue-600 text-xs sm:text-sm">CQ</td>
+                        <td class="px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-gray-700 text-center">{{ cq_stats.exam_count }}</td>
+                        <td class="px-2 sm:px-3 py-1.5 sm:py-2 font-bold text-blue-600 text-xs sm:text-sm text-center">{{ cq_stats.average|floatformat:1 }}%</td>
+                        <td class="px-2 sm:px-3 py-1.5 sm:py-2 font-semibold text-blue-600 text-xs sm:text-sm text-center">{{ cq_stats.excellence_rate|floatformat:1 }}%</td>
+                        <td class="px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm hidden sm:table-cell">
                             {% if cq_stats.best_student %}
                             <a href="{% url 'student_detail' cq_stats.best_student.id %}" class="font-medium hover:text-blue-600 transition-colors">
                                 {{ cq_stats.best_student.name }}
@@ -109,11 +109,11 @@
                     </tr>
                     <!-- MCQ Row -->
                     <tr class="hover:bg-green-50 transition-colors duration-200">
-                        <td class="px-3 py-2 font-bold text-green-600 text-sm">MCQ</td>
-                        <td class="px-3 py-2 text-sm text-gray-700 text-center">{{ mcq_stats.exam_count }}</td>
-                        <td class="px-3 py-2 font-bold text-green-600 text-sm text-center">{{ mcq_stats.average|floatformat:1 }}%</td>
-                        <td class="px-3 py-2 font-semibold text-green-600 text-sm text-center">{{ mcq_stats.excellence_rate|floatformat:1 }}%</td>
-                        <td class="px-3 py-2 text-sm">
+                        <td class="px-2 sm:px-3 py-1.5 sm:py-2 font-bold text-green-600 text-xs sm:text-sm">MCQ</td>
+                        <td class="px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-gray-700 text-center">{{ mcq_stats.exam_count }}</td>
+                        <td class="px-2 sm:px-3 py-1.5 sm:py-2 font-bold text-green-600 text-xs sm:text-sm text-center">{{ mcq_stats.average|floatformat:1 }}%</td>
+                        <td class="px-2 sm:px-3 py-1.5 sm:py-2 font-semibold text-green-600 text-xs sm:text-sm text-center">{{ mcq_stats.excellence_rate|floatformat:1 }}%</td>
+                        <td class="px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm hidden sm:table-cell">
                             {% if mcq_stats.best_student %}
                             <a href="{% url 'student_detail' mcq_stats.best_student.id %}" class="font-medium hover:text-green-600 transition-colors">
                                 {{ mcq_stats.best_student.name }}
@@ -129,33 +129,33 @@
     </div>
 
     <!-- Student Performance Table -->
-    <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in-up" style="animation-delay: 0.3s;">
-        <h2 class="text-base font-bold gradient-text mb-3">🎓 Student Performance</h2>
+    <div class="glass-effect rounded-xl p-3 sm:p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in-up" style="animation-delay: 0.3s;">
+        <h2 class="text-sm sm:text-base font-bold gradient-text mb-2 sm:mb-3">🎓 Student Performance</h2>
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead>
                     <tr class="gradient-primary text-white">
-                        <th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide rounded-tl-lg">Rank</th>
-                        <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide">Student</th>
-                        <th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide">Exam Attended</th>
-                        <th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide">Marks</th>
-                        <th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide">Average Score</th>
-                        <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide rounded-tr-lg">Performance</th>
+                        <th class="px-2 sm:px-3 py-1.5 sm:py-2 text-center text-[10px] sm:text-xs font-semibold uppercase tracking-wide rounded-tl-lg">Rank</th>
+                        <th class="px-2 sm:px-3 py-1.5 sm:py-2 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wide">Student</th>
+                        <th class="px-2 sm:px-3 py-1.5 sm:py-2 text-center text-[10px] sm:text-xs font-semibold uppercase tracking-wide">Exam Attended</th>
+                        <th class="px-2 sm:px-3 py-1.5 sm:py-2 text-center text-[10px] sm:text-xs font-semibold uppercase tracking-wide">Marks</th>
+                        <th class="px-2 sm:px-3 py-1.5 sm:py-2 text-center text-[10px] sm:text-xs font-semibold uppercase tracking-wide hidden sm:table-cell">Average Score</th>
+                        <th class="px-2 sm:px-3 py-1.5 sm:py-2 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wide rounded-tr-lg hidden sm:table-cell">Performance</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     {% for item in student_performance %}
                     <tr class="hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 transition-all duration-200">
-                        <td class="px-3 py-2 font-bold text-gray-600 text-sm text-center">{{ forloop.counter }}</td>
-                        <td class="px-3 py-2">
-                            <a href="{% url 'student_detail' item.student.id %}" class="font-medium hover:text-purple-600 transition-colors text-sm">
+                        <td class="px-2 sm:px-3 py-1.5 sm:py-2 font-bold text-gray-600 text-xs sm:text-sm text-center">{{ forloop.counter }}</td>
+                        <td class="px-2 sm:px-3 py-1.5 sm:py-2">
+                            <a href="{% url 'student_detail' item.student.id %}" class="font-medium hover:text-purple-600 transition-colors text-xs sm:text-sm">
                                 {{ item.student.name }}
                             </a>
                         </td>
-                        <td class="px-3 py-2 text-sm text-gray-600 text-center">{{ item.exam_count }}</td>
-                        <td class="px-3 py-2 text-sm text-gray-700 font-medium text-center">{{ item.total_marks_obtained|floatformat:0 }} / {{ item.total_possible_marks|floatformat:0 }}</td>
-                        <td class="px-3 py-2 font-bold gradient-text text-sm text-center">{{ item.average|floatformat:1 }}%</td>
-                        <td class="px-3 py-2">
+                        <td class="px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-gray-600 text-center">{{ item.exam_count }}</td>
+                        <td class="px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-gray-700 font-medium text-center">{{ item.total_marks_obtained|floatformat:0 }}/{{ item.total_possible_marks|floatformat:0 }}</td>
+                        <td class="px-2 sm:px-3 py-1.5 sm:py-2 font-bold gradient-text text-xs sm:text-sm text-center hidden sm:table-cell">{{ item.average|floatformat:1 }}%</td>
+                        <td class="px-2 sm:px-3 py-1.5 sm:py-2 hidden sm:table-cell">
                             <div class="w-full bg-gray-200 rounded-full h-2">
                                 <div class="gradient-primary h-2 rounded-full" style="width: {{ item.average }}%"></div>
                             </div>
@@ -163,7 +163,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="px-3 py-4 text-center text-gray-500 text-sm">No student data available</td>
+                        <td colspan="6" class="px-2 sm:px-3 py-3 text-center text-gray-500 text-xs sm:text-sm">No student data available</td>
                     </tr>
                     {% endfor %}
                 </tbody>
