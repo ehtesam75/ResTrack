@@ -713,9 +713,14 @@ def add_exam(request):
     students = Student.objects.all().order_by('name')
     subjects = Subject.objects.all().order_by('name')
     
+    # Check if running on production (non-localhost)
+    host = request.get_host().lower()
+    is_production = not (host.startswith('localhost') or host.startswith('127.0.0.1'))
+    
     context = {
         'students': students,
         'subjects': subjects,
+        'is_production': is_production,
     }
     
     return render(request, 'marks/add_exam.html', context)
@@ -786,11 +791,16 @@ def add_bulk_exam(request):
     students = Student.objects.all().order_by('name')
     subjects = Subject.objects.all().order_by('name')
     
+    # Check if running on production (non-localhost)
+    host = request.get_host().lower()
+    is_production = not (host.startswith('localhost') or host.startswith('127.0.0.1'))
+    
     context = {
         'students': students,
         'subjects': subjects,
         'student_count': student_count,
         'student_range': range(1, student_count + 1) if student_count else [],
+        'is_production': is_production,
     }
     
     return render(request, 'marks/add_bulk_exam.html', context)
