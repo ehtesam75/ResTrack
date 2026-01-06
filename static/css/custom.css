@@ -244,3 +244,10 @@ html {
 .mobile-menu:not(.hidden) {
     animation: slideDown 0.2s ease-out;
 }
+
+/* Hide elements on mobile */
+@media (max-width: 767px) {
+    .hide-mobile {
+        display: none !important;
+    }
+}

@@ -10,7 +10,7 @@
             <h1 class="text-2xl font-bold gradient-text">All Subjects</h1>
             <p class="text-sm text-gray-600 mt-1">Manage subjects and track performance</p>
         </div>
-        <a href="{% url 'add_subject' %}" class="bg-green-100 text-green-700 px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-green-200 transform hover:-translate-y-0.5 transition-all duration-200">
+        <a href="{% url 'add_subject' %}" class="hide-mobile bg-green-100 text-green-700 px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-green-200 transform hover:-translate-y-0.5 transition-all duration-200">
             Add Subject
         </a>
     </div>
@@ -41,7 +41,7 @@
         {% empty %}
         <div class="col-span-full glass-effect rounded-xl p-8 text-center border border-gray-200 shadow-lg">
             <p class="text-gray-500 mb-3">No subjects found</p>
-            <a href="{% url 'add_subject' %}" class="inline-block bg-green-100 text-green-700 px-5 py-2.5 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-green-200 transition-all">
+            <a href="{% url 'add_subject' %}" class="hide-mobile inline-block bg-green-100 text-green-700 px-5 py-2.5 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-green-200 transition-all">
                 Add Your First Subject
             </a>
         </div>
