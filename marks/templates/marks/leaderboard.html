@@ -62,15 +62,12 @@
                         <!-- Name & Stats -->
                         <div class="flex-1 min-w-0">
                             <p class="font-semibold text-gray-900 text-sm truncate">{{ item.student.name }}</p>
-                            <div class="flex items-center gap-3 mt-1">
-                                <span class="text-xs text-gray-500">{{ item.total_exams }} exams</span>
-                                <span class="text-xs font-bold gradient-text">{{ item.average_percentage|floatformat:1 }}% avg</span>
-                            </div>
+                            <p class="text-xs text-gray-500 mt-1">{{ item.total_exams }} exams</p>
                         </div>
-                        <!-- Points -->
+                        <!-- Avg & Points -->
                         <div class="text-right flex-shrink-0">
-                            <p class="text-sm font-bold {% if item.total_points >= 0 %}text-green-600{% else %}text-red-600{% endif %}">{{ item.total_points|stringformat:"+d" }} pts</p>
-                            <p class="text-xs text-blue-600">{{ item.excellence_rate|floatformat:0 }}% excellent</p>
+                            <p class="text-sm font-bold gradient-text">{{ item.average_percentage|floatformat:1 }}%</p>
+                            <p class="text-xs {% if item.total_points >= 0 %}text-green-600{% else %}text-red-600{% endif %}">{{ item.total_points|stringformat:"+d" }} pts</p>
                         </div>
                     </div>
                 </a>

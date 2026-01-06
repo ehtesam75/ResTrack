@@ -38,8 +38,8 @@
             Filters
         </h2>
         
-        <!-- Filter Form - Hidden on mobile by default -->
-        <form method="get" action="{% url 'all_exams' %}" id="filter-form" class="hidden sm:block sm:mt-0">
+        <!-- Filter Form -->
+        <form method="get" action="{% url 'all_exams' %}" id="filter-form" class="hidden sm:block mt-3 sm:mt-0">
             <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-3 mb-3">
                 <!-- Exam ID Range Filter -->
                 <div>
@@ -335,9 +335,14 @@
     
     if (filterToggle && filterForm) {
         filterToggle.addEventListener('click', function() {
-            filterForm.classList.toggle('hidden');
-            filterForm.classList.toggle('sm:block');
-            filterChevron.classList.toggle('rotate-180');
+            const isHidden = filterForm.classList.contains('hidden');
+            if (isHidden) {
+                filterForm.classList.remove('hidden');
+                filterChevron.classList.add('rotate-180');
+            } else {
+                filterForm.classList.add('hidden');
+                filterChevron.classList.remove('rotate-180');
+            }
         });
         
         // If there are active filters, show the form on mobile too
