@@ -229,6 +229,9 @@
     const examTypeSelect = document.getElementById('exam_type');
     const classSelect = document.getElementById('class_number');
     const dateInput = document.getElementById('date');
+    const chapterInput = document.getElementById('chapter');
+    const examIdInput = document.getElementById('exam_id');
+    const isProduction = {{ is_production|yesno:"true,false" }};
     
     // Validate all fields
     function validateForm() {
@@ -239,7 +242,8 @@
         
         // Check all required fields
         if (!studentSelect.value || !subjectSelect.value || !examTypeSelect.value || 
-            !classSelect.value || !dateInput.value || !totalMarksInput.value || !markObtainedInput.value) {
+            !classSelect.value || !dateInput.value || !totalMarksInput.value || !markObtainedInput.value ||
+            !chapterInput.value || !examIdInput.value) {
             allRequiredFilled = false;
         }
         
@@ -253,7 +257,8 @@
             markObtainedInput.classList.remove('border-red-500');
         }
         
-        submitBtn.disabled = hasError || !allRequiredFilled;
+        // Disable button if validation fails OR if in production
+        submitBtn.disabled = hasError || !allRequiredFilled || isProduction;
     }
     
     // Real-time validation
@@ -264,12 +269,20 @@
     examTypeSelect.addEventListener('change', validateForm);
     classSelect.addEventListener('change', validateForm);
     dateInput.addEventListener('change', validateForm);
+    chapterInput.addEventListener('input', validateForm);
+    examIdInput.addEventListener('input', validateForm);
     
     // Initial validation check
     validateForm();
     
     // Validate that marks obtained is not greater than total marks
     document.querySelector('form').addEventListener('submit', function(e) {
+        if (isProduction) {
+            e.preventDefault();
+            alert('Form submission is disabled on the hosted version. Please use localhost to add exam records.');
+            return false;
+        }
+        
         const totalMarks = parseFloat(totalMarksInput.value);
         const markObtained = parseFloat(markObtainedInput.value);
         

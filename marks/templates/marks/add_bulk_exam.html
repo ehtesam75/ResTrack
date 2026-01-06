@@ -52,8 +52,7 @@
             <div class="flex gap-3">
                 <button 
                     type="submit" 
-                    {% if is_production %}disabled{% endif %}
-                    class="bg-purple-100 text-purple-700 px-6 py-2.5 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-purple-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    class="bg-purple-100 text-purple-700 px-6 py-2.5 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-purple-200 transition-all"
                 >
                     Continue
                 </button>
@@ -345,8 +344,10 @@
             const examType = document.getElementById('exam_type')?.value;
             const classNumber = document.getElementById('class_number')?.value;
             const date = document.getElementById('date')?.value;
+            const chapter = document.getElementById('chapter')?.value;
+            const examId = document.getElementById('exam_id')?.value;
             
-            if (!subject || !examType || !classNumber || !date || !totalMarks) {
+            if (!subject || !examType || !classNumber || !date || !totalMarks || !chapter || !examId) {
                 allFieldsFilled = false;
             }
             
@@ -378,13 +379,16 @@
             }
             
             if (submitBulkBtn) {
-                submitBulkBtn.disabled = hasError || !allFieldsFilled;
+                const isProduction = {{ is_production|yesno:"true,false" }};
+                // Disable button if validation fails OR if in production
+                submitBulkBtn.disabled = hasError || !allFieldsFilled || isProduction;
             }
         }
         
         // Real-time validation for each marks input
         document.addEventListener('input', function(e) {
-            if (e.target.classList.contains('marks-input') || e.target.id === 'total_marks') {
+            if (e.target.classList.contains('marks-input') || e.target.id === 'total_marks' ||
+                e.target.id === 'chapter' || e.target.id === 'exam_id') {
                 validateAllMarks();
             }
         });
@@ -412,7 +416,18 @@
         validateAllMarks();
         
         // Form submission validation
+        const isProduction = {{ is_production|yesno:"true,false" }};
+        
         form.addEventListener('submit', function(e) {
+            // Check if this is the final submit (not the continue button)
+            if (form.querySelector('[name="submit_exams"]')) {
+                if (isProduction) {
+                    e.preventDefault();
+                    alert('Form submission is disabled on the hosted version. Please use localhost to add exam records.');
+                    return false;
+                }
+            }
+            
             const totalMarks = parseFloat(document.getElementById('total_marks').value);
             const studentCount = parseInt(document.querySelector('[name="student_count"]').value);
             
