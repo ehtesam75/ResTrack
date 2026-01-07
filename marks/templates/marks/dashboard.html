@@ -147,7 +147,7 @@
             <!-- Mobile: Card Layout -->
             <div class="sm:hidden space-y-2">
                 {% for item in subject_performance %}
-                <a href="{% url 'subject_detail' item.subject.id %}" class="block bg-white rounded-lg p-3 border border-gray-100 shadow-sm hover:shadow-md transition-all">
+                <a href="{% url 'subject_detail' item.subject.id %}" class="block bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-3 border border-purple-100/50 shadow-sm hover:shadow-md transition-all">
                     <div class="flex items-center justify-between">
                         <div>
                             <span class="text-sm font-medium text-gray-900">{{ item.subject.name }}</span>
@@ -223,7 +223,7 @@
             <!-- Mobile: Card Layout -->
             <div class="sm:hidden space-y-2">
                 {% for item in exam_type_performance %}
-                <div class="bg-white rounded-lg p-3 border border-gray-100 shadow-sm">
+                <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-3 border border-indigo-100/50 shadow-sm">
                     <div class="flex items-center justify-between">
                         <div>
                             <span class="text-sm font-medium text-gray-900">{{ item.exam_type.name }}</span>
@@ -278,7 +278,7 @@
         <!-- Mobile: Card Layout -->
         <div class="sm:hidden space-y-2">
             {% for exam in recent_exams %}
-            <div class="bg-white rounded-lg p-3 border border-gray-100 shadow-sm">
+            <div class="bg-gradient-to-r from-slate-50 to-gray-50 rounded-lg p-3 border border-gray-200/60 shadow-sm">
                 <div class="flex items-center justify-between mb-2">
                     <div class="flex items-center gap-2">
                         <span class="text-xs font-semibold text-purple-600">#{{ exam.exam_id|default:"N/A" }}</span>

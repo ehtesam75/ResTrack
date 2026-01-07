@@ -60,7 +60,7 @@
             <!-- Mobile: Card Layout -->
             <div class="sm:hidden space-y-2">
                 {% for item in overall_rankings %}
-                <a href="{% url 'student_detail' item.student.id %}" class="block bg-white rounded-lg p-3 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                <a href="{% url 'student_detail' item.student.id %}" class="block bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-3 border border-purple-100/50 shadow-sm hover:shadow-md transition-shadow">
                     <div class="flex items-center gap-3">
                         <!-- Rank -->
                         <div class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full {% if item.rank == 1 %}bg-yellow-100{% elif item.rank == 2 %}bg-gray-100{% elif item.rank == 3 %}bg-orange-100{% else %}bg-purple-50{% endif %}">
@@ -161,7 +161,7 @@
                 <!-- Mobile: Compact List -->
                 <div class="sm:hidden space-y-2">
                     {% for item in subject_data.leaders %}
-                    <a href="{% url 'student_detail' item.student.id %}" class="flex items-center gap-2 p-2 bg-white rounded-lg border border-gray-100">
+                    <a href="{% url 'student_detail' item.student.id %}" class="flex items-center gap-2 p-2 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-100/50">
                         <div class="w-7 h-7 flex items-center justify-center rounded-full {% if item.rank == 1 %}bg-yellow-100{% elif item.rank == 2 %}bg-gray-100{% elif item.rank == 3 %}bg-orange-100{% else %}bg-purple-50{% endif %}">
                             {% if item.rank == 1 %}
                                 <span class="text-sm">🥇</span>
@@ -256,7 +256,7 @@
                 <!-- Mobile: Card Layout -->
                 <div class="sm:hidden space-y-2">
                     {% for item in current_month_performers %}
-                    <a href="{% url 'student_detail' item.student.id %}" class="flex items-center gap-2 p-2 bg-white/80 rounded-lg border border-green-200">
+                    <a href="{% url 'student_detail' item.student.id %}" class="flex items-center gap-2 p-2 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
                         <div class="w-7 h-7 flex items-center justify-center rounded-full {% if item.rank == 1 %}bg-yellow-100{% elif item.rank == 2 %}bg-gray-100{% elif item.rank == 3 %}bg-orange-100{% else %}bg-green-100{% endif %}">
                             {% if item.rank == 1 %}
                                 <span class="text-sm">🥇</span>
@@ -346,7 +346,7 @@
                 <!-- Mobile: Card Layout -->
                 <div class="sm:hidden space-y-2">
                     {% for item in month_data.champions %}
-                    <a href="{% url 'student_detail' item.student.id %}" class="flex items-center gap-2 p-2 bg-white rounded-lg border border-gray-100">
+                    <a href="{% url 'student_detail' item.student.id %}" class="flex items-center gap-2 p-2 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-100/50">
                         <div class="w-7 h-7 flex items-center justify-center rounded-full {% if item.rank == 1 %}bg-yellow-100{% elif item.rank == 2 %}bg-gray-100{% elif item.rank == 3 %}bg-orange-100{% else %}bg-purple-50{% endif %}">
                             {% if item.rank == 1 %}
                                 <span class="text-sm">🥇</span>

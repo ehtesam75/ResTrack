@@ -70,7 +70,7 @@
             <!-- Mobile: Card Layout -->
             <div class="sm:hidden space-y-2">
                 {% for item in student_summary %}
-                <a href="{% url 'student_detail' item.student.id %}" class="block bg-white rounded-lg p-3 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                <a href="{% url 'student_detail' item.student.id %}" class="block bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-3 border border-amber-100/50 shadow-sm hover:shadow-md transition-shadow">
                     <div class="flex items-center gap-3">
                         <!-- Rank -->
                         <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full {% if forloop.counter == 1 %}bg-yellow-100{% elif forloop.counter == 2 %}bg-gray-100{% elif forloop.counter == 3 %}bg-orange-100{% else %}bg-purple-50{% endif %}">

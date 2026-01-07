@@ -83,7 +83,7 @@
         <!-- Mobile: Card Layout -->
         <div class="sm:hidden space-y-2">
             <!-- CQ Card -->
-            <div class="bg-white rounded-lg p-3 border-l-4 border-blue-500 shadow-sm">
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-3 border-l-4 border-blue-500 shadow-sm">
                 <div class="flex items-center justify-between mb-2">
                     <div>
                         <span class="font-bold text-blue-600 text-sm">CQ</span>
@@ -105,7 +105,7 @@
                 </div>
             </div>
             <!-- MCQ Card -->
-            <div class="bg-white rounded-lg p-3 border-l-4 border-green-500 shadow-sm">
+            <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-3 border-l-4 border-green-500 shadow-sm">
                 <div class="flex items-center justify-between mb-2">
                     <div>
                         <span class="font-bold text-green-600 text-sm">MCQ</span>
@@ -175,7 +175,7 @@
         <!-- Mobile: Card Layout -->
         <div class="sm:hidden space-y-2">
             {% for item in student_performance %}
-            <a href="{% url 'student_detail' item.student.id %}" class="block bg-white rounded-lg p-3 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+            <a href="{% url 'student_detail' item.student.id %}" class="block bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-3 border border-purple-100/50 shadow-sm hover:shadow-md transition-shadow">
                 <div class="flex items-center gap-3">
                     <!-- Rank -->
                     <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full {% if forloop.counter == 1 %}bg-yellow-100{% elif forloop.counter == 2 %}bg-gray-100{% elif forloop.counter == 3 %}bg-orange-100{% else %}bg-purple-50{% endif %}">
