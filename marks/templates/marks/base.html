@@ -151,7 +151,7 @@
             <!-- Divider -->
             <div class="my-2 mx-3 border-t border-gray-200"></div>
             
-            <p class="px-3 py-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Help & Admin</p>
+            <p class="px-3 py-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Help</p>
             
             <a href="{% url 'guide' %}" class="{% if 'guide' in request.path %}bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 border-l-2 border-purple-500{% else %}text-gray-600 hover:bg-gray-50 border-l-2 border-transparent{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-r-lg font-medium transition-all text-sm">
                 <div class="w-8 h-8 rounded-lg {% if 'guide' in request.path %}bg-purple-100{% else %}bg-gray-100{% endif %} flex items-center justify-center">
@@ -160,19 +160,6 @@
                     </svg>
                 </div>
                 <span>Guide</span>
-            </a>
-            
-            <a href="/admin/" target="_blank" rel="noopener noreferrer" id="mobile-admin-link" class="text-gray-600 hover:bg-purple-50 border-l-2 border-transparent flex items-center gap-2.5 px-3 py-2.5 rounded-r-lg font-medium transition-all text-sm">
-                <div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
-                    <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    </svg>
-                </div>
-                <span>Admin Panel</span>
-                <svg class="w-3 h-3 text-gray-400 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                </svg>
             </a>
         </div>
     </div>
@@ -206,9 +193,7 @@
             const isLocal = host === 'localhost' || host === '127.0.0.1';
             if (!isLocal) {
                 const adminBtn = document.getElementById('admin-panel-btn');
-                const mobileAdminLink = document.getElementById('mobile-admin-link');
                 if (adminBtn) adminBtn.style.display = 'none';
-                if (mobileAdminLink) mobileAdminLink.style.display = 'none';
             }
         })();
     </script>
