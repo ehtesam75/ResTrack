@@ -3,7 +3,7 @@
 {% block title %}User Guide - ResTrack{% endblock %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto">
+<div id="top" class="max-w-5xl mx-auto">
     <!-- Page Header -->
     <div class="mb-4 sm:mb-8 animate-fade-in-up" style="animation-delay: 0.05s;">
         <h1 class="text-xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2 flex items-center">
@@ -552,10 +552,10 @@
         </div>
     </div>
 
-    <!-- Back to Dashboard -->
+    <!-- Go to Top -->
     <div class="text-center mt-6 sm:mt-8 animate-fade-in-up" style="animation-delay: 0.5s;">
-        <a href="{% url 'dashboard' %}" class="inline-block bg-blue-600 text-white text-xs sm:text-sm font-semibold px-5 sm:px-6 py-2 sm:py-2.5 rounded-xl hover:bg-blue-700 transition duration-200 shadow-md">
-            ← Back to Dashboard
+        <a href="#top" class="inline-block bg-gray-600 text-white text-xs sm:text-sm font-semibold px-5 sm:px-6 py-2 sm:py-2.5 rounded-xl hover:bg-gray-700 transition duration-200 shadow-md">
+            ↑ Back to Top
         </a>
     </div>
 </div>

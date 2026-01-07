@@ -127,18 +127,6 @@
                         {% endfor %}
                     </select>
                 </div>
-                
-                <!-- Action Buttons -->
-                <div class="pt-3 border-t border-gray-200 flex gap-2">
-                    <button type="submit" class="flex-1 bg-purple-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium shadow-sm hover:bg-purple-700 transition-colors">
-                        Apply Filters
-                    </button>
-                    {% if request.GET.student or request.GET.subject or request.GET.exam_type or request.GET.class_number or request.GET.month or request.GET.chapter or request.GET.exam_id_from or request.GET.exam_id_to or request.GET.date_from or request.GET.date_to %}
-                    <a href="{% url 'all_exams' %}" class="px-4 py-2.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
-                        Clear
-                    </a>
-                    {% endif %}
-                </div>
             </form>
         </div>
     </div>
