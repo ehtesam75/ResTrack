@@ -151,15 +151,23 @@
             <!-- Divider -->
             <div class="my-2 mx-3 border-t border-gray-200"></div>
             
-            <p class="px-3 py-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Help</p>
+            <p class="px-3 py-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">More</p>
             
-            <a href="{% url 'guide' %}" class="{% if 'guide' in request.path %}bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 border-l-2 border-purple-500{% else %}text-gray-600 hover:bg-gray-50 border-l-2 border-transparent{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-r-lg font-medium transition-all text-sm">
-                <div class="w-8 h-8 rounded-lg {% if 'guide' in request.path %}bg-purple-100{% else %}bg-gray-100{% endif %} flex items-center justify-center">
-                    <svg class="w-4 h-4 {% if 'guide' in request.path %}text-purple-600{% else %}text-gray-500{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="{% url 'guide' %}" class="{% if request.path == '/guide/' %}bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 border-l-2 border-purple-500{% else %}text-gray-600 hover:bg-gray-50 border-l-2 border-transparent{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-r-lg font-medium transition-all text-sm">
+                <div class="w-8 h-8 rounded-lg {% if request.path == '/guide/' %}bg-purple-100{% else %}bg-gray-100{% endif %} flex items-center justify-center">
+                    <svg class="w-4 h-4 {% if request.path == '/guide/' %}text-purple-600{% else %}text-gray-500{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
                 <span>Guide</span>
+            </a>
+            <a href="{% url 'about' %}" class="{% if 'about' in request.path %}bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 border-l-2 border-purple-500{% else %}text-gray-600 hover:bg-gray-50 border-l-2 border-transparent{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-r-lg font-medium transition-all text-sm">
+                <div class="w-8 h-8 rounded-lg {% if 'about' in request.path %}bg-purple-100{% else %}bg-gray-100{% endif %} flex items-center justify-center">
+                    <svg class="w-4 h-4 {% if 'about' in request.path %}text-purple-600{% else %}text-gray-500{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <span>About</span>
             </a>
         </div>
     </div>

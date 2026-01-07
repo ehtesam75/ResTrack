@@ -32,6 +32,9 @@ urlpatterns = [
     # Guide page
     path('guide/', views.guide, name='guide'),
     
+    # About page
+    path('about/', views.about, name='about'),
+    
     # API endpoints for charts
     path('api/marks-over-time/<int:student_id>/', views.api_marks_over_time, name='api_marks_over_time'),
     path('api/subject-performance/<int:student_id>/', views.api_subject_performance, name='api_subject_performance'),

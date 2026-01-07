@@ -1425,4 +1425,9 @@ def guide(request):
     return render(request, 'marks/guide.html')
 
 
+def about(request):
+    """About page with project and developer information"""
+    return render(request, 'marks/about.html')
+
+
 
