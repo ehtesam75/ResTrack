@@ -5,17 +5,19 @@
 {% block content %}
 <div class="max-w-7xl mx-auto">
     <!-- Mobile Header -->
-    <div class="sm:hidden mb-4 flex items-center justify-between">
-        <div>
-            <h1 class="text-2xl font-bold gradient-text">Leaderboard</h1>
-            <p class="text-sm text-gray-600 mt-1">Top performers and rankings</p>
+    <div class="sm:hidden mb-4">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-lg font-bold gradient-text">Leaderboard</h1>
+                <p class="text-xs text-gray-500 mt-0.5">Top performers & rankings</p>
+            </div>
+            <select id="class-filter-mobile" onchange="filterByClass(this)" class="px-2.5 py-1.5 bg-purple-50 border border-purple-200 rounded-lg text-xs font-medium text-purple-700 focus:ring-2 focus:ring-purple-500 focus:border-transparent shadow-sm">
+                <option value="all" {% if selected_class == 'all' %}selected{% endif %}>All Classes</option>
+                {% for class_num in available_classes %}
+                <option value="{{ class_num }}" {% if selected_class == class_num|stringformat:"s" %}selected{% endif %}>Class {{ class_num }}</option>
+                {% endfor %}
+            </select>
         </div>
-        <select id="class-filter-mobile" onchange="filterByClass(this)" class="px-2 py-1 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-            <option value="all" {% if selected_class == 'all' %}selected{% endif %}>All Classes</option>
-            {% for class_num in available_classes %}
-            <option value="{{ class_num }}" {% if selected_class == class_num|stringformat:"s" %}selected{% endif %}>Class {{ class_num }}</option>
-            {% endfor %}
-        </select>
     </div>
     
     <!-- Desktop Header -->
