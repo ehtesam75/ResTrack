@@ -3,7 +3,7 @@
 {% block title %}User Guide - ResTrack{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-5xl">
+<div class="max-w-5xl mx-auto">
     <!-- Page Header -->
     <div class="mb-4 sm:mb-8 animate-fade-in-up" style="animation-delay: 0.05s;">
         <h1 class="text-xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2 flex items-center">
@@ -16,7 +16,7 @@
     <div class="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-6 border border-gray-200 animate-fade-in-up" style="animation-delay: 0.1s;">
         <h2 class="text-sm sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Table of Contents</h2>
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
-            <a href="#about" class="flex items-center text-xs sm:text-sm text-blue-600 hover:text-blue-800 transition group p-2 sm:p-0 rounded-lg hover:bg-blue-50 sm:hover:bg-transparent">
+            <a href="#about" class="hidden sm:flex items-center text-xs sm:text-sm text-blue-600 hover:text-blue-800 transition group p-2 sm:p-0 rounded-lg hover:bg-blue-50 sm:hover:bg-transparent">
                 <span class="mr-1.5 sm:mr-2 text-blue-500 group-hover:text-blue-700">→</span>
                 <span>About</span>
             </a>
@@ -34,13 +34,13 @@
             </a>
             <a href="#excellence" class="flex items-center text-xs sm:text-sm text-blue-600 hover:text-blue-800 transition group p-2 sm:p-0 rounded-lg hover:bg-blue-50 sm:hover:bg-transparent">
                 <span class="mr-1.5 sm:mr-2 text-blue-500 group-hover:text-blue-700">→</span>
-                <span>Excellence</span>
+                <span>Excellence Rate</span>
             </a>
             <a href="#rankings" class="flex items-center text-xs sm:text-sm text-blue-600 hover:text-blue-800 transition group p-2 sm:p-0 rounded-lg hover:bg-blue-50 sm:hover:bg-transparent">
                 <span class="mr-1.5 sm:mr-2 text-blue-500 group-hover:text-blue-700">→</span>
                 <span>Rankings</span>
             </a>
-            <a href="#terminology" class="col-span-2 sm:col-span-1 flex items-center text-xs sm:text-sm text-blue-600 hover:text-blue-800 transition group p-2 sm:p-0 rounded-lg hover:bg-blue-50 sm:hover:bg-transparent">
+            <a href="#terminology" class="flex items-center text-xs sm:text-sm text-blue-600 hover:text-blue-800 transition group p-2 sm:p-0 rounded-lg hover:bg-blue-50 sm:hover:bg-transparent">
                 <span class="mr-1.5 sm:mr-2 text-blue-500 group-hover:text-blue-700">→</span>
                 <span>Key Terminology</span>
             </a>
@@ -48,7 +48,7 @@
     </div>
 
     <!-- About This Project - Hidden on mobile (separate page) -->
-    <div id="about" class="hidden sm:block bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-5 border border-purple-200 animate-fade-in-up" style="animation-delay: 0.15s;">
+    <div id="about" class="hidden sm:block scroll-mt-24 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-5 border border-purple-200 animate-fade-in-up" style="animation-delay: 0.15s;">
         <h2 class="text-lg sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">🚀 About This Project</h2>
         <div class="h-0.5 w-12 sm:w-16 bg-purple-600 mb-3 sm:mb-4"></div>
         
@@ -106,7 +106,7 @@
     </div>
 
     <!-- Grading System -->
-    <div id="grading" class="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-5 border border-gray-200 animate-fade-in-up" style="animation-delay: 0.2s;">
+    <div id="grading" class="scroll-mt-24 bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-5 border border-gray-200 animate-fade-in-up" style="animation-delay: 0.2s;">
         <h2 class="text-lg sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">📊 Grading System</h2>
         <div class="h-0.5 w-12 sm:w-16 bg-blue-600 mb-3 sm:mb-4"></div>
         
@@ -307,7 +307,7 @@
     </div>
 
     <!-- Points System -->
-    <div id="points" class="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-5 border border-gray-200 animate-fade-in-up" style="animation-delay: 0.25s;">
+    <div id="points" class="scroll-mt-24 bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-5 border border-gray-200 animate-fade-in-up" style="animation-delay: 0.25s;">
         <h2 class="text-lg sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">💰 Points System</h2>
         <div class="h-0.5 w-12 sm:w-16 bg-blue-600 mb-3 sm:mb-4"></div>
         
@@ -373,7 +373,7 @@
     </div>
 
     <!-- Monthly Wins Bonus -->
-    <div id="monthly-wins" class="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-5 border border-gray-200 animate-fade-in-up" style="animation-delay: 0.3s;">
+    <div id="monthly-wins" class="scroll-mt-24 bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-5 border border-gray-200 animate-fade-in-up" style="animation-delay: 0.3s;">
         <h2 class="text-lg sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">🏆 Monthly Wins Bonus</h2>
         <div class="h-0.5 w-12 sm:w-16 bg-blue-600 mb-3 sm:mb-4"></div>
         
@@ -424,7 +424,7 @@
     </div>
 
     <!-- Excellence Rate -->
-    <div id="excellence" class="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-5 border border-gray-200 animate-fade-in-up" style="animation-delay: 0.35s;">
+    <div id="excellence" class="scroll-mt-24 bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-5 border border-gray-200 animate-fade-in-up" style="animation-delay: 0.35s;">
         <h2 class="text-lg sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">⭐ Excellence Rate</h2>
         <div class="h-0.5 w-12 sm:w-16 bg-blue-600 mb-3 sm:mb-4"></div>
         
@@ -461,7 +461,7 @@
     </div>
 
     <!-- Rankings & Leaderboards -->
-    <div id="rankings" class="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-5 border border-gray-200 animate-fade-in-up" style="animation-delay: 0.4s;">
+    <div id="rankings" class="scroll-mt-24 bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-5 border border-gray-200 animate-fade-in-up" style="animation-delay: 0.4s;">
         <h2 class="text-lg sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">🏅 Rankings & Leaderboards</h2>
         <div class="h-0.5 w-12 sm:w-16 bg-blue-600 mb-3 sm:mb-4"></div>
         
@@ -489,7 +489,7 @@
     </div>
 
     <!-- Key Terminology -->
-    <div id="terminology" class="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-5 border border-gray-200 animate-fade-in-up" style="animation-delay: 0.45s;">
+    <div id="terminology" class="scroll-mt-24 bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-5 border border-gray-200 animate-fade-in-up" style="animation-delay: 0.45s;">
         <h2 class="text-lg sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">📖 Key Terminology</h2>
         <div class="h-0.5 w-12 sm:w-16 bg-blue-600 mb-3 sm:mb-4"></div>
         
