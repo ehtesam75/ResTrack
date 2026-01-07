@@ -251,73 +251,73 @@
     <!-- Statistics Summary -->
     {% if exams %}
         <div class="mb-4 sm:mb-6 grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 animate-fade-in-up" style="animation-delay: 0.25s;">
-            <div class="bg-white rounded-lg shadow-md p-2.5 sm:p-4">
+            <div class="bg-white rounded-lg shadow-md p-3 sm:p-4">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <div class="rounded-md bg-blue-500 p-1.5 sm:p-2.5">
-                            <svg class="h-3.5 w-3.5 sm:h-5 sm:w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="rounded-md bg-blue-500 p-2 sm:p-2.5">
+                            <svg class="h-4 w-4 sm:h-5 sm:w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                             </svg>
                         </div>
                     </div>
-                    <div class="ml-2 sm:ml-4 w-0 flex-1">
+                    <div class="ml-3 sm:ml-4 w-0 flex-1">
                         <dl>
-                            <dt class="text-[10px] sm:text-xs font-medium text-gray-500">Exams</dt>
-                            <dd class="text-base sm:text-xl font-semibold text-gray-900">{{ unique_exams_count }}</dd>
+                            <dt class="text-xs sm:text-xs font-medium text-gray-500">Exams</dt>
+                            <dd class="text-lg sm:text-xl font-semibold text-gray-900">{{ unique_exams_count }}</dd>
                         </dl>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white rounded-lg shadow-md p-2.5 sm:p-4">
+            <div class="bg-white rounded-lg shadow-md p-3 sm:p-4">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <div class="rounded-md bg-green-500 p-1.5 sm:p-2.5">
-                            <svg class="h-3.5 w-3.5 sm:h-5 sm:w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="rounded-md bg-green-500 p-2 sm:p-2.5">
+                            <svg class="h-4 w-4 sm:h-5 sm:w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
                         </div>
                     </div>
-                    <div class="ml-2 sm:ml-4 w-0 flex-1">
+                    <div class="ml-3 sm:ml-4 w-0 flex-1">
                         <dl>
-                            <dt class="text-[10px] sm:text-xs font-medium text-gray-500">Average</dt>
-                            <dd class="text-base sm:text-xl font-semibold text-gray-900">{{ average_percentage|floatformat:1 }}%</dd>
+                            <dt class="text-xs sm:text-xs font-medium text-gray-500">Average</dt>
+                            <dd class="text-lg sm:text-xl font-semibold text-gray-900">{{ average_percentage|floatformat:1 }}%</dd>
                         </dl>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white rounded-lg shadow-md p-2.5 sm:p-4">
+            <div class="bg-white rounded-lg shadow-md p-3 sm:p-4">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <div class="rounded-md bg-yellow-500 p-1.5 sm:p-2.5">
-                            <svg class="h-3.5 w-3.5 sm:h-5 sm:w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="rounded-md bg-yellow-500 p-2 sm:p-2.5">
+                            <svg class="h-4 w-4 sm:h-5 sm:w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
                             </svg>
                         </div>
                     </div>
-                    <div class="ml-2 sm:ml-4 w-0 flex-1">
+                    <div class="ml-3 sm:ml-4 w-0 flex-1">
                         <dl>
-                            <dt class="text-[10px] sm:text-xs font-medium text-gray-500">Highest</dt>
-                            <dd class="text-base sm:text-xl font-semibold text-gray-900">{{ highest_percentage|floatformat:1 }}%</dd>
+                            <dt class="text-xs sm:text-xs font-medium text-gray-500">Highest</dt>
+                            <dd class="text-lg sm:text-xl font-semibold text-gray-900">{{ highest_percentage|floatformat:1 }}%</dd>
                         </dl>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white rounded-lg shadow-md p-2.5 sm:p-4">
+            <div class="bg-white rounded-lg shadow-md p-3 sm:p-4">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <div class="rounded-md bg-red-500 p-1.5 sm:p-2.5">
-                            <svg class="h-3.5 w-3.5 sm:h-5 sm:w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="rounded-md bg-red-500 p-2 sm:p-2.5">
+                            <svg class="h-4 w-4 sm:h-5 sm:w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
                             </svg>
                         </div>
                     </div>
-                    <div class="ml-2 sm:ml-4 w-0 flex-1">
+                    <div class="ml-3 sm:ml-4 w-0 flex-1">
                         <dl>
-                            <dt class="text-[10px] sm:text-xs font-medium text-gray-500">Lowest</dt>
-                            <dd class="text-base sm:text-xl font-semibold text-gray-900">{{ lowest_percentage|floatformat:1 }}%</dd>
+                            <dt class="text-xs sm:text-xs font-medium text-gray-500">Lowest</dt>
+                            <dd class="text-lg sm:text-xl font-semibold text-gray-900">{{ lowest_percentage|floatformat:1 }}%</dd>
                         </dl>
                     </div>
                 </div>

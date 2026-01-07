@@ -174,7 +174,7 @@
                             {% endif %}
                         </div>
                         <span class="flex-1 font-medium text-sm text-gray-900 truncate">{{ item.student.name }}</span>
-                        <span class="text-xs font-bold gradient-text">{{ item.average_percentage|floatformat:1 }}% avg</span>
+                        <span class="text-xs font-bold gradient-text">{{ item.average_percentage|floatformat:1 }}%</span>
                     </a>
                     {% empty %}
                     <div class="text-center text-gray-500 text-xs py-2">No data</div>
@@ -273,7 +273,7 @@
                             <span class="text-[10px] text-gray-500">{{ item.exams_count }} exams</span>
                         </div>
                         <div class="text-right flex-shrink-0">
-                            <span class="text-xs font-bold gradient-text block">{{ item.average_percentage|floatformat:1 }}% avg</span>
+                            <span class="text-xs font-bold gradient-text block">{{ item.average_percentage|floatformat:1 }}%</span>
                             <span class="text-[10px] font-semibold {% if item.points_earned >= 0 %}text-green-600{% else %}text-red-600{% endif %}">{{ item.points_earned|stringformat:"+d" }} pts</span>
                         </div>
                     </a>
@@ -363,7 +363,7 @@
                             <span class="text-[10px] text-gray-500">{{ item.exams_count }} exams</span>
                         </div>
                         <div class="text-right flex-shrink-0">
-                            <span class="text-xs font-bold gradient-text block">{{ item.average_percentage|floatformat:1 }}% avg</span>
+                            <span class="text-xs font-bold gradient-text block">{{ item.average_percentage|floatformat:1 }}%</span>
                             <span class="text-[10px] font-semibold {% if item.points_earned >= 0 %}text-green-600{% else %}text-red-600{% endif %}">{{ item.points_earned|stringformat:"+d" }} pts</span>
                         </div>
                     </a>
