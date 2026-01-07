@@ -343,12 +343,16 @@
         <div class="sm:hidden space-y-2">
             {% for record in points_history %}
             <div class="bg-gradient-to-r from-rose-50 to-orange-50 rounded-lg p-3 border border-rose-100/50 shadow-sm">
-                <div class="flex items-center justify-between mb-1.5">
-                    <a href="{% url 'student_detail' record.student.id %}" class="text-sm font-semibold text-gray-900 hover:text-purple-600">{{ record.student.name }}</a>
-                    <span class="text-sm font-bold text-rose-600">-{{ record.points_spent }} pts</span>
+                <div class="flex items-start justify-between">
+                    <div class="flex-1 min-w-0">
+                        <a href="{% url 'student_detail' record.student.id %}" class="text-sm font-semibold text-gray-900 hover:text-purple-600">{{ record.student.name }}</a>
+                        <p class="text-[10px] text-gray-400 mt-0.5">{{ record.date|date:"M d, Y" }}</p>
+                    </div>
+                    <div class="text-right flex-shrink-0 ml-3">
+                        <span class="text-sm font-bold text-rose-600">-{{ record.points_spent }} pts</span>
+                        <p class="text-[10px] text-gray-500 line-clamp-1 mt-0.5">{{ record.description }}</p>
+                    </div>
                 </div>
-                <p class="text-xs text-gray-500 line-clamp-2 mb-1">{{ record.description }}</p>
-                <p class="text-[10px] text-gray-400">{{ record.date|date:"M d, Y" }}</p>
             </div>
             {% empty %}
             <div class="text-center text-gray-500 text-xs py-4">No points spent records found</div>
