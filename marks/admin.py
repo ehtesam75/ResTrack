@@ -30,7 +30,7 @@ class ExamTypeAdmin(admin.ModelAdmin):
 
 @admin.register(Exam)
 class ExamAdmin(admin.ModelAdmin):
-    list_display = ['exam_id', 'student', 'subject', 'exam_type', 'date', 'mark_obtained', 'total_marks', 'percentage', 'grade', 'class_number']
+    list_display = ['exam_id', 'student', 'subject', 'exam_type', 'date', 'chapter', 'mark_obtained', 'total_marks', 'percentage', 'grade', 'class_number']
     list_filter = ['subject', 'exam_type', 'date', 'student', 'class_number']
     search_fields = ['student__name', 'subject__name', 'chapter']
     date_hierarchy = 'date'
@@ -38,7 +38,7 @@ class ExamAdmin(admin.ModelAdmin):
     
     # Make fields editable in admin
     fields = ['student', 'subject', 'exam_type', 'date', 'chapter', 'class_number', 'total_marks', 'mark_obtained', 'group_id', 'exam_id']
-    list_editable = ['mark_obtained', 'total_marks']
+    list_editable = ['chapter', 'mark_obtained', 'total_marks']
     
     def percentage(self, obj):
         return f"{obj.percentage}%"
