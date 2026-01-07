@@ -77,126 +77,66 @@
 
     <!-- Leaderboards Section -->
     <div class="animate-fade-in-up" style="animation-delay: 0.2s;">
-        <!-- Mobile: Horizontal Scroll -->
-        <div class="sm:hidden overflow-x-auto pb-2 -mx-4 px-4">
-            <div class="flex gap-3" style="min-width: max-content;">
-                <!-- Top by Total Marks -->
-                <div class="glass-effect rounded-xl p-3 border border-gray-200 shadow-lg bg-gradient-to-br from-green-50 to-emerald-50" style="width: 260px; flex-shrink: 0;">
-                    <h2 class="text-sm font-bold gradient-text mb-2">🥇 Top by Total Marks</h2>
-                    <div class="space-y-1.5">
-                        {% for item in total_marks_leaderboard %}
-                        <div class="flex items-center justify-between p-1.5 bg-white/80 rounded-lg">
-                            <div class="flex items-center">
-                                <span class="gradient-green text-white font-semibold text-[10px] w-4 h-4 rounded flex items-center justify-center mr-2">{{ forloop.counter }}</span>
-                                <a href="{% url 'student_detail' item.student.id %}" class="text-xs text-gray-800 font-medium truncate" style="max-width: 120px;">{{ item.student.name }}</a>
-                            </div>
-                            <span class="font-bold gradient-text text-xs">{{ item.total_marks|floatformat:0 }}</span>
-                        </div>
-                        {% empty %}
-                        <p class="text-gray-500 text-center text-xs py-2">No data</p>
-                        {% endfor %}
-                    </div>
-                </div>
-
-                <!-- Top by Average -->
-                <div class="glass-effect rounded-xl p-3 border border-gray-200 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-50" style="width: 260px; flex-shrink: 0;">
-                    <h2 class="text-sm font-bold gradient-text mb-2">⭐ Top by Average</h2>
-                    <div class="space-y-1.5">
-                        {% for item in average_leaderboard %}
-                        <div class="flex items-center justify-between p-1.5 bg-white/80 rounded-lg">
-                            <div class="flex items-center">
-                                <span class="gradient-blue text-white font-semibold text-[10px] w-4 h-4 rounded flex items-center justify-center mr-2">{{ forloop.counter }}</span>
-                                <a href="{% url 'student_detail' item.student.id %}" class="text-xs text-gray-800 font-medium truncate" style="max-width: 120px;">{{ item.student.name }}</a>
-                            </div>
-                            <span class="font-bold gradient-text text-xs">{{ item.average|floatformat:1 }}%</span>
-                        </div>
-                        {% empty %}
-                        <p class="text-gray-500 text-center text-xs py-2">No data</p>
-                        {% endfor %}
-                    </div>
-                </div>
-
-                <!-- Lifetime Points -->
-                <div class="glass-effect rounded-xl p-3 border border-gray-200 shadow-lg bg-gradient-to-br from-purple-50 to-pink-50" style="width: 260px; flex-shrink: 0;">
-                    <h2 class="text-sm font-bold gradient-text mb-2">💎 Lifetime Points</h2>
-                    <div class="space-y-1.5">
-                        {% for item in points_leaderboard %}
-                        <div class="flex items-center justify-between p-1.5 bg-white/80 rounded-lg">
-                            <div class="flex items-center">
-                                <span class="gradient-purple text-white font-semibold text-[10px] w-4 h-4 rounded flex items-center justify-center mr-2">{{ forloop.counter }}</span>
-                                <a href="{% url 'student_detail' item.student.id %}" class="text-xs text-gray-800 font-medium truncate" style="max-width: 120px;">{{ item.student.name }}</a>
-                            </div>
-                            <span class="font-bold gradient-text text-xs">{{ item.total_points }}</span>
-                        </div>
-                        {% empty %}
-                        <p class="text-gray-500 text-center text-xs py-2">No data</p>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Desktop: Grid -->
-        <div class="hidden sm:grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
             <!-- Top Performers by Total Marks -->
-            <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-green-50 to-emerald-50">
-            <h2 class="text-base font-bold gradient-text mb-3">🥇 Top by Total Marks</h2>
-            <div class="space-y-2">
-                {% for item in total_marks_leaderboard %}
-                <div class="flex items-center justify-between p-2 bg-white rounded-lg hover:shadow-sm transition-all duration-200">
-                    <div class="flex items-center">
-                        <span class="gradient-green text-white font-semibold text-xs w-5 h-5 rounded flex items-center justify-center mr-2 shadow-sm">{{ forloop.counter }}</span>
-                        <a href="{% url 'student_detail' item.student.id %}" class="text-sm text-gray-800 hover:text-purple-600 font-medium transition-colors">
-                            {{ item.student.name }}
-                        </a>
+            <div class="glass-effect rounded-xl p-3 sm:p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-green-50 to-emerald-50">
+                <h2 class="text-sm sm:text-base font-bold gradient-text mb-2 sm:mb-3">🥇 Top by Total Marks</h2>
+                <div class="space-y-1.5 sm:space-y-2">
+                    {% for item in total_marks_leaderboard %}
+                    <div class="flex items-center justify-between p-1.5 sm:p-2 bg-white/80 sm:bg-white rounded-lg hover:shadow-sm transition-all duration-200">
+                        <div class="flex items-center">
+                            <span class="gradient-green text-white font-semibold text-[10px] sm:text-xs w-4 h-4 sm:w-5 sm:h-5 rounded flex items-center justify-center mr-2 shadow-sm">{{ forloop.counter }}</span>
+                            <a href="{% url 'student_detail' item.student.id %}" class="text-xs sm:text-sm text-gray-800 hover:text-purple-600 font-medium transition-colors">
+                                {{ item.student.name }}
+                            </a>
+                        </div>
+                        <span class="font-bold gradient-text text-xs sm:text-sm">{{ item.total_marks|floatformat:0 }}</span>
                     </div>
-                    <span class="font-bold gradient-text text-sm">{{ item.total_marks|floatformat:0 }}</span>
+                    {% empty %}
+                    <p class="text-gray-500 text-center text-xs sm:text-sm py-2 sm:py-4">No data available</p>
+                    {% endfor %}
                 </div>
-                {% empty %}
-                <p class="text-gray-500 text-center text-sm py-4">No data available</p>
-                {% endfor %}
             </div>
-        </div>
 
             <!-- Top Performers by Average -->
-            <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-blue-50 to-indigo-50">
-            <h2 class="text-base font-bold gradient-text mb-3">⭐ Top by Average</h2>
-            <div class="space-y-2">
-                {% for item in average_leaderboard %}
-                <div class="flex items-center justify-between p-2 bg-white rounded-lg hover:shadow-sm transition-all duration-200">
-                    <div class="flex items-center">
-                        <span class="gradient-blue text-white font-semibold text-xs w-5 h-5 rounded flex items-center justify-center mr-2 shadow-sm">{{ forloop.counter }}</span>
-                        <a href="{% url 'student_detail' item.student.id %}" class="text-sm text-gray-800 hover:text-purple-600 font-medium transition-colors">
-                            {{ item.student.name }}
-                        </a>
+            <div class="glass-effect rounded-xl p-3 sm:p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-blue-50 to-indigo-50">
+                <h2 class="text-sm sm:text-base font-bold gradient-text mb-2 sm:mb-3">⭐ Top by Average</h2>
+                <div class="space-y-1.5 sm:space-y-2">
+                    {% for item in average_leaderboard %}
+                    <div class="flex items-center justify-between p-1.5 sm:p-2 bg-white/80 sm:bg-white rounded-lg hover:shadow-sm transition-all duration-200">
+                        <div class="flex items-center">
+                            <span class="gradient-blue text-white font-semibold text-[10px] sm:text-xs w-4 h-4 sm:w-5 sm:h-5 rounded flex items-center justify-center mr-2 shadow-sm">{{ forloop.counter }}</span>
+                            <a href="{% url 'student_detail' item.student.id %}" class="text-xs sm:text-sm text-gray-800 hover:text-purple-600 font-medium transition-colors">
+                                {{ item.student.name }}
+                            </a>
+                        </div>
+                        <span class="font-bold gradient-text text-xs sm:text-sm">{{ item.average|floatformat:1 }}%</span>
                     </div>
-                    <span class="font-bold gradient-text text-sm">{{ item.average|floatformat:1 }}%</span>
+                    {% empty %}
+                    <p class="text-gray-500 text-center text-xs sm:text-sm py-2 sm:py-4">No data available</p>
+                    {% endfor %}
                 </div>
-                {% empty %}
-                <p class="text-gray-500 text-center text-sm py-4">No data available</p>
-                {% endfor %}
             </div>
-        </div>
 
             <!-- Top by Lifetime Points -->
-            <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-purple-50 to-pink-50">
-            <h2 class="text-base font-bold gradient-text mb-3">💎 Lifetime Points</h2>
-            <div class="space-y-2">
-                {% for item in points_leaderboard %}
-                <div class="flex items-center justify-between p-2 bg-white rounded-lg hover:shadow-sm transition-all duration-200">
-                    <div class="flex items-center">
-                        <span class="gradient-purple text-white font-semibold text-xs w-5 h-5 rounded flex items-center justify-center mr-2 shadow-sm">{{ forloop.counter }}</span>
-                        <a href="{% url 'student_detail' item.student.id %}" class="text-sm text-gray-800 hover:text-purple-600 font-medium transition-colors">
-                            {{ item.student.name }}
-                        </a>
+            <div class="glass-effect rounded-xl p-3 sm:p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-purple-50 to-pink-50">
+                <h2 class="text-sm sm:text-base font-bold gradient-text mb-2 sm:mb-3">💎 Lifetime Points</h2>
+                <div class="space-y-1.5 sm:space-y-2">
+                    {% for item in points_leaderboard %}
+                    <div class="flex items-center justify-between p-1.5 sm:p-2 bg-white/80 sm:bg-white rounded-lg hover:shadow-sm transition-all duration-200">
+                        <div class="flex items-center">
+                            <span class="gradient-purple text-white font-semibold text-[10px] sm:text-xs w-4 h-4 sm:w-5 sm:h-5 rounded flex items-center justify-center mr-2 shadow-sm">{{ forloop.counter }}</span>
+                            <a href="{% url 'student_detail' item.student.id %}" class="text-xs sm:text-sm text-gray-800 hover:text-purple-600 font-medium transition-colors">
+                                {{ item.student.name }}
+                            </a>
+                        </div>
+                        <span class="font-bold gradient-text text-xs sm:text-sm">{{ item.total_points }}</span>
                     </div>
-                    <span class="font-bold gradient-text text-sm">{{ item.total_points }}</span>
+                    {% empty %}
+                    <p class="text-gray-500 text-center text-xs sm:text-sm py-2 sm:py-4">No data available</p>
+                    {% endfor %}
                 </div>
-                {% empty %}
-                <p class="text-gray-500 text-center text-sm py-4">No data available</p>
-                {% endfor %}
             </div>
-        </div>
         </div>
     </div>
 

@@ -3,20 +3,66 @@
 {% block title %}Students - ResTrack{% endblock %}
 
 {% block content %}
-<div class="space-y-4">
+<div class="space-y-4 sm:space-y-6">
     <!-- Header -->
     <div class="flex justify-between items-center animate-fade-in-up">
         <div>
-            <h1 class="text-2xl font-bold gradient-text">All Students</h1>
-            <p class="text-sm text-gray-600 mt-1">Manage student profiles and performance</p>
+            <h1 class="text-xl sm:text-2xl font-bold gradient-text">All Students</h1>
+            <p class="text-xs sm:text-sm text-gray-600 mt-1">Manage student profiles and performance</p>
         </div>
         <a href="{% url 'add_student' %}" class="hide-mobile bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-blue-200 transform hover:-translate-y-0.5 transition-all duration-200">
             Add Student
         </a>
     </div>
 
-    <!-- Students Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in-up" style="animation-delay: 0.1s;">
+    <!-- Mobile: Compact Student Cards -->
+    <div class="sm:hidden space-y-2 animate-fade-in-up" style="animation-delay: 0.1s;">
+        {% for item in students %}
+        <a href="{% url 'student_detail' item.student.id %}" class="block glass-effect rounded-xl p-3 border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-r from-white to-purple-50/30">
+            <div class="flex items-center gap-3">
+                <!-- Rank Badge -->
+                <div class="flex-shrink-0 w-10 h-10 rounded-full gradient-primary flex items-center justify-center shadow-md">
+                    <span class="text-white text-sm font-bold">#{{ item.rank }}</span>
+                </div>
+                
+                <!-- Student Info -->
+                <div class="flex-1 min-w-0">
+                    <h3 class="text-sm font-bold text-gray-900 truncate">{{ item.student.name }}</h3>
+                    {% if item.student.class_number or item.student.roll %}
+                    <p class="text-[10px] text-gray-500">
+                        {% if item.student.class_name %}Class {{ item.student.class_name }}{% endif %}
+                        {% if item.student.class_name and item.student.roll %} · {% endif %}
+                        {% if item.student.roll %}Roll {{ item.student.roll }}{% endif %}
+                    </p>
+                    {% endif %}
+                </div>
+                
+                <!-- Stats -->
+                <div class="flex-shrink-0 text-right">
+                    <p class="text-sm font-bold gradient-text">{{ item.average|floatformat:1 }}%</p>
+                    <p class="text-[10px] text-gray-500">{{ item.total_marks|floatformat:0 }} marks</p>
+                </div>
+                
+                <!-- Arrow -->
+                <div class="flex-shrink-0 text-gray-400">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </div>
+            </div>
+        </a>
+        {% empty %}
+        <div class="glass-effect rounded-xl p-6 text-center border border-gray-200 shadow-lg">
+            <p class="text-gray-500 text-sm mb-3">No students found</p>
+            <a href="{% url 'add_student' %}" class="hide-mobile inline-block bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-blue-200 transition-all">
+                Add Your First Student
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Desktop: Student Cards Grid -->
+    <div class="hidden sm:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in-up" style="animation-delay: 0.1s;">
         {% for item in students %}
         <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300">
             <div class="flex items-start justify-between mb-3">
