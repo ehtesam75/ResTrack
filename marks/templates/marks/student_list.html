@@ -20,14 +20,14 @@
         {% for item in students %}
         <a href="{% url 'student_detail' item.student.id %}" class="block glass-effect rounded-xl p-3 border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-r from-white to-purple-50/30">
             <div class="flex items-center gap-3">
-                <!-- Rank Badge -->
-                <div class="flex-shrink-0 w-10 h-10 rounded-full gradient-primary flex items-center justify-center shadow-md">
-                    <span class="text-white text-sm font-bold">#{{ item.rank }}</span>
-                </div>
-                
                 <!-- Student Info -->
                 <div class="flex-1 min-w-0">
-                    <h3 class="text-sm font-bold text-gray-900 truncate">{{ item.student.name }}</h3>
+                    <div class="flex items-center gap-2 mb-0.5">
+                        <h3 class="text-sm font-bold text-gray-900 truncate">{{ item.student.name }}</h3>
+                        <span class="flex-shrink-0 gradient-primary text-white px-1.5 py-0.5 rounded text-[10px] font-semibold shadow-sm">
+                            Rank #{{ item.rank }}
+                        </span>
+                    </div>
                     {% if item.student.class_number or item.student.roll %}
                     <p class="text-[10px] text-gray-500">
                         {% if item.student.class_name %}Class {{ item.student.class_name }}{% endif %}
