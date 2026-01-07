@@ -3,12 +3,12 @@
 {% block title %}Dashboard - ResTrack{% endblock %}
 
 {% block content %}
-<div class="space-y-8">
+<div class="space-y-4 sm:space-y-8">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 animate-fade-in-up">
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3 animate-fade-in-up">
         <div>
-            <h1 class="text-2xl font-bold gradient-text">Analytics Dashboard</h1>
-            <p class="text-sm text-gray-600 mt-1">Track performance and insights</p>
+            <h1 class="text-xl sm:text-2xl font-bold gradient-text">Analytics Dashboard</h1>
+            <p class="text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1">Track performance and insights</p>
         </div>
         <div class="hide-mobile flex flex-wrap gap-2">
             <a href="{% url 'add_exam' %}" class="bg-purple-100 text-purple-700 px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-purple-200 transform hover:-translate-y-0.5 transition-all duration-200">Record Exam Result</a>
@@ -17,48 +17,48 @@
     </div>
 
     <!-- KPI Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in-up" style="animation-delay: 0.1s;">
-        <div class="stat-card" style="border-left: 3px solid #93C5FD;">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 animate-fade-in-up" style="animation-delay: 0.1s;">
+        <div class="stat-card p-3 sm:p-4" style="border-left: 3px solid #93C5FD;">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-600 text-xs font-medium uppercase tracking-wide">Unique Exams</p>
-                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ summary.total_exams }}</p>
+                    <p class="text-gray-600 text-[10px] sm:text-xs font-medium uppercase tracking-wide">Unique Exams</p>
+                    <p class="text-xl sm:text-2xl font-bold text-gray-900 mt-0.5 sm:mt-1">{{ summary.total_exams }}</p>
                 </div>
-                <div class="rounded-lg p-2.5 shadow-md" style="background: #DBEAFE;">
+                <div class="hidden sm:block rounded-lg p-2.5 shadow-md" style="background: #DBEAFE;">
                     <span class="text-2xl">📝</span>
                 </div>
             </div>
         </div>
 
-        <div class="stat-card" style="border-left: 3px solid #86EFAC;">
+        <div class="stat-card p-3 sm:p-4" style="border-left: 3px solid #86EFAC;">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-600 text-xs font-medium uppercase tracking-wide">Total Subjects</p>
-                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ summary.total_subjects }}</p>
+                    <p class="text-gray-600 text-[10px] sm:text-xs font-medium uppercase tracking-wide">Total Subjects</p>
+                    <p class="text-xl sm:text-2xl font-bold text-gray-900 mt-0.5 sm:mt-1">{{ summary.total_subjects }}</p>
                 </div>
-                <div class="rounded-lg p-2.5 shadow-md" style="background: #D1FAE5;">
+                <div class="hidden sm:block rounded-lg p-2.5 shadow-md" style="background: #D1FAE5;">
                     <span class="text-2xl">📚</span>
                 </div>
             </div>
         </div>
 
-        <div class="stat-card" style="border-left: 3px solid #BAE6FD;">
+        <div class="stat-card p-3 sm:p-4" style="border-left: 3px solid #BAE6FD;">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-600 text-xs font-medium uppercase tracking-wide">Total Students</p>
-                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ summary.total_students }}</p>
+                    <p class="text-gray-600 text-[10px] sm:text-xs font-medium uppercase tracking-wide">Total Students</p>
+                    <p class="text-xl sm:text-2xl font-bold text-gray-900 mt-0.5 sm:mt-1">{{ summary.total_students }}</p>
                 </div>
-                <div class="rounded-lg p-2.5 shadow-md" style="background: #E0F2FE;">
+                <div class="hidden sm:block rounded-lg p-2.5 shadow-md" style="background: #E0F2FE;">
                     <span class="text-2xl">🎓</span>
                 </div>
             </div>
         </div>
 
-        <div class="stat-card" style="border-left: 3px solid #FED7AA;">
+        <div class="stat-card p-3 sm:p-4" style="border-left: 3px solid #FED7AA;">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-600 text-xs font-medium uppercase tracking-wide">Best Student</p>
-                    <p class="text-base font-bold text-gray-900 mt-1">
+                    <p class="text-gray-600 text-[10px] sm:text-xs font-medium uppercase tracking-wide">Best Student</p>
+                    <p class="text-sm sm:text-base font-bold text-gray-900 mt-0.5 sm:mt-1">
                         {% if summary.best_student %}
                             <a href="{% url 'student_detail' summary.best_student.id %}" class="gradient-text hover:opacity-80 transition-opacity">
                                 {{ summary.best_student.name }}
@@ -68,7 +68,7 @@
                         {% endif %}
                     </p>
                 </div>
-                <div class="rounded-lg p-2.5 shadow-md" style="background: #FFEDD5;">
+                <div class="hidden sm:block rounded-lg p-2.5 shadow-md" style="background: #FFEDD5;">
                     <span class="text-2xl">🏆</span>
                 </div>
             </div>
@@ -76,9 +76,70 @@
     </div>
 
     <!-- Leaderboards Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 animate-fade-in-up" style="animation-delay: 0.2s;">
-        <!-- Top Performers by Total Marks -->
-        <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-green-50 to-emerald-50">
+    <div class="animate-fade-in-up" style="animation-delay: 0.2s;">
+        <!-- Mobile: Horizontal Scroll -->
+        <div class="sm:hidden overflow-x-auto pb-2 -mx-4 px-4">
+            <div class="flex gap-3" style="min-width: max-content;">
+                <!-- Top by Total Marks -->
+                <div class="glass-effect rounded-xl p-3 border border-gray-200 shadow-lg bg-gradient-to-br from-green-50 to-emerald-50" style="width: 260px; flex-shrink: 0;">
+                    <h2 class="text-sm font-bold gradient-text mb-2">🥇 Top by Total Marks</h2>
+                    <div class="space-y-1.5">
+                        {% for item in total_marks_leaderboard %}
+                        <div class="flex items-center justify-between p-1.5 bg-white/80 rounded-lg">
+                            <div class="flex items-center">
+                                <span class="gradient-green text-white font-semibold text-[10px] w-4 h-4 rounded flex items-center justify-center mr-2">{{ forloop.counter }}</span>
+                                <a href="{% url 'student_detail' item.student.id %}" class="text-xs text-gray-800 font-medium truncate" style="max-width: 120px;">{{ item.student.name }}</a>
+                            </div>
+                            <span class="font-bold gradient-text text-xs">{{ item.total_marks|floatformat:0 }}</span>
+                        </div>
+                        {% empty %}
+                        <p class="text-gray-500 text-center text-xs py-2">No data</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Top by Average -->
+                <div class="glass-effect rounded-xl p-3 border border-gray-200 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-50" style="width: 260px; flex-shrink: 0;">
+                    <h2 class="text-sm font-bold gradient-text mb-2">⭐ Top by Average</h2>
+                    <div class="space-y-1.5">
+                        {% for item in average_leaderboard %}
+                        <div class="flex items-center justify-between p-1.5 bg-white/80 rounded-lg">
+                            <div class="flex items-center">
+                                <span class="gradient-blue text-white font-semibold text-[10px] w-4 h-4 rounded flex items-center justify-center mr-2">{{ forloop.counter }}</span>
+                                <a href="{% url 'student_detail' item.student.id %}" class="text-xs text-gray-800 font-medium truncate" style="max-width: 120px;">{{ item.student.name }}</a>
+                            </div>
+                            <span class="font-bold gradient-text text-xs">{{ item.average|floatformat:1 }}%</span>
+                        </div>
+                        {% empty %}
+                        <p class="text-gray-500 text-center text-xs py-2">No data</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Lifetime Points -->
+                <div class="glass-effect rounded-xl p-3 border border-gray-200 shadow-lg bg-gradient-to-br from-purple-50 to-pink-50" style="width: 260px; flex-shrink: 0;">
+                    <h2 class="text-sm font-bold gradient-text mb-2">💎 Lifetime Points</h2>
+                    <div class="space-y-1.5">
+                        {% for item in points_leaderboard %}
+                        <div class="flex items-center justify-between p-1.5 bg-white/80 rounded-lg">
+                            <div class="flex items-center">
+                                <span class="gradient-purple text-white font-semibold text-[10px] w-4 h-4 rounded flex items-center justify-center mr-2">{{ forloop.counter }}</span>
+                                <a href="{% url 'student_detail' item.student.id %}" class="text-xs text-gray-800 font-medium truncate" style="max-width: 120px;">{{ item.student.name }}</a>
+                            </div>
+                            <span class="font-bold gradient-text text-xs">{{ item.total_points }}</span>
+                        </div>
+                        {% empty %}
+                        <p class="text-gray-500 text-center text-xs py-2">No data</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Desktop: Grid -->
+        <div class="hidden sm:grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <!-- Top Performers by Total Marks -->
+            <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-green-50 to-emerald-50">
             <h2 class="text-base font-bold gradient-text mb-3">🥇 Top by Total Marks</h2>
             <div class="space-y-2">
                 {% for item in total_marks_leaderboard %}
@@ -97,8 +158,8 @@
             </div>
         </div>
 
-        <!-- Top Performers by Average -->
-        <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-blue-50 to-indigo-50">
+            <!-- Top Performers by Average -->
+            <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-blue-50 to-indigo-50">
             <h2 class="text-base font-bold gradient-text mb-3">⭐ Top by Average</h2>
             <div class="space-y-2">
                 {% for item in average_leaderboard %}
@@ -117,8 +178,8 @@
             </div>
         </div>
 
-        <!-- Top by Lifetime Points -->
-        <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-purple-50 to-pink-50">
+            <!-- Top by Lifetime Points -->
+            <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-purple-50 to-pink-50">
             <h2 class="text-base font-bold gradient-text mb-3">💎 Lifetime Points</h2>
             <div class="space-y-2">
                 {% for item in points_leaderboard %}
@@ -136,25 +197,26 @@
                 {% endfor %}
             </div>
         </div>
+        </div>
     </div>
 
     <!-- Charts Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-fade-in-up" style="animation-delay: 0.3s;">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 animate-fade-in-up" style="animation-delay: 0.3s;">
         <!-- Subject Performance Table -->
-        <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300">
-            <h2 class="text-base font-bold gradient-text mb-3">📈 Subject Performance</h2>
+        <div class="glass-effect rounded-xl p-3 sm:p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300">
+            <h2 class="text-sm sm:text-base font-bold gradient-text mb-2 sm:mb-3">📈 Subject Performance</h2>
             
             <!-- Mobile: Card Layout -->
             <div class="sm:hidden space-y-2">
                 {% for item in subject_performance %}
-                <a href="{% url 'subject_detail' item.subject.id %}" class="block bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-3 border border-purple-100/50 shadow-sm hover:shadow-md transition-all">
+                <a href="{% url 'subject_detail' item.subject.id %}" class="block bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-3 border border-purple-100/50 shadow-sm hover:shadow-md transition-all">
                     <div class="flex items-center justify-between">
-                        <div>
-                            <span class="text-sm font-medium text-gray-900">{{ item.subject.name }}</span>
-                            <p class="text-[11px] text-gray-400 mt-0.5">{{ item.total_exams }} exam{% if item.total_exams != 1 %}s{% endif %}</p>
+                        <div class="flex-1 min-w-0">
+                            <span class="text-sm font-semibold text-gray-900 block truncate">{{ item.subject.name }}</span>
+                            <p class="text-[10px] text-gray-500 mt-0.5">{{ item.total_exams }} exam{% if item.total_exams != 1 %}s{% endif %}</p>
                         </div>
-                        <div class="text-right">
-                            <span class="text-sm font-bold" style="color: #6D67CA;">{{ item.average_percentage|floatformat:1 }}%</span>
+                        <div class="text-right flex-shrink-0 ml-2">
+                            <span class="text-sm font-bold gradient-text">{{ item.average_percentage|floatformat:1 }}%</span>
                             <p class="text-[10px] text-gray-400">avg</p>
                         </div>
                     </div>
@@ -196,10 +258,10 @@
         </div>
 
         <!-- Subject Performance Chart -->
-        <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col">
-            <h2 class="text-base font-bold gradient-text mb-3">📈 Subject Performance Chart</h2>
-            <div class="flex-1 overflow-x-auto" style="min-height: 300px; position: relative;">
-                <div style="min-width: 500px; height: 100%;">
+        <div class="glass-effect rounded-xl p-3 sm:p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col">
+            <h2 class="text-sm sm:text-base font-bold gradient-text mb-2 sm:mb-3">📈 Subject Performance Chart</h2>
+            <div class="flex-1 overflow-x-auto" style="min-height: 250px; position: relative;">
+                <div style="min-width: 400px; height: 100%;">
                     <canvas id="subjectPerformanceChart"></canvas>
                 </div>
             </div>
@@ -207,30 +269,30 @@
     </div>
 
     <!-- Performance Tables -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-fade-in-up" style="animation-delay: 0.4s;">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 animate-fade-in-up" style="animation-delay: 0.4s;">
         <!-- Grade Distribution Chart -->
-        <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300">
-            <h2 class="text-base font-bold gradient-text mb-3">📊 Grade Distribution</h2>
+        <div class="glass-effect rounded-xl p-3 sm:p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300">
+            <h2 class="text-sm sm:text-base font-bold gradient-text mb-2 sm:mb-3">📊 Grade Distribution</h2>
             <div style="max-height: 150px; position: relative;">
                 <canvas id="gradeDistributionChart"></canvas>
             </div>
         </div>
 
         <!-- Exam Type Performance Table -->
-        <div class="glass-effect rounded-xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300">
-            <h2 class="text-base font-bold gradient-text mb-3">📈 Exam Type Performance</h2>
+        <div class="glass-effect rounded-xl p-3 sm:p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300">
+            <h2 class="text-sm sm:text-base font-bold gradient-text mb-2 sm:mb-3">📈 Exam Type Performance</h2>
             
             <!-- Mobile: Card Layout -->
             <div class="sm:hidden space-y-2">
                 {% for item in exam_type_performance %}
-                <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-3 border border-indigo-100/50 shadow-sm">
+                <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-3 border border-indigo-100/50 shadow-sm">
                     <div class="flex items-center justify-between">
-                        <div>
-                            <span class="text-sm font-medium text-gray-900">{{ item.exam_type.name }}</span>
-                            <p class="text-[11px] text-gray-400 mt-0.5">{{ item.total_exams }} exam{% if item.total_exams != 1 %}s{% endif %}</p>
+                        <div class="flex-1 min-w-0">
+                            <span class="text-sm font-semibold text-gray-900 block truncate">{{ item.exam_type.name }}</span>
+                            <p class="text-[10px] text-gray-500 mt-0.5">{{ item.total_exams }} exam{% if item.total_exams != 1 %}s{% endif %}</p>
                         </div>
-                        <div class="text-right">
-                            <span class="text-sm font-bold" style="color: #6D67CA;">{{ item.average_percentage|floatformat:1 }}%</span>
+                        <div class="text-right flex-shrink-0 ml-2">
+                            <span class="text-sm font-bold gradient-text">{{ item.average_percentage|floatformat:1 }}%</span>
                             <p class="text-[10px] text-gray-400">avg</p>
                         </div>
                     </div>
@@ -278,18 +340,18 @@
         <!-- Mobile: Card Layout -->
         <div class="sm:hidden space-y-2">
             {% for exam in recent_exams %}
-            <div class="bg-gradient-to-r from-slate-50 to-gray-50 rounded-lg p-3 border border-gray-200/60 shadow-sm">
+            <div class="bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl p-3 border border-gray-200/60 shadow-sm">
                 <div class="flex items-center justify-between mb-2">
                     <div class="flex items-center gap-2">
-                        <span class="text-xs font-semibold text-purple-600">#{{ exam.exam_id|default:"N/A" }}</span>
+                        <span class="text-xs font-bold text-purple-600">#{{ exam.exam_id|default:"N/A" }}</span>
                         <span class="text-[10px] text-gray-400">{{ exam.date|date:"M d" }}</span>
                     </div>
-                    <span class="grade-badge text-gray-900 text-[10px] px-2 py-0.5" style="background-color: {{ exam.grade_color }};">{{ exam.grade }}</span>
+                    <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full" style="background-color: {{ exam.grade_color }};">{{ exam.grade }}</span>
                 </div>
                 <div class="flex items-center justify-between">
                     <div class="flex-1 min-w-0">
-                        <a href="{% url 'student_detail' exam.student.id %}" class="font-medium text-sm text-gray-900 hover:text-purple-600 truncate block">{{ exam.student.name }}</a>
-                        <p class="text-[10px] text-gray-500">{{ exam.subject.name }} · Ch {{ exam.chapter|default:"—" }}</p>
+                        <a href="{% url 'student_detail' exam.student.id %}" class="font-semibold text-sm text-gray-900 hover:text-purple-600 truncate block">{{ exam.student.name }}</a>
+                        <p class="text-[10px] text-gray-500">{{ exam.subject.name }} · {{ exam.exam_type.name }} · Ch {{ exam.chapter|default:"—" }}</p>
                     </div>
                     <div class="text-right flex-shrink-0 ml-3">
                         <p class="text-sm font-bold gradient-text">{{ exam.percentage|floatformat:1 }}%</p>
