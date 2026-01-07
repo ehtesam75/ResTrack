@@ -49,10 +49,10 @@
 </div>
 
 <div class="max-w-7xl mx-auto">
-    <div class="mb-6 flex justify-between items-center">
+    <div class="mb-4 sm:mb-6 flex justify-between items-center">
         <div>
-            <h1 class="text-2xl font-bold gradient-text">Points Management</h1>
-            <p class="text-sm text-gray-600 mt-1">View points spending history and student points summary</p>
+            <h1 class="text-lg sm:text-2xl font-bold gradient-text">Points Management</h1>
+            <p class="text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1">Points spending history & summary</p>
         </div>
         <a 
             href="{% url 'add_points_spent' %}" 
@@ -243,7 +243,17 @@
         </form>
         
         <!-- Results Summary -->
-        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 mt-6">
+        <!-- Mobile: Compact -->
+        <div class="sm:hidden bg-blue-50 border-l-4 border-blue-500 px-3 py-2 mb-4 mt-4 rounded-r-lg">
+            <p class="text-xs text-blue-700">
+                <span class="font-semibold">{{ points_history.count }}</span> record{% if points_history.count != 1 %}s{% endif %}
+                {% if request.GET.student or request.GET.from_date or request.GET.to_date or request.GET.min_spent %}
+                    <span class="text-blue-500">(filtered)</span>
+                {% endif %}
+            </p>
+        </div>
+        <!-- Desktop: Full -->
+        <div class="hidden sm:block bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 mt-6">
             <p class="text-sm text-blue-700">
                 Found <span class="font-semibold">{{ points_history.count }}</span> points spent record{% if points_history.count != 1 %}s{% endif %}
                 {% if request.GET.student or request.GET.from_date or request.GET.to_date or request.GET.min_spent %}
@@ -254,74 +264,74 @@
 
         <!-- Statistics Summary -->
         {% if points_history %}
-        <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="bg-white rounded-lg shadow-md p-4">
+        <div class="mb-4 sm:mb-6 grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
+            <div class="bg-white rounded-lg shadow-md p-2.5 sm:p-4">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <div class="rounded-md bg-blue-500 p-2.5">
-                            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="rounded-md bg-blue-500 p-2 sm:p-2.5">
+                            <svg class="h-4 w-4 sm:h-5 sm:w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
                         </div>
                     </div>
-                    <div class="ml-4 w-0 flex-1">
+                    <div class="ml-2.5 sm:ml-4 w-0 flex-1">
                         <dl>
-                            <dt class="text-xs font-medium text-gray-500 truncate">Total Points Spent</dt>
-                            <dd class="text-xl font-semibold text-gray-900">{{ total_points_spent }}</dd>
+                            <dt class="text-[10px] sm:text-xs font-medium text-gray-500 truncate">Total Spent</dt>
+                            <dd class="text-base sm:text-xl font-semibold text-gray-900">{{ total_points_spent }}</dd>
                         </dl>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white rounded-lg shadow-md p-4">
+            <div class="bg-white rounded-lg shadow-md p-2.5 sm:p-4">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <div class="rounded-md bg-green-500 p-2.5">
-                            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="rounded-md bg-green-500 p-2 sm:p-2.5">
+                            <svg class="h-4 w-4 sm:h-5 sm:w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                             </svg>
                         </div>
                     </div>
-                    <div class="ml-4 w-0 flex-1">
+                    <div class="ml-2.5 sm:ml-4 w-0 flex-1">
                         <dl>
-                            <dt class="text-xs font-medium text-gray-500 truncate">Average Spent</dt>
-                            <dd class="text-xl font-semibold text-gray-900">{{ average_spent|floatformat:1 }}</dd>
+                            <dt class="text-[10px] sm:text-xs font-medium text-gray-500 truncate">Average</dt>
+                            <dd class="text-base sm:text-xl font-semibold text-gray-900">{{ average_spent|floatformat:1 }}</dd>
                         </dl>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white rounded-lg shadow-md p-4">
+            <div class="bg-white rounded-lg shadow-md p-2.5 sm:p-4">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <div class="rounded-md bg-yellow-500 p-2.5">
-                            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="rounded-md bg-yellow-500 p-2 sm:p-2.5">
+                            <svg class="h-4 w-4 sm:h-5 sm:w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
                             </svg>
                         </div>
                     </div>
-                    <div class="ml-4 w-0 flex-1">
+                    <div class="ml-2.5 sm:ml-4 w-0 flex-1">
                         <dl>
-                            <dt class="text-xs font-medium text-gray-500 truncate">Highest Spent</dt>
-                            <dd class="text-xl font-semibold text-gray-900">{{ highest_spent }}</dd>
+                            <dt class="text-[10px] sm:text-xs font-medium text-gray-500 truncate">Highest</dt>
+                            <dd class="text-base sm:text-xl font-semibold text-gray-900">{{ highest_spent }}</dd>
                         </dl>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white rounded-lg shadow-md p-4">
+            <div class="bg-white rounded-lg shadow-md p-2.5 sm:p-4">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <div class="rounded-md bg-red-500 p-2.5">
-                            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="rounded-md bg-red-500 p-2 sm:p-2.5">
+                            <svg class="h-4 w-4 sm:h-5 sm:w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
                             </svg>
                         </div>
                     </div>
-                    <div class="ml-4 w-0 flex-1">
+                    <div class="ml-2.5 sm:ml-4 w-0 flex-1">
                         <dl>
-                            <dt class="text-xs font-medium text-gray-500 truncate">Lowest Spent</dt>
-                            <dd class="text-xl font-semibold text-gray-900">{{ lowest_spent }}</dd>
+                            <dt class="text-[10px] sm:text-xs font-medium text-gray-500 truncate">Lowest</dt>
+                            <dd class="text-base sm:text-xl font-semibold text-gray-900">{{ lowest_spent }}</dd>
                         </dl>
                     </div>
                 </div>
@@ -332,16 +342,16 @@
         <!-- Mobile: Card Layout -->
         <div class="sm:hidden space-y-2">
             {% for record in points_history %}
-            <div class="bg-white rounded-lg p-3 border border-gray-100 shadow-sm">
-                <div class="flex items-center justify-between mb-1">
-                    <span class="text-[11px] text-gray-400">{{ record.date|date:"M d, Y" }}</span>
+            <div class="bg-gradient-to-r from-rose-50 to-orange-50 rounded-lg p-3 border border-rose-100/50 shadow-sm">
+                <div class="flex items-center justify-between mb-1.5">
+                    <a href="{% url 'student_detail' record.student.id %}" class="text-sm font-semibold text-gray-900 hover:text-purple-600">{{ record.student.name }}</a>
                     <span class="text-sm font-bold text-rose-600">-{{ record.points_spent }} pts</span>
                 </div>
-                <a href="{% url 'student_detail' record.student.id %}" class="text-sm font-semibold text-gray-900">{{ record.student.name }}</a>
-                <p class="text-[11px] text-gray-500 mt-0.5 line-clamp-2">{{ record.description }}</p>
+                <p class="text-xs text-gray-500 line-clamp-2 mb-1">{{ record.description }}</p>
+                <p class="text-[10px] text-gray-400">{{ record.date|date:"M d, Y" }}</p>
             </div>
             {% empty %}
-            <div class="text-center text-gray-500 text-xs py-4">No points spent records found</div>
+            <div class="text-center text-gray-500 text-sm py-4">No points spent records found</div>
             {% endfor %}
         </div>
         

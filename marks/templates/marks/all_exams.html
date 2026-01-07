@@ -5,10 +5,10 @@
 {% block content %}
 <div class="max-w-7xl mx-auto">
     <!-- Header -->
-    <div class="mb-4 animate-fade-in-up flex justify-between items-center">
+    <div class="mb-3 sm:mb-4 animate-fade-in-up flex justify-between items-center">
         <div>
-            <h1 class="text-2xl font-bold gradient-text">All Exam Records</h1>
-            <p class="text-sm text-gray-600 mt-1">Complete list of all exam entries</p>
+            <h1 class="text-lg sm:text-2xl font-bold gradient-text">All Exam Records</h1>
+            <p class="text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1">Complete list of all exam entries</p>
         </div>
         <div class="flex items-center gap-2">
             <!-- Mobile: Clear Filter Button (shows when filters active) -->
@@ -239,7 +239,17 @@
     </div>
 
     <!-- Results Summary -->
-    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 animate-fade-in-up" style="animation-delay: 0.2s;">
+    <!-- Mobile: Compact -->
+    <div class="sm:hidden bg-blue-50 border-l-4 border-blue-500 px-3 py-2 mb-4 rounded-r-lg animate-fade-in-up" style="animation-delay: 0.2s;">
+        <p class="text-xs text-blue-700">
+            <span class="font-semibold">{{ unique_exams_count }}</span> exam{% if unique_exams_count != 1 %}s{% endif %} · <span class="font-semibold">{{ total_records_count }}</span> record{% if total_records_count != 1 %}s{% endif %}
+            {% if request.GET.student or request.GET.subject or request.GET.exam_type or request.GET.class_number or request.GET.month or request.GET.chapter or request.GET.exam_id_from or request.GET.exam_id_to or request.GET.date_from or request.GET.date_to %}
+                <span class="text-blue-500">(filtered)</span>
+            {% endif %}
+        </p>
+    </div>
+    <!-- Desktop: Full -->
+    <div class="hidden sm:block bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 animate-fade-in-up" style="animation-delay: 0.2s;">
         <p class="text-sm text-blue-700">
             Found <span class="font-semibold">{{ unique_exams_count }}</span> unique exam{% if unique_exams_count != 1 %}s{% endif %} and <span class="font-semibold">{{ total_records_count }}</span> result record{% if total_records_count != 1 %}s{% endif %}.
             {% if request.GET.student or request.GET.subject or request.GET.exam_type or request.GET.class_number or request.GET.month or request.GET.chapter or request.GET.exam_id_from or request.GET.exam_id_to or request.GET.date_from or request.GET.date_to %}

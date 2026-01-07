@@ -194,11 +194,12 @@
                     <!-- Name & Stats -->
                     <div class="flex-1 min-w-0">
                         <p class="font-semibold text-gray-900 text-sm truncate">{{ item.student.name }}</p>
-                        <p class="text-xs text-gray-500">{{ item.exam_count }} exams · {{ item.total_marks_obtained|floatformat:0 }}/{{ item.total_possible_marks|floatformat:0 }}</p>
+                        <p class="text-[10px] text-gray-400">{{ item.exam_count }} exams · {{ item.total_marks_obtained|floatformat:0 }}/{{ item.total_possible_marks|floatformat:0 }}</p>
                     </div>
                     <!-- Average -->
                     <div class="text-right flex-shrink-0">
                         <p class="text-sm font-bold gradient-text">{{ item.average|floatformat:1 }}%</p>
+                        <p class="text-[10px] text-gray-400">avg</p>
                     </div>
                 </div>
             </a>
