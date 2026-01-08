@@ -13,15 +13,15 @@
         <div class="flex items-center gap-2">
             <!-- Mobile: Clear Filter Button (shows when filters active) -->
             {% if request.GET.student or request.GET.subject or request.GET.exam_type or request.GET.class_number or request.GET.month or request.GET.chapter or request.GET.exam_id_from or request.GET.exam_id_to or request.GET.date_from or request.GET.date_to %}
-            <a href="{% url 'all_exams' %}" class="sm:hidden flex items-center justify-center w-9 h-9 rounded-lg bg-red-100 text-red-600">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="{% url 'all_exams' %}" class="sm:hidden flex items-center justify-center w-7 h-7 rounded-md bg-red-100 text-red-600">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </a>
             {% endif %}
             <!-- Mobile: Filter Button -->
-            <button type="button" id="filter-toggle" class="sm:hidden flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-purple-100 text-purple-700 shadow-sm">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button type="button" id="filter-toggle" class="sm:hidden flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium bg-purple-100 text-purple-700">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
                 </svg>
                 Filters
@@ -453,6 +453,10 @@
         filterOverlay.classList.add('hidden');
         filterPanel.classList.add('-translate-x-full');
         document.body.style.overflow = '';
+        // Apply filters when the overlay closes
+        if (mobileFilterForm) {
+            mobileFilterForm.submit();
+        }
     }
     
     if (filterToggle) {
@@ -465,23 +469,6 @@
         filterOverlay.addEventListener('click', closeFilterPanel);
     }
     
-    // Auto-submit mobile filter form on select change
-    if (mobileFilterForm) {
-        const selects = mobileFilterForm.querySelectorAll('.mobile-filter-select');
-        const inputs = mobileFilterForm.querySelectorAll('.mobile-filter-input');
-        
-        selects.forEach(function(select) {
-            select.addEventListener('change', function() {
-                mobileFilterForm.submit();
-            });
-        });
-        
-        // For text/number inputs, submit on blur or Enter key
-        inputs.forEach(function(input) {
-            input.addEventListener('change', function() {
-                mobileFilterForm.submit();
-            });
-        });
-    }
+    // Filters now apply on overlay close; no auto-submit on change
 </script>
 {% endblock %}
