@@ -5,12 +5,12 @@
 {% block content %}
 <div class="max-w-7xl mx-auto">
     <!-- Header -->
-    <div class="mb-3 sm:mb-4 animate-fade-in-up flex justify-between items-center">
-        <div>
-            <h1 class="text-lg sm:text-2xl font-bold gradient-text">All Exam Records</h1>
-            <p class="text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1">Complete list of all exam entries</p>
-        </div>
-        <div class="flex items-center gap-2">
+    <div class="mb-3 sm:mb-4 animate-fade-in-up">
+        <div class="flex justify-between items-start sm:items-center">
+            <div class="flex-1">
+                <h1 class="text-lg sm:text-2xl font-bold gradient-text">All Exam Records</h1>
+            </div>
+            <div class="flex items-center gap-2">
             <!-- Mobile: Clear Filter Button (shows when filters active) -->
             {% if request.GET.student or request.GET.subject or request.GET.exam_type or request.GET.class_number or request.GET.month or request.GET.chapter or request.GET.exam_id_from or request.GET.exam_id_to or request.GET.date_from or request.GET.date_to %}
             <a href="{% url 'all_exams' %}" class="sm:hidden flex items-center justify-center w-7 h-7 rounded-md bg-red-100 text-red-600">
@@ -32,7 +32,9 @@
             <a href="{% url 'add_exam' %}" class="hide-mobile px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md transition-all" style="background-color: #D1FAE5; color: #065F46;">
                 Record Exam Result
             </a>
+            </div>
         </div>
+        <p class="text-xs sm:text-sm text-gray-600 mt-1 sm:mt-0.5">Complete list of all exam entries</p>
     </div>
 
     <!-- Mobile: Filter Overlay -->

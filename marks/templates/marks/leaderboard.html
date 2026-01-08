@@ -163,20 +163,26 @@
                 <!-- Mobile: Compact List -->
                 <div class="sm:hidden space-y-2">
                     {% for item in subject_data.leaders %}
-                    <a href="{% url 'student_detail' item.student.id %}" class="flex items-center gap-2 p-2 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-100/50">
-                        <div class="w-7 h-7 flex items-center justify-center rounded-full {% if item.rank == 1 %}bg-yellow-100{% elif item.rank == 2 %}bg-gray-100{% elif item.rank == 3 %}bg-orange-100{% else %}bg-purple-50{% endif %}">
+                    <a href="{% url 'student_detail' item.student.id %}" class="flex items-center gap-2.5 p-2.5 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-100/50">
+                        <div class="w-8 h-8 flex items-center justify-center rounded-full {% if item.rank == 1 %}bg-yellow-100{% elif item.rank == 2 %}bg-gray-100{% elif item.rank == 3 %}bg-orange-100{% else %}bg-purple-50{% endif %}">
                             {% if item.rank == 1 %}
-                                <span class="text-sm">🥇</span>
+                                <span class="text-base">🥇</span>
                             {% elif item.rank == 2 %}
-                                <span class="text-sm">🥈</span>
+                                <span class="text-base">🥈</span>
                             {% elif item.rank == 3 %}
-                                <span class="text-sm">🥉</span>
+                                <span class="text-base">🥉</span>
                             {% else %}
                                 <span class="text-xs font-bold text-purple-600">#{{ item.rank }}</span>
                             {% endif %}
                         </div>
-                        <span class="flex-1 font-medium text-sm text-gray-900 truncate">{{ item.student.name }}</span>
-                        <span class="text-xs font-bold gradient-text">{{ item.average_percentage|floatformat:1 }}%</span>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-semibold text-gray-900 text-sm truncate">{{ item.student.name }}</p>
+                            <p class="text-[10px] text-gray-500">{{ item.exam_count }} exams</p>
+                        </div>
+                        <div class="text-right flex-shrink-0">
+                            <p class="text-sm font-bold gradient-text">{{ item.average_percentage|floatformat:1 }}%</p>
+                            <p class="text-[10px] text-gray-500">avg</p>
+                        </div>
                     </a>
                     {% empty %}
                     <div class="text-center text-gray-500 text-xs py-2">No data</div>

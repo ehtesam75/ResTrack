@@ -236,15 +236,15 @@
                     <h3 class="font-semibold text-gray-900 mb-2 sm:mb-1.5 text-sm">{{ item.exam_type.name }}</h3>
                     <div class="space-y-1 sm:space-y-1">
                         <div class="flex justify-between text-xs sm:text-xs">
-                            <span class="text-gray-600">Exams:</span>
+                            <span class="text-gray-600">Exams Attended:</span>
                             <span class="font-semibold">{{ item.exam_count }}</span>
                         </div>
                         <div class="flex justify-between text-xs sm:text-xs">
-                            <span class="text-gray-600">Total:</span>
+                            <span class="text-gray-600">Total Obtained Marks:</span>
                             <span class="font-semibold gradient-text">{{ item.total_marks|floatformat:0 }}</span>
                         </div>
                         <div class="flex justify-between text-xs sm:text-xs">
-                            <span class="text-gray-600">Avg:</span>
+                            <span class="text-gray-600">Average Score:</span>
                             <span class="font-semibold gradient-text">{{ item.average_percentage|floatformat:1 }}%</span>
                         </div>
                     </div>
@@ -346,6 +346,7 @@
                     </div>
                     <div class="text-right flex-shrink-0">
                         <p class="text-sm font-bold" style="color: #6D67CA;">{{ month.average_percentage|floatformat:1 }}%</p>
+                        <p class="text-[10px] text-gray-500">avg</p>
                     </div>
                 </div>
                 {% endfor %}
