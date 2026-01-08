@@ -419,9 +419,21 @@
         pointsFilterOverlay.classList.add('hidden');
         pointsFilterPanel.classList.add('-translate-x-full');
         document.body.style.overflow = '';
-        // Apply filters when the overlay closes
+        // Only submit if form has actual filter values
         if (pointsFilterForm) {
-            pointsFilterForm.submit();
+            const formData = new FormData(pointsFilterForm);
+            let hasFilters = false;
+            for (let [key, value] of formData.entries()) {
+                if (value && value.trim() !== '') {
+                    hasFilters = true;
+                    break;
+                }
+            }
+            // Only submit if there are filters or if URL already has params (to allow clearing)
+            const urlHasParams = window.location.search.length > 1;
+            if (hasFilters || urlHasParams) {
+                pointsFilterForm.submit();
+            }
         }
     }
     

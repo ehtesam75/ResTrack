@@ -320,35 +320,36 @@
     <div class="glass-effect rounded-xl shadow-lg border border-gray-200 animate-fade-in-up overflow-hidden" style="animation-delay: 0.55s;">
         <div class="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 px-3 sm:px-4 py-2">
             <div class="flex items-center space-x-2">
-                <span class="text-lg sm:text-xl">📈</span>
-                <h3 class="text-white text-xs font-semibold tracking-wide">Best Performing Months</h3>
+                <span class="text-base sm:text-xl">📈</span>
+                <h3 class="text-white text-xs font-semibold tracking-wide sm:hidden">Top 3 Performing Months</h3>
+                <h3 class="text-white text-xs font-semibold tracking-wide hidden sm:block">Best Performing Months</h3>
             </div>
         </div>
-        <div class="p-2.5 sm:p-3 bg-gradient-to-br from-gray-50 to-white">
-            <!-- Mobile: Compact Card Layout -->
-            <div class="sm:hidden space-y-2">
+        <div class="p-2 sm:p-3 bg-gradient-to-br from-gray-50 to-white">
+            <!-- Mobile: Top 3 Only, Compact Card Layout -->
+            <div class="sm:hidden space-y-1.5">
                 {% for month in best_5_months %}
-                <div class="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg p-2.5 border border-emerald-100/50 shadow-sm flex items-center gap-3">
-                    <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full {% if forloop.counter == 1 %}bg-yellow-100{% elif forloop.counter == 2 %}bg-gray-100{% elif forloop.counter == 3 %}bg-orange-100{% else %}bg-blue-50{% endif %}">
+                {% if forloop.counter <= 3 %}
+                <div class="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg p-2 border border-emerald-100/50 shadow-sm flex items-center gap-2.5">
+                    <div class="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full {% if forloop.counter == 1 %}bg-yellow-100{% elif forloop.counter == 2 %}bg-gray-100{% elif forloop.counter == 3 %}bg-orange-100{% endif %}">
                         {% if forloop.counter == 1 %}
-                            <span class="text-base">🥇</span>
+                            <span class="text-sm">🥇</span>
                         {% elif forloop.counter == 2 %}
-                            <span class="text-base">🥈</span>
+                            <span class="text-sm">🥈</span>
                         {% elif forloop.counter == 3 %}
-                            <span class="text-base">🥉</span>
-                        {% else %}
-                            <span class="text-xs font-bold text-blue-600">#{{ forloop.counter }}</span>
+                            <span class="text-sm">🥉</span>
                         {% endif %}
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p class="font-semibold text-sm text-gray-900">{{ month.month_name }}</p>
-                        <p class="text-xs text-gray-500">{{ month.exams_count }} exams · {{ month.points_earned }} pts</p>
+                        <p class="font-semibold text-xs text-gray-900">{{ month.month_name }}</p>
+                        <p class="text-[10px] text-gray-500">{{ month.exams_count }} exams · {{ month.points_earned }} pts</p>
                     </div>
                     <div class="text-right flex-shrink-0">
-                        <p class="text-sm font-bold" style="color: #6D67CA;">{{ month.average_percentage|floatformat:1 }}%</p>
+                        <p class="text-xs font-bold" style="color: #6D67CA;">{{ month.average_percentage|floatformat:1 }}%</p>
                         <p class="text-[10px] text-gray-500">avg</p>
                     </div>
                 </div>
+                {% endif %}
                 {% endfor %}
             </div>
             
