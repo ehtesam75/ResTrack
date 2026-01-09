@@ -438,6 +438,35 @@
 </div>
 
 <script>
+    // Clear filters on page refresh (mobile)
+    (function() {
+        // Check if this is a page refresh
+        const navEntries = performance.getEntriesByType('navigation');
+        const isRefresh = navEntries.length > 0 && navEntries[0].type === 'reload';
+        
+        // Also check performance.navigation for older browsers
+        const isRefreshLegacy = performance.navigation && performance.navigation.type === 1;
+        
+        if ((isRefresh || isRefreshLegacy) && window.innerWidth < 640) {
+            // Check if URL has filter parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.toString().length > 0) {
+                // Clear all filter inputs
+                const filterInputs = document.querySelectorAll('.mobile-filter-input, .mobile-filter-select');
+                filterInputs.forEach(input => {
+                    if (input.tagName === 'SELECT') {
+                        input.selectedIndex = 0;
+                    } else {
+                        input.value = '';
+                    }
+                });
+                // Redirect to clean URL
+                window.history.replaceState({}, '', window.location.pathname);
+                window.location.href = window.location.pathname;
+            }
+        }
+    })();
+
     // Filter slide-in panel for mobile
     const filterToggle = document.getElementById('filter-toggle');
     const filterClose = document.getElementById('filter-close');

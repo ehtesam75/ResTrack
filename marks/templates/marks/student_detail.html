@@ -257,33 +257,33 @@
     </div>
 
     <!-- Subject-wise Summary -->
-    <div class="glass-effect rounded-xl p-2.5 sm:p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in-up" style="animation-delay: 0.5s;">
-        <h2 class="text-xs sm:text-base font-bold gradient-text mb-2 sm:mb-3">📊 Subject-wise Summary</h2>
+    <div class="glass-effect rounded-xl p-3 sm:p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in-up" style="animation-delay: 0.5s;">
+        <h2 class="text-sm sm:text-base font-bold gradient-text mb-2 sm:mb-3">📊 Subject-wise Summary</h2>
         
         <!-- Mobile: Card Layout -->
-        <div class="sm:hidden space-y-1.5">
+        <div class="sm:hidden space-y-2">
             {% for item in subject_summary %}
-            <div class="bg-gradient-to-r from-purple-50/70 to-blue-50/70 rounded-lg p-2 border border-purple-100/50 shadow-sm">
-                <div class="flex items-center justify-between mb-1.5">
-                    <div class="flex items-center gap-1.5">
-                        <span class="text-[10px] font-bold text-purple-600">#{{ item.rank }}</span>
-                        <span class="text-xs text-gray-900">{{ item.subject.name }}</span>
+            <div class="bg-gradient-to-r from-purple-50/70 to-blue-50/70 rounded-lg p-3 border border-purple-100/50 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold text-purple-600">#{{ item.rank }}</span>
+                        <span class="text-sm text-gray-900">{{ item.subject.name }}</span>
                     </div>
-                    <span class="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-medium">{{ item.exam_count }} exams</span>
+                    <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-medium">{{ item.exam_count }} exams</span>
                 </div>
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-[10px] text-gray-500">Total Marks</p>
-                        <p class="text-xs font-bold gradient-text">{{ item.total_marks|floatformat:0 }}</p>
+                        <p class="text-xs text-gray-500">Total Marks</p>
+                        <p class="text-sm font-bold gradient-text">{{ item.total_marks|floatformat:0 }}</p>
                     </div>
                     <div class="text-right">
-                        <p class="text-[10px] text-gray-500">Average</p>
-                        <p class="text-xs font-bold gradient-text">{{ item.average_percentage|floatformat:1 }}%</p>
+                        <p class="text-xs text-gray-500">Average</p>
+                        <p class="text-sm font-bold gradient-text">{{ item.average_percentage|floatformat:1 }}%</p>
                     </div>
                 </div>
             </div>
             {% empty %}
-            <div class="text-center text-gray-500 text-xs py-4">No subject data available</div>
+            <div class="text-center text-gray-500 text-sm py-4">No subject data available</div>
             {% endfor %}
         </div>
         
@@ -391,33 +391,33 @@
     {% endif %}
 
     <!-- Recent Exams -->
-    <div class="glass-effect rounded-xl p-2.5 sm:p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in-up" style="animation-delay: 0.6s;">
-        <h2 class="text-xs sm:text-base font-bold gradient-text mb-2 sm:mb-3">🕒 Recent Exams</h2>
+    <div class="glass-effect rounded-xl p-3 sm:p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in-up" style="animation-delay: 0.6s;">
+        <h2 class="text-sm sm:text-base font-bold gradient-text mb-2 sm:mb-3">🕒 Recent Exams</h2>
         
         <!-- Mobile: Card Layout -->
-        <div class="sm:hidden space-y-1.5">
+        <div class="sm:hidden space-y-2">
             {% for exam in recent_exams %}
-            <div class="bg-gradient-to-r from-slate-50 to-gray-50 rounded-lg p-2 border border-gray-200/60 shadow-sm">
-                <div class="flex items-center justify-between mb-1.5">
-                    <div class="flex items-center gap-1.5">
-                        <span class="text-[10px] font-semibold text-purple-600">#{{ exam.exam_id|default:"N/A" }}</span>
-                        <span class="text-[10px] text-gray-400">{{ exam.date|date:"M d" }}</span>
+            <div class="bg-white rounded-lg p-3 border border-gray-100 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-semibold text-purple-600">#{{ exam.exam_id|default:"N/A" }}</span>
+                        <span class="text-xs text-gray-400">{{ exam.date|date:"M d" }}</span>
                     </div>
-                    <span class="grade-badge text-gray-900 text-[10px] px-1.5 py-0.5" style="background-color: {{ exam.grade_color }};">{{ exam.grade }}</span>
+                    <span class="grade-badge text-gray-900 text-xs px-2 py-0.5" style="background-color: {{ exam.grade_color }};">{{ exam.grade }}</span>
                 </div>
                 <div class="flex items-center justify-between">
                     <div class="flex-1 min-w-0">
-                        <p class="text-xs text-gray-900 truncate">{{ exam.subject.name }}</p>
-                        <p class="text-[10px] text-gray-500">{{ exam.exam_type.name }} · Ch {{ exam.chapter|default:"—" }}</p>
+                        <p class="text-sm text-gray-900 truncate">{{ exam.subject.name }}</p>
+                        <p class="text-xs text-gray-500">{{ exam.exam_type.name }} · Ch {{ exam.chapter|default:"—" }}</p>
                     </div>
-                    <div class="text-right flex-shrink-0 ml-2">
-                        <p class="text-xs font-bold gradient-text">{{ exam.percentage|floatformat:1 }}%</p>
-                        <p class="text-[10px] text-gray-500">{{ exam.mark_obtained|floatformat:0 }}/{{ exam.total_marks|floatformat:0 }}</p>
+                    <div class="text-right flex-shrink-0 ml-3">
+                        <p class="text-sm font-bold gradient-text">{{ exam.percentage|floatformat:1 }}%</p>
+                        <p class="text-xs text-gray-500">{{ exam.mark_obtained|floatformat:0 }}/{{ exam.total_marks|floatformat:0 }}</p>
                     </div>
                 </div>
             </div>
             {% empty %}
-            <div class="text-center text-gray-500 text-xs py-4">No exams recorded</div>
+            <div class="text-center text-gray-500 text-sm py-4">No exams recorded</div>
             {% endfor %}
         </div>
         
