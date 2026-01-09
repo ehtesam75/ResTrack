@@ -30,14 +30,19 @@ class ExamTypeAdmin(admin.ModelAdmin):
 
 @admin.register(Exam)
 class ExamAdmin(admin.ModelAdmin):
-    list_display = ['exam_id', 'student', 'subject', 'exam_type', 'date', 'chapter', 'mark_obtained', 'total_marks', 'percentage', 'grade', 'class_number']
+    list_display = ['exam_id', 'student', 'subject', 'exam_type', 'date', 'chapter', 'mark_obtained', 'total_marks', 'percentage', 'grade', 'class_number', 'has_pdf']
     list_filter = ['subject', 'exam_type', 'date', 'student', 'class_number']
-    search_fields = ['student__name', 'subject__name', 'chapter']
+    search_fields = ['student__name', 'subject__name', 'chapter', 'exam_id']
     date_hierarchy = 'date'
     ordering = ['-exam_id']
     
     # Make fields editable in admin
-    fields = ['student', 'subject', 'exam_type', 'date', 'chapter', 'class_number', 'total_marks', 'mark_obtained', 'group_id', 'exam_id']
+    fields = ['student', 'subject', 'exam_type', 'date', 'chapter', 'class_number', 'total_marks', 'mark_obtained', 'group_id', 'exam_id', 'question_pdf']
+    
+    def has_pdf(self, obj):
+        return bool(obj.question_pdf)
+    has_pdf.boolean = True
+    has_pdf.short_description = 'PDF'
     list_editable = ['chapter', 'mark_obtained', 'total_marks']
     
     def percentage(self, obj):
