@@ -131,6 +131,14 @@
                 </div>
                 <span>Exams</span>
             </a>
+            <a href="{% url 'exam_lookup' %}" class="{% if 'exam-lookup' in request.path %}bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 border-l-2 border-purple-500{% else %}text-gray-600 hover:bg-gray-50 border-l-2 border-transparent{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-r-lg font-medium transition-all text-sm">
+                <div class="w-8 h-8 rounded-lg {% if 'exam-lookup' in request.path %}bg-purple-100{% else %}bg-gray-100{% endif %} flex items-center justify-center">
+                    <svg class="w-4 h-4 {% if 'exam-lookup' in request.path %}text-purple-600{% else %}text-gray-500{% endif %}" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-1 2l5 5h-5V4zM8.5 13a.5.5 0 01.5.5v3a.5.5 0 01-1 0v-3a.5.5 0 01.5-.5zm2.5 0a.5.5 0 01.5.5v3a.5.5 0 01-1 0v-3a.5.5 0 01.5-.5zm3.5.5a.5.5 0 00-1 0v3a.5.5 0 001 0v-3z"/>
+                    </svg>
+                </div>
+                <span>Exam Papers</span>
+            </a>
             <a href="{% url 'points' %}" class="{% if 'points' in request.path %}bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 border-l-2 border-purple-500{% else %}text-gray-600 hover:bg-gray-50 border-l-2 border-transparent{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-r-lg font-medium transition-all text-sm">
                 <div class="w-8 h-8 rounded-lg {% if 'points' in request.path %}bg-purple-100{% else %}bg-gray-100{% endif %} flex items-center justify-center">
                     <svg class="w-4 h-4 {% if 'points' in request.path %}text-purple-600{% else %}text-gray-500{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">

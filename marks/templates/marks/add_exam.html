@@ -33,7 +33,7 @@
         </div>
         {% endif %}
         
-        <form method="post" class="space-y-5">
+        <form method="post" enctype="multipart/form-data" class="space-y-5">
             {% csrf_token %}
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -192,6 +192,24 @@
                     >
                     <p class="text-xs text-red-600 mt-1 hidden" id="marks-error">Cannot exceed total marks</p>
                 </div>
+
+                <div>
+                    <label for="question_pdf" class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Question Paper (PDF) <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <input 
+                            type="file" 
+                            id="question_pdf" 
+                            name="question_pdf" 
+                            accept=".pdf"
+                            required
+                            class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-purple-100 file:text-purple-700 hover:file:bg-purple-200"
+                        >
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Upload exam question paper (PDF only)</p>
+                    <p class="text-xs text-red-600 mt-1 hidden" id="pdf-error">Please upload a PDF file</p>
+                </div>
             </div>
 
             <div class="flex gap-3 pt-2">
@@ -231,6 +249,8 @@
     const dateInput = document.getElementById('date');
     const chapterInput = document.getElementById('chapter');
     const examIdInput = document.getElementById('exam_id');
+    const questionPdfInput = document.getElementById('question_pdf');
+    const pdfError = document.getElementById('pdf-error');
     const isProduction = {{ is_production|yesno:"true,false" }};
     
     // Validate all fields
@@ -240,10 +260,10 @@
         let hasError = false;
         let allRequiredFilled = true;
         
-        // Check all required fields
+        // Check all required fields including PDF
         if (!studentSelect.value || !subjectSelect.value || !examTypeSelect.value || 
             !classSelect.value || !dateInput.value || !totalMarksInput.value || !markObtainedInput.value ||
-            !chapterInput.value || !examIdInput.value) {
+            !chapterInput.value || !examIdInput.value || !questionPdfInput.files.length) {
             allRequiredFilled = false;
         }
         
@@ -255,6 +275,19 @@
         } else {
             marksError.classList.add('hidden');
             markObtainedInput.classList.remove('border-red-500');
+        }
+        
+        // Validate PDF file type
+        if (questionPdfInput.files.length > 0) {
+            const file = questionPdfInput.files[0];
+            if (!file.type.includes('pdf') && !file.name.toLowerCase().endsWith('.pdf')) {
+                pdfError.classList.remove('hidden');
+                questionPdfInput.classList.add('border-red-500');
+                hasError = true;
+            } else {
+                pdfError.classList.add('hidden');
+                questionPdfInput.classList.remove('border-red-500');
+            }
         }
         
         // Disable button if validation fails OR if in production
@@ -271,6 +304,7 @@
     dateInput.addEventListener('change', validateForm);
     chapterInput.addEventListener('input', validateForm);
     examIdInput.addEventListener('input', validateForm);
+    questionPdfInput.addEventListener('change', validateForm);
     
     // Initial validation check
     validateForm();

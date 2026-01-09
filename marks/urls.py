@@ -35,6 +35,10 @@ urlpatterns = [
     # About page
     path('about/', views.about, name='about'),
     
+    # Exam lookup page (mobile)
+    path('exam-lookup/', views.exam_lookup, name='exam_lookup'),
+    path('exam-lookup-api/', views.exam_lookup_api, name='exam_lookup_api'),
+    
     # API endpoints for charts
     path('api/marks-over-time/<int:student_id>/', views.api_marks_over_time, name='api_marks_over_time'),
     path('api/subject-performance/<int:student_id>/', views.api_subject_performance, name='api_subject_performance'),

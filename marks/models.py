@@ -402,6 +402,12 @@ class Exam(models.Model):
         blank=True,
         help_text="Unique exam identifier (same for bulk entries)"
     )
+    question_pdf = models.FileField(
+        upload_to='exam_questions/',
+        blank=True,
+        null=True,
+        help_text="PDF file containing exam questions"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

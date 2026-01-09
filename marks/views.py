@@ -685,9 +685,10 @@ def add_exam(request):
         class_number = request.POST.get('class_number')
         total_marks = request.POST.get('total_marks')
         mark_obtained = request.POST.get('mark_obtained')
+        question_pdf = request.FILES.get('question_pdf')
         
         exam_id = request.POST.get('exam_id')
-        if all([student_id, subject_id, exam_type_name, date, chapter, class_number, total_marks, mark_obtained, exam_id]):
+        if all([student_id, subject_id, exam_type_name, date, chapter, class_number, total_marks, mark_obtained, exam_id, question_pdf]):
             try:
                 student = Student.objects.get(id=student_id)
                 subject = Subject.objects.get(id=subject_id)
@@ -707,7 +708,8 @@ def add_exam(request):
                     class_number=class_number,
                     total_marks=total_marks,
                     mark_obtained=mark_obtained,
-                    exam_id=exam_id
+                    exam_id=exam_id,
+                    question_pdf=question_pdf
                 )
                 messages.success(request, 'Exam added successfully!')
                 return redirect('student_detail', student_id=student.id)
@@ -747,9 +749,10 @@ def add_bulk_exam(request):
             chapter = request.POST.get('chapter')
             class_number = request.POST.get('class_number')
             total_marks = request.POST.get('total_marks')
+            question_pdf = request.FILES.get('question_pdf')
             
             exam_id = request.POST.get('exam_id')
-            if all([subject_id, exam_type_name, date, chapter, class_number, total_marks, exam_id]):
+            if all([subject_id, exam_type_name, date, chapter, class_number, total_marks, exam_id, question_pdf]):
                 try:
                     subject = Subject.objects.get(id=subject_id)
                     # Get or create exam type (CQ or MCQ)
@@ -779,7 +782,8 @@ def add_bulk_exam(request):
                                 total_marks=total_marks,
                                 mark_obtained=mark_obtained,
                                 group_id=group_id,
-                                exam_id=exam_id
+                                exam_id=exam_id,
+                                question_pdf=question_pdf
                             )
                             created_count += 1
                     messages.success(request, f'Successfully added 1 exam with {created_count} student results!')
@@ -1430,4 +1434,53 @@ def about(request):
     return render(request, 'marks/about.html')
 
 
+def exam_lookup(request):
+    """Mobile-only page for looking up exam PDFs by exam ID"""
+    return render(request, 'marks/exam_lookup.html')
 
+
+def exam_lookup_api(request):
+    """API endpoint for fetching exam details by exam ID"""
+    exam_id = request.GET.get('exam_id', '').strip()
+    
+    if not exam_id:
+        return JsonResponse({'success': False, 'error': 'Please enter an exam ID'})
+    
+    # Find exam(s) with the given exam_id
+    exams = Exam.objects.filter(exam_id=exam_id).select_related('subject', 'exam_type', 'student')
+    
+    if not exams.exists():
+        return JsonResponse({'success': False, 'error': f'No exam found with ID: {exam_id}'})
+    
+    # Get the first exam for common details
+    first_exam = exams.first()
+    
+    # Find best performer for this exam
+    best_student = None
+    best_percentage = 0
+    for exam in exams:
+        if exam.percentage > best_percentage:
+            best_percentage = exam.percentage
+            best_student = exam.student
+    
+    # Get PDF URL if available
+    pdf_url = None
+    if first_exam.question_pdf:
+        pdf_url = first_exam.question_pdf.url
+    
+    return JsonResponse({
+        'success': True,
+        'exam': {
+            'exam_id': first_exam.exam_id,
+            'date': first_exam.date.strftime('%B %d, %Y') if first_exam.date else 'N/A',
+            'subject': first_exam.subject.name,
+            'chapter': first_exam.chapter or 'N/A',
+            'exam_type': first_exam.exam_type.name,
+            'total_marks': str(first_exam.total_marks),
+            'best_student': best_student.name if best_student else 'N/A',
+            'best_percentage': round(best_percentage, 1),
+            'total_participants': exams.count(),
+            'has_pdf': pdf_url is not None,
+            'pdf_url': pdf_url,
+        }
+    })

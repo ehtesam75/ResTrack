@@ -135,6 +135,12 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # ======================
+# Media Files
+# ======================
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# ======================
 # Misc
 # ======================
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
