@@ -60,7 +60,6 @@ def teacher_signup(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            messages.success(request, f'Welcome, {user.first_name}! Your teacher account has been created successfully.')
             return redirect('dashboard')
         else:
             for field, errors in form.errors.items():
@@ -83,11 +82,6 @@ def user_login(request):
             user = form.get_user()
             login(request, user)
             
-            if hasattr(user, 'teacher_profile'):
-                messages.success(request, f'Welcome back, {user.first_name or user.username}!')
-            else:
-                messages.success(request, f'Welcome back, {user.username}!')
-            
             next_url = request.GET.get('next', 'dashboard')
             return redirect(next_url)
         else:
@@ -101,7 +95,6 @@ def user_login(request):
 def user_logout(request):
     """Handle user logout"""
     logout(request)
-    messages.success(request, 'You have been logged out successfully.')
     return redirect('home')
 
 
@@ -345,13 +338,14 @@ def student_detail(request, student_id):
                 excellent_exams += 1
         excellence_rate = (excellent_exams / total_exams) * 100
     
-    # Calculate Monthly Winner Count (only past months, #1 positions)
+    # Calculate Monthly Winner Count (only past months, #1 positions) - within same teacher
     from datetime import date
     current_year = date.today().year
     current_month = date.today().month
     
     monthly_winner_count = 0
-    exam_dates = Exam.objects.values_list('date', flat=True).distinct()
+    # Only look at teacher's exams
+    exam_dates = Exam.objects.filter(teacher=teacher).values_list('date', flat=True).distinct()
     months_set = set()
     
     for exam_date in exam_dates:
@@ -361,14 +355,16 @@ def student_detail(request, student_id):
                 months_set.add((exam_date.year, exam_date.month))
     
     for year, month in months_set:
-        # Get total unique exams conducted in this month
+        # Get total unique exams conducted in this month (teacher-scoped)
         total_month_exams = Exam.objects.filter(
+            teacher=teacher,
             date__year=year,
             date__month=month
         ).values('exam_id').distinct().count()
         
-        # Get all students who had exams in this month
+        # Get all students who had exams in this month (teacher-scoped)
         students_in_month = Student.objects.filter(
+            teacher=teacher,
             exam__date__year=year,
             exam__date__month=month
         ).distinct()
@@ -410,12 +406,12 @@ def student_detail(request, student_id):
                         monthly_winner_count += 1
                     break
     
-    # Calculate Subject Champion Count (how many subjects they've topped)
+    # Calculate Subject Champion Count (how many subjects they've topped) - within same teacher
     subject_champion_count = 0
-    subjects = Subject.objects.all()
+    subjects = Subject.objects.filter(teacher=teacher)
     
     for subject in subjects:
-        students_in_subject = Student.objects.filter(exam__subject=subject).distinct()
+        students_in_subject = Student.objects.filter(teacher=teacher, exam__subject=subject).distinct()
         subject_rankings = []
         
         for s in students_in_subject:
@@ -484,8 +480,8 @@ def student_detail(request, student_id):
     monthly_performance.sort(key=lambda x: x['average_percentage'], reverse=True)
     best_5_months = monthly_performance[:5]
     
-    # Get all other students for comparison dropdown
-    all_students = Student.objects.exclude(id=student_id).order_by('name')
+    # Get all other students for comparison dropdown (teacher-scoped)
+    all_students = Student.objects.filter(teacher=teacher).exclude(id=student_id).order_by('name')
     
     context = {
         'student': student,
@@ -939,7 +935,6 @@ def add_student(request):
                     created_by=request.user
                 )
                 
-                messages.success(request, f'Student "{name}" with username "{username}" created successfully!')
                 return redirect('student_detail', student_id=student.id)
             except Exception as e:
                 messages.error(request, f'Error creating student: {str(e)}')
@@ -1004,7 +999,6 @@ def edit_student(request, student_id):
                         student_user.set_password(new_password)
                         student_user.save()
                 
-                messages.success(request, f'Student "{name}" updated successfully!')
                 return redirect('student_detail', student_id=student.id)
             except Exception as e:
                 messages.error(request, f'Error updating student: {str(e)}')
@@ -1029,7 +1023,6 @@ def add_subject(request):
         
         if name:
             subject = Subject.objects.create(name=name, teacher=request.user)
-            messages.success(request, f'Subject "{name}" added successfully!')
             return redirect('subject_list')
         else:
             messages.error(request, 'Subject name is required!')
@@ -1049,7 +1042,6 @@ def add_exam_type(request):
         
         if name:
             exam_type = ExamType.objects.create(name=name, teacher=request.user)
-            messages.success(request, f'Exam type "{name}" added successfully!')
             return redirect('add_exam')
         else:
             messages.error(request, 'Exam type name is required!')
@@ -1078,7 +1070,7 @@ def add_exam(request):
         question_pdf = request.FILES.get('question_pdf')
         
         exam_id = request.POST.get('exam_id')
-        if all([student_id, subject_id, exam_type_name, date, chapter, class_number, total_marks, mark_obtained, exam_id, question_pdf]):
+        if all([student_id, subject_id, exam_type_name, date, chapter, class_number, total_marks, mark_obtained, exam_id]):
             try:
                 # Ensure student belongs to this teacher
                 student = Student.objects.get(id=student_id, teacher=teacher)
@@ -1103,7 +1095,6 @@ def add_exam(request):
                     exam_id=exam_id,
                     question_pdf=question_pdf
                 )
-                messages.success(request, 'Exam added successfully!')
                 return redirect('student_detail', student_id=student.id)
             except Exception as e:
                 messages.error(request, f'Error adding exam: {str(e)}')
@@ -1151,7 +1142,7 @@ def add_bulk_exam(request):
             question_pdf = request.FILES.get('question_pdf')
             
             exam_id = request.POST.get('exam_id')
-            if all([subject_id, exam_type_name, date, chapter, class_number, total_marks, exam_id, question_pdf]):
+            if all([subject_id, exam_type_name, date, chapter, class_number, total_marks, exam_id]):
                 try:
                     # Ensure subject belongs to this teacher
                     subject = Subject.objects.get(id=subject_id, teacher=teacher)
@@ -1188,7 +1179,6 @@ def add_bulk_exam(request):
                                 question_pdf=question_pdf
                             )
                             created_count += 1
-                    messages.success(request, f'Successfully added 1 exam with {created_count} student results!')
                     return redirect('all_exams')
                 except Exception as e:
                     messages.error(request, f'Error adding exams: {str(e)}')
@@ -1267,7 +1257,6 @@ def edit_exam(request, exam_id):
                 # Recalculate student's lifetime points
                 exam.student.recalculate_lifetime_points()
                 
-                messages.success(request, 'Exam updated successfully!')
                 return redirect('all_exams')
             except Exception as e:
                 messages.error(request, f'Error updating exam: {str(e)}')
@@ -1352,7 +1341,8 @@ def all_exams(request):
     if subject_filter:
         exams = exams.filter(subject_id=subject_filter)
     if exam_type_filter:
-        exams = exams.filter(exam_type_id=exam_type_filter)
+        # Filter by exam type name (CQ or MCQ)
+        exams = exams.filter(exam_type__name=exam_type_filter)
     if class_filter:
         exams = exams.filter(class_number=class_filter)
     if month_filter:
@@ -1527,7 +1517,6 @@ def add_points_spent(request):
                     points_spent=points_spent,
                     description=description[:15]  # Enforce max 15 characters
                 )
-                messages.success(request, f'Successfully recorded {points_spent} points spent by {student.name}.')
                 return redirect('points')
         except Student.DoesNotExist:
             messages.error(request, 'Student not found.')

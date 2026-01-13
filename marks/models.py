@@ -161,14 +161,15 @@ class Student(models.Model):
     @property
     def rank(self):
         """
-        Calculate student's rank among all students.
+        Calculate student's rank among students belonging to the same teacher.
         
         Ranking Rules:
         1. Primary: Ranked by average score (average_percentage)
         2. Tie-breaker: If average scores are equal, rank by total_marks
         3. If both are equal, students share the same rank
         """
-        students = Student.objects.all()
+        # Only rank among students of the same teacher
+        students = Student.objects.filter(teacher=self.teacher)
         
         # Sort by average score (primary), then total marks (tie-breaker), both descending
         ranked_students = sorted(
