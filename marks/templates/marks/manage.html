@@ -1,0 +1,267 @@
+{% extends 'marks/base.html' %}
+
+{% block title %}Teacher Dashboard{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-2xl sm:text-3xl font-bold gradient-text">Teacher Dashboard</h1>
+        <p class="text-gray-600 mt-1">Manage students, exams, subjects, and more</p>
+    </div>
+
+    {% if not user.is_authenticated or not is_teacher %}
+    <!-- Not authorized message -->
+    <div class="bg-red-50 border-l-4 border-red-500 text-red-800 px-6 py-4 rounded-r-lg shadow-md">
+        <div class="flex items-center gap-3">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+            </svg>
+            <div>
+                <p class="font-semibold">Access Denied</p>
+                <p class="text-sm">Only teachers can access this page. Please log in with a teacher account.</p>
+            </div>
+        </div>
+    </div>
+    {% else %}
+
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+        <div class="glass-effect rounded-xl p-4 border border-gray-200">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-gray-900">{{ total_students }}</p>
+                    <p class="text-xs text-gray-500">Students</p>
+                </div>
+            </div>
+        </div>
+        <div class="glass-effect rounded-xl p-4 border border-gray-200">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-gray-900">{{ total_subjects }}</p>
+                    <p class="text-xs text-gray-500">Subjects</p>
+                </div>
+            </div>
+        </div>
+        <div class="glass-effect rounded-xl p-4 border border-gray-200">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-gray-900">{{ total_exams }}</p>
+                    <p class="text-xs text-gray-500">Exams</p>
+                </div>
+            </div>
+        </div>
+        <div class="glass-effect rounded-xl p-4 border border-gray-200">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-gray-900">{{ total_exam_types }}</p>
+                    <p class="text-xs text-gray-500">Exam Types</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions Grid -->
+    <div class="mb-8">
+        <h2 class="text-lg font-bold text-gray-900 mb-4">Quick Actions</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Add Student -->
+            <a href="{% url 'add_student' %}" class="group glass-effect rounded-xl p-5 border border-gray-200 hover:border-purple-300 hover:shadow-lg hover:shadow-purple-500/10 transition-all">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/30 group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">Add Student</h3>
+                        <p class="text-sm text-gray-500">Create new student with login</p>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Add Subject -->
+            <a href="{% url 'add_subject' %}" class="group glass-effect rounded-xl p-5 border border-gray-200 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-500/10 transition-all">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">Add Subject</h3>
+                        <p class="text-sm text-gray-500">Create new subject</p>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Add Exam -->
+            <a href="{% url 'add_exam' %}" class="group glass-effect rounded-xl p-5 border border-gray-200 hover:border-green-300 hover:shadow-lg hover:shadow-green-500/10 transition-all">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg shadow-green-500/30 group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900 group-hover:text-green-600 transition-colors">Add Exam</h3>
+                        <p class="text-sm text-gray-500">Record single exam result</p>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Add Bulk Exam -->
+            <a href="{% url 'add_bulk_exams' %}" class="group glass-effect rounded-xl p-5 border border-gray-200 hover:border-orange-300 hover:shadow-lg hover:shadow-orange-500/10 transition-all">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/30 group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900 group-hover:text-orange-600 transition-colors">Add Bulk Exam</h3>
+                        <p class="text-sm text-gray-500">Add results for multiple students</p>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Add Exam Type -->
+            <a href="{% url 'add_exam_type' %}" class="group glass-effect rounded-xl p-5 border border-gray-200 hover:border-pink-300 hover:shadow-lg hover:shadow-pink-500/10 transition-all">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg shadow-pink-500/30 group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900 group-hover:text-pink-600 transition-colors">Add Exam Type</h3>
+                        <p class="text-sm text-gray-500">Create CQ, MCQ, etc.</p>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Record Points Spent -->
+            <a href="{% url 'add_points_spent' %}" class="group glass-effect rounded-xl p-5 border border-gray-200 hover:border-yellow-300 hover:shadow-lg hover:shadow-yellow-500/10 transition-all">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center shadow-lg shadow-yellow-500/30 group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900 group-hover:text-yellow-600 transition-colors">Record Points Spent</h3>
+                        <p class="text-sm text-gray-500">Deduct student points</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Manage Data Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Students List -->
+        <div class="glass-effect rounded-xl border border-gray-200 overflow-hidden">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+                <h2 class="font-bold text-gray-900">Students</h2>
+                <a href="{% url 'student_list' %}" class="text-purple-600 text-sm font-medium hover:text-purple-700">View All →</a>
+            </div>
+            <div class="divide-y divide-gray-100 max-h-80 overflow-y-auto">
+                {% for student in recent_students %}
+                <div class="p-4 hover:bg-gray-50 transition-colors flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                            {{ student.name|slice:":1"|upper }}
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-900 text-sm">{{ student.name }}</p>
+                            <p class="text-xs text-gray-500">Class {{ student.class_name }} • Roll {{ student.roll }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <a href="{% url 'edit_student' student.id %}" class="text-gray-400 hover:text-blue-600 transition-colors" title="Edit">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                        </a>
+                        <a href="{% url 'student_detail' student.id %}" class="text-gray-400 hover:text-purple-600 transition-colors" title="View">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="p-8 text-center text-gray-500">
+                    <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                    <p class="text-sm">No students yet</p>
+                    <a href="{% url 'add_student' %}" class="text-purple-600 text-sm font-medium mt-2 inline-block hover:text-purple-700">Add your first student →</a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Recent Exams -->
+        <div class="glass-effect rounded-xl border border-gray-200 overflow-hidden">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+                <h2 class="font-bold text-gray-900">Recent Exams</h2>
+                <a href="{% url 'all_exams' %}" class="text-purple-600 text-sm font-medium hover:text-purple-700">View All →</a>
+            </div>
+            <div class="divide-y divide-gray-100 max-h-80 overflow-y-auto">
+                {% for exam in recent_exams %}
+                <div class="p-4 hover:bg-gray-50 transition-colors">
+                    <div class="flex items-center justify-between mb-1">
+                        <p class="font-medium text-gray-900 text-sm">{{ exam.student.name }}</p>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs px-2 py-0.5 rounded-full {% if exam.percentage >= 80 %}bg-green-100 text-green-700{% elif exam.percentage >= 60 %}bg-blue-100 text-blue-700{% elif exam.percentage >= 40 %}bg-yellow-100 text-yellow-700{% else %}bg-red-100 text-red-700{% endif %}">
+                                {{ exam.percentage|floatformat:1 }}%
+                            </span>
+                            <a href="{% url 'edit_exam' exam.id %}" class="text-gray-400 hover:text-blue-600 transition-colors" title="Edit">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between text-xs text-gray-500">
+                        <span>{{ exam.subject.name }} • {{ exam.exam_type.name }}</span>
+                        <span>{{ exam.mark_obtained }}/{{ exam.total_marks }}</span>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="p-8 text-center text-gray-500">
+                    <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <p class="text-sm">No exams recorded yet</p>
+                    <a href="{% url 'add_exam' %}" class="text-purple-600 text-sm font-medium mt-2 inline-block hover:text-purple-700">Add your first exam →</a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+</div>
+{% endblock %}

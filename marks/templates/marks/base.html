@@ -33,7 +33,7 @@
                         <a href="{% url 'dashboard' %}" class="text-xl font-bold gradient-text hover:opacity-80 transition-opacity">ResTrack</a>
                     </div>
                     <div class="hidden sm:ml-8 sm:flex sm:space-x-6">
-                        <a href="{% url 'dashboard' %}" class="{% if request.path == '/' %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors nav-link">
+                        <a href="{% url 'dashboard' %}" class="{% if request.path == '/dashboard/' %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors nav-link">
                             Dashboard
                         </a>
                         <a href="{% url 'student_list' %}" class="{% if 'students' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors nav-link">
@@ -56,12 +56,50 @@
                         </a>
                     </div>
                 </div>
-                <div class="flex items-center">
-                    <div class="hidden sm:ml-6 sm:flex sm:items-center" id="admin-panel-btn">
-                        <a href="/admin/" target="_blank" rel="noopener noreferrer" class="text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md transition-all" style="background-color: #8B5CC5;">
-                            Admin Panel
+                <div class="flex items-center gap-3">
+                    {% if user.is_authenticated %}
+                    <!-- Teacher: Show Manage button -->
+                    {% if user.teacher_profile %}
+                    <div class="hidden sm:flex sm:items-center">
+                        <a href="{% url 'manage' %}" class="{% if 'manage' in request.path %}bg-purple-700{% else %}bg-purple-600 hover:bg-purple-700{% endif %} text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md transition-all">
+                            Manage
                         </a>
                     </div>
+                    {% endif %}
+                    <!-- User dropdown -->
+                    <div class="hidden sm:flex sm:items-center relative" x-data="{ open: false }">
+                        <button onclick="toggleUserMenu()" class="flex items-center gap-2 text-gray-700 hover:text-purple-600 px-3 py-2 rounded-lg hover:bg-gray-100 transition-all text-sm font-medium">
+                            <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white text-xs font-semibold">
+                                {{ user.first_name|slice:":1"|upper|default:user.username|slice:":1"|upper }}
+                            </div>
+                            <span class="max-w-24 truncate">{{ user.first_name|default:user.username }}</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div id="userMenu" class="hidden absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50">
+                            <div class="px-4 py-2 border-b border-gray-100">
+                                <p class="text-sm font-semibold text-gray-900">{{ user.get_full_name|default:user.username }}</p>
+                                <p class="text-xs text-gray-500">{% if user.teacher_profile %}Teacher{% else %}Student{% endif %}</p>
+                            </div>
+                            <a href="{% url 'logout' %}" class="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                </svg>
+                                Log Out
+                            </a>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="hidden sm:flex sm:items-center gap-2">
+                        <a href="{% url 'login' %}" class="text-gray-700 hover:text-purple-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                            Log In
+                        </a>
+                        <a href="{% url 'signup' %}" class="bg-gradient-to-r from-purple-600 to-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md transition-all">
+                            Sign Up
+                        </a>
+                    </div>
+                    {% endif %}
                     <!-- Mobile menu button -->
                     <button type="button" class="sm:hidden mobile-menu-btn ml-2 inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-purple-600 hover:bg-gray-100 focus:outline-none transition-colors" id="mobile-menu-button">
                         <span class="sr-only">Open main menu</span>
@@ -84,8 +122,13 @@
         <div class="gradient-primary p-4">
             <div class="flex justify-between items-center">
                 <div>
+                    {% if user.is_authenticated %}
+                    <h2 class="text-lg font-bold text-white">{{ user.first_name|default:user.username }}</h2>
+                    <p class="text-purple-200 text-[10px] mt-0.5">{% if user.teacher_profile %}Teacher Account{% else %}Student Account{% endif %}</p>
+                    {% else %}
                     <h2 class="text-lg font-bold text-white">ResTrack</h2>
                     <p class="text-purple-200 text-[10px] mt-0.5">Result Tracking System</p>
+                    {% endif %}
                 </div>
                 <button type="button" class="w-8 h-8 rounded-lg bg-white/20 text-white hover:bg-white/30 transition-colors flex items-center justify-center" id="mobile-menu-close">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -97,11 +140,26 @@
         
         <!-- Navigation Links -->
         <div class="p-2 space-y-0.5">
+            {% if user.is_authenticated %}
             <p class="px-3 py-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Main Menu</p>
+            {% endif %}
             
-            <a href="{% url 'dashboard' %}" class="{% if request.path == '/' %}bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 border-l-2 border-purple-500{% else %}text-gray-600 hover:bg-gray-50 border-l-2 border-transparent{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-r-lg font-medium transition-all text-sm">
-                <div class="w-8 h-8 rounded-lg {% if request.path == '/' %}bg-purple-100{% else %}bg-gray-100{% endif %} flex items-center justify-center">
-                    <svg class="w-4 h-4 {% if request.path == '/' %}text-purple-600{% else %}text-gray-500{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {% if not user.is_authenticated %}
+            <!-- Not logged in: Show login/signup -->
+            <div class="p-3 space-y-2">
+                <a href="{% url 'login' %}" class="block w-full text-center bg-purple-600 text-white font-semibold py-3 rounded-lg hover:bg-purple-700 transition-colors">
+                    Log In
+                </a>
+                <a href="{% url 'signup' %}" class="block w-full text-center bg-gray-100 text-gray-700 font-semibold py-3 rounded-lg hover:bg-gray-200 transition-colors">
+                    Sign Up as Teacher
+                </a>
+            </div>
+            <div class="my-2 mx-3 border-t border-gray-200"></div>
+            {% endif %}
+            
+            <a href="{% url 'dashboard' %}" class="{% if request.path == '/dashboard/' %}bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 border-l-2 border-purple-500{% else %}text-gray-600 hover:bg-gray-50 border-l-2 border-transparent{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-r-lg font-medium transition-all text-sm">
+                <div class="w-8 h-8 rounded-lg {% if request.path == '/dashboard/' %}bg-purple-100{% else %}bg-gray-100{% endif %} flex items-center justify-center">
+                    <svg class="w-4 h-4 {% if request.path == '/dashboard/' %}text-purple-600{% else %}text-gray-500{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
                     </svg>
                 </div>
@@ -156,6 +214,23 @@
                 <span>Leaderboard</span>
             </a>
             
+            {% if user.is_authenticated and user.teacher_profile %}
+            <!-- Divider -->
+            <div class="my-2 mx-3 border-t border-gray-200"></div>
+            
+            <p class="px-3 py-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Teacher Actions</p>
+            
+            <a href="{% url 'manage' %}" class="{% if 'manage' in request.path %}bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 border-l-2 border-purple-500{% else %}text-gray-600 hover:bg-gray-50 border-l-2 border-transparent{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-r-lg font-medium transition-all text-sm">
+                <div class="w-8 h-8 rounded-lg {% if 'manage' in request.path %}bg-purple-100{% else %}bg-gray-100{% endif %} flex items-center justify-center">
+                    <svg class="w-4 h-4 {% if 'manage' in request.path %}text-purple-600{% else %}text-gray-500{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                </div>
+                <span>Manage</span>
+            </a>
+            {% endif %}
+            
             <!-- Divider -->
             <div class="my-2 mx-3 border-t border-gray-200"></div>
             
@@ -177,6 +252,20 @@
                 </div>
                 <span>About</span>
             </a>
+            
+            {% if user.is_authenticated %}
+            <!-- Divider -->
+            <div class="my-2 mx-3 border-t border-gray-200"></div>
+            
+            <a href="{% url 'logout' %}" class="text-red-600 hover:bg-red-50 border-l-2 border-transparent flex items-center gap-2.5 px-3 py-2.5 rounded-r-lg font-medium transition-all text-sm">
+                <div class="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                    </svg>
+                </div>
+                <span>Log Out</span>
+            </a>
+            {% endif %}
         </div>
     </div>
     
@@ -203,15 +292,22 @@
         menuClose.addEventListener('click', closeMenu);
         overlay.addEventListener('click', closeMenu);
         
-        // Hide admin panel button in production
-        (function() {
-            const host = window.location.hostname;
-            const isLocal = host === 'localhost' || host === '127.0.0.1';
-            if (!isLocal) {
-                const adminBtn = document.getElementById('admin-panel-btn');
-                if (adminBtn) adminBtn.style.display = 'none';
+        // User dropdown menu toggle
+        function toggleUserMenu() {
+            const userMenu = document.getElementById('userMenu');
+            if (userMenu) {
+                userMenu.classList.toggle('hidden');
             }
-        })();
+        }
+        
+        // Close user menu when clicking outside
+        document.addEventListener('click', function(e) {
+            const userMenu = document.getElementById('userMenu');
+            const userButton = e.target.closest('button[onclick="toggleUserMenu()"]');
+            if (userMenu && !userButton && !userMenu.contains(e.target)) {
+                userMenu.classList.add('hidden');
+            }
+        });
     </script>
 
     <!-- Messages -->

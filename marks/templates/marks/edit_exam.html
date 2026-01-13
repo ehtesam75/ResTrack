@@ -1,0 +1,206 @@
+{% extends 'marks/base.html' %}
+
+{% block title %}Edit Exam - ResTrack{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-bold text-gray-900">Edit Exam</h1>
+        <a href="{% url 'all_exams' %}" class="text-indigo-600 hover:text-indigo-800">
+            <i class="fas fa-arrow-left mr-1"></i> Back to Exams
+        </a>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="mb-6">
+        {% for message in messages %}
+        <div class="p-4 rounded-lg {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="POST" enctype="multipart/form-data" class="space-y-6">
+        {% csrf_token %}
+        
+        <!-- Exam Information -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-file-alt text-indigo-600 mr-2"></i>
+                Exam Information
+            </h2>
+            
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="exam_id" class="block text-sm font-medium text-gray-700 mb-1">
+                            Exam ID <span class="text-red-500">*</span>
+                        </label>
+                        <input type="number" id="exam_id" name="exam_id" value="{{ exam.exam_id }}" required min="1"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    </div>
+                    
+                    <div>
+                        <label for="date" class="block text-sm font-medium text-gray-700 mb-1">
+                            Date <span class="text-red-500">*</span>
+                        </label>
+                        <input type="date" id="date" name="date" value="{{ exam.date|date:'Y-m-d' }}" required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="student" class="block text-sm font-medium text-gray-700 mb-1">
+                        Student <span class="text-red-500">*</span>
+                    </label>
+                    <select id="student" name="student" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        {% for s in students %}
+                        <option value="{{ s.id }}" {% if s.id == exam.student.id %}selected{% endif %}>{{ s.name }} (Roll: {{ s.roll }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="subject" class="block text-sm font-medium text-gray-700 mb-1">
+                        Subject <span class="text-red-500">*</span>
+                    </label>
+                    <select id="subject" name="subject" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        {% for sub in subjects %}
+                        <option value="{{ sub.id }}" {% if sub.id == exam.subject.id %}selected{% endif %}>{{ sub.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="exam_type" class="block text-sm font-medium text-gray-700 mb-1">
+                            Exam Type <span class="text-red-500">*</span>
+                        </label>
+                        <select id="exam_type" name="exam_type" required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                            <option value="CQ" {% if exam.exam_type.name == "CQ" %}selected{% endif %}>CQ (Creative Questions)</option>
+                            <option value="MCQ" {% if exam.exam_type.name == "MCQ" %}selected{% endif %}>MCQ (Multiple Choice)</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="class_number" class="block text-sm font-medium text-gray-700 mb-1">
+                            Class <span class="text-red-500">*</span>
+                        </label>
+                        <select id="class_number" name="class_number" required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                            {% for i in "6789" %}
+                            <option value="{{ i }}" {% if exam.class_number == i|add:0 %}selected{% endif %}>Class {{ i }}</option>
+                            {% endfor %}
+                            <option value="10" {% if exam.class_number == 10 %}selected{% endif %}>Class 10</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="chapter" class="block text-sm font-medium text-gray-700 mb-1">
+                        Chapter <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" id="chapter" name="chapter" value="{{ exam.chapter }}" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                </div>
+            </div>
+        </div>
+
+        <!-- Marks -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-star text-indigo-600 mr-2"></i>
+                Marks
+            </h2>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label for="total_marks" class="block text-sm font-medium text-gray-700 mb-1">
+                        Total Marks <span class="text-red-500">*</span>
+                    </label>
+                    <input type="number" id="total_marks" name="total_marks" value="{{ exam.total_marks }}" required min="1"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                </div>
+                
+                <div>
+                    <label for="mark_obtained" class="block text-sm font-medium text-gray-700 mb-1">
+                        Marks Obtained <span class="text-red-500">*</span>
+                    </label>
+                    <input type="number" id="mark_obtained" name="mark_obtained" value="{{ exam.mark_obtained }}" required min="0"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                </div>
+            </div>
+            
+            <!-- Current percentage display -->
+            <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                <span class="text-sm text-gray-600">Current Percentage: </span>
+                <span class="font-semibold text-indigo-600">{{ exam.percentage|floatformat:1 }}%</span>
+                <span class="ml-2 px-2 py-1 text-xs rounded" style="background-color: {{ exam.grade_color }}">{{ exam.grade }}</span>
+            </div>
+        </div>
+
+        <!-- Question PDF -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-file-pdf text-indigo-600 mr-2"></i>
+                Question Paper
+            </h2>
+            
+            {% if exam.question_pdf %}
+            <div class="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center justify-between">
+                <span class="text-green-800">
+                    <i class="fas fa-check-circle mr-1"></i>
+                    Current file: {{ exam.question_pdf.name|cut:"exam_questions/" }}
+                </span>
+                <a href="{{ exam.question_pdf.url }}" target="_blank" class="text-indigo-600 hover:text-indigo-800">
+                    <i class="fas fa-external-link-alt mr-1"></i> View
+                </a>
+            </div>
+            {% endif %}
+            
+            <div>
+                <label for="question_pdf" class="block text-sm font-medium text-gray-700 mb-1">
+                    Replace PDF (optional)
+                </label>
+                <input type="file" id="question_pdf" name="question_pdf" accept=".pdf"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                <p class="text-xs text-gray-500 mt-1">Upload a new PDF to replace the current one. Leave empty to keep the current file.</p>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="flex justify-end space-x-4">
+            <a href="{% url 'all_exams' %}" 
+                class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                Cancel
+            </a>
+            <button type="submit" 
+                class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center">
+                <i class="fas fa-save mr-2"></i>
+                Save Changes
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+// Update percentage preview on mark changes
+function updatePercentage() {
+    const total = parseFloat(document.getElementById('total_marks').value) || 0;
+    const obtained = parseFloat(document.getElementById('mark_obtained').value) || 0;
+    
+    if (total > 0) {
+        const percentage = (obtained / total) * 100;
+        // You could add a live percentage preview here
+    }
+}
+
+document.getElementById('total_marks').addEventListener('input', updatePercentage);
+document.getElementById('mark_obtained').addEventListener('input', updatePercentage);
+</script>
+{% endblock %}

@@ -1,5 +1,35 @@
 from django.db import models
 from django.db.models import Avg, Sum, Count, Q
+from django.contrib.auth.models import User
+
+
+class TeacherProfile(models.Model):
+    """Profile for teacher accounts"""
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='teacher_profile')
+    institution = models.CharField(max_length=200, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Teacher: {self.user.get_full_name() or self.user.username}"
+
+    class Meta:
+        verbose_name = "Teacher Profile"
+        verbose_name_plural = "Teacher Profiles"
+
+
+class StudentProfile(models.Model):
+    """Profile linking a user account to a student record"""
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_profile')
+    student = models.OneToOneField('Student', on_delete=models.CASCADE, related_name='user_profile')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_students')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Student Account: {self.student.name}"
+
+    class Meta:
+        verbose_name = "Student Profile"
+        verbose_name_plural = "Student Profiles"
 
 
 class Student(models.Model):
@@ -7,6 +37,14 @@ class Student(models.Model):
     name = models.CharField(max_length=200)
     roll = models.CharField(max_length=50, blank=True, null=True)
     class_name = models.CharField(max_length=100, blank=True, null=True)
+    teacher = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE, 
+        related_name='students',
+        null=True,
+        blank=True,
+        help_text="Teacher who owns this student"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -297,6 +335,14 @@ class Student(models.Model):
 class Subject(models.Model):
     """Model representing a subject/course"""
     name = models.CharField(max_length=200)
+    teacher = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE, 
+        related_name='subjects',
+        null=True,
+        blank=True,
+        help_text="Teacher who owns this subject"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -358,6 +404,14 @@ class Subject(models.Model):
 class ExamType(models.Model):
     """Model representing a type/category of exam (e.g., MCQ, CQ, Midterm)"""
     name = models.CharField(max_length=100)
+    teacher = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE, 
+        related_name='exam_types',
+        null=True,
+        blank=True,
+        help_text="Teacher who owns this exam type"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -386,6 +440,14 @@ class Exam(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
     exam_type = models.ForeignKey(ExamType, on_delete=models.CASCADE)
+    teacher = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE, 
+        related_name='exams',
+        null=True,
+        blank=True,
+        help_text="Teacher who created this exam"
+    )
     date = models.DateField()
     chapter = models.CharField(max_length=200, blank=True, null=True)
     class_number = models.IntegerField(default=1)
@@ -601,6 +663,14 @@ class LifetimePoints(models.Model):
 class PointsSpent(models.Model):
     """Model tracking when students spend their points"""
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    teacher = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE, 
+        related_name='points_spent_records',
+        null=True,
+        blank=True,
+        help_text="Teacher who recorded this points spent"
+    )
     points_spent = models.IntegerField(help_text="Number of points spent")
     description = models.CharField(max_length=15, help_text="How points were used")
     date = models.DateField(auto_now_add=True)

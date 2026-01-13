@@ -2,13 +2,23 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # Main pages
-    path('', views.dashboard, name='dashboard'),
+    # Authentication URLs
+    path('', views.home, name='home'),
+    path('login/', views.user_login, name='login'),
+    path('signup/', views.teacher_signup, name='signup'),
+    path('logout/', views.user_logout, name='logout'),
+    
+    # Teacher management dashboard
+    path('manage/', views.manage, name='manage'),
+    
+    # Main dashboard (authenticated)
+    path('dashboard/', views.dashboard, name='dashboard'),
     
     # Student pages
     path('students/', views.student_list, name='student_list'),
     path('students/<int:student_id>/', views.student_detail, name='student_detail'),
     path('students/add/', views.add_student, name='add_student'),
+    path('students/<int:student_id>/edit/', views.edit_student, name='edit_student'),
     path('students/compare/<int:student1_id>/<int:student2_id>/', views.compare_students, name='compare_students'),
     
     # Subject pages
@@ -20,6 +30,7 @@ urlpatterns = [
     path('exams/', views.all_exams, name='all_exams'),
     path('exams/add/', views.add_exam, name='add_exam'),
     path('exams/add-bulk/', views.add_bulk_exam, name='add_bulk_exams'),
+    path('exams/<int:exam_id>/edit/', views.edit_exam, name='edit_exam'),
     path('exam-types/add/', views.add_exam_type, name='add_exam_type'),
     
     # Points page

@@ -1,5 +1,19 @@
 from django.contrib import admin
-from .models import Student, Subject, ExamType, Exam, GradeScale, LifetimePoints, PointsSpent
+from .models import Student, Subject, ExamType, Exam, GradeScale, LifetimePoints, PointsSpent, TeacherProfile, StudentProfile
+
+
+@admin.register(TeacherProfile)
+class TeacherProfileAdmin(admin.ModelAdmin):
+    list_display = ['user', 'institution', 'created_at']
+    search_fields = ['user__username', 'user__first_name', 'user__last_name', 'institution']
+    list_filter = ['created_at']
+
+
+@admin.register(StudentProfile)
+class StudentProfileAdmin(admin.ModelAdmin):
+    list_display = ['user', 'student', 'created_by', 'created_at']
+    search_fields = ['user__username', 'student__name', 'created_by__username']
+    list_filter = ['created_at', 'created_by']
 
 
 @admin.register(Student)

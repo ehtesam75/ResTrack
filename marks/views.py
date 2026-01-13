@@ -1,24 +1,263 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login, logout, authenticate
 from django.db.models import Sum, Q
 import json
-from .models import Student, Subject, ExamType, Exam, GradeScale, LifetimePoints, PointsSpent
+from .models import Student, Subject, ExamType, Exam, GradeScale, LifetimePoints, PointsSpent, TeacherProfile, StudentProfile
 from .services import LeaderboardService, DashboardService, ChartDataService, count_unique_exams
+from .forms import TeacherSignupForm, LoginForm, StudentAccountForm
 
 
-def dashboard(request):
-    """Main dashboard view with analytics"""
-    summary = DashboardService.get_dashboard_summary()
-    subject_performance = DashboardService.get_subject_performance_table()
-    exam_type_performance = DashboardService.get_exam_type_performance_table()
-    grade_distribution = DashboardService.get_grade_distribution()
-    recent_exams = DashboardService.get_recent_exams(limit=10)
+def is_teacher(user):
+    """Check if user is a teacher"""
+    if not user.is_authenticated:
+        return False
+    return hasattr(user, 'teacher_profile')
+
+
+def is_student(user):
+    """Check if user is a student"""
+    if not user.is_authenticated:
+        return False
+    return hasattr(user, 'student_profile')
+
+
+def get_teacher_for_user(user):
+    """
+    Get the teacher user for data filtering.
+    - If user is a teacher, return the user
+    - If user is a student, return the teacher who created them
+    """
+    if not user.is_authenticated:
+        return None
     
-    # Leaderboards
-    total_marks_leaderboard = LeaderboardService.total_marks_leaderboard()[:5]
-    average_leaderboard = LeaderboardService.average_leaderboard()[:5]
-    points_leaderboard = LeaderboardService.lifetime_points_leaderboard()[:5]
+    if hasattr(user, 'teacher_profile'):
+        return user
+    
+    if hasattr(user, 'student_profile'):
+        # Return the teacher who created this student
+        return user.student_profile.created_by
+    
+    return None
+
+
+def home(request):
+    """Landing page for the application"""
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    return render(request, 'marks/home.html')
+
+
+def teacher_signup(request):
+    """Handle teacher registration"""
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    
+    if request.method == 'POST':
+        form = TeacherSignupForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, f'Welcome, {user.first_name}! Your teacher account has been created successfully.')
+            return redirect('dashboard')
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{error}')
+    else:
+        form = TeacherSignupForm()
+    
+    return render(request, 'marks/signup.html', {'form': form})
+
+
+def user_login(request):
+    """Handle user login (both teacher and student)"""
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    
+    if request.method == 'POST':
+        form = LoginForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            
+            if hasattr(user, 'teacher_profile'):
+                messages.success(request, f'Welcome back, {user.first_name or user.username}!')
+            else:
+                messages.success(request, f'Welcome back, {user.username}!')
+            
+            next_url = request.GET.get('next', 'dashboard')
+            return redirect(next_url)
+        else:
+            messages.error(request, 'Invalid username or password.')
+    else:
+        form = LoginForm()
+    
+    return render(request, 'marks/login.html', {'form': form})
+
+
+def user_logout(request):
+    """Handle user logout"""
+    logout(request)
+    messages.success(request, 'You have been logged out successfully.')
+    return redirect('home')
+
+
+@login_required(login_url='login')
+def manage(request):
+    """Teacher management dashboard"""
+    teacher = get_teacher_for_user(request.user)
+    
+    # Filter all data by teacher
+    teacher_students = Student.objects.filter(teacher=teacher)
+    teacher_subjects = Subject.objects.filter(teacher=teacher)
+    teacher_exams = Exam.objects.filter(teacher=teacher)
+    teacher_exam_types = ExamType.objects.filter(teacher=teacher)
+    
+    context = {
+        'is_teacher': is_teacher(request.user),
+        'total_students': teacher_students.count(),
+        'total_subjects': teacher_subjects.count(),
+        'total_exams': count_unique_exams(teacher_exams),
+        'total_exam_types': teacher_exam_types.count(),
+        'recent_students': teacher_students.order_by('-created_at')[:5],
+        'recent_exams': teacher_exams.order_by('-date', '-id')[:5],
+    }
+    return render(request, 'marks/manage.html', context)
+
+
+@login_required(login_url='login')
+def dashboard(request):
+    """Main dashboard view with analytics - filtered by teacher"""
+    from collections import Counter
+    
+    teacher = get_teacher_for_user(request.user)
+    
+    # Filter all data by teacher
+    teacher_students = Student.objects.filter(teacher=teacher)
+    teacher_subjects = Subject.objects.filter(teacher=teacher)
+    teacher_exams = Exam.objects.filter(teacher=teacher)
+    teacher_exam_types = ExamType.objects.filter(teacher=teacher)
+    
+    # Dashboard summary
+    total_exams = count_unique_exams(teacher_exams)
+    total_subjects = teacher_subjects.count()
+    total_students = teacher_students.count()
+    
+    # Get highest performers among teacher's students
+    best_student = None
+    highest_marks_student = None
+    highest_avg_student = None
+    
+    if teacher_students.exists():
+        students_with_exams = [s for s in teacher_students if s.total_exams > 0]
+        if students_with_exams:
+            highest_marks_student = max(teacher_students, key=lambda s: s.total_marks)
+            highest_avg_student = max(students_with_exams, key=lambda s: s.average_percentage)
+            best_student = highest_avg_student
+    
+    summary = {
+        'total_exams': total_exams,
+        'total_subjects': total_subjects,
+        'total_students': total_students,
+        'highest_marks_student': highest_marks_student,
+        'highest_avg_student': highest_avg_student,
+        'best_student': best_student
+    }
+    
+    # Subject performance - filtered by teacher
+    subject_performance = []
+    for subject in teacher_subjects:
+        exams = teacher_exams.filter(subject=subject)
+        if exams.exists():
+            total_marks_obtained = sum(float(e.mark_obtained) for e in exams)
+            total_possible_marks = sum(float(e.total_marks) for e in exams)
+            avg_percentage = (total_marks_obtained * 100 / total_possible_marks) if total_possible_marks > 0 else 0
+            
+            # Best student in this subject (among teacher's students)
+            best_in_subject = None
+            best_avg = 0
+            for student in teacher_students:
+                student_exams = exams.filter(student=student)
+                if student_exams.exists():
+                    s_total = sum(float(e.mark_obtained) for e in student_exams)
+                    s_possible = sum(float(e.total_marks) for e in student_exams)
+                    s_avg = (s_total * 100 / s_possible) if s_possible > 0 else 0
+                    if s_avg > best_avg:
+                        best_avg = s_avg
+                        best_in_subject = student
+            
+            subject_performance.append({
+                'subject': subject,
+                'average_percentage': round(avg_percentage, 2),
+                'total_exams': count_unique_exams(exams),
+                'best_student': best_in_subject
+            })
+    
+    subject_performance = sorted(subject_performance, key=lambda x: x['average_percentage'], reverse=True)
+    
+    # Exam type performance - filtered by teacher
+    exam_type_performance = []
+    for exam_type in teacher_exam_types:
+        exams = teacher_exams.filter(exam_type=exam_type)
+        if exams.exists():
+            total_marks_obtained = sum(float(e.mark_obtained) for e in exams)
+            total_possible_marks = sum(float(e.total_marks) for e in exams)
+            avg_percentage = (total_marks_obtained * 100 / total_possible_marks) if total_possible_marks > 0 else 0
+            
+            exam_type_performance.append({
+                'exam_type': exam_type,
+                'average_percentage': round(avg_percentage, 2),
+                'total_exams': count_unique_exams(exams)
+            })
+    
+    exam_type_performance = sorted(exam_type_performance, key=lambda x: x['average_percentage'], reverse=True)
+    
+    # Grade distribution - filtered by teacher
+    grades = [exam.grade for exam in teacher_exams]
+    distribution = Counter(grades)
+    
+    grade_colors = {
+        'Average': '#FEF08A', 'Fail': '#FECACA', 'Good': '#D1FAE5',
+        'Horrible': '#FCA5A5', 'Poor': '#FDE68A', 'Superb': '#A7F3D0',
+    }
+    
+    grade_distribution = []
+    for grade_name, count in distribution.items():
+        grade_scale = GradeScale.objects.filter(grade_name=grade_name).first()
+        color = grade_scale.color_code if grade_scale else grade_colors.get(grade_name, '#000000')
+        grade_distribution.append({'grade': grade_name, 'count': count, 'color': color})
+    
+    # Recent exams - filtered by teacher
+    recent_exams = teacher_exams.order_by('-date', '-exam_id')[:10]
+    
+    # Leaderboards - filtered by teacher's students
+    total_marks_leaderboard = sorted(
+        [{'student': s, 'total_marks': s.total_marks, 'total_exams': s.total_exams} for s in teacher_students],
+        key=lambda x: x['total_marks'], reverse=True
+    )[:5]
+    
+    average_leaderboard = sorted(
+        [{'student': s, 'average': s.average_percentage, 'total_exams': s.total_exams} 
+         for s in teacher_students if s.total_exams > 0],
+        key=lambda x: x['average'], reverse=True
+    )[:5]
+    
+    # Points leaderboard - filtered by teacher's students
+    from .models import LifetimePoints
+    points_leaderboard = []
+    for student in teacher_students:
+        lp = LifetimePoints.objects.filter(student=student).first()
+        if lp:
+            points_leaderboard.append({
+                'student': student,
+                'total_points': lp.total_points,
+                'points_earned': lp.points_earned,
+                'points_spent': lp.points_spent
+            })
+    points_leaderboard = sorted(points_leaderboard, key=lambda x: x['total_points'], reverse=True)[:5]
     
     # Serialize subject_performance for JavaScript
     subject_performance_json = json.dumps([
@@ -46,9 +285,11 @@ def dashboard(request):
     return render(request, 'marks/dashboard.html', context)
 
 
+@login_required(login_url='login')
 def student_list(request):
-    """List all students"""
-    students = Student.objects.all().order_by('name')
+    """List all students - filtered by teacher"""
+    teacher = get_teacher_for_user(request.user)
+    students = Student.objects.filter(teacher=teacher).order_by('name')
     
     # Add computed properties for sorting/display
     student_data = [
@@ -65,12 +306,14 @@ def student_list(request):
     return render(request, 'marks/student_list.html', context)
 
 
+@login_required(login_url='login')
 def student_detail(request, student_id):
     """Student profile dashboard"""
     from datetime import datetime
     from django.db.models import Avg, Sum
     
-    student = get_object_or_404(Student, id=student_id)
+    teacher = get_teacher_for_user(request.user)
+    student = get_object_or_404(Student, id=student_id, teacher=teacher)
     
     # Get student statistics
     subject_summary = student.subject_wise_summary()
@@ -261,17 +504,25 @@ def student_detail(request, student_id):
     return render(request, 'marks/student_detail.html', context)
 
 
+@login_required(login_url='login')
 def compare_students(request, student1_id, student2_id):
-    """Compare two students side by side"""
+    """Compare two students side by side - filtered by teacher"""
     from datetime import date
     
-    student1 = get_object_or_404(Student, id=student1_id)
+    teacher = get_teacher_for_user(request.user)
+    
+    student1 = get_object_or_404(Student, id=student1_id, teacher=teacher)
     student2 = None
     if student2_id != 0:
-        student2 = get_object_or_404(Student, id=student2_id)
+        student2 = get_object_or_404(Student, id=student2_id, teacher=teacher)
     
-    # Get all other students for the dropdown
-    all_students = Student.objects.exclude(id=student1_id).order_by('name')
+    # Get all other students for the dropdown (filtered by teacher)
+    all_students = Student.objects.filter(teacher=teacher).exclude(id=student1_id).order_by('name')
+    
+    # Get teacher-scoped querysets for calculations
+    teacher_exams = Exam.objects.filter(teacher=teacher)
+    teacher_students = Student.objects.filter(teacher=teacher)
+    teacher_subjects = Subject.objects.filter(teacher=teacher)
     
     def get_student_stats(student):
         """Get comprehensive stats for a student"""
@@ -295,12 +546,12 @@ def compare_students(request, student1_id, student2_id):
                     excellent_exams += 1
             excellence_rate = (excellent_exams / total_exams) * 100
         
-        # Monthly winner count
+        # Monthly winner count (within teacher's students)
         current_year = date.today().year
         current_month = date.today().month
         monthly_winner_count = 0
         
-        exam_dates = Exam.objects.values_list('date', flat=True).distinct()
+        exam_dates = teacher_exams.values_list('date', flat=True).distinct()
         months_set = set()
         for exam_date in exam_dates:
             if exam_date:
@@ -308,13 +559,13 @@ def compare_students(request, student1_id, student2_id):
                     months_set.add((exam_date.year, exam_date.month))
         
         for year, month in months_set:
-            # Get total unique exams conducted in this month
-            total_month_exams = Exam.objects.filter(
+            # Get total unique exams conducted in this month (teacher-scoped)
+            total_month_exams = teacher_exams.filter(
                 date__year=year,
                 date__month=month
             ).values('exam_id').distinct().count()
             
-            students_in_month = Student.objects.filter(
+            students_in_month = teacher_students.filter(
                 exam__date__year=year,
                 exam__date__month=month
             ).distinct()
@@ -353,11 +604,10 @@ def compare_students(request, student1_id, student2_id):
                             monthly_winner_count += 1
                         break
         
-        # Subject champion count
+        # Subject champion count (teacher-scoped)
         subject_champion_count = 0
-        subjects = Subject.objects.all()
-        for subject in subjects:
-            students_in_subject = Student.objects.filter(exam__subject=subject).distinct()
+        for subject in teacher_subjects:
+            students_in_subject = teacher_students.filter(exam__subject=subject).distinct()
             subject_rankings = []
             for s in students_in_subject:
                 subject_exams = s.exam_set.filter(subject=subject)
@@ -466,16 +716,25 @@ def compare_students(request, student1_id, student2_id):
     return render(request, 'marks/compare_students.html', context)
 
 
+@login_required(login_url='login')
 def subject_list(request):
-    """List all subjects"""
-    subjects = Subject.objects.all().order_by('name')
+    """List all subjects - filtered by teacher"""
+    teacher = get_teacher_for_user(request.user)
+    subjects = Subject.objects.filter(teacher=teacher).order_by('name')
     
     subject_data = []
     for subject in subjects:
-        exams = Exam.objects.filter(subject=subject)
+        exams = Exam.objects.filter(subject=subject, teacher=teacher)
+        # Calculate average marks for teacher's students
+        avg_marks = 0
+        if exams.exists():
+            total_marks_obtained = sum(float(e.mark_obtained) for e in exams)
+            total_possible_marks = sum(float(e.total_marks) for e in exams)
+            avg_marks = (total_marks_obtained * 100 / total_possible_marks) if total_possible_marks > 0 else 0
+        
         subject_data.append({
             'subject': subject,
-            'average': subject.average_marks,
+            'average': round(avg_marks, 2),
             'total_exams': count_unique_exams(exams)
         })
     
@@ -483,16 +742,31 @@ def subject_list(request):
     return render(request, 'marks/subject_list.html', context)
 
 
+@login_required(login_url='login')
 def subject_detail(request, subject_id):
-    """Subject dashboard"""
-    subject = get_object_or_404(Subject, id=subject_id)
+    """Subject dashboard - filtered by teacher"""
+    teacher = get_teacher_for_user(request.user)
+    subject = get_object_or_404(Subject, id=subject_id, teacher=teacher)
     
-    # Get subject statistics
-    exams = Exam.objects.filter(subject=subject)
-    best_student = subject.best_student()
+    # Get subject statistics (filtered by teacher)
+    exams = Exam.objects.filter(subject=subject, teacher=teacher)
     
-    # Get all students in this subject with their performance
-    students = Student.objects.filter(exam__subject=subject).distinct()
+    # Get best student among teacher's students
+    teacher_students = Student.objects.filter(teacher=teacher)
+    best_student = None
+    best_avg = 0
+    for student in teacher_students:
+        student_exams = exams.filter(student=student)
+        if student_exams.exists():
+            total = sum(float(e.mark_obtained) for e in student_exams)
+            possible = sum(float(e.total_marks) for e in student_exams)
+            avg = (total * 100 / possible) if possible > 0 else 0
+            if avg > best_avg:
+                best_avg = avg
+                best_student = student
+    
+    # Get all students in this subject with their performance (teacher-scoped)
+    students = teacher_students.filter(exam__subject=subject).distinct()
     student_performance = []
     
     for student in students:
@@ -617,55 +891,164 @@ def subject_detail(request, subject_id):
     return render(request, 'marks/subject_detail.html', context)
 
 
+@login_required(login_url='login')
 def add_student(request):
-    """Add a new student"""
-    host = request.get_host()
-    is_production = not (host.startswith('localhost') or host.startswith('127.0.0.1'))
+    """Add a new student with login credentials"""
+    from django.contrib.auth.models import User
+    
+    # Check if user is a teacher
+    teacher_check = is_teacher(request.user)
+    
+    if request.method == 'POST' and teacher_check:
+        name = request.POST.get('name')
+        roll = request.POST.get('roll')
+        class_number = request.POST.get('class_number')
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        confirm_password = request.POST.get('confirm_password')
+        
+        # Validate all fields
+        if not all([name, roll, class_number, username, password, confirm_password]):
+            messages.error(request, 'All fields are required!')
+        elif password != confirm_password:
+            messages.error(request, 'Passwords do not match!')
+        elif len(password) < 6:
+            messages.error(request, 'Password must be at least 6 characters!')
+        elif User.objects.filter(username=username).exists():
+            messages.error(request, 'This username is already taken. Please choose another.')
+        else:
+            try:
+                # Create user account
+                user = User.objects.create_user(
+                    username=username,
+                    password=password
+                )
+                
+                # Create student record with teacher assignment
+                student = Student.objects.create(
+                    name=name,
+                    roll=roll,
+                    class_name=str(class_number),
+                    teacher=request.user
+                )
+                
+                # Create student profile linking user to student
+                StudentProfile.objects.create(
+                    user=user,
+                    student=student,
+                    created_by=request.user
+                )
+                
+                messages.success(request, f'Student "{name}" with username "{username}" created successfully!')
+                return redirect('student_detail', student_id=student.id)
+            except Exception as e:
+                messages.error(request, f'Error creating student: {str(e)}')
+    
+    return render(request, 'marks/add_student_new.html', {'is_teacher': teacher_check})
+
+
+@login_required(login_url='login')
+def edit_student(request, student_id):
+    """Edit student personal information and credentials"""
+    from django.contrib.auth.models import User
+    
+    if not is_teacher(request.user):
+        messages.error(request, 'Only teachers can edit students.')
+        return redirect('dashboard')
+    
+    teacher = request.user
+    student = get_object_or_404(Student, id=student_id, teacher=teacher)
+    
+    # Get the student's user account if it exists
+    student_user = None
+    if hasattr(student, 'user_profile'):
+        student_user = student.user_profile.user
     
     if request.method == 'POST':
         name = request.POST.get('name')
         roll = request.POST.get('roll')
         class_number = request.POST.get('class_number')
+        username = request.POST.get('username')
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
         
-        if name and roll and class_number:
-            student = Student.objects.create(
-                name=name,
-                roll=roll,
-                class_name=str(class_number)
-            )
-            messages.success(request, f'Student "{name}" added successfully!')
-            return redirect('student_detail', student_id=student.id)
+        # Validate required fields
+        if not all([name, roll, class_number]):
+            messages.error(request, 'Name, roll, and class are required!')
         else:
-            messages.error(request, 'Student name, class, and roll number are all required!')
+            try:
+                # Update student info
+                student.name = name
+                student.roll = roll
+                student.class_name = str(class_number)
+                student.save()
+                
+                # Update user credentials if provided
+                if student_user:
+                    # Update username if changed
+                    if username and username != student_user.username:
+                        if User.objects.filter(username=username).exclude(id=student_user.id).exists():
+                            messages.error(request, 'This username is already taken.')
+                            return redirect('edit_student', student_id=student_id)
+                        student_user.username = username
+                        student_user.save()
+                    
+                    # Update password if provided
+                    if new_password:
+                        if new_password != confirm_password:
+                            messages.error(request, 'Passwords do not match!')
+                            return redirect('edit_student', student_id=student_id)
+                        if len(new_password) < 6:
+                            messages.error(request, 'Password must be at least 6 characters!')
+                            return redirect('edit_student', student_id=student_id)
+                        student_user.set_password(new_password)
+                        student_user.save()
+                
+                messages.success(request, f'Student "{name}" updated successfully!')
+                return redirect('student_detail', student_id=student.id)
+            except Exception as e:
+                messages.error(request, f'Error updating student: {str(e)}')
     
-    return render(request, 'marks/add_student.html', {'is_production': is_production})
+    context = {
+        'student': student,
+        'student_user': student_user,
+        'is_teacher': True,
+    }
+    return render(request, 'marks/edit_student.html', context)
 
 
+@login_required(login_url='login')
 def add_subject(request):
     """Add a new subject"""
-    host = request.get_host()
-    is_production = not (host.startswith('localhost') or host.startswith('127.0.0.1'))
+    if not is_teacher(request.user):
+        messages.error(request, 'Only teachers can add subjects.')
+        return redirect('dashboard')
     
     if request.method == 'POST':
         name = request.POST.get('name')
         
         if name:
-            subject = Subject.objects.create(name=name)
+            subject = Subject.objects.create(name=name, teacher=request.user)
             messages.success(request, f'Subject "{name}" added successfully!')
             return redirect('subject_list')
         else:
             messages.error(request, 'Subject name is required!')
     
-    return render(request, 'marks/add_subject.html', {'is_production': is_production})
+    return render(request, 'marks/add_subject.html')
 
 
+@login_required(login_url='login')
 def add_exam_type(request):
     """Add a new exam type"""
+    if not is_teacher(request.user):
+        messages.error(request, 'Only teachers can add exam types.')
+        return redirect('dashboard')
+    
     if request.method == 'POST':
         name = request.POST.get('name')
         
         if name:
-            exam_type = ExamType.objects.create(name=name)
+            exam_type = ExamType.objects.create(name=name, teacher=request.user)
             messages.success(request, f'Exam type "{name}" added successfully!')
             return redirect('add_exam')
         else:
@@ -674,8 +1057,15 @@ def add_exam_type(request):
     return render(request, 'marks/add_exam_type.html')
 
 
+@login_required(login_url='login')
 def add_exam(request):
     """Add a new exam"""
+    if not is_teacher(request.user):
+        messages.error(request, 'Only teachers can add exams.')
+        return redirect('dashboard')
+    
+    teacher = request.user
+    
     if request.method == 'POST':
         student_id = request.POST.get('student')
         subject_id = request.POST.get('subject')
@@ -690,10 +1080,11 @@ def add_exam(request):
         exam_id = request.POST.get('exam_id')
         if all([student_id, subject_id, exam_type_name, date, chapter, class_number, total_marks, mark_obtained, exam_id, question_pdf]):
             try:
-                student = Student.objects.get(id=student_id)
-                subject = Subject.objects.get(id=subject_id)
-                # Get or create exam type (CQ or MCQ)
-                exam_type, created = ExamType.objects.get_or_create(name=exam_type_name)
+                # Ensure student belongs to this teacher
+                student = Student.objects.get(id=student_id, teacher=teacher)
+                subject = Subject.objects.get(id=subject_id, teacher=teacher)
+                # Get or create exam type (CQ or MCQ) for this teacher
+                exam_type, created = ExamType.objects.get_or_create(name=exam_type_name, teacher=teacher)
                 # Convert to integers
                 class_number = int(class_number)
                 total_marks = int(total_marks)
@@ -703,6 +1094,7 @@ def add_exam(request):
                     student=student,
                     subject=subject,
                     exam_type=exam_type,
+                    teacher=teacher,
                     date=date,
                     chapter=chapter,
                     class_number=class_number,
@@ -718,8 +1110,9 @@ def add_exam(request):
         else:
             messages.error(request, 'All required fields must be filled!')
     
-    students = Student.objects.all().order_by('name')
-    subjects = Subject.objects.all().order_by('name')
+    # Filter students and subjects by teacher
+    students = Student.objects.filter(teacher=teacher).order_by('name')
+    subjects = Subject.objects.filter(teacher=teacher).order_by('name')
     
     # Check if running on production (non-localhost)
     host = request.get_host().lower()
@@ -734,8 +1127,14 @@ def add_exam(request):
     return render(request, 'marks/add_exam.html', context)
 
 
+@login_required(login_url='login')
 def add_bulk_exam(request):
     """Add exam for multiple students at once"""
+    if not is_teacher(request.user):
+        messages.error(request, 'Only teachers can add exams.')
+        return redirect('dashboard')
+    
+    teacher = request.user
     student_count = None
     
     if request.method == 'POST':
@@ -754,9 +1153,10 @@ def add_bulk_exam(request):
             exam_id = request.POST.get('exam_id')
             if all([subject_id, exam_type_name, date, chapter, class_number, total_marks, exam_id, question_pdf]):
                 try:
-                    subject = Subject.objects.get(id=subject_id)
-                    # Get or create exam type (CQ or MCQ)
-                    exam_type, created = ExamType.objects.get_or_create(name=exam_type_name)
+                    # Ensure subject belongs to this teacher
+                    subject = Subject.objects.get(id=subject_id, teacher=teacher)
+                    # Get or create exam type (CQ or MCQ) for this teacher
+                    exam_type, created = ExamType.objects.get_or_create(name=exam_type_name, teacher=teacher)
                     class_number = int(class_number)
                     total_marks = int(total_marks)
                     exam_id = int(exam_id)
@@ -770,12 +1170,14 @@ def add_bulk_exam(request):
                         student_id = request.POST.get(f'student_{i}')
                         mark_obtained = request.POST.get(f'marks_{i}')
                         if student_id and mark_obtained:
-                            student = Student.objects.get(id=student_id)
+                            # Ensure student belongs to this teacher
+                            student = Student.objects.get(id=student_id, teacher=teacher)
                             mark_obtained = int(mark_obtained)
                             Exam.objects.create(
                                 student=student,
                                 subject=subject,
                                 exam_type=exam_type,
+                                teacher=teacher,
                                 date=date,
                                 chapter=chapter,
                                 class_number=class_number,
@@ -798,8 +1200,9 @@ def add_bulk_exam(request):
             if student_count_str:
                 student_count = int(student_count_str)
     
-    students = Student.objects.all().order_by('name')
-    subjects = Subject.objects.all().order_by('name')
+    # Filter students and subjects by teacher
+    students = Student.objects.filter(teacher=teacher).order_by('name')
+    subjects = Subject.objects.filter(teacher=teacher).order_by('name')
     
     # Check if running on production (non-localhost)
     host = request.get_host().lower()
@@ -816,40 +1219,120 @@ def add_bulk_exam(request):
     return render(request, 'marks/add_bulk_exam.html', context)
 
 
+@login_required(login_url='login')
+def edit_exam(request, exam_id):
+    """Edit an existing exam result"""
+    if not is_teacher(request.user):
+        messages.error(request, 'Only teachers can edit exams.')
+        return redirect('dashboard')
+    
+    teacher = request.user
+    exam = get_object_or_404(Exam, id=exam_id, teacher=teacher)
+    
+    if request.method == 'POST':
+        student_id = request.POST.get('student')
+        subject_id = request.POST.get('subject')
+        exam_type_name = request.POST.get('exam_type')
+        date = request.POST.get('date')
+        chapter = request.POST.get('chapter')
+        class_number = request.POST.get('class_number')
+        total_marks = request.POST.get('total_marks')
+        mark_obtained = request.POST.get('mark_obtained')
+        exam_id_new = request.POST.get('exam_id')
+        question_pdf = request.FILES.get('question_pdf')
+        
+        if all([student_id, subject_id, exam_type_name, date, chapter, class_number, total_marks, mark_obtained, exam_id_new]):
+            try:
+                # Ensure student and subject belong to this teacher
+                student = Student.objects.get(id=student_id, teacher=teacher)
+                subject = Subject.objects.get(id=subject_id, teacher=teacher)
+                exam_type, created = ExamType.objects.get_or_create(name=exam_type_name, teacher=teacher)
+                
+                # Update exam
+                exam.student = student
+                exam.subject = subject
+                exam.exam_type = exam_type
+                exam.date = date
+                exam.chapter = chapter
+                exam.class_number = int(class_number)
+                exam.total_marks = int(total_marks)
+                exam.mark_obtained = int(mark_obtained)
+                exam.exam_id = int(exam_id_new)
+                
+                if question_pdf:
+                    exam.question_pdf = question_pdf
+                
+                exam.save()
+                
+                # Recalculate student's lifetime points
+                exam.student.recalculate_lifetime_points()
+                
+                messages.success(request, 'Exam updated successfully!')
+                return redirect('all_exams')
+            except Exception as e:
+                messages.error(request, f'Error updating exam: {str(e)}')
+        else:
+            messages.error(request, 'All required fields must be filled!')
+    
+    # Get teacher's students and subjects for dropdowns
+    students = Student.objects.filter(teacher=teacher).order_by('name')
+    subjects = Subject.objects.filter(teacher=teacher).order_by('name')
+    
+    # Check if running on production
+    host = request.get_host().lower()
+    is_production = not (host.startswith('localhost') or host.startswith('127.0.0.1'))
+    
+    context = {
+        'exam': exam,
+        'students': students,
+        'subjects': subjects,
+        'is_production': is_production,
+    }
+    
+    return render(request, 'marks/edit_exam.html', context)
+
+
 # API endpoints for chart data
+@login_required(login_url='login')
 def api_marks_over_time(request, student_id):
     """API endpoint for marks over time chart data"""
     data = ChartDataService.marks_over_time(student_id)
     return JsonResponse(data)
 
 
+@login_required(login_url='login')
 def api_subject_performance(request, student_id):
     """API endpoint for subject performance chart data"""
     data = ChartDataService.subject_performance_chart(student_id)
     return JsonResponse(data)
 
 
+@login_required(login_url='login')
 def api_grade_distribution(request, student_id):
     """API endpoint for grade distribution chart data"""
     data = ChartDataService.grade_distribution_chart(student_id)
     return JsonResponse(data)
 
 
+@login_required(login_url='login')
 def api_student_comparison(request, subject_id):
     """API endpoint for student comparison chart data"""
     data = ChartDataService.student_comparison_chart(subject_id)
     return JsonResponse(data)
 
 
+@login_required(login_url='login')
 def api_overall_grade_distribution(request):
     """API endpoint for overall grade distribution chart data"""
     data = ChartDataService.overall_grade_distribution()
     return JsonResponse(data)
 
 
+@login_required(login_url='login')
 def all_exams(request):
-    """Display all exam entries in detail"""
-    exams = Exam.objects.all().select_related('student', 'subject', 'exam_type').order_by('-date', '-exam_id')
+    """Display all exam entries in detail - filtered by teacher"""
+    teacher = get_teacher_for_user(request.user)
+    exams = Exam.objects.filter(teacher=teacher).select_related('student', 'subject', 'exam_type').order_by('-date', '-exam_id')
     
     # Get filter parameters
     student_filter = request.GET.get('student')
@@ -903,16 +1386,16 @@ def all_exams(request):
         highest_percentage = max(exam.percentage for exam in exams)
         lowest_percentage = min(exam.percentage for exam in exams)
     
-    # Get all options for filters
-    students = Student.objects.all().order_by('name')
-    subjects = Subject.objects.all().order_by('name')
-    exam_types = ExamType.objects.all().order_by('name')
+    # Get all options for filters (filtered by teacher)
+    students = Student.objects.filter(teacher=teacher).order_by('name')
+    subjects = Subject.objects.filter(teacher=teacher).order_by('name')
+    exam_types = ExamType.objects.filter(teacher=teacher).order_by('name')
     
-    # Generate available months from exam dates
+    # Generate available months from teacher's exam dates
     from datetime import datetime
-    all_exams = Exam.objects.all().values_list('date', flat=True).distinct()
+    teacher_exam_dates = Exam.objects.filter(teacher=teacher).values_list('date', flat=True).distinct()
     months_set = set()
-    for exam_date in all_exams:
+    for exam_date in teacher_exam_dates:
         if exam_date:
             months_set.add((exam_date.year, exam_date.month))
     
@@ -944,13 +1427,16 @@ def all_exams(request):
     return render(request, 'marks/all_exams.html', context)
 
 
+@login_required(login_url='login')
 def points(request):
-    """Points management page with history and summary"""
-    # Get all students for filters
-    students = Student.objects.all().order_by('name')
+    """Points management page with history and summary - filtered by teacher"""
+    teacher = get_teacher_for_user(request.user)
     
-    # Get points spent history with filters
-    points_history = PointsSpent.objects.all().select_related('student')
+    # Get all students for filters (filtered by teacher)
+    students = Student.objects.filter(teacher=teacher).order_by('name')
+    
+    # Get points spent history with filters (filtered by teacher)
+    points_history = PointsSpent.objects.filter(teacher=teacher).select_related('student')
     
     # Apply filters from GET parameters
     student_filter = request.GET.get('student')
@@ -979,9 +1465,9 @@ def points(request):
         highest_spent = max(record.points_spent for record in points_history)
         lowest_spent = min(record.points_spent for record in points_history)
     
-    # Get student points summary
+    # Get student points summary (filtered by teacher)
     student_summary = []
-    for student in Student.objects.all().order_by('name'):
+    for student in Student.objects.filter(teacher=teacher).order_by('name'):
         lifetime_points, created = LifetimePoints.objects.get_or_create(student=student)
         student_summary.append({
             'student': student,
@@ -1006,10 +1492,14 @@ def points(request):
     return render(request, 'marks/points.html', context)
 
 
+@login_required(login_url='login')
 def add_points_spent(request):
     """Form to record points spent by a student"""
-    host = request.get_host()
-    is_production = not (host.startswith('localhost') or host.startswith('127.0.0.1'))
+    if not is_teacher(request.user):
+        messages.error(request, 'Only teachers can record points spent.')
+        return redirect('dashboard')
+    
+    teacher = request.user
     
     if request.method == 'POST':
         student_id = request.POST.get('student')
@@ -1017,7 +1507,8 @@ def add_points_spent(request):
         description = request.POST.get('description')
         
         try:
-            student = Student.objects.get(id=student_id)
+            # Ensure student belongs to this teacher
+            student = Student.objects.get(id=student_id, teacher=teacher)
             points_spent = int(points_spent)
             
             # Get or create lifetime points for validation
@@ -1029,9 +1520,10 @@ def add_points_spent(request):
             elif points_spent > lifetime_points.points_remaining:
                 messages.error(request, f'{student.name} only has {lifetime_points.points_remaining} points remaining.')
             else:
-                # Create the points spent record
+                # Create the points spent record with teacher
                 PointsSpent.objects.create(
                     student=student,
+                    teacher=teacher,
                     points_spent=points_spent,
                     description=description[:15]  # Enforce max 15 characters
                 )
@@ -1042,31 +1534,33 @@ def add_points_spent(request):
         except ValueError:
             messages.error(request, 'Invalid points value.')
     
-    # Get all students for the form
-    students = Student.objects.all().order_by('name')
+    # Get all students for the form (filtered by teacher)
+    students = Student.objects.filter(teacher=teacher).order_by('name')
     
     context = {
         'students': students,
-        'is_production': is_production,
     }
     
     return render(request, 'marks/add_points_spent.html', context)
 
 
+@login_required(login_url='login')
 def leaderboard(request):
-    """Leaderboard page with overall, subject-wise, and monthly rankings"""
+    """Leaderboard page with overall, subject-wise, and monthly rankings - filtered by teacher"""
     from django.db.models import Avg, Count, Max, Sum
     from datetime import datetime
+    
+    teacher = get_teacher_for_user(request.user)
     
     # Get class filter from request
     class_filter = request.GET.get('class_number', 'all')
     
-    # Get available class numbers
-    available_classes = Exam.objects.values_list('class_number', flat=True).distinct().order_by('class_number')
+    # Get available class numbers (filtered by teacher)
+    available_classes = Exam.objects.filter(teacher=teacher).values_list('class_number', flat=True).distinct().order_by('class_number')
     
-    # Overall Rankings
+    # Overall Rankings (filtered by teacher)
     overall_rankings = []
-    students = Student.objects.all()
+    students = Student.objects.filter(teacher=teacher)
     
     for student in students:
         # Filter exams by class if specified
@@ -1105,7 +1599,7 @@ def leaderboard(request):
                     month_exams = exams.filter(date__year=year, date__month=month)
                     if not month_exams.exists():
                         continue
-                    students_in_month = Student.objects.filter(exam__class_number=exams.first().class_number, exam__date__year=year, exam__date__month=month).distinct()
+                    students_in_month = Student.objects.filter(teacher=teacher, exam__class_number=exams.first().class_number, exam__date__year=year, exam__date__month=month).distinct()
                     month_rankings = []
                     for s in students_in_month:
                         s_month_exams = s.exam_set.filter(class_number=exams.first().class_number, date__year=year, date__month=month)
@@ -1189,21 +1683,22 @@ def leaderboard(request):
         else:
             item['rank'] = 1
     
-    # Subject-wise Leaders
+    # Subject-wise Leaders (filtered by teacher)
     subject_leaders = []
-    subjects = Subject.objects.all()
+    subjects = Subject.objects.filter(teacher=teacher)
     
     for subject in subjects:
         leaders = []
         
-        # Filter by class if specified
+        # Filter by class if specified (teacher-scoped)
         if class_filter != 'all':
             students_in_subject = Student.objects.filter(
+                teacher=teacher,
                 exam__subject=subject,
                 exam__class_number=int(class_filter)
             ).distinct()
         else:
-            students_in_subject = Student.objects.filter(exam__subject=subject).distinct()
+            students_in_subject = Student.objects.filter(teacher=teacher, exam__subject=subject).distinct()
         
         for student in students_in_subject:
             # Filter exams by class
@@ -1252,7 +1747,7 @@ def leaderboard(request):
             'leaders': leaders[:10],  # Top 10 per subject
         })
     
-    # Monthly Champions (exclude current month)
+    # Monthly Champions (exclude current month) - filtered by teacher
     monthly_champions = []
     
     # Get all unique year-month combinations from exams (only past months)
@@ -1260,11 +1755,11 @@ def leaderboard(request):
     current_year = date_type.today().year
     current_month = date_type.today().month
     
-    # Filter exam dates by class
+    # Filter exam dates by class and teacher
     if class_filter != 'all':
-        exam_dates = Exam.objects.filter(class_number=int(class_filter)).values_list('date', flat=True).distinct()
+        exam_dates = Exam.objects.filter(teacher=teacher, class_number=int(class_filter)).values_list('date', flat=True).distinct()
     else:
-        exam_dates = Exam.objects.values_list('date', flat=True).distinct()
+        exam_dates = Exam.objects.filter(teacher=teacher).values_list('date', flat=True).distinct()
     
     months_set = set()
     
@@ -1281,15 +1776,17 @@ def leaderboard(request):
         month_name = datetime(year, month, 1).strftime('%B %Y')
         champions = []
         
-        # Get all students who had exams in this month (with class filter)
+        # Get all students who had exams in this month (with class filter, teacher-scoped)
         if class_filter != 'all':
             students_in_month = Student.objects.filter(
+                teacher=teacher,
                 exam__date__year=year,
                 exam__date__month=month,
                 exam__class_number=int(class_filter)
             ).distinct()
         else:
             students_in_month = Student.objects.filter(
+                teacher=teacher,
                 exam__date__year=year,
                 exam__date__month=month
             ).distinct()
@@ -1352,15 +1849,17 @@ def leaderboard(request):
     current_month_performers = []
     month_name = datetime(current_year, current_month, 1).strftime('%B %Y')
     
-    # Get all students who have exams in the current month (with class filter)
+    # Get all students who have exams in the current month (with class filter, teacher-scoped)
     if class_filter != 'all':
         students_current_month = Student.objects.filter(
+            teacher=teacher,
             exam__date__year=current_year,
             exam__date__month=current_month,
             exam__class_number=int(class_filter)
         ).distinct()
     else:
         students_current_month = Student.objects.filter(
+            teacher=teacher,
             exam__date__year=current_year,
             exam__date__month=current_month
         ).distinct()
@@ -1424,21 +1923,26 @@ def leaderboard(request):
     return render(request, 'marks/leaderboard.html', context)
 
 
+@login_required(login_url='login')
 def guide(request):
     """User guide page explaining grading system, points, and terminology"""
     return render(request, 'marks/guide.html')
 
 
+@login_required(login_url='login')
 def about(request):
     """About page with project and developer information"""
     return render(request, 'marks/about.html')
 
 
+@login_required(login_url='login')
+@login_required(login_url='login')
 def exam_lookup(request):
     """Mobile-only page for looking up exam PDFs by exam ID"""
     return render(request, 'marks/exam_lookup.html')
 
 
+@login_required(login_url='login')
 def exam_lookup_api(request):
     """API endpoint for fetching exam details by exam ID"""
     exam_id = request.GET.get('exam_id', '').strip()
