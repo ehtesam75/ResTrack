@@ -1974,8 +1974,10 @@ def exam_lookup_api(request):
     if not exam_id:
         return JsonResponse({'success': False, 'error': 'Please enter an exam ID'})
     
-    # Find exam(s) with the given exam_id
-    exams = Exam.objects.filter(exam_id=exam_id).select_related('subject', 'exam_type', 'student')
+    # Get current teacher
+    teacher = get_teacher_for_user(request.user)
+    # Find exam(s) with the given exam_id, filtered by teacher
+    exams = Exam.objects.filter(exam_id=exam_id, teacher=teacher).select_related('subject', 'exam_type', 'student')
     
     if not exams.exists():
         return JsonResponse({'success': False, 'error': f'No exam found with ID: {exam_id}'})
