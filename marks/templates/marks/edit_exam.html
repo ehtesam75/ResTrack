@@ -87,12 +87,8 @@
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                         >
                             <option value="">Select Exam Type</option>
-                            {% for et in exam_types %}
-                            <option value="{{ et.name }}" {% if exam.exam_type.name == et.name %}selected{% endif %}>{{ et.name }}</option>
-                            {% empty %}
                             <option value="CQ" {% if exam.exam_type.name == "CQ" %}selected{% endif %}>CQ</option>
                             <option value="MCQ" {% if exam.exam_type.name == "MCQ" %}selected{% endif %}>MCQ</option>
-                            {% endfor %}
                         </select>
                     </div>
                     

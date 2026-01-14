@@ -152,12 +152,8 @@
                         class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors"
                     >
                         <option value="">Select Exam Type</option>
-                        {% for exam_type in exam_types %}
-                        <option value="{{ exam_type.name }}">{{ exam_type.name }}</option>
-                        {% empty %}
                         <option value="CQ">CQ</option>
                         <option value="MCQ">MCQ</option>
-                        {% endfor %}
                     </select>
                 </div>
 
