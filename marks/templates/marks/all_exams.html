@@ -109,26 +109,15 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1.5">Exam Type</label>
-                    <div class="flex gap-4 mt-2">
-                        <label class="flex items-center cursor-pointer">
-                            <input type="radio" name="exam_type" value=""
-                                {% if not request.GET.exam_type %}checked{% endif %}
-                                class="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-500">
-                            <span class="ml-2 text-sm text-gray-700">All</span>
-                        </label>
-                        <label class="flex items-center cursor-pointer">
-                            <input type="radio" name="exam_type" value="CQ"
-                                {% if request.GET.exam_type == "CQ" %}checked{% endif %}
-                                class="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-500">
-                            <span class="ml-2 text-sm text-gray-700">CQ</span>
-                        </label>
-                        <label class="flex items-center cursor-pointer">
-                            <input type="radio" name="exam_type" value="MCQ"
-                                {% if request.GET.exam_type == "MCQ" %}checked{% endif %}
-                                class="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-500">
-                            <span class="ml-2 text-sm text-gray-700">MCQ</span>
-                        </label>
-                    </div>
+                    <select name="exam_type" class="mobile-filter-select w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50">
+                        <option value="">All Types</option>
+                        {% for et in exam_types %}
+                        <option value="{{ et.name }}" {% if request.GET.exam_type == et.name %}selected{% endif %}>{{ et.name }}</option>
+                        {% empty %}
+                        <option value="CQ" {% if request.GET.exam_type == "CQ" %}selected{% endif %}>CQ</option>
+                        <option value="MCQ" {% if request.GET.exam_type == "MCQ" %}selected{% endif %}>MCQ</option>
+                        {% endfor %}
+                    </select>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1.5">Month</label>
@@ -215,27 +204,16 @@
 
                 <!-- Exam Type Filter -->
                 <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">Exam Type</label>
-                    <div class="flex gap-4 mt-2">
-                        <label class="flex items-center cursor-pointer">
-                            <input type="radio" name="exam_type" value=""
-                                {% if not request.GET.exam_type %}checked{% endif %}
-                                class="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-500">
-                            <span class="ml-2 text-sm text-gray-700">All</span>
-                        </label>
-                        <label class="flex items-center cursor-pointer">
-                            <input type="radio" name="exam_type" value="CQ"
-                                {% if request.GET.exam_type == "CQ" %}checked{% endif %}
-                                class="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-500">
-                            <span class="ml-2 text-sm text-gray-700">CQ</span>
-                        </label>
-                        <label class="flex items-center cursor-pointer">
-                            <input type="radio" name="exam_type" value="MCQ"
-                                {% if request.GET.exam_type == "MCQ" %}checked{% endif %}
-                                class="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-500">
-                            <span class="ml-2 text-sm text-gray-700">MCQ</span>
-                        </label>
-                    </div>
+                    <label for="exam_type" class="block text-xs font-semibold text-gray-700 mb-1.5">Exam Type</label>
+                    <select name="exam_type" id="exam_type" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors">
+                        <option value="">All Types</option>
+                        {% for et in exam_types %}
+                        <option value="{{ et.name }}" {% if request.GET.exam_type == et.name %}selected{% endif %}>{{ et.name }}</option>
+                        {% empty %}
+                        <option value="CQ" {% if request.GET.exam_type == "CQ" %}selected{% endif %}>CQ</option>
+                        <option value="MCQ" {% if request.GET.exam_type == "MCQ" %}selected{% endif %}>MCQ</option>
+                        {% endfor %}
+                    </select>
                 </div>
 
                 <!-- Month Filter -->
@@ -446,9 +424,11 @@
                     {% endif %}
                 </p>
                 <div class="mt-6">
+                    {% if user.teacher_profile %}
                     <a href="{% url 'add_exam' %}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
                         Add Exam Record
                     </a>
+                    {% endif %}
                 </div>
             </div>
         {% endif %}

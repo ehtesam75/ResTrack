@@ -10,9 +10,11 @@
             <h1 class="text-xl sm:text-2xl font-bold gradient-text">All Students</h1>
             <p class="text-xs sm:text-sm text-gray-600 mt-1">Manage student profiles and performance</p>
         </div>
+        {% if user.teacher_profile %}
         <a href="{% url 'add_student' %}" class="hide-mobile bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-blue-200 transform hover:-translate-y-0.5 transition-all duration-200">
             Add Student
         </a>
+        {% endif %}
     </div>
 
     <!-- Mobile: Compact Student Cards -->

@@ -54,12 +54,14 @@
             <h1 class="text-lg sm:text-2xl font-bold gradient-text">Points Management</h1>
             <p class="text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1">Points spending history & summary</p>
         </div>
+        {% if user.teacher_profile %}
         <a 
             href="{% url 'add_points_spent' %}" 
             class="hide-mobile bg-purple-100 text-purple-700 px-6 py-2.5 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-purple-200 transition-all"
         >
             Record Points Spent
         </a>
+        {% endif %}
     </div>
 
     <!-- Student Points Summary Table -->

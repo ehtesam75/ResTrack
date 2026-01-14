@@ -83,20 +83,20 @@
             <!-- Stats -->
             <div class="mt-16 sm:mt-24 grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-4xl mx-auto">
                 <div class="text-center p-4">
-                    <div class="text-3xl sm:text-4xl font-bold gradient-text">∞</div>
+                    <div class="text-3xl sm:text-4xl font-bold gradient-text">{{ total_teachers|default:"0" }}</div>
+                    <div class="text-sm text-gray-500 mt-1">Teachers</div>
+                </div>
+                <div class="text-center p-4">
+                    <div class="text-3xl sm:text-4xl font-bold gradient-text">{{ total_students|default:"0" }}</div>
                     <div class="text-sm text-gray-500 mt-1">Students</div>
                 </div>
                 <div class="text-center p-4">
-                    <div class="text-3xl sm:text-4xl font-bold gradient-text">∞</div>
+                    <div class="text-3xl sm:text-4xl font-bold gradient-text">{{ total_exams|default:"0" }}</div>
                     <div class="text-sm text-gray-500 mt-1">Exams</div>
                 </div>
                 <div class="text-center p-4">
-                    <div class="text-3xl sm:text-4xl font-bold gradient-text">Real-time</div>
-                    <div class="text-sm text-gray-500 mt-1">Analytics</div>
-                </div>
-                <div class="text-center p-4">
-                    <div class="text-3xl sm:text-4xl font-bold gradient-text">Free</div>
-                    <div class="text-sm text-gray-500 mt-1">Forever</div>
+                    <div class="text-3xl sm:text-4xl font-bold gradient-text">{{ total_points|default:"0" }}</div>
+                    <div class="text-sm text-gray-500 mt-1">Points Earned</div>
                 </div>
             </div>
         </div>
@@ -276,19 +276,7 @@
                 </div>
             </div>
 
-            <!-- Note -->
-            <div class="mt-12 bg-gradient-to-r from-purple-600 to-blue-500 rounded-2xl p-6 sm:p-8 text-white text-center">
-                <div class="flex items-center justify-center gap-2 mb-3">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <span class="font-semibold">Important Note</span>
-                </div>
-                <p class="text-sm sm:text-base opacity-90">
-                    Students cannot sign up directly. Only teachers can create student accounts. 
-                    This ensures proper management of student data and maintains academic integrity.
-                </p>
-            </div>
+
         </div>
     </section>
 
@@ -312,13 +300,10 @@
     <!-- Footer -->
     <footer class="bg-gray-900 text-gray-400 py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div class="text-center sm:text-left">
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                <div class="text-center">
                     <span class="text-white font-bold text-lg">ResTrack</span>
                     <p class="text-sm mt-1">Student Result Tracking System</p>
-                </div>
-                <div class="text-sm">
-                    © 2026 ResTrack. All rights reserved.
                 </div>
             </div>
         </div>

@@ -47,7 +47,24 @@ def home(request):
     """Landing page for the application"""
     if request.user.is_authenticated:
         return redirect('dashboard')
-    return render(request, 'marks/home.html')
+    
+    # Get global stats for home page
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    
+    total_teachers = TeacherProfile.objects.count()
+    total_students = Student.objects.count()
+    total_exams = count_unique_exams(Exam.objects.all())
+    total_points = LifetimePoints.objects.aggregate(total=Sum('points_earned'))['total'] or 0
+    
+    context = {
+        'total_teachers': total_teachers,
+        'total_students': total_students,
+        'total_exams': total_exams,
+        'total_points': total_points,
+    }
+    
+    return render(request, 'marks/home.html', context)
 
 
 def teacher_signup(request):
@@ -226,19 +243,19 @@ def dashboard(request):
     # Recent exams - filtered by teacher
     recent_exams = teacher_exams.order_by('-date', '-exam_id')[:10]
     
-    # Leaderboards - filtered by teacher's students
+    # Leaderboards - filtered by teacher's students (TOP 3 only)
     total_marks_leaderboard = sorted(
         [{'student': s, 'total_marks': s.total_marks, 'total_exams': s.total_exams} for s in teacher_students],
         key=lambda x: x['total_marks'], reverse=True
-    )[:5]
+    )[:3]
     
     average_leaderboard = sorted(
         [{'student': s, 'average': s.average_percentage, 'total_exams': s.total_exams} 
          for s in teacher_students if s.total_exams > 0],
         key=lambda x: x['average'], reverse=True
-    )[:5]
+    )[:3]
     
-    # Points leaderboard - filtered by teacher's students
+    # Points leaderboard - filtered by teacher's students (TOP 3 only)
     from .models import LifetimePoints
     points_leaderboard = []
     for student in teacher_students:
@@ -250,7 +267,7 @@ def dashboard(request):
                 'points_earned': lp.points_earned,
                 'points_spent': lp.points_spent
             })
-    points_leaderboard = sorted(points_leaderboard, key=lambda x: x['total_points'], reverse=True)[:5]
+    points_leaderboard = sorted(points_leaderboard, key=lambda x: x['total_points'], reverse=True)[:3]
     
     # Serialize subject_performance for JavaScript
     subject_performance_json = json.dumps([
@@ -1104,6 +1121,7 @@ def add_exam(request):
     # Filter students and subjects by teacher
     students = Student.objects.filter(teacher=teacher).order_by('name')
     subjects = Subject.objects.filter(teacher=teacher).order_by('name')
+    exam_types = ExamType.objects.filter(teacher=teacher).order_by('name')
     
     # Check if running on production (non-localhost)
     host = request.get_host().lower()
@@ -1112,6 +1130,7 @@ def add_exam(request):
     context = {
         'students': students,
         'subjects': subjects,
+        'exam_types': exam_types,
         'is_production': is_production,
     }
     
@@ -1193,6 +1212,7 @@ def add_bulk_exam(request):
     # Filter students and subjects by teacher
     students = Student.objects.filter(teacher=teacher).order_by('name')
     subjects = Subject.objects.filter(teacher=teacher).order_by('name')
+    exam_types = ExamType.objects.filter(teacher=teacher).order_by('name')
     
     # Check if running on production (non-localhost)
     host = request.get_host().lower()
@@ -1201,6 +1221,7 @@ def add_bulk_exam(request):
     context = {
         'students': students,
         'subjects': subjects,
+        'exam_types': exam_types,
         'student_count': student_count,
         'student_range': range(1, student_count + 1) if student_count else [],
         'is_production': is_production,
@@ -1266,6 +1287,7 @@ def edit_exam(request, exam_id):
     # Get teacher's students and subjects for dropdowns
     students = Student.objects.filter(teacher=teacher).order_by('name')
     subjects = Subject.objects.filter(teacher=teacher).order_by('name')
+    exam_types = ExamType.objects.filter(teacher=teacher).order_by('name')
     
     # Check if running on production
     host = request.get_host().lower()
@@ -1275,6 +1297,7 @@ def edit_exam(request, exam_id):
         'exam': exam,
         'students': students,
         'subjects': subjects,
+        'exam_types': exam_types,
         'is_production': is_production,
     }
     
@@ -1541,11 +1564,22 @@ def leaderboard(request):
     
     teacher = get_teacher_for_user(request.user)
     
-    # Get class filter from request
+    # Get class filter from request (default to 'all')
     class_filter = request.GET.get('class_number', 'all')
     
-    # Get available class numbers (filtered by teacher)
-    available_classes = Exam.objects.filter(teacher=teacher).values_list('class_number', flat=True).distinct().order_by('class_number')
+    # Get available class numbers (only classes with actual exam records, filtered by teacher)
+    try:
+        available_classes = list(
+            Exam.objects.filter(teacher=teacher)
+            .exclude(class_number__isnull=True)
+            .values_list('class_number', flat=True)
+            .distinct()
+            .order_by('class_number')
+        )
+        # Filter out any None or empty values
+        available_classes = [c for c in available_classes if c is not None]
+    except (ValueError, TypeError):
+        available_classes = []
     
     # Overall Rankings (filtered by teacher)
     overall_rankings = []
@@ -1928,7 +1962,17 @@ def about(request):
 @login_required(login_url='login')
 def exam_lookup(request):
     """Mobile-only page for looking up exam PDFs by exam ID"""
-    return render(request, 'marks/exam_lookup.html')
+    teacher = get_teacher_for_user(request.user)
+    
+    # Get exam stats for this teacher
+    total_exams = count_unique_exams(Exam.objects.filter(teacher=teacher))
+    exams_with_pdf = Exam.objects.filter(teacher=teacher).exclude(question_pdf='').exclude(question_pdf__isnull=True).values('exam_id').distinct().count()
+    
+    context = {
+        'total_exams': total_exams,
+        'exams_with_pdf': exams_with_pdf,
+    }
+    return render(request, 'marks/exam_lookup.html', context)
 
 
 @login_required(login_url='login')

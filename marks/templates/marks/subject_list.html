@@ -10,9 +10,11 @@
             <h1 class="text-xl sm:text-2xl font-bold gradient-text">All Subjects</h1>
             <p class="text-xs sm:text-sm text-gray-600 mt-1">Manage subjects and track performance</p>
         </div>
+        {% if user.teacher_profile %}
         <a href="{% url 'add_subject' %}" class="hide-mobile bg-green-100 text-green-700 px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-green-200 transform hover:-translate-y-0.5 transition-all duration-200">
             Add Subject
         </a>
+        {% endif %}
     </div>
 
     <!-- Mobile: Compact Subject Cards -->
