@@ -61,9 +61,9 @@
                     <!-- Teacher: Show Manage button -->
                     {% if user.teacher_profile %}
                     <div class="hidden sm:flex sm:items-center">
-                        <a href="{% url 'manage' %}" class="{% if 'manage' in request.path %}bg-purple-700{% else %}bg-purple-600 hover:bg-purple-700{% endif %} text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md transition-all">
-                            Manage
-                        </a>
+                            <a href="{% url 'manage' %}" class="{% if 'manage' in request.path %}bg-purple-200{% else %}bg-purple-100 hover:bg-purple-200{% endif %} text-purple-700 px-4 py-2 rounded-md text-sm font-medium shadow-sm hover:shadow-md transition-all">
+                                Manage
+                            </a>
                     </div>
                     {% endif %}
                     <!-- User dropdown -->
