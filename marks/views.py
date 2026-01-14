@@ -1753,7 +1753,7 @@ def leaderboard(request):
         
         subject_leaders.append({
             'subject': subject,
-            'leaders': leaders[:10],  # Top 10 per subject
+            'leaders': leaders[:5],  # Top 5 per subject
         })
     
     # Monthly Champions (exclude current month) - filtered by teacher
@@ -1851,7 +1851,7 @@ def leaderboard(request):
             'month_name': month_name,
             'year': year,
             'month': month,
-            'champions': champions[:10],  # Top 10 per month
+            'champions': champions[:5],  # Top 5 per month
         })
     
     # Current Month Top Performers (separate from monthly champions)
@@ -1923,7 +1923,7 @@ def leaderboard(request):
         'overall_rankings': overall_rankings,
         'subject_leaders': subject_leaders,
         'monthly_champions': monthly_champions,
-        'current_month_performers': current_month_performers[:10],  # Top 10 for current month
+        'current_month_performers': current_month_performers[:5],  # Top 5 for current month
         'current_month_name': month_name,
         'available_classes': available_classes,
         'selected_class': class_filter,
