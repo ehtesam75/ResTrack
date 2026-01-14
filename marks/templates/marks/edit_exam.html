@@ -134,6 +134,7 @@
                     </label>
                     <input type="number" id="mark_obtained" name="mark_obtained" value="{{ exam.mark_obtained }}" required min="0"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    <p id="mark-error" class="text-xs text-red-600 mt-1 hidden">Obtained marks cannot exceed total marks.</p>
                 </div>
             </div>
             
@@ -170,7 +171,7 @@
                 </label>
                 <input type="file" id="question_pdf" name="question_pdf" accept=".pdf"
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                <p class="text-xs text-gray-500 mt-1">Upload a new PDF to replace the current one (max 1MB). Leave empty to keep the current file.</p>
+                <p class="text-xs text-gray-500 mt-1">Upload a new PDF to replace the current one. Leave empty to keep the current file.</p>
                 <p class="text-xs text-red-600 mt-1 hidden" id="pdf-error">Please upload a PDF file</p>
                 <p class="text-xs text-red-600 mt-1 hidden" id="pdf-size-error">File size must be less than 1MB</p>
             </div>
@@ -197,11 +198,31 @@ const questionPdfInput = document.getElementById('question_pdf');
 const pdfError = document.getElementById('pdf-error');
 const pdfSizeError = document.getElementById('pdf-size-error');
 
-// Update percentage preview on mark changes
+const saveBtn = document.querySelector('button[type="submit"]');
+const totalMarksInput = document.getElementById('total_marks');
+const markObtainedInput = document.getElementById('mark_obtained');
+const markError = document.getElementById('mark-error');
+
+function validateFormFields() {
+    let valid = true;
+    const total = parseFloat(totalMarksInput.value) || 0;
+    const obtained = parseFloat(markObtainedInput.value) || 0;
+    if (!totalMarksInput.value || !markObtainedInput.value || obtained > total) {
+        valid = false;
+    }
+    saveBtn.disabled = !valid;
+}
+
+// Update percentage preview and validate marks
 function updatePercentage() {
-    const total = parseFloat(document.getElementById('total_marks').value) || 0;
-    const obtained = parseFloat(document.getElementById('mark_obtained').value) || 0;
-    
+    const total = parseFloat(totalMarksInput.value) || 0;
+    const obtained = parseFloat(markObtainedInput.value) || 0;
+    if (obtained > total) {
+        markError.classList.remove('hidden');
+    } else {
+        markError.classList.add('hidden');
+    }
+    validateFormFields();
     if (total > 0) {
         const percentage = (obtained / total) * 100;
         // You could add a live percentage preview here
@@ -242,10 +263,10 @@ function validatePdf() {
     }
 }
 
-document.getElementById('total_marks').addEventListener('input', updatePercentage);
-document.getElementById('mark_obtained').addEventListener('input', updatePercentage);
+totalMarksInput.addEventListener('input', updatePercentage);
+markObtainedInput.addEventListener('input', updatePercentage);
 questionPdfInput.addEventListener('change', validatePdf);
-
+document.addEventListener('DOMContentLoaded', validateFormFields);
 // Form submit validation
 document.querySelector('form').addEventListener('submit', function(e) {
     if (questionPdfInput.files.length > 0) {
@@ -255,6 +276,10 @@ document.querySelector('form').addEventListener('submit', function(e) {
             alert('PDF file size must be less than 1MB!');
             return false;
         }
+    }
+    if (saveBtn.disabled) {
+        e.preventDefault();
+        return false;
     }
 });
 </script>
