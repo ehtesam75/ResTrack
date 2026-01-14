@@ -3,43 +3,48 @@
 {% block title %}Add Student{% endblock %}
 
 {% block content %}
-<div class="max-w-3xl mx-auto">
-    {% if is_production %}
-    <div class="bg-red-50 border-l-4 border-red-500 text-red-800 px-4 py-3 rounded-r-lg shadow-md mb-4" role="alert">
-        <div class="flex items-center">
-            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-            </svg>
-            <span class="text-sm font-medium">This form is disabled on the hosted version. Please use localhost to add students.</span>
+<div class="max-w-4xl mx-auto">
+    <div class="glass-effect rounded-xl p-6 border border-gray-200 shadow-lg animate-fade-in-up">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-2xl font-bold gradient-text">Add New Student</h1>
+                <p class="text-sm text-gray-600 mt-1">Enter student details below</p>
+            </div>
         </div>
-    </div>
-    {% endif %}
-    
-    <div class="glass-effect rounded-xl p-6 border border-gray-200 shadow-lg">
-        <div class="mb-5">
-            <h1 class="text-2xl font-bold gradient-text">Add New Student</h1>
-            <p class="text-sm text-gray-600 mt-1">Enter student details below</p>
+        {% if is_production %}
+        <div class="bg-red-50 border-l-4 border-red-600 p-4 mb-5">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-600" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-semibold text-red-900">Form Submission Disabled</h3>
+                    <p class="text-sm text-red-800 mt-1">
+                        This form is currently disabled on the hosted version. To add students, please access ResTrack locally at <code class="bg-red-100 px-1.5 py-0.5 rounded text-xs">localhost:8000</code> or <code class="bg-red-100 px-1.5 py-0.5 rounded text-xs">127.0.0.1:8000</code>.
+                    </p>
+                </div>
+            </div>
         </div>
-        
+        {% endif %}
         <form method="post" class="space-y-5">
             {% csrf_token %}
-            
-            <div>
-                <label for="name" class="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">
-                    Student Name <span class="text-red-500">*</span>
-                </label>
-                <input 
-                    type="text" 
-                    id="name" 
-                    name="name" 
-                    required
-                    oninput="validateStudentForm()"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all"
-                    placeholder="Enter student name"
-                >
-            </div>
-
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="name" class="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">
+                        Student Name <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="name" 
+                        name="name" 
+                        required
+                        oninput="validateStudentForm()"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all"
+                        placeholder="Enter student name"
+                    >
+                </div>
                 <div>
                     <label for="class_number" class="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">
                         Class <span class="text-red-500">*</span>
@@ -56,7 +61,6 @@
                         max="12"
                     >
                 </div>
-
                 <div>
                     <label for="roll" class="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">
                         Roll Number <span class="text-red-500">*</span>
@@ -72,7 +76,6 @@
                     >
                 </div>
             </div>
-
             <div class="flex gap-3 pt-2">
                 <button 
                     type="submit"

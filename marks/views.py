@@ -1032,21 +1032,31 @@ def edit_student(request, student_id):
 
 @login_required(login_url='login')
 def add_subject(request):
-    """Add a new subject"""
+    """Add a new subject and show already added subjects for the current teacher"""
     if not is_teacher(request.user):
         messages.error(request, 'Only teachers can add subjects.')
         return redirect('dashboard')
-    
+
+    # Get all subjects for the current teacher
+    subjects = Subject.objects.filter(teacher=request.user).order_by('-created_at')
+
     if request.method == 'POST':
         name = request.POST.get('name')
-        
         if name:
             subject = Subject.objects.create(name=name, teacher=request.user)
             return redirect('subject_list')
         else:
             messages.error(request, 'Subject name is required!')
-    
-    return render(request, 'marks/add_subject.html')
+
+    # Check if running on production (non-localhost)
+    host = request.get_host().lower()
+    is_production = not (host.startswith('localhost') or host.startswith('127.0.0.1'))
+
+    context = {
+        'subjects': subjects,
+        'is_production': is_production,
+    }
+    return render(request, 'marks/add_subject.html', context)
 
 
 
