@@ -1048,23 +1048,6 @@ def add_subject(request):
     return render(request, 'marks/add_subject.html')
 
 
-@login_required(login_url='login')
-def add_exam_type(request):
-    """Add a new exam type"""
-    if not is_teacher(request.user):
-        messages.error(request, 'Only teachers can add exam types.')
-        return redirect('dashboard')
-    
-    if request.method == 'POST':
-        name = request.POST.get('name')
-        
-        if name:
-            exam_type = ExamType.objects.create(name=name, teacher=request.user)
-            return redirect('add_exam')
-        else:
-            messages.error(request, 'Exam type name is required!')
-    
-    return render(request, 'marks/add_exam_type.html')
 
 
 @login_required(login_url='login')
