@@ -6,6 +6,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.db.models import Sum, Q
 import json
 from .models import Student, Subject, ExamType, Exam, GradeScale, LifetimePoints, PointsSpent, TeacherProfile, StudentProfile
+from django.db.models import Q
 from .services import LeaderboardService, DashboardService, ChartDataService, count_unique_exams
 from .forms import TeacherSignupForm, LoginForm, StudentAccountForm
 
@@ -1950,12 +1951,17 @@ def exam_lookup(request):
     teacher = get_teacher_for_user(request.user)
     
     # Get exam stats for this teacher
-    total_exams = count_unique_exams(Exam.objects.filter(teacher=teacher))
-    exams_with_pdf = Exam.objects.filter(teacher=teacher).exclude(question_pdf='').exclude(question_pdf__isnull=True).values('exam_id').distinct().count()
-    
+    qs = Exam.objects.filter(teacher=teacher)
+    exam_ids = qs.values_list('exam_id', flat=True)
+    min_exam_id = exam_ids.order_by('exam_id').first() if exam_ids else None
+    max_exam_id = exam_ids.order_by('-exam_id').first() if exam_ids else None
+    exams_with_pdf = qs.exclude(question_pdf='').exclude(question_pdf__isnull=True).values('exam_id').distinct().count()
+    exams_without_pdf = qs.filter(Q(question_pdf='') | Q(question_pdf__isnull=True)).values('exam_id').distinct().count()
     context = {
-        'total_exams': total_exams,
+        'min_exam_id': min_exam_id or 'N/A',
+        'max_exam_id': max_exam_id or 'N/A',
         'exams_with_pdf': exams_with_pdf,
+        'exams_without_pdf': exams_without_pdf,
     }
     return render(request, 'marks/exam_lookup.html', context)
 
