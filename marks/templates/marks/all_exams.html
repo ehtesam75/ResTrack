@@ -29,9 +29,11 @@
                 <span class="w-2 h-2 bg-purple-600 rounded-full"></span>
                 {% endif %}
             </button>
+            {% if not is_student %}
             <a href="{% url 'add_exam' %}" class="hide-mobile px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md transition-all" style="background-color: #D1FAE5; color: #065F46;">
                 Record Exam Result
             </a>
+            {% endif %}
             </div>
         </div>
         <p class="text-xs sm:text-sm text-gray-600 mt-1 sm:mt-0.5">Complete list of all exam entries</p>

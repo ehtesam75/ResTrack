@@ -899,6 +899,7 @@ def subject_detail(request, subject_id):
         'cq_stats': cq_stats,
         'mcq_stats': mcq_stats,
         'recent_exams': recent_exams,
+        'is_student': is_student(request.user),
     }
     
     return render(request, 'marks/subject_detail.html', context)
@@ -1435,6 +1436,7 @@ def all_exams(request):
         'average_percentage': average_percentage,
         'highest_percentage': highest_percentage,
         'lowest_percentage': lowest_percentage,
+        'is_student': is_student(request.user),
     }
     
     return render(request, 'marks/all_exams.html', context)
