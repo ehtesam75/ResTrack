@@ -134,7 +134,7 @@ def manage(request):
         'total_exams': count_unique_exams(teacher_exams),
         'total_exam_types': teacher_exam_types.count(),
         'recent_students': teacher_students.order_by('-created_at')[:5],
-        'recent_exams': teacher_exams.order_by('-date', '-id')[:5],
+        'recent_exams': teacher_exams.order_by('-date', '-id')[:100],
     }
     return render(request, 'marks/manage.html', context)
 

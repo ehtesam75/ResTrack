@@ -169,7 +169,7 @@
         <div class="glass-effect rounded-xl border border-gray-200 overflow-hidden">
             <div class="p-4 border-b border-gray-100 flex items-center justify-between">
                 <h2 class="font-bold text-gray-900">Students</h2>
-                <a href="{% url 'student_list' %}" class="text-purple-600 text-sm font-medium hover:text-purple-700">View All →</a>
+                <a href="{% url 'student_list' %}" class="text-purple-600 text-xs font-medium hover:text-purple-700">View All →</a>
             </div>
             <div class="divide-y divide-gray-100 max-h-80 overflow-y-auto">
                 {% for student in recent_students %}
@@ -212,7 +212,7 @@
         <div class="glass-effect rounded-xl border border-gray-200 overflow-hidden">
             <div class="p-4 border-b border-gray-100 flex items-center justify-between">
                 <h2 class="font-bold text-gray-900">Recent Exams</h2>
-                <a href="{% url 'all_exams' %}" class="text-purple-600 text-sm font-medium hover:text-purple-700">View All →</a>
+                <a href="{% url 'all_exams' %}" class="text-purple-600 text-xs font-medium hover:text-purple-700">View All →</a>
             </div>
             <div class="divide-y divide-gray-100 max-h-80 overflow-y-auto">
                 {% for exam in recent_exams %}
