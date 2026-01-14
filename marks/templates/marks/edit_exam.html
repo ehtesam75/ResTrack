@@ -139,10 +139,10 @@
             </div>
             
             <!-- Current percentage display -->
-            <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+            <div id="percentage-grade-box" class="mt-4 p-3 bg-gray-50 rounded-lg">
                 <span class="text-sm text-gray-600">Current Percentage: </span>
-                <span class="font-semibold text-indigo-600">{{ exam.percentage|floatformat:1 }}%</span>
-                <span class="ml-2 px-2 py-1 text-xs rounded" style="background-color: {{ exam.grade_color }}">{{ exam.grade }}</span>
+                <span id="live-percentage" class="font-semibold text-indigo-600">{{ exam.percentage|floatformat:1 }}%</span>
+                <span id="live-grade" class="ml-2 px-2 py-1 text-xs rounded" style="background-color: {{ exam.grade_color }}">{{ exam.grade }}</span>
             </div>
         </div>
 
@@ -184,7 +184,8 @@
                 Cancel
             </a>
             <button type="submit" 
-                class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center">
+                id="save-btn"
+                class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center disabled:bg-indigo-200 disabled:text-white disabled:cursor-not-allowed">
                 <i class="fas fa-save mr-2"></i>
                 Save Changes
             </button>
@@ -198,7 +199,7 @@ const questionPdfInput = document.getElementById('question_pdf');
 const pdfError = document.getElementById('pdf-error');
 const pdfSizeError = document.getElementById('pdf-size-error');
 
-const saveBtn = document.querySelector('button[type="submit"]');
+const saveBtn = document.getElementById('save-btn');
 const totalMarksInput = document.getElementById('total_marks');
 const markObtainedInput = document.getElementById('mark_obtained');
 const markError = document.getElementById('mark-error');
@@ -211,6 +212,13 @@ function validateFormFields() {
         valid = false;
     }
     saveBtn.disabled = !valid;
+    // Show/hide percentage and grade box
+    const box = document.getElementById('percentage-grade-box');
+    if (obtained > total) {
+        box.classList.add('hidden');
+    } else {
+        box.classList.remove('hidden');
+    }
 }
 
 // Update percentage preview and validate marks
@@ -222,11 +230,41 @@ function updatePercentage() {
     } else {
         markError.classList.add('hidden');
     }
-    validateFormFields();
-    if (total > 0) {
-        const percentage = (obtained / total) * 100;
-        // You could add a live percentage preview here
+    // Live percentage and grade update
+    const percentSpan = document.getElementById('live-percentage');
+    const gradeSpan = document.getElementById('live-grade');
+    let percent = '';
+    let grade = '';
+    let gradeColor = '';
+    if (total > 0 && obtained >= 0 && obtained <= total) {
+        percent = ((obtained / total) * 100).toFixed(1) + '%';
+        const p = (obtained / total) * 100;
+        // Determine exam type (CQ/MCQ)
+        let examType = '';
+        const examTypeSelect = document.getElementById('exam_type');
+        if (examTypeSelect) {
+            examType = examTypeSelect.value.trim().toUpperCase();
+        }
+        if (examType === 'MCQ') {
+            if (p >= 93) { grade = 'Superb'; gradeColor = '#A7F3D0'; }
+            else if (p >= 77) { grade = 'Good'; gradeColor = '#D1FAE5'; }
+            else if (p >= 55) { grade = 'Average'; gradeColor = '#FEF08A'; }
+            else if (p >= 40) { grade = 'Poor'; gradeColor = '#FDE68A'; }
+            else if (p >= 30) { grade = 'Fail'; gradeColor = '#FECACA'; }
+            else { grade = 'Horrible'; gradeColor = '#FCA5A5'; }
+        } else { // CQ or default
+            if (p >= 85) { grade = 'Superb'; gradeColor = '#A7F3D0'; }
+            else if (p >= 70) { grade = 'Good'; gradeColor = '#D1FAE5'; }
+            else if (p >= 50) { grade = 'Average'; gradeColor = '#FEF08A'; }
+            else if (p >= 33) { grade = 'Poor'; gradeColor = '#FDE68A'; }
+            else if (p >= 20) { grade = 'Fail'; gradeColor = '#FECACA'; }
+            else { grade = 'Horrible'; gradeColor = '#FCA5A5'; }
+        }
     }
+    percentSpan.textContent = percent;
+    gradeSpan.textContent = grade;
+    gradeSpan.style.backgroundColor = gradeColor;
+    validateFormFields();
 }
 
 // Validate PDF file
