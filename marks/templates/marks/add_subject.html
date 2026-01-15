@@ -56,17 +56,17 @@
     </div>
 
     {% if subjects %}
-    <div class="mt-10">
-        <h2 class="text-lg font-semibold mb-3 gradient-text">Your Added Subjects</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="mt-8">
+        <h2 class="text-base font-semibold mb-2 gradient-text">Your Added Subjects</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {% for subject in subjects %}
-            <div class="bg-white/80 border border-gray-200 rounded-xl shadow-sm p-4 flex flex-col justify-between hover:shadow-md transition-all">
+            <div class="bg-white/80 border border-gray-200 rounded-lg shadow-sm p-3 flex flex-col justify-between hover:shadow-md transition-all">
                 <div>
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="inline-block w-2.5 h-2.5 rounded-full bg-purple-400"></span>
-                        <span class="font-semibold text-gray-800 text-base">{{ subject.name }}</span>
+                    <div class="flex items-center gap-1 mb-0.5">
+                        <span class="inline-block w-2 h-2 rounded-full bg-purple-400"></span>
+                        <span class="font-medium text-gray-800 text-sm">{{ subject.name }}</span>
                     </div>
-                    <div class="text-xs text-gray-500">Added on {{ subject.created_at|date:'M d, Y' }}</div>
+                    <div class="text-[11px] text-gray-500">Added on {{ subject.created_at|date:'M d, Y' }}</div>
                 </div>
             </div>
             {% endfor %}
