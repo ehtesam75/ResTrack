@@ -3,223 +3,343 @@
 {% block title %}About - ResTrack{% endblock %}
 
 {% block content %}
-<div class="max-w-lg mx-auto">
-    <!-- Page Header -->
-    <div class="text-center mb-6 animate-fade-in-up">
-        <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg">
-            <span class="text-2xl">📊</span>
+<!--
+    ABOUT PAGE TEMPLATE
+    - Responsive: Mobile and Desktop views separated by Tailwind classes
+    - Mobile: sm:hidden, Desktop: hidden sm:block or sm:grid
+    - Major sections are commented for clarity
+-->
+<div class="max-w-5xl mx-auto px-4 sm:px-6">
+
+    <!-- ================= MOBILE VIEW ================= -->
+    <div class="sm:hidden max-w-lg mx-auto">
+        <!-- Mobile Header -->
+        <div class="text-center mb-6 animate-fade-in-up">
+            <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg">
+                <span class="text-2xl">📊</span>
+            </div>
+            <h1 class="text-xl font-bold gradient-text">About ResTrack</h1>
+            <p class="text-xs text-gray-500 mt-1">Student Result Tracking & Analysis System</p>
         </div>
-        <h1 class="text-xl font-bold gradient-text">About ResTrack</h1>
-        <p class="text-xs text-gray-500 mt-1">Student Result Tracking & Analysis System</p>
+
+        <!-- Mobile: About This Project -->
+        <div class="glass-effect rounded-xl border border-gray-200 shadow-lg overflow-hidden mb-4 animate-fade-in-up" style="animation-delay: 0.1s;">
+            <div class="bg-gradient-to-r from-purple-500 to-blue-500 px-4 py-3">
+                <h2 class="text-white font-bold text-sm flex items-center gap-2">
+                    <span>🚀</span> About This Project
+                </h2>
+            </div>
+            <div class="p-4 space-y-3">
+                <p class="text-xs text-gray-700 leading-relaxed">
+                    <strong class="text-purple-700">ResTrack</strong> (Results Tracking System) is a comprehensive student performance monitoring and analytics platform designed to help teachers and students track academic progress effectively.
+                </p>
+                
+                <!-- Mobile: Development Info -->
+                <div class="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-3 border border-amber-200">
+                    <div class="flex items-start gap-2">
+                        <span class="text-base">💡</span>
+                        <div>
+                            <p class="text-xs text-gray-700 leading-relaxed">
+                                This project is being developed by a chatbot. I've put in considerable effort fixing logic issues, resolving bugs, and contributing feature ideas to ensure everything works properly.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile: Purpose -->
+                <div class="bg-purple-50 rounded-lg p-3 border-l-3 border-purple-500">
+                    <h3 class="text-xs font-semibold text-purple-800 mb-1.5 flex items-center gap-1.5">
+                        <span>🎯</span> Purpose
+                    </h3>
+                    <p class="text-[11px] text-gray-600 leading-relaxed">
+                        ResTrack transforms traditional grade tracking into an engaging, gamified learning experience. By converting exam performance into points and rewards, students are motivated to excel academically.
+                    </p>
+                </div>
+
+                <!-- Mobile: How It Works -->
+                <div class="bg-blue-50 rounded-lg p-3 border-l-3 border-blue-500">
+                    <h3 class="text-xs font-semibold text-blue-800 mb-1.5 flex items-center gap-1.5">
+                        <span>⚙️</span> How It Works
+                    </h3>
+                    <ul class="text-[11px] text-gray-600 space-y-1">
+                        <li class="flex items-start gap-1.5"><span class="text-blue-500 mt-0.5">•</span><span>Teachers enter exam results</span></li>
+                        <li class="flex items-start gap-1.5"><span class="text-blue-500 mt-0.5">•</span><span>System calculates scores & grades</span></li>
+                        <li class="flex items-start gap-1.5"><span class="text-blue-500 mt-0.5">•</span><span>Earn points for performance</span></li>
+                        <li class="flex items-start gap-1.5"><span class="text-blue-500 mt-0.5">•</span><span>Bonus points for achievements</span></li>
+                        <li class="flex items-start gap-1.5"><span class="text-blue-500 mt-0.5">•</span><span>Analytics show trends & rankings</span></li>
+                    </ul>
+                </div>
+
+                <!-- Mobile: Key Features -->
+                <div class="bg-green-50 rounded-lg p-3 border-l-3 border-green-500">
+                    <h3 class="text-xs font-semibold text-green-800 mb-2 flex items-center gap-1.5">
+                        <span>🌟</span> Key Features
+                    </h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="bg-white rounded-lg p-2 shadow-sm"><p class="text-[11px] font-medium text-green-700">Automated Grading</p><p class="text-[10px] text-gray-500">Instant calculation</p></div>
+                        <div class="bg-white rounded-lg p-2 shadow-sm"><p class="text-[11px] font-medium text-green-700">Points & Rewards</p><p class="text-[10px] text-gray-500">Gamified learning</p></div>
+                        <div class="bg-white rounded-lg p-2 shadow-sm"><p class="text-[11px] font-medium text-green-700">Analytics</p><p class="text-[10px] text-gray-500">Charts & insights</p></div>
+                        <div class="bg-white rounded-lg p-2 shadow-sm"><p class="text-[11px] font-medium text-green-700">Rankings</p><p class="text-[10px] text-gray-500">Multiple categories</p></div>
+                    </div>
+                </div>
+
+                <!-- Mobile: GitHub Link -->
+                <a href="https://github.com/ehtesam75/ResTrack" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between bg-gray-900 hover:bg-gray-800 rounded-lg p-3 transition-colors">
+                    <div class="flex items-center gap-2.5">
+                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/></svg>
+                        <div><p class="text-white text-xs font-medium">View on GitHub</p><p class="text-gray-400 text-[10px]">ehtesam75/ResTrack</p></div>
+                    </div>
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                </a>
+            </div>
+        </div>
+
+        <!-- Mobile: About Me Card -->
+        <div class="glass-effect rounded-xl border border-gray-200 shadow-lg overflow-hidden mb-4 animate-fade-in-up" style="animation-delay: 0.2s;">
+            <div class="bg-gradient-to-r from-blue-500 to-cyan-500 px-4 py-3">
+                <h2 class="text-white font-bold text-sm flex items-center gap-2"><span>👨‍💻</span> About Me</h2>
+            </div>
+            <div class="p-4">
+                <div class="text-center mb-4">
+                    <div class="w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-3 border-3 border-white shadow-lg"><span class="text-3xl">👤</span></div>
+                    <h3 class="text-base font-bold text-gray-900">Ehtesam Zunnuryn</h3>
+                    <p class="text-xs text-gray-500 mt-0.5">CS Undergraduate</p>
+                    <div class="flex items-center justify-center gap-1 mt-1"><span class="text-[10px] text-gray-400">🎓</span><span class="text-[11px] text-gray-600">Dhaka International University</span></div>
+                </div>
+                <div class="space-y-2">
+                    <a href="https://www.linkedin.com/in/ehtesam75/" target="_blank" class="flex items-center justify-between bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 rounded-lg p-3 transition-colors border border-blue-200">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 bg-[#0077B5] rounded-lg flex items-center justify-center"><svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></div>
+                            <div><p class="text-blue-700 text-xs font-medium">LinkedIn</p><p class="text-blue-500 text-[10px]">Connect with me</p></div>
+                        </div>
+                        <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    </a>
+                    <a href="https://github.com/ehtesam75" target="_blank" class="flex items-center justify-between bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 rounded-lg p-3 transition-colors border border-gray-200">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center"><svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/></svg></div>
+                            <div><p class="text-gray-700 text-xs font-medium">GitHub</p><p class="text-gray-500 text-[10px]">@ehtesam75</p></div>
+                        </div>
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile: Quick Links -->
+        <div class="glass-effect rounded-xl border border-gray-200 shadow-lg p-4 mb-4 animate-fade-in-up" style="animation-delay: 0.3s;">
+            <h3 class="text-xs font-semibold text-gray-700 mb-3 flex items-center gap-1.5"><span>🔗</span> Quick Links</h3>
+            <div class="grid grid-cols-2 gap-2">
+                <a href="{% url 'guide' %}" class="flex items-center gap-2 bg-purple-50 hover:bg-purple-100 rounded-lg p-2.5 transition-colors"><div class="w-7 h-7 bg-purple-100 rounded-lg flex items-center justify-center"><span class="text-sm">📚</span></div><span class="text-xs font-medium text-purple-700">User Guide</span></a>
+                <a href="{% url 'dashboard' %}" class="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 rounded-lg p-2.5 transition-colors"><div class="w-7 h-7 bg-blue-100 rounded-lg flex items-center justify-center"><span class="text-sm">📊</span></div><span class="text-xs font-medium text-blue-700">Dashboard</span></a>
+                <a href="{% url 'leaderboard' %}" class="flex items-center gap-2 bg-green-50 hover:bg-green-100 rounded-lg p-2.5 transition-colors"><div class="w-7 h-7 bg-green-100 rounded-lg flex items-center justify-center"><span class="text-sm">🏆</span></div><span class="text-xs font-medium text-green-700">Leaderboard</span></a>
+                <a href="{% url 'student_list' %}" class="flex items-center gap-2 bg-orange-50 hover:bg-orange-100 rounded-lg p-2.5 transition-colors"><div class="w-7 h-7 bg-orange-100 rounded-lg flex items-center justify-center"><span class="text-sm">👥</span></div><span class="text-xs font-medium text-orange-700">Students</span></a>
+            </div>
+        </div>
+
+        <!-- Mobile: Last Updated -->
+        <div class="text-center py-3 animate-fade-in-up" style="animation-delay: 0.4s;">
+            <div class="inline-flex items-center gap-1.5 bg-gray-100 rounded-full px-3 py-1.5">
+                <svg class="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span class="text-[10px] text-gray-600">Last updated on January 7, 2026</span>
+            </div>
+        </div>
     </div>
 
-    <!-- About This Project -->
-    <div class="glass-effect rounded-xl border border-gray-200 shadow-lg overflow-hidden mb-4 animate-fade-in-up" style="animation-delay: 0.1s;">
-        <div class="bg-gradient-to-r from-purple-500 to-blue-500 px-4 py-3">
-            <h2 class="text-white font-bold text-sm flex items-center gap-2">
-                <span>🚀</span> About This Project
-            </h2>
+
+    <!-- ================= DESKTOP VIEW ================= -->
+    <div id="about" class="scroll-mt-24 hidden sm:block glass-effect rounded-xl border border-gray-200 shadow-lg overflow-hidden mb-5 animate-fade-in-up" style="animation-delay: 0.15s;">
+        <!-- Desktop Header -->
+        <div class="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                        <span class="text-2xl">🚀</span>
+                    </div>
+                    <div>
+                        <h2 class="text-white font-bold text-xl">ResTrack</h2>
+                        <p class="text-purple-200 text-sm">Student Results Tracking & Analysis System</p>
+                    </div>
+                </div>
+                <a href="https://github.com/ehtesam75/ResTrack" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors">
+                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/>
+                    </svg>
+                    <span class="text-white text-sm font-medium">View on GitHub</span>
+                </a>
+            </div>
         </div>
-        <div class="p-4 space-y-3">
-            <p class="text-xs text-gray-700 leading-relaxed">
-                <strong class="text-purple-700">ResTrack</strong> (Results Tracking System) is a comprehensive student performance monitoring and analytics platform designed to help teachers and students track academic progress effectively.
+        
+        <!-- Desktop: Main Content -->
+        <div class="p-6">
+            <p class="text-sm text-gray-700 leading-relaxed mb-5">
+                <strong class="text-purple-700">ResTrack</strong> (Results Tracking System) is a comprehensive student performance monitoring and analytics platform designed to help teachers and students track academic progress effectively. It transforms traditional grade tracking into an engaging, gamified learning experience where performance translates to points and rewards.
             </p>
             
-            <!-- Development Info -->
-            <div class="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-3 border border-amber-200">
-                <div class="flex items-start gap-2">
-                    <span class="text-base">💡</span>
+            <!-- Desktop: Development Note -->
+            <div class="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-4 border border-amber-200 mb-6">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <span class="text-xl">💡</span>
+                    </div>
                     <div>
-                        <p class="text-xs text-gray-700 leading-relaxed">
+                        <h4 class="text-sm font-bold text-amber-800 mb-1">Development Note</h4>
+                        <p class="text-sm text-gray-600 leading-relaxed">
                             This project is being developed by a chatbot. I've put in considerable effort fixing logic issues, resolving bugs, and contributing feature ideas to ensure everything works properly.
                         </p>
                     </div>
                 </div>
             </div>
 
-            <!-- Purpose -->
-            <div class="bg-purple-50 rounded-lg p-3 border-l-3 border-purple-500">
-                <h3 class="text-xs font-semibold text-purple-800 mb-1.5 flex items-center gap-1.5">
-                    <span>🎯</span> Purpose
-                </h3>
-                <p class="text-[11px] text-gray-600 leading-relaxed">
-                    ResTrack transforms traditional grade tracking into an engaging, gamified learning experience. By converting exam performance into points and rewards, students are motivated to excel academically.
-                </p>
-            </div>
+            <!-- Desktop: Two Column Layout -->
+            <div class="grid grid-cols-2 gap-5 mb-6">
+                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-100">
+                    <h3 class="text-base font-bold text-blue-800 mb-4 flex items-center gap-2">
+                        <span class="w-7 h-7 bg-blue-100 rounded-lg flex items-center justify-center">⚙️</span>
+                        How It Works
+                    </h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-center gap-3 text-sm text-gray-600">
+                            <span class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-xs font-bold">1</span>
+                            Teachers enter exam results into the system
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-gray-600">
+                            <span class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-xs font-bold">2</span>
+                            System automatically calculates grades & scores
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-gray-600">
+                            <span class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-xs font-bold">3</span>
+                            Students earn points based on performance
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-gray-600">
+                            <span class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-xs font-bold">4</span>
+                            Analytics reveal trends, insights & rankings
+                        </li>
+                    </ul>
+                </div>
 
-            <!-- How It Works -->
-            <div class="bg-blue-50 rounded-lg p-3 border-l-3 border-blue-500">
-                <h3 class="text-xs font-semibold text-blue-800 mb-1.5 flex items-center gap-1.5">
-                    <span>⚙️</span> How It Works
-                </h3>
-                <ul class="text-[11px] text-gray-600 space-y-1">
-                    <li class="flex items-start gap-1.5">
-                        <span class="text-blue-500 mt-0.5">•</span>
-                        <span>Teachers enter exam results</span>
-                    </li>
-                    <li class="flex items-start gap-1.5">
-                        <span class="text-blue-500 mt-0.5">•</span>
-                        <span>System calculates scores & grades</span>
-                    </li>
-                    <li class="flex items-start gap-1.5">
-                        <span class="text-blue-500 mt-0.5">•</span>
-                        <span>Earn points for performance</span>
-                    </li>
-                    <li class="flex items-start gap-1.5">
-                        <span class="text-blue-500 mt-0.5">•</span>
-                        <span>Bonus points for achievements</span>
-                    </li>
-                    <li class="flex items-start gap-1.5">
-                        <span class="text-blue-500 mt-0.5">•</span>
-                        <span>Analytics show trends & rankings</span>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- Key Features -->
-            <div class="bg-green-50 rounded-lg p-3 border-l-3 border-green-500">
-                <h3 class="text-xs font-semibold text-green-800 mb-2 flex items-center gap-1.5">
-                    <span>🌟</span> Key Features
-                </h3>
-                <div class="grid grid-cols-2 gap-2">
-                    <div class="bg-white rounded-lg p-2 shadow-sm">
-                        <p class="text-[11px] font-medium text-green-700">Automated Grading</p>
-                        <p class="text-[10px] text-gray-500">Instant calculation</p>
-                    </div>
-                    <div class="bg-white rounded-lg p-2 shadow-sm">
-                        <p class="text-[11px] font-medium text-green-700">Points & Rewards</p>
-                        <p class="text-[10px] text-gray-500">Gamified learning</p>
-                    </div>
-                    <div class="bg-white rounded-lg p-2 shadow-sm">
-                        <p class="text-[11px] font-medium text-green-700">Analytics</p>
-                        <p class="text-[10px] text-gray-500">Charts & insights</p>
-                    </div>
-                    <div class="bg-white rounded-lg p-2 shadow-sm">
-                        <p class="text-[11px] font-medium text-green-700">Rankings</p>
-                        <p class="text-[10px] text-gray-500">Multiple categories</p>
-                    </div>
+                <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-5 border border-purple-100">
+                    <h3 class="text-base font-bold text-purple-800 mb-4 flex items-center gap-2">
+                        <span class="w-7 h-7 bg-purple-100 rounded-lg flex items-center justify-center">🎯</span>
+                        Core Purpose
+                    </h3>
+                    <ul class="space-y-3 text-sm text-gray-600">
+                        <li class="flex items-start gap-3">
+                            <span class="text-purple-500 mt-0.5 text-lg">✓</span>
+                            Track student academic progress over time
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-purple-500 mt-0.5 text-lg">✓</span>
+                            Gamify learning with points & rewards system
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-purple-500 mt-0.5 text-lg">✓</span>
+                            Identify strengths and areas for improvement
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-purple-500 mt-0.5 text-lg">✓</span>
+                            Motivate through competitive rankings
+                        </li>
+                    </ul>
                 </div>
             </div>
 
-            <!-- GitHub Link -->
-            <a href="https://github.com/ehtesam75/ResTrack" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between bg-gray-900 hover:bg-gray-800 rounded-lg p-3 transition-colors">
-                <div class="flex items-center gap-2.5">
-                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                        <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/>
-                    </svg>
+            <!-- Desktop: Key Features -->
+            <h3 class="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <span>🌟</span> Key Features
+            </h3>
+            <div class="grid grid-cols-4 gap-4 mb-6">
+                <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 border border-green-100 text-center hover:shadow-md transition-shadow">
+                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                        <span class="text-xl">📊</span>
+                    </div>
+                    <p class="text-sm font-semibold text-green-700">Dashboard</p>
+                    <p class="text-xs text-gray-500 mt-1">Analytics overview</p>
+                </div>
+                <div class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-4 border border-blue-100 text-center hover:shadow-md transition-shadow">
+                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                        <span class="text-xl">🎓</span>
+                    </div>
+                    <p class="text-sm font-semibold text-blue-700">Auto Grading</p>
+                    <p class="text-xs text-gray-500 mt-1">CQ & MCQ scales</p>
+                </div>
+                <div class="bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl p-4 border border-purple-100 text-center hover:shadow-md transition-shadow">
+                    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                        <span class="text-xl">⭐</span>
+                    </div>
+                    <p class="text-sm font-semibold text-purple-700">Points System</p>
+                    <p class="text-xs text-gray-500 mt-1">Earn & redeem</p>
+                </div>
+                <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-4 border border-amber-100 text-center hover:shadow-md transition-shadow">
+                    <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                        <span class="text-xl">🏆</span>
+                    </div>
+                    <p class="text-sm font-semibold text-amber-700">Leaderboards</p>
+                    <p class="text-xs text-gray-500 mt-1">Multiple rankings</p>
+                </div>
+            </div>
+
+            <!-- Desktop: Additional Features -->
+            <div class="grid grid-cols-3 gap-4 border-t border-gray-100 pt-6">
+                <div class="flex items-center gap-3 bg-gray-50 rounded-lg p-3 border border-gray-100">
+                    <span class="text-lg">📈</span>
                     <div>
-                        <p class="text-white text-xs font-medium">View on GitHub</p>
-                        <p class="text-gray-400 text-[10px]">ehtesam75/ResTrack</p>
+                        <p class="text-sm font-medium text-gray-700">Charts & Visualizations</p>
+                        <p class="text-xs text-gray-500">Interactive data insights</p>
                     </div>
                 </div>
-                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                </svg>
-            </a>
+                <div class="flex items-center gap-3 bg-gray-50 rounded-lg p-3 border border-gray-100">
+                    <span class="text-lg">📅</span>
+                    <div>
+                        <p class="text-sm font-medium text-gray-700">Monthly Winners</p>
+                        <p class="text-xs text-gray-500">Top performers each month</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 bg-gray-50 rounded-lg p-3 border border-gray-100">
+                    <span class="text-lg">🔍</span>
+                    <div>
+                        <p class="text-sm font-medium text-gray-700">Compare Students</p>
+                        <p class="text-xs text-gray-500">Side-by-side analysis</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-
-    <!-- About Me -->
-    <div class="glass-effect rounded-xl border border-gray-200 shadow-lg overflow-hidden mb-4 animate-fade-in-up" style="animation-delay: 0.2s;">
-        <div class="bg-gradient-to-r from-blue-500 to-cyan-500 px-4 py-3">
-            <h2 class="text-white font-bold text-sm flex items-center gap-2">
-                <span>👨‍💻</span> About Me
-            </h2>
-        </div>
-        <div class="p-4">
-            <!-- Profile Card -->
-            <div class="text-center mb-4">
-                <div class="w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-3 border-3 border-white shadow-lg">
+    
+    <!-- ================= DESKTOP PROFILE & QUICK LINKS ================= -->
+    <div class="hidden sm:grid grid-cols-12 gap-5 mb-10 animate-fade-in-up" style="animation-delay: 0.3s;">
+        <!-- Desktop: Profile Card -->
+        <div class="col-span-8 glass-effect rounded-xl border border-gray-200 shadow-lg p-5 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
                     <span class="text-3xl">👤</span>
                 </div>
-                <h3 class="text-base font-bold text-gray-900">Ehtesam Zunnuryn</h3>
-                <p class="text-xs text-gray-500 mt-0.5">CS Undergraduate</p>
-                <div class="flex items-center justify-center gap-1 mt-1">
-                    <span class="text-[10px] text-gray-400">🎓</span>
-                    <span class="text-[11px] text-gray-600">Dhaka International University</span>
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900">Ehtesam Zunnuryn</h3>
+                    <p class="text-sm text-blue-600">CS Undergraduate • Dhaka International University</p>
                 </div>
             </div>
-
-            <!-- Social Links -->
-            <div class="space-y-2">
-                <a href="https://www.linkedin.com/in/ehtesam75/" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 rounded-lg p-3 transition-colors border border-blue-200">
-                    <div class="flex items-center gap-2.5">
-                        <div class="w-8 h-8 bg-[#0077B5] rounded-lg flex items-center justify-center">
-                            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-blue-700 text-xs font-medium">LinkedIn</p>
-                            <p class="text-blue-500 text-[10px]">Connect with me</p>
-                        </div>
-                    </div>
-                    <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                    </svg>
-                </a>
-
-                <a href="https://github.com/ehtesam75" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 rounded-lg p-3 transition-colors border border-gray-200">
-                    <div class="flex items-center gap-2.5">
-                        <div class="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center">
-                            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-gray-700 text-xs font-medium">GitHub</p>
-                            <p class="text-gray-500 text-[10px]">@ehtesam75</p>
-                        </div>
-                    </div>
-                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                    </svg>
-                </a>
+            <div class="flex gap-3">
+                <a href="https://github.com/ehtesam75" target="_blank" class="px-4 py-2 bg-gray-900 text-white text-xs font-medium rounded-lg hover:bg-black transition-colors">GitHub</a>
+                <a href="https://www.linkedin.com/in/ehtesam75/" target="_blank" class="px-4 py-2 bg-[#0077B5] text-white text-xs font-medium rounded-lg hover:bg-[#006396] transition-colors">LinkedIn</a>
             </div>
         </div>
-    </div>
 
-    <!-- Quick Links -->
-    <div class="glass-effect rounded-xl border border-gray-200 shadow-lg p-4 mb-4 animate-fade-in-up" style="animation-delay: 0.3s;">
-        <h3 class="text-xs font-semibold text-gray-700 mb-3 flex items-center gap-1.5">
-            <span>🔗</span> Quick Links
-        </h3>
-        <div class="grid grid-cols-2 gap-2">
-            <a href="{% url 'guide' %}" class="flex items-center gap-2 bg-purple-50 hover:bg-purple-100 rounded-lg p-2.5 transition-colors">
-                <div class="w-7 h-7 bg-purple-100 rounded-lg flex items-center justify-center">
-                    <span class="text-sm">📚</span>
-                </div>
-                <span class="text-xs font-medium text-purple-700">User Guide</span>
+        <!-- Desktop: Quick Links -->
+        <div class="col-span-4 glass-effect rounded-xl border border-gray-200 shadow-lg p-5 flex items-center justify-around">
+            <a href="{% url 'dashboard' %}" class="flex flex-col items-center gap-1 hover:scale-110 transition-transform cursor-pointer group">
+                <div class="w-10 h-10 bg-blue-50 group-hover:bg-blue-100 rounded-lg flex items-center justify-center text-xl">📊</div>
+                <span class="text-xs font-medium text-gray-600">Dashboard</span>
             </a>
-            <a href="{% url 'dashboard' %}" class="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 rounded-lg p-2.5 transition-colors">
-                <div class="w-7 h-7 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <span class="text-sm">📊</span>
-                </div>
-                <span class="text-xs font-medium text-blue-700">Dashboard</span>
+            <a href="{% url 'leaderboard' %}" class="flex flex-col items-center gap-1 hover:scale-110 transition-transform cursor-pointer group">
+                <div class="w-10 h-10 bg-green-50 group-hover:bg-green-100 rounded-lg flex items-center justify-center text-xl">🏆</div>
+                <span class="text-xs font-medium text-gray-600">Ranks</span>
             </a>
-            <a href="{% url 'leaderboard' %}" class="flex items-center gap-2 bg-green-50 hover:bg-green-100 rounded-lg p-2.5 transition-colors">
-                <div class="w-7 h-7 bg-green-100 rounded-lg flex items-center justify-center">
-                    <span class="text-sm">🏆</span>
-                </div>
-                <span class="text-xs font-medium text-green-700">Leaderboard</span>
-            </a>
-            <a href="{% url 'student_list' %}" class="flex items-center gap-2 bg-orange-50 hover:bg-orange-100 rounded-lg p-2.5 transition-colors">
-                <div class="w-7 h-7 bg-orange-100 rounded-lg flex items-center justify-center">
-                    <span class="text-sm">👥</span>
-                </div>
-                <span class="text-xs font-medium text-orange-700">Students</span>
+            <a href="{% url 'student_list' %}" class="flex flex-col items-center gap-1 hover:scale-110 transition-transform cursor-pointer group">
+                <div class="w-10 h-10 bg-orange-50 group-hover:bg-orange-100 rounded-lg flex items-center justify-center text-xl">👥</div>
+                <span class="text-xs font-medium text-gray-600">Students</span>
             </a>
         </div>
     </div>
 
-    <!-- Last Updated -->
-    <div class="text-center py-3 animate-fade-in-up" style="animation-delay: 0.4s;">
-        <div class="inline-flex items-center gap-1.5 bg-gray-100 rounded-full px-3 py-1.5">
-            <svg class="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            <span class="text-[10px] text-gray-600">Last updated on January 7, 2026</span>
-        </div>
-    </div>
 </div>
 {% endblock %}
