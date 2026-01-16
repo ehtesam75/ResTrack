@@ -152,7 +152,7 @@
                         <td class="px-3 py-2 font-semibold text-blue-600 text-sm text-center">{{ cq_stats.excellence_rate|floatformat:1 }}%</td>
                         <td class="px-3 py-2 text-sm">
                             {% if cq_stats.best_student %}
-                            <a href="{% url 'student_detail' cq_stats.best_student.id %}" class="font-medium hover:text-blue-600 transition-colors">{{ cq_stats.best_student.name }}</a>
+                            <a href="{% url 'student_detail' cq_stats.best_student.id %}" class="font-medium text-blue-600 hover:opacity-80 transition-colors">{{ cq_stats.best_student.name }}</a>
                             {% else %}<span class="text-gray-400">N/A</span>{% endif %}
                         </td>
                     </tr>
@@ -163,7 +163,7 @@
                         <td class="px-3 py-2 font-semibold text-green-600 text-sm text-center">{{ mcq_stats.excellence_rate|floatformat:1 }}%</td>
                         <td class="px-3 py-2 text-sm">
                             {% if mcq_stats.best_student %}
-                            <a href="{% url 'student_detail' mcq_stats.best_student.id %}" class="font-medium hover:text-green-600 transition-colors">{{ mcq_stats.best_student.name }}</a>
+                            <a href="{% url 'student_detail' mcq_stats.best_student.id %}" class="font-medium text-green-600 hover:opacity-80 transition-colors">{{ mcq_stats.best_student.name }}</a>
                             {% else %}<span class="text-gray-400">N/A</span>{% endif %}
                         </td>
                     </tr>
