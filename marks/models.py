@@ -674,7 +674,7 @@ class PointsSpent(models.Model):
     )
     points_spent = models.IntegerField(help_text="Number of points spent")
     description = models.CharField(max_length=15, help_text="How points were used")
-    date = models.DateField(auto_now_add=True)
+    date = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

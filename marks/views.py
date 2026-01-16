@@ -1514,6 +1514,7 @@ def add_points_spent(request):
         student_id = request.POST.get('student')
         points_spent = request.POST.get('points_spent')
         description = request.POST.get('description')
+        date = request.POST.get('date')
         
         try:
             # Ensure student belongs to this teacher
@@ -1534,7 +1535,8 @@ def add_points_spent(request):
                     student=student,
                     teacher=teacher,
                     points_spent=points_spent,
-                    description=description[:15]  # Enforce max 15 characters
+                    description=description[:15],  # Enforce max 15 characters
+                    date=date
                 )
                 return redirect('points')
         except Student.DoesNotExist:
