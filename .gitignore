@@ -6,3 +6,6 @@ docs/
 setup.ps1
 .env
 exam_questions/
+backup.json
+data.json
+db.sqlite3
