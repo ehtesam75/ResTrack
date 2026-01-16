@@ -101,6 +101,7 @@
                             id="date" 
                             name="date" 
                             required
+                            max="{{ today|default:None }}"
                             class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white hover:bg-gray-50 transition-colors"
                         >
                     </div>
@@ -285,10 +286,16 @@
 
 {% block extra_js %}
 <script>
-    // Set today's date as default
+    // Set today's date as default and max
     const dateInput = document.getElementById('date');
+    const today = new Date();
     if (dateInput) {
-        dateInput.valueAsDate = new Date();
+        dateInput.valueAsDate = today;
+        // Set max date attribute to today (YYYY-MM-DD)
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        dateInput.max = `${yyyy}-${mm}-${dd}`;
     }
     
     // Hide already selected students from dropdowns
