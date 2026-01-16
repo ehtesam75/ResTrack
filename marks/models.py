@@ -465,8 +465,16 @@ class Exam(models.Model):
         blank=True,
         help_text="Unique exam identifier (same for bulk entries)"
     )
+    def exam_pdf_upload_path(instance, filename):
+        """
+        Returns upload path for exam question PDF in the format:
+        ResTrack/Exam Questions/<teacher username>/<filename>
+        """
+        username = instance.teacher.username if instance.teacher else 'unknown_teacher'
+        return f"ResTrack/Exam Questions/{username}/{filename}"
+
     question_pdf = models.FileField(
-        upload_to='exam_questions/',
+        upload_to=exam_pdf_upload_path,
         blank=True,
         null=True,
         help_text="PDF file containing exam questions"
