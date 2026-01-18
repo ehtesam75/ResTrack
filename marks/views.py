@@ -55,16 +55,21 @@ def home(request):
     
     total_teachers = TeacherProfile.objects.count()
     total_students = Student.objects.count()
-    total_exams = count_unique_exams(Exam.objects.all())
+    # Calculate total exams as the sum of unique exams per teacher
+    teacher_users = [tp.user for tp in TeacherProfile.objects.all()]
+    total_exams = 0
+    for teacher in teacher_users:
+        teacher_exams = Exam.objects.filter(teacher=teacher)
+        total_exams += count_unique_exams(teacher_exams)
     total_points = LifetimePoints.objects.aggregate(total=Sum('points_earned'))['total'] or 0
-    
+
     context = {
         'total_teachers': total_teachers,
         'total_students': total_students,
         'total_exams': total_exams,
         'total_points': total_points,
     }
-    
+
     return render(request, 'marks/home.html', context)
 
 
