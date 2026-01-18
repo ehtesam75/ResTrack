@@ -1,18 +1,18 @@
 // Service Worker for ResTrack PWA
-const CACHE_NAME = 'restrack-v1.1.0';
-const STATIC_CACHE_NAME = 'restrack-static-v1.1.0';
+const CACHE_NAME = 'restrack-v1.2.0';
+const STATIC_CACHE_NAME = 'restrack-static-v1.2.0';
 
 // Static assets to cache - ONLY static files, no authenticated pages
 const STATIC_ASSETS = [
   '/static/manifest.json',
   '/static/css/custom.css',
   // Cache icons for faster loading but allow updates
-  '/static/icons/icon-72x72.png',
-  '/static/icons/icon-96x96.png',
-  '/static/icons/icon-128x128.png',
-  '/static/icons/icon-144x144.png',
-  '/static/icons/icon-192x192.png',
-  '/static/icons/icon-512x512.png',
+  '/static/icons/ResTrack-72x72.png',
+  '/static/icons/ResTrack-96x96.png',
+  '/static/icons/ResTrack-128x128.png',
+  '/static/icons/ResTrack-144x144.png',
+  '/static/icons/ResTrack-192x192.png',
+  '/static/icons/ResTrack-512x512.png',
   'https://cdn.tailwindcss.com',
   'https://cdn.jsdelivr.net/npm/chart.js'
 ];

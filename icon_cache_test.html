@@ -49,8 +49,8 @@
         <p>Current icon links in your app:</p>
         <ul>
             <li><a href="/static/manifest.json?v=1.1.0" target="_blank">Manifest JSON</a></li>
-            <li><img src="/static/icons/icon-192x192.png?v=1.1.0" width="96" height="96" alt="192x192 icon"></li>
-            <li><img src="/static/icons/icon-512x512.png?v=1.1.0" width="96" height="96" alt="512x512 icon"></li>
+            <li><img src="/static/icons/ResTrack-192x192.png?v=1.2.0" width="96" height="96" alt="192x192 icon"></li>
+            <li><img src="/static/icons/ResTrack-512x512.png?v=1.2.0" width="96" height="96" alt="512x512 icon"></li>
         </ul>
 
         <h2>Step 2: Clear Cache & Refresh</h2>
@@ -71,13 +71,27 @@
             <li>Check if the new icon appears</li>
         </ol>
 
-        <h2>Manual Steps (if automatic methods don't work):</h2>
+        <h2>Mobile PWA Debugging:</h2>
+        <p><strong>For Android:</strong></p>
         <ol>
-            <li>Open Developer Tools (F12)</li>
-            <li>Go to Application/Storage tab</li>
-            <li>Clear Storage for your domain</li>
-            <li>Uninstall and reinstall the PWA</li>
+            <li>Open Chrome browser (not the PWA)</li>
+            <li>Go to <code>chrome://inspect/#devices</code></li>
+            <li>Connect your phone via USB</li>
+            <li>Enable USB debugging on phone</li>
+            <li>Find your PWA and click "Inspect"</li>
         </ol>
+
+        <p><strong>For iOS:</strong></p>
+        <ol>
+            <li>Use Safari on macOS</li>
+            <li>Enable "Develop" menu in Safari preferences</li>
+            <li>Connect iPhone via USB</li>
+            <li>Select your device from Develop menu</li>
+        </ol>
+
+        <h2>Alternative Mobile Solutions:</h2>
+        <button onclick="mobilePWAReset()">Mobile PWA Reset (Try This First)</button>
+        <button onclick="checkNetworkStatus()">Check Network & Cache Status</button>
     </div>
 
     <script>
@@ -169,6 +183,73 @@
             }
 
             showStatus('Icons refreshed with timestamp. Try reinstalling PWA now.');
+        }
+
+        function mobilePWAReset() {
+            // Force refresh manifest and icons for mobile PWA
+            const timestamp = Date.now();
+
+            // Update all icon links with timestamp
+            const links = document.querySelectorAll('link[rel*="icon"], link[rel="manifest"]');
+            links.forEach(link => {
+                const url = new URL(link.href);
+                url.searchParams.set('force', timestamp);
+                link.href = url.toString();
+            });
+
+            // Clear any local storage related to PWA
+            try {
+                localStorage.clear();
+                sessionStorage.clear();
+            } catch (e) {
+                console.log('Could not clear storage:', e);
+            }
+
+            showStatus('Mobile PWA reset initiated. Please:\n1. Close the PWA completely\n2. Clear browser cache\n3. Reinstall the PWA\n4. Check if new icon appears');
+
+            // Show detailed instructions
+            setTimeout(() => {
+                alert('Mobile PWA Reset Instructions:\n\n1. CLOSE the PWA completely (swipe away)\n2. Open browser settings\n3. Clear browser cache/data\n4. Visit your app URL again\n5. Reinstall as PWA\n6. Check if icon updated');
+            }, 2000);
+        }
+
+        function checkNetworkStatus() {
+            const status = {
+                online: navigator.onLine,
+                serviceWorker: 'serviceWorker' in navigator,
+                cache: 'caches' in window,
+                manifest: !!document.querySelector('link[rel="manifest"]'),
+                icons: document.querySelectorAll('link[rel*="icon"]').length
+            };
+
+            let statusText = 'Network & Cache Status:\n\n';
+            statusText += `🌐 Online: ${status.online ? '✅' : '❌'}\n`;
+            statusText += `🔧 Service Worker: ${status.serviceWorker ? '✅' : '❌'}\n`;
+            statusText += `💾 Cache API: ${status.cache ? '✅' : '❌'}\n`;
+            statusText += `📄 Manifest: ${status.manifest ? '✅' : '❌'}\n`;
+            statusText += `🖼️ Icons: ${status.icons}\n\n`;
+
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistration().then(reg => {
+                    statusText += `SW Registered: ${!!reg ? '✅' : '❌'}\n`;
+                    if (reg) {
+                        statusText += `SW Active: ${!!reg.active ? '✅' : '❌'}\n`;
+                        statusText += `SW Scope: ${reg.scope}\n`;
+                    }
+
+                    const statusDiv = document.getElementById('status');
+                    statusDiv.textContent = statusText;
+                    statusDiv.className = 'status success';
+                    statusDiv.style.display = 'block';
+                    statusDiv.style.whiteSpace = 'pre-line';
+                });
+            } else {
+                const statusDiv = document.getElementById('status');
+                statusDiv.textContent = statusText;
+                statusDiv.className = 'status success';
+                statusDiv.style.display = 'block';
+                statusDiv.style.whiteSpace = 'pre-line';
+            }
         }
 
         function checkSWStatus() {
