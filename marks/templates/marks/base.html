@@ -3,6 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#7c3aed">
+    <meta name="description" content="A comprehensive web application for managing, analyzing, and visualizing student exam performance with gamification features.">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="ResTrack">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192x192.png">
+    <link rel="manifest" href="/static/manifest.json">
     <title>{% block title %}ResTrack{% endblock %}</title>
     
     <!-- Tailwind CSS -->
@@ -352,5 +359,47 @@
     </main>
 
     {% block extra_js %}{% endblock %}
+
+    <!-- Service Worker Registration -->
+    <script>
+        // Register service worker for PWA functionality
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/static/sw.js')
+                    .then(function(registration) {
+                        console.log('Service Worker registered successfully:', registration.scope);
+
+                        // Check for updates
+                        registration.addEventListener('updatefound', function() {
+                            const newWorker = registration.installing;
+                            if (newWorker) {
+                                newWorker.addEventListener('statechange', function() {
+                                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                        // New version available
+                                        if (confirm('A new version of ResTrack is available. Reload to update?')) {
+                                            window.location.reload();
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    })
+                    .catch(function(error) {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
+
+        // Handle PWA install prompt (browsers show native UI)
+        window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('PWA install prompt available');
+            // Let browser handle the install prompt naturally
+        });
+
+        // Track successful app installation
+        window.addEventListener('appinstalled', (evt) => {
+            console.log('PWA installed successfully');
+        });
+    </script>
 </body>
 </html>
