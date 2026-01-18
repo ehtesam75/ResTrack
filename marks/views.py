@@ -316,7 +316,7 @@ def dashboard(request):
 def student_list(request):
     """List all students - filtered by teacher"""
     teacher = get_teacher_for_user(request.user)
-    students = Student.objects.filter(teacher=teacher).order_by('name')
+    students = Student.objects.filter(teacher=teacher).order_by('first_name', 'last_name')
     
     # Add computed properties for sorting/display
     student_data = [
@@ -515,7 +515,7 @@ def student_detail(request, student_id):
     best_5_months = monthly_performance[:5]
     
     # Get all other students for comparison dropdown (teacher-scoped)
-    all_students = Student.objects.filter(teacher=teacher).exclude(id=student_id).order_by('name')
+    all_students = Student.objects.filter(teacher=teacher).exclude(id=student_id).order_by('first_name', 'last_name')
     
     context = {
         'student': student,
@@ -547,7 +547,7 @@ def compare_students(request, student1_id, student2_id):
         student2 = get_object_or_404(Student, id=student2_id, teacher=teacher)
     
     # Get all other students for the dropdown (filtered by teacher)
-    all_students = Student.objects.filter(teacher=teacher).exclude(id=student1_id).order_by('name')
+    all_students = Student.objects.filter(teacher=teacher).exclude(id=student1_id).order_by('first_name', 'last_name')
     
     # Get teacher-scoped querysets for calculations
     teacher_exams = Exam.objects.filter(teacher=teacher)
@@ -931,16 +931,17 @@ def add_student(request):
     teacher_check = is_teacher(request.user)
     
     if request.method == 'POST' and teacher_check:
-        name = request.POST.get('name')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
         roll = request.POST.get('roll')
         class_number = request.POST.get('class_number')
         username = request.POST.get('username')
         password = request.POST.get('password')
         confirm_password = request.POST.get('confirm_password')
-        
-        # Validate all fields
-        if not all([name, roll, class_number, username, password, confirm_password]):
-            messages.error(request, 'All fields are required!')
+
+        # Validate all required fields
+        if not all([first_name, roll, class_number, username, password, confirm_password]):
+            messages.error(request, 'All required fields must be filled!')
         elif password != confirm_password:
             messages.error(request, 'Passwords do not match!')
         elif len(password) < 6:
@@ -957,7 +958,8 @@ def add_student(request):
                 
                 # Create student record with teacher assignment
                 student = Student.objects.create(
-                    name=name,
+                    first_name=first_name,
+                    last_name=last_name if last_name else "",
                     roll=roll,
                     class_name=str(class_number),
                     teacher=request.user
@@ -995,20 +997,22 @@ def edit_student(request, student_id):
         student_user = student.user_profile.user
     
     if request.method == 'POST':
-        name = request.POST.get('name')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
         roll = request.POST.get('roll')
         class_number = request.POST.get('class_number')
         username = request.POST.get('username')
         new_password = request.POST.get('new_password')
         confirm_password = request.POST.get('confirm_password')
-        
+
         # Validate required fields
-        if not all([name, roll, class_number]):
-            messages.error(request, 'Name, roll, and class are required!')
+        if not all([first_name, roll, class_number]):
+            messages.error(request, 'First name, roll, and class are required!')
         else:
             try:
                 # Update student info
-                student.name = name
+                student.first_name = first_name
+                student.last_name = last_name or None
                 student.roll = roll
                 student.class_name = str(class_number)
                 student.save()
@@ -1158,7 +1162,7 @@ def add_exam(request):
             messages.error(request, 'All required fields must be filled!')
     
     # Filter students and subjects by teacher
-    students = Student.objects.filter(teacher=teacher).order_by('name')
+    students = Student.objects.filter(teacher=teacher).order_by('first_name', 'last_name')
     subjects = Subject.objects.filter(teacher=teacher).order_by('name')
     exam_types = ExamType.objects.filter(teacher=teacher).order_by('name')
     
@@ -1249,7 +1253,7 @@ def add_bulk_exam(request):
                 student_count = int(student_count_str)
     
     # Filter students and subjects by teacher
-    students = Student.objects.filter(teacher=teacher).order_by('name')
+    students = Student.objects.filter(teacher=teacher).order_by('first_name', 'last_name')
     subjects = Subject.objects.filter(teacher=teacher).order_by('name')
     exam_types = ExamType.objects.filter(teacher=teacher).order_by('name')
     
@@ -1324,7 +1328,7 @@ def edit_exam(request, exam_id):
             messages.error(request, 'All required fields must be filled!')
     
     # Get teacher's students and subjects for dropdowns
-    students = Student.objects.filter(teacher=teacher).order_by('name')
+    students = Student.objects.filter(teacher=teacher).order_by('first_name', 'last_name')
     subjects = Subject.objects.filter(teacher=teacher).order_by('name')
     exam_types = ExamType.objects.filter(teacher=teacher).order_by('name')
     
@@ -1439,7 +1443,7 @@ def all_exams(request):
         lowest_percentage = min(exam.percentage for exam in exams)
     
     # Get all options for filters (filtered by teacher)
-    students = Student.objects.filter(teacher=teacher).order_by('name')
+    students = Student.objects.filter(teacher=teacher).order_by('first_name', 'last_name')
     subjects = Subject.objects.filter(teacher=teacher).order_by('name')
     exam_types = ExamType.objects.filter(teacher=teacher).order_by('name')
     
@@ -1486,7 +1490,7 @@ def points(request):
     teacher = get_teacher_for_user(request.user)
     
     # Get all students for filters (filtered by teacher)
-    students = Student.objects.filter(teacher=teacher).order_by('name')
+    students = Student.objects.filter(teacher=teacher).order_by('first_name', 'last_name')
     
     # Get points spent history with filters (filtered by teacher)
     points_history = PointsSpent.objects.filter(teacher=teacher).select_related('student')
@@ -1520,7 +1524,7 @@ def points(request):
     
     # Get student points summary (filtered by teacher)
     student_summary = []
-    for student in Student.objects.filter(teacher=teacher).order_by('name'):
+    for student in Student.objects.filter(teacher=teacher).order_by('first_name', 'last_name'):
         lifetime_points, created = LifetimePoints.objects.get_or_create(student=student)
         student_summary.append({
             'student': student,
@@ -1589,7 +1593,7 @@ def add_points_spent(request):
             messages.error(request, 'Invalid points value.')
     
     # Get all students for the form (filtered by teacher)
-    students = Student.objects.filter(teacher=teacher).order_by('name')
+    students = Student.objects.filter(teacher=teacher).order_by('first_name', 'last_name')
     
     context = {
         'students': students,

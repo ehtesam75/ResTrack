@@ -12,18 +12,18 @@ class TeacherProfileAdmin(admin.ModelAdmin):
 @admin.register(StudentProfile)
 class StudentProfileAdmin(admin.ModelAdmin):
     list_display = ['user', 'student', 'created_by', 'created_at']
-    search_fields = ['user__username', 'student__name', 'created_by__username']
+    search_fields = ['user__username', 'student__first_name', 'student__last_name', 'created_by__username']
     list_filter = ['created_at', 'created_by']
 
 
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
-    list_display = ['name', 'roll', 'class_name', 'total_marks', 'total_exams', 'average_percentage']
-    search_fields = ['name', 'roll']
+    list_display = ['name', 'first_name', 'last_name', 'roll', 'class_name', 'total_marks', 'total_exams', 'average_percentage']
+    search_fields = ['first_name', 'last_name', 'roll']
     list_filter = ['class_name']
-    fields = ['name', 'roll', 'class_name']
+    fields = ['first_name', 'last_name', 'roll', 'class_name']
     list_display_links = ['total_marks']
-    list_editable = ['name', 'roll', 'class_name']
+    list_editable = ['first_name', 'last_name', 'roll', 'class_name']
 
 
 @admin.register(Subject)
@@ -46,7 +46,7 @@ class ExamTypeAdmin(admin.ModelAdmin):
 class ExamAdmin(admin.ModelAdmin):
     list_display = ['exam_id', 'student', 'subject', 'exam_type', 'date', 'chapter', 'mark_obtained', 'total_marks', 'percentage', 'grade', 'class_number', 'has_pdf']
     list_filter = ['subject', 'exam_type', 'date', 'student', 'class_number']
-    search_fields = ['student__name', 'subject__name', 'chapter', 'exam_id']
+    search_fields = ['student__first_name', 'student__last_name', 'subject__name', 'chapter', 'exam_id']
     date_hierarchy = 'date'
     ordering = ['-exam_id']
     
@@ -103,7 +103,7 @@ class GradeScaleAdmin(admin.ModelAdmin):
 @admin.register(LifetimePoints)
 class LifetimePointsAdmin(admin.ModelAdmin):
     list_display = ['student', 'points_earned', 'points_spent', 'points_remaining']
-    search_fields = ['student__name']
+    search_fields = ['student__first_name', 'student__last_name']
     
     def points_remaining(self, obj):
         return obj.points_remaining
@@ -114,7 +114,7 @@ class LifetimePointsAdmin(admin.ModelAdmin):
 class PointsSpentAdmin(admin.ModelAdmin):
     list_display = ['student', 'points_spent', 'description', 'date', 'created_at']
     list_filter = ['date', 'student']
-    search_fields = ['student__name', 'description']
+    search_fields = ['student__first_name', 'student__last_name', 'description']
     date_hierarchy = 'date'
     readonly_fields = ['created_at']
     list_editable = ['points_spent', 'description']

@@ -84,14 +84,14 @@
                         <button onclick="toggleUserMenu()" class="flex items-center gap-2 text-gray-700 hover:text-purple-600 px-3 py-2 rounded-lg hover:bg-gray-100 transition-all text-sm font-medium">
                             <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white text-xs font-semibold">
                                 {% if user.student_profile %}
-                                    {{ user.student_profile.student.name|first_word|slice:':1'|upper }}
+                                    {{ user.student_profile.student.first_name|slice:':1'|upper }}
                                 {% else %}
                                     {{ user.first_name|slice:':1'|upper|default:user.username|slice:':1'|upper }}
                                 {% endif %}
                             </div>
                             <span class="max-w-24 truncate">
                                 {% if user.student_profile %}
-                                    {{ user.student_profile.student.name|first_word|default:user.username }}
+                                    {{ user.student_profile.student.name }}
                                 {% else %}
                                     {{ user.first_name|default:user.username }}
                                 {% endif %}

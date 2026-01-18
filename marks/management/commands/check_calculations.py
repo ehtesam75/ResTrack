@@ -14,7 +14,7 @@ class Command(BaseCommand):
         # Check Exam Percentage Calculations
         self.stdout.write('\n1. EXAM PERCENTAGE CALCULATIONS:')
         self.stdout.write('-'*80)
-        exams = Exam.objects.all().order_by('date', 'student__name')
+        exams = Exam.objects.all().order_by('date', 'student__first_name', 'student__last_name')
         for exam in exams:
             calculated_percentage = (float(exam.mark_obtained) / float(exam.total_marks)) * 100
             model_percentage = float(exam.percentage)

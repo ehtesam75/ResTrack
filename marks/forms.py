@@ -91,11 +91,19 @@ class LoginForm(AuthenticationForm):
 class StudentAccountForm(forms.Form):
     """Form for creating student accounts by teachers"""
     # Student personal info
-    name = forms.CharField(
-        max_length=200,
+    first_name = forms.CharField(
+        max_length=10,
         widget=forms.TextInput(attrs={
             'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all',
-            'placeholder': 'Student full name'
+            'placeholder': 'First name (max 10 chars)'
+        })
+    )
+    last_name = forms.CharField(
+        max_length=10,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all',
+            'placeholder': 'Last name (max 10 chars, optional)'
         })
     )
     class_number = forms.IntegerField(
@@ -167,7 +175,8 @@ class StudentAccountForm(forms.Form):
         
         # Create the student record
         student = Student.objects.create(
-            name=self.cleaned_data['name'],
+            first_name=self.cleaned_data['first_name'],
+            last_name=self.cleaned_data.get('last_name') or None,
             class_name=str(self.cleaned_data['class_number']),
             roll=self.cleaned_data['roll']
         )
@@ -184,10 +193,19 @@ class StudentAccountForm(forms.Form):
 
 class EditStudentForm(forms.Form):
     """Form for editing student information"""
-    name = forms.CharField(
-        max_length=200,
+    first_name = forms.CharField(
+        max_length=10,
         widget=forms.TextInput(attrs={
-            'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all'
+            'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all',
+            'placeholder': 'First name (max 10 chars)'
+        })
+    )
+    last_name = forms.CharField(
+        max_length=10,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all',
+            'placeholder': 'Last name (max 10 chars, optional)'
         })
     )
     class_number = forms.IntegerField(

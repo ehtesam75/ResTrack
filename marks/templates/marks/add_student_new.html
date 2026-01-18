@@ -33,10 +33,21 @@
                 <div class="bg-white/60 border border-gray-200 rounded-lg p-4 shadow-sm">
                     <h2 class="text-sm font-semibold text-gray-700 mb-2">Personal Info</h2>
                     <div class="space-y-3">
-                        <div>
-                            <label for="name" class="block text-xs font-medium text-gray-700 mb-1">Full Name <span class="text-red-500">*</span></label>
-                            <input type="text" id="name" name="name" required class="w-full px-3 py-1.5 border border-gray-300 rounded-md focus:ring-1 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all" placeholder="Enter student's full name">
-                                                    <p class="mt-1 text-xs text-gray-500">The first word will be used as the first name</p>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label for="first_name" class="block text-xs font-medium text-gray-700 mb-1">First Name <span class="text-red-500">*</span></label>
+                                <input type="text" id="first_name" name="first_name" required maxlength="10" class="w-full px-3 py-1.5 border border-gray-300 rounded-md focus:ring-1 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all" placeholder="First name">
+                                <div class="text-xs text-gray-500 mt-1">
+                                    <span id="first-name-count">0</span>/10 characters
+                                </div>
+                            </div>
+                            <div>
+                                <label for="last_name" class="block text-xs font-medium text-gray-700 mb-1">Last Name (optional)</label>
+                                <input type="text" id="last_name" name="last_name" maxlength="10" class="w-full px-3 py-1.5 border border-gray-300 rounded-md focus:ring-1 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all" placeholder="Last name">
+                                <div class="text-xs text-gray-500 mt-1">
+                                    <span id="last-name-count">0</span>/10 characters
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <label for="class_number" class="block text-xs font-medium text-gray-700 mb-1">Class <span class="text-red-500">*</span></label>
@@ -96,15 +107,21 @@
 <script>
     const isProduction = {{ is_production|yesno:"true,false" }};
     function validateStudentForm() {
-        const name = document.getElementById('name').value.trim();
+        const firstName = document.getElementById('first_name').value.trim();
+        const lastName = document.getElementById('last_name').value.trim();
         const classNum = document.getElementById('class_number').value;
         const roll = document.getElementById('roll').value.trim();
         const username = document.getElementById('username') ? document.getElementById('username').value.trim() : '';
         const password = document.getElementById('password') ? document.getElementById('password').value : '';
         const confirmPassword = document.getElementById('confirm_password') ? document.getElementById('confirm_password').value : '';
         const submitBtn = document.getElementById('submitBtn');
-        // Enable submit button only if all fields are filled AND not in production AND passwords match
-        if (name && classNum && roll && username && password && confirmPassword && password === confirmPassword && !isProduction) {
+
+        // Update character counts
+        document.getElementById('first-name-count').textContent = firstName.length;
+        document.getElementById('last-name-count').textContent = lastName.length;
+
+        // Enable submit button only if all required fields are filled AND not in production AND passwords match
+        if (firstName && classNum && roll && username && password && confirmPassword && password === confirmPassword && !isProduction) {
             submitBtn.disabled = false;
         } else {
             submitBtn.disabled = true;

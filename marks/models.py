@@ -34,18 +34,26 @@ class StudentProfile(models.Model):
 
 class Student(models.Model):
     """Model representing a student in the tracking system"""
-    name = models.CharField(max_length=200)
+    first_name = models.CharField(max_length=10, help_text="First name (max 10 characters)")
+    last_name = models.CharField(max_length=10, blank=True, null=True, help_text="Last name (max 10 characters)")
     roll = models.CharField(max_length=50, blank=True, null=True)
     class_name = models.CharField(max_length=100, blank=True, null=True)
     teacher = models.ForeignKey(
-        User, 
-        on_delete=models.CASCADE, 
+        User,
+        on_delete=models.CASCADE,
         related_name='students',
         null=True,
         blank=True,
         help_text="Teacher who owns this student"
     )
     created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def name(self):
+        """Full name property for backward compatibility"""
+        if self.last_name:
+            return f"{self.first_name} {self.last_name}"
+        return self.first_name
 
     def __str__(self):
         return self.name

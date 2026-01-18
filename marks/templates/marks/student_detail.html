@@ -269,7 +269,7 @@
                 <div class="flex items-center justify-between mb-2">
                     <div class="flex items-center gap-2">
                         <span class="text-xs font-bold text-purple-600">#{{ item.rank }}</span>
-                        <span class="text-sm text-gray-900">{{ item.subject.short_name|default:item.subject.name }}</span>
+                        <span class="text-sm text-gray-900">{{ item.subject.name }}</span>
                     </div>
                     <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-medium">{{ item.exam_count }} exams</span>
                 </div>
@@ -295,7 +295,7 @@
             <div class="border-l-3 border-purple-500 bg-gradient-to-r from-purple-50 to-blue-50 p-3 rounded">
                 <div class="flex justify-between items-center mb-2">
                     <div class="flex items-center gap-2">
-                        <h3 class="font-bold text-gray-900 text-sm mb-0">{{ item.subject.short_name|default:item.subject.name }}</h3>
+                        <h3 class="font-bold text-gray-900 text-sm mb-0">{{ item.subject.name }}</h3>
                         <span class="text-[10px] gradient-blue text-white px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap ml-1">{{ item.exam_count }} exams</span>
                     </div>
                     <span class="text-[10px] gradient-orange text-white px-1.5 py-0.5 rounded font-semibold shadow-sm whitespace-nowrap">Rank #{{ item.rank }}</span>
@@ -409,7 +409,7 @@
                 </div>
                 <div class="flex items-center justify-between">
                     <div class="flex-1 min-w-0">
-                        <p class="text-sm text-gray-900 truncate">{{ exam.subject.short_name|default:exam.subject.name }}</p>
+                        <p class="text-sm text-gray-900 truncate">{{ exam.subject.name }}</p>
                         <p class="text-xs text-gray-500">{{ exam.exam_type.name }} · Ch {{ exam.chapter|default:"—" }}</p>
                     </div>
                     <div class="text-right flex-shrink-0 ml-3">
