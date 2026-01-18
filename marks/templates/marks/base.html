@@ -93,7 +93,11 @@
                         </button>
                         <div id="userMenu" class="hidden absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50">
                             <div class="px-4 py-2 border-b border-gray-100">
-                                <p class="text-sm font-semibold text-gray-900">{{ user.get_full_name|default:user.username }}</p>
+                                {% if user.student_profile %}
+                                    <p class="text-sm font-semibold text-gray-900">{{ user.student_profile.student.name }}</p>
+                                {% else %}
+                                    <p class="text-sm font-semibold text-gray-900">{{ user.get_full_name|default:user.username }}</p>
+                                {% endif %}
                                 <p class="text-xs text-gray-500">{% if user.teacher_profile %}Teacher{% else %}Student{% endif %}</p>
                             </div>
                             {% if user.teacher_profile %}
