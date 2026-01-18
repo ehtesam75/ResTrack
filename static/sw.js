@@ -1,11 +1,18 @@
 // Service Worker for ResTrack PWA
-const CACHE_NAME = 'restrack-v1.0.0';
-const STATIC_CACHE_NAME = 'restrack-static-v1.0.0';
+const CACHE_NAME = 'restrack-v1.1.0';
+const STATIC_CACHE_NAME = 'restrack-static-v1.1.0';
 
 // Static assets to cache - ONLY static files, no authenticated pages
 const STATIC_ASSETS = [
   '/static/manifest.json',
   '/static/css/custom.css',
+  // Cache icons for faster loading but allow updates
+  '/static/icons/icon-72x72.png',
+  '/static/icons/icon-96x96.png',
+  '/static/icons/icon-128x128.png',
+  '/static/icons/icon-144x144.png',
+  '/static/icons/icon-192x192.png',
+  '/static/icons/icon-512x512.png',
   'https://cdn.tailwindcss.com',
   'https://cdn.jsdelivr.net/npm/chart.js'
 ];
@@ -33,7 +40,7 @@ self.addEventListener('activate', event => {
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          // Only keep current static cache, remove all others
+          // Delete all old caches to ensure fresh icons and manifest
           if (cacheName !== STATIC_CACHE_NAME) {
             console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
@@ -42,7 +49,10 @@ self.addEventListener('activate', event => {
       );
     }).then(() => {
       console.log('Service Worker activated and old caches cleaned up.');
-      return self.clients.claim();
+      // Force refresh all clients to get updated icons
+      return self.clients.matchAll().then(clients => {
+        clients.forEach(client => client.navigate(client.url));
+      }).then(() => self.clients.claim());
     })
   );
 });
@@ -96,5 +106,18 @@ self.addEventListener('fetch', event => {
 self.addEventListener('message', event => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
+  }
+  if (event.data && event.data.type === 'CLEAR_ICON_CACHE') {
+    // Clear all caches and force refresh
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => caches.delete(cacheName))
+      );
+    }).then(() => {
+      console.log('Icon cache cleared, refreshing clients...');
+      return self.clients.matchAll();
+    }).then(clients => {
+      clients.forEach(client => client.navigate(client.url));
+    });
   }
 });

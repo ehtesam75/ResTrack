@@ -8,8 +8,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="ResTrack">
-    <link rel="apple-touch-icon" href="/static/icons/icon-192x192.png">
-    <link rel="manifest" href="/static/manifest.json">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192x192.png?v=1.1.0">
+    <link rel="manifest" href="/static/manifest.json?v=1.1.0">
     <title>{% block title %}ResTrack{% endblock %}</title>
     
     <!-- Tailwind CSS -->
@@ -404,6 +404,17 @@
         window.addEventListener('appinstalled', (evt) => {
             console.log('PWA installed successfully');
         });
+
+        // Function to clear icon cache (useful when updating icons)
+        window.clearIconCache = function() {
+            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_ICON_CACHE' });
+                console.log('Icon cache clear request sent to service worker');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            }
+        };
     </script>
 </body>
 </html>
