@@ -53,6 +53,9 @@ urlpatterns = [
     # Favicon test page
     path('favicon-test/', TemplateView.as_view(template_name='marks/favicon_test.html'), name='favicon_test'),
 
+    # Edit subject
+    path('subjects/edit/', views.edit_subject, name='edit_subject'),
+
     # API endpoints for charts
     path('api/marks-over-time/<int:student_id>/', views.api_marks_over_time, name='api_marks_over_time'),
     path('api/subject-performance/<int:student_id>/', views.api_subject_performance, name='api_subject_performance'),

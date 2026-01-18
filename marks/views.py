@@ -1076,6 +1076,33 @@ def add_subject(request):
     return render(request, 'marks/add_subject.html', context)
 
 
+@login_required(login_url='login')
+def edit_subject(request):
+    """Edit an existing subject"""
+    if not is_teacher(request.user):
+        messages.error(request, 'Only teachers can edit subjects.')
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        subject_id = request.POST.get('subject_id')
+        name = request.POST.get('name')
+        short_name = request.POST.get('short_name')
+
+        try:
+            subject = Subject.objects.get(id=subject_id, teacher=request.user)
+            subject.name = name
+            subject.short_name = short_name
+            subject.save()
+
+            return redirect('add_subject')
+        except Subject.DoesNotExist:
+            messages.error(request, 'Subject not found or you do not have permission to edit it.')
+        except Exception as e:
+            messages.error(request, f'Error updating subject: {str(e)}')
+
+    return redirect('add_subject')
+
+
 
 
 @login_required(login_url='login')
