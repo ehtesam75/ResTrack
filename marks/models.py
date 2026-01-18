@@ -336,9 +336,10 @@ class Student(models.Model):
 class Subject(models.Model):
     """Model representing a subject/course"""
     name = models.CharField(max_length=200)
+    short_name = models.CharField(max_length=10, blank=True, null=True, help_text="Short name/abbreviation (max 10 characters)")
     teacher = models.ForeignKey(
-        User, 
-        on_delete=models.CASCADE, 
+        User,
+        on_delete=models.CASCADE,
         related_name='subjects',
         null=True,
         blank=True,

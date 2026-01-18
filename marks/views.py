@@ -1054,11 +1054,12 @@ def add_subject(request):
 
     if request.method == 'POST':
         name = request.POST.get('name')
-        if name:
-            subject = Subject.objects.create(name=name, teacher=request.user)
+        short_name = request.POST.get('short_name')
+        if name and short_name:
+            subject = Subject.objects.create(name=name, short_name=short_name, teacher=request.user)
             return redirect('subject_list')
         else:
-            messages.error(request, 'Subject name is required!')
+            messages.error(request, 'Both subject name and short name are required!')
 
     # Check if running on production (non-localhost)
     host = request.get_host().lower()
