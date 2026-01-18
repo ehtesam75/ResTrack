@@ -7,6 +7,8 @@ const STATIC_ASSETS = [
   '/static/manifest.json',
   '/static/css/custom.css',
   // Cache favicon for instant loading
+  '/static/icons/favicon.ico',
+  '/static/icons/ResTrack-16x16.png',
   '/static/icons/ResTrack-32x32.png',
   // Cache icons for faster loading but allow updates
   '/static/icons/ResTrack-72x72.png',

@@ -1,0 +1,172 @@
+{% extends 'marks/base.html' %}
+
+{% block title %}Favicon Test - ResTrack{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="glass-effect rounded-xl p-6 border border-gray-200 shadow-lg animate-fade-in-up">
+        <h1 class="text-2xl font-bold gradient-text mb-6">🧪 Favicon Test Page</h1>
+
+        <div class="space-y-6">
+            <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+                <h2 class="text-lg font-semibold text-blue-800 mb-2">📋 Test Results:</h2>
+                <p class="text-blue-700">
+                    <strong>Browser Tab Icon:</strong>
+                    <span id="tab-icon-status" class="font-mono">Checking...</span>
+                </p>
+                <p class="text-blue-700">
+                    <strong>Favicon File Access:</strong>
+                    <span id="file-status" class="font-mono">Checking...</span>
+                </p>
+            </div>
+
+            <div class="bg-gray-50 border border-gray-200 p-4 rounded-lg">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">🖼️ Favicon Image Test:</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="flex items-center space-x-4">
+                        <img id="favicon-16" src="/static/icons/ResTrack-16x16.png" alt="16x16 PNG Favicon Test"
+                             class="w-16 h-16 border-2 border-gray-300 rounded-lg"
+                             onerror="updateStatus('16x16 PNG not found')">
+                        <div>
+                            <p class="text-sm font-medium text-gray-700">16x16 PNG</p>
+                            <p class="text-xs text-gray-500">Small favicon</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <img id="favicon-32" src="/static/icons/ResTrack-32x32.png" alt="32x32 PNG Favicon Test"
+                             class="w-16 h-16 border-2 border-gray-300 rounded-lg"
+                             onerror="updateStatus('32x32 PNG not found')">
+                        <div>
+                            <p class="text-sm font-medium text-gray-700">32x32 PNG</p>
+                            <p class="text-xs text-gray-500">Standard favicon</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <img id="favicon-ico" src="/static/icons/favicon.ico" alt="ICO Favicon Test"
+                             class="w-16 h-16 border-2 border-gray-300 rounded-lg"
+                             onerror="updateStatus('ICO not found')"
+                             style="image-rendering: pixelated;">
+                        <div>
+                            <p class="text-sm font-medium text-gray-700">ICO Format</p>
+                            <p class="text-xs text-gray-500">Classic favicon</p>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-600 mt-4">
+                    If you can see all three icons above, all favicon files are accessible and properly served.
+                </p>
+            </div>
+
+            <div class="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+                <h2 class="text-lg font-semibold text-yellow-800 mb-2">🔧 Troubleshooting Steps:</h2>
+                <ol class="list-decimal list-inside space-y-2 text-yellow-700">
+                    <li><strong>Check browser tab:</strong> Do you see the ResTrack icon in the tab?</li>
+                    <li><strong>Hard refresh:</strong> Press Ctrl+F5 (or Cmd+Shift+R) to clear cache</li>
+                    <li><strong>Clear browser cache:</strong> Settings → Clear browsing data → Cached images</li>
+                    <li><strong>Try different browser:</strong> Chrome, Firefox, Safari, Edge</li>
+                    <li><strong>Check network tab:</strong> Look for favicon requests in DevTools</li>
+                </ol>
+            </div>
+
+            <div class="bg-green-50 border border-green-200 p-4 rounded-lg">
+                <h2 class="text-lg font-semibold text-green-800 mb-2">✅ If Favicon Works:</h2>
+                <p class="text-green-700">Great! The favicon is working on this test page. It should now work on all pages since they're using the same base template.</p>
+            </div>
+
+            <div class="bg-red-50 border border-red-200 p-4 rounded-lg">
+                <h2 class="text-lg font-semibold text-red-800 mb-2">❌ If Favicon Doesn't Work:</h2>
+                <ul class="list-disc list-inside space-y-1 text-red-700">
+                    <li>Check if static files are properly collected: <code>python manage.py collectstatic</code></li>
+                    <li>Verify the favicon file exists in <code>staticfiles/icons/</code></li>
+                    <li>Check production server static file configuration</li>
+                    <li>Try accessing the favicon URL directly: <code>/static/icons/ResTrack-32x32.png</code></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="mt-6 text-center">
+            <a href="{% url 'dashboard' %}" class="bg-purple-100 text-purple-700 px-6 py-3 rounded-lg font-medium shadow-sm hover:shadow-md hover:bg-purple-200 transition-all">
+                ← Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+// Test favicon functionality
+document.addEventListener('DOMContentLoaded', function() {
+    let png16Loaded = false;
+    let png32Loaded = false;
+    let icoLoaded = false;
+
+    // Check 16x16 PNG favicon
+    const png16Img = document.getElementById('favicon-16');
+    png16Img.onload = function() {
+        png16Loaded = true;
+        updateStatus();
+    };
+    png16Img.onerror = function() {
+        updateStatus();
+    };
+
+    // Check 32x32 PNG favicon
+    const png32Img = document.getElementById('favicon-32');
+    png32Img.onload = function() {
+        png32Loaded = true;
+        updateStatus();
+    };
+    png32Img.onerror = function() {
+        updateStatus();
+    };
+
+    // Check ICO favicon
+    const icoImg = document.getElementById('favicon-ico');
+    icoImg.onload = function() {
+        icoLoaded = true;
+        updateStatus();
+    };
+    icoImg.onerror = function() {
+        updateStatus();
+    };
+
+    // Check if favicon links exist in HTML
+    const faviconLinks = document.querySelectorAll('link[rel*="icon"]');
+    const tabIconStatus = document.getElementById('tab-icon-status');
+    if (faviconLinks.length > 0) {
+        tabIconStatus.textContent = `✅ ${faviconLinks.length} favicon links found in HTML`;
+    } else {
+        tabIconStatus.textContent = '❌ No favicon links found in HTML';
+    }
+
+    function updateStatus() {
+        const fileStatus = document.getElementById('file-status');
+        let status = '';
+
+        const loadedCount = [png16Loaded, png32Loaded, icoLoaded].filter(Boolean).length;
+        const totalCount = 3;
+
+        if (loadedCount === totalCount) {
+            status = '✅ All favicon formats load successfully (16x16 PNG, 32x32 PNG, ICO)';
+        } else if (loadedCount === 2) {
+            const missing = [];
+            if (!png16Loaded) missing.push('16x16 PNG');
+            if (!png32Loaded) missing.push('32x32 PNG');
+            if (!icoLoaded) missing.push('ICO');
+            status = `✅ 2/3 favicons load (${missing.join(', ')} failed)`;
+        } else if (loadedCount === 1) {
+            status = '⚠️ Only 1 favicon format loads';
+        } else {
+            status = '❌ All favicon formats failed to load';
+        }
+
+        fileStatus.textContent = status;
+    }
+
+    // Add timestamp for cache busting test
+    const timestamp = document.getElementById('timestamp');
+    if (timestamp) {
+        timestamp.textContent = new Date().toISOString();
+    }
+});
+</script>
+{% endblock %}

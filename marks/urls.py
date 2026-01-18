@@ -1,4 +1,5 @@
 from django.urls import path
+from django.views.generic import TemplateView
 from . import views
 
 urlpatterns = [
@@ -48,7 +49,10 @@ urlpatterns = [
     # Exam lookup page (mobile)
     path('exam-lookup/', views.exam_lookup, name='exam_lookup'),
     path('exam-lookup-api/', views.exam_lookup_api, name='exam_lookup_api'),
-    
+
+    # Favicon test page
+    path('favicon-test/', TemplateView.as_view(template_name='marks/favicon_test.html'), name='favicon_test'),
+
     # API endpoints for charts
     path('api/marks-over-time/<int:student_id>/', views.api_marks_over_time, name='api_marks_over_time'),
     path('api/subject-performance/<int:student_id>/', views.api_subject_performance, name='api_subject_performance'),

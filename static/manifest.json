@@ -1,5 +1,5 @@
 {
-  "name": "ResTrack - Student Marks Tracking",
+  "name": "ResTrack",
   "short_name": "ResTrack",
   "description": "A comprehensive web application for managing, analyzing, and visualizing student exam performance with gamification features.",
   "start_url": "/",
