@@ -127,12 +127,19 @@ def manage(request):
     teacher_exams = Exam.objects.filter(teacher=teacher)
     teacher_exam_types = ExamType.objects.filter(teacher=teacher)
     
+    from .models import LifetimePoints
+    # Get all student IDs under this teacher
+    student_ids = teacher_students.values_list('id', flat=True)
+    # Sum all points_earned for these students
+    teacher_students_lifetime_points = LifetimePoints.objects.filter(student_id__in=student_ids).aggregate(total=Sum('points_earned'))['total'] or 0
+
     context = {
         'is_teacher': is_teacher(request.user),
         'total_students': teacher_students.count(),
         'total_subjects': teacher_subjects.count(),
         'total_exams': count_unique_exams(teacher_exams),
-        'total_exam_types': teacher_exam_types.count(),
+        # 'total_exam_types': teacher_exam_types.count(),  # No longer needed in template
+        'teacher_students_lifetime_points': teacher_students_lifetime_points,
         'recent_students': teacher_students.order_by('-created_at')[:5],
         'recent_exams': teacher_exams.order_by('-date', '-id')[:100],
     }
