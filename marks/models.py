@@ -471,7 +471,7 @@ class Exam(models.Model):
         ResTrack/Exam Questions/<teacher username>/<filename>
         """
         username = instance.teacher.username if instance.teacher else 'unknown_teacher'
-        return f"ResTrack/Exam Questions/{username}/{filename}"
+        return f"ResTrack-System/Exam Questions/{username}/{filename}"
 
     question_pdf = models.FileField(
         upload_to=exam_pdf_upload_path,

@@ -6,6 +6,8 @@ const STATIC_CACHE_NAME = 'restrack-static-v1.2.0';
 const STATIC_ASSETS = [
   '/static/manifest.json',
   '/static/css/custom.css',
+  // Cache favicon for instant loading
+  '/static/icons/ResTrack-32x32.png',
   // Cache icons for faster loading but allow updates
   '/static/icons/ResTrack-72x72.png',
   '/static/icons/ResTrack-96x96.png',
