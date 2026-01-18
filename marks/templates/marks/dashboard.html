@@ -292,7 +292,7 @@
                 <div class="flex items-center justify-between">
                     <div class="flex-1 min-w-0">
                         <a href="{% url 'student_detail' exam.student.id %}" class="font-semibold text-sm text-gray-900 hover:text-purple-600 truncate block">{{ exam.student.name }}</a>
-                        <p class="text-[10px] text-gray-500">{{ exam.subject.name }} · {{ exam.exam_type.name }} · Ch {{ exam.chapter|default:"—" }}</p>
+                        <p class="text-[10px] text-gray-500">{{ exam.subject.short_name|default:exam.subject.name }} · {{ exam.exam_type.name }} · Ch {{ exam.chapter|default:"—" }}</p>
                     </div>
                     <div class="text-right flex-shrink-0 ml-3">
                         <p class="text-sm font-bold gradient-text">{{ exam.percentage|floatformat:1 }}%</p>
@@ -391,46 +391,9 @@
 
     // Subject Performance Chart
     const subjectData = {{ subject_performance_json|safe }};
-    
-    // Function to shorten subject names
-    function shortenSubjectName(name) {
-        const abbreviations = {
-            'Mathematics': 'Math',
-            'Science': 'Science',
-            'English 1st Paper': 'Eng 1st',
-            'English 2nd Paper': 'Eng 2nd',
-            'Bangla 1st Paper': 'Ban 1st',
-            'Bangla 2nd Paper': 'Ban 2nd',
-            'Bangladesh and Global Studies': 'BGS',
-            'Information and Communication Technology': 'ICT',
-            'Information & Communication Technology': 'ICT',
-            'Physical Education': 'Phys Ed',
-            'Religious Studies': 'Religion',
-            'Islam and Moral Education': 'Islam',
-            'Hindu and Moral Education': 'Hindu',
-            'Home Economics': 'Home Ec',
-            'Agricultural Studies': 'Agri',
-            'Higher Mathematics': 'H. Math',
-            'General Science': 'Gen Sci',
-            'Social Science': 'Soc Sci',
-        };
-        
-        if (abbreviations[name]) return abbreviations[name];
-        
-        const nameLower = name.toLowerCase();
-        if (nameLower.includes('1st paper')) {
-            return name.split(' ')[0].substring(0, 3) + ' 1st';
-        }
-        if (nameLower.includes('2nd paper')) {
-            return name.split(' ')[0].substring(0, 3) + ' 2nd';
-        }
-        
-        if (name.length <= 8) return name;
-        return name.substring(0, 7) + '.';
-    }
-    
+
     if (subjectData.length > 0) {
-        const subjectLabels = subjectData.map(item => shortenSubjectName(item.subject.name));
+        const subjectLabels = subjectData.map(item => item.subject.short_name || item.subject.name.substring(0, 8) + (item.subject.name.length > 8 ? '.' : ''));
         const subjectFullLabels = subjectData.map(item => item.subject.name);
         const subjectValues = subjectData.map(item => parseFloat(item.average_percentage));
         

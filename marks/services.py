@@ -308,12 +308,12 @@ class ChartDataService:
             student = Student.objects.get(id=student_id)
         except Student.DoesNotExist:
             return {'labels': [], 'data': [], 'fullLabels': []}
-        
+
         subject_summary = student.subject_wise_summary()
-        labels = [ChartDataService.shorten_subject_name(item['subject'].name) for item in subject_summary]
+        labels = [item['subject'].short_name or ChartDataService.shorten_subject_name(item['subject'].name) for item in subject_summary]
         full_labels = [item['subject'].name for item in subject_summary]
         data = [float(item['average_percentage']) for item in subject_summary]
-        
+
         return {'labels': labels, 'data': data, 'fullLabels': full_labels}
     
     @staticmethod

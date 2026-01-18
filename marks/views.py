@@ -285,7 +285,11 @@ def dashboard(request):
     # Serialize subject_performance for JavaScript
     subject_performance_json = json.dumps([
         {
-            'subject': {'name': item['subject'].name, 'id': item['subject'].id},
+            'subject': {
+                'name': item['subject'].name,
+                'short_name': item['subject'].short_name,
+                'id': item['subject'].id
+            },
             'average_percentage': item['average_percentage'],
             'total_exams': item['total_exams'],
             'best_student': item['best_student'].name if item['best_student'] else None

@@ -376,7 +376,7 @@
                     <div class="flex items-center justify-between">
                         <div class="flex-1 min-w-0">
                             <a href="{% url 'student_detail' exam.student.id %}" class="font-semibold text-sm text-gray-900 hover:text-purple-600 truncate block">{{ exam.student.name }}</a>
-                            <p class="text-[10px] text-gray-500"><a href="{% url 'subject_detail' exam.subject.id %}" class="hover:text-purple-600">{{ exam.subject.name }}</a> · {{ exam.exam_type.name }} · Ch {{ exam.chapter|default:"—" }}</p>
+                            <p class="text-[10px] text-gray-500"><a href="{% url 'subject_detail' exam.subject.id %}" class="hover:text-purple-600">{{ exam.subject.short_name|default:exam.subject.name }}</a> · {{ exam.exam_type.name }} · Ch {{ exam.chapter|default:"—" }}</p>
                         </div>
                         <div class="text-right flex-shrink-0 ml-3">
                             <p class="text-sm font-bold gradient-text">{{ exam.percentage|floatformat:1 }}%</p>
