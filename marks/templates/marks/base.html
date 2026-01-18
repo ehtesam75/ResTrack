@@ -369,15 +369,19 @@
         // Register service worker for PWA functionality
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
+                console.log('Attempting to register service worker...');
                 navigator.serviceWorker.register('/static/sw.js')
                     .then(function(registration) {
                         console.log('Service Worker registered successfully:', registration.scope);
+                        console.log('Service worker state:', registration.active ? 'active' : 'inactive');
 
                         // Check for updates
                         registration.addEventListener('updatefound', function() {
+                            console.log('Service worker update found');
                             const newWorker = registration.installing;
                             if (newWorker) {
                                 newWorker.addEventListener('statechange', function() {
+                                    console.log('Service worker state changed to:', newWorker.state);
                                     if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                                         // New version available
                                         if (confirm('A new version of ResTrack is available. Reload to update?')) {
@@ -390,8 +394,11 @@
                     })
                     .catch(function(error) {
                         console.log('Service Worker registration failed:', error);
+                        console.log('Error details:', error.message);
                     });
             });
+        } else {
+            console.log('Service Worker not supported in this browser');
         }
 
         // Handle PWA install prompt (browsers show native UI)
@@ -407,12 +414,30 @@
 
         // Function to clear icon cache (useful when updating icons)
         window.clearIconCache = function() {
-            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-                navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_ICON_CACHE' });
-                console.log('Icon cache clear request sent to service worker');
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
+            if ('serviceWorker' in navigator) {
+                // Check if service worker is registered
+                navigator.serviceWorker.getRegistration('/static/sw.js').then(registration => {
+                    if (registration && registration.active) {
+                        registration.active.postMessage({ type: 'CLEAR_ICON_CACHE' });
+                        console.log('Icon cache clear request sent to service worker');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        console.log('Service worker not active');
+                        // Try to register it first
+                        navigator.serviceWorker.register('/static/sw.js').then(reg => {
+                            console.log('Service worker registered for cache clearing');
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
+                        });
+                    }
+                }).catch(error => {
+                    console.log('Service worker registration check failed:', error);
+                });
+            } else {
+                console.log('Service Worker not supported');
             }
         };
     </script>

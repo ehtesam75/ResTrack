@@ -57,8 +57,11 @@
         <button onclick="clearIconCache()">Clear Icon Cache & Refresh</button>
         <button onclick="hardRefresh()">Hard Refresh Page</button>
         <button onclick="clearAllCaches()">Clear All Browser Cache</button>
+        <button onclick="forceIconRefresh()">Force Icon Refresh (No SW)</button>
+        <button onclick="checkSWStatus()">Check Service Worker Status</button>
 
         <div id="status" class="status"></div>
+        <div id="sw-status" class="status" style="display: none;"></div>
 
         <h2>Step 3: Test PWA Installation</h2>
         <p>After clearing cache:</p>
@@ -89,14 +92,28 @@
         }
 
         function clearIconCache() {
-            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-                navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_ICON_CACHE' });
-                showStatus('Icon cache clear request sent. Page will refresh in 1 second...');
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistration().then(registration => {
+                    if (registration && registration.active) {
+                        registration.active.postMessage({ type: 'CLEAR_ICON_CACHE' });
+                        showStatus('Icon cache clear request sent. Page will refresh in 1 second...');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        showStatus('Service Worker not active. Try registering it first.', false);
+                        // Try to register the service worker
+                        navigator.serviceWorker.register('/static/sw.js').then(reg => {
+                            showStatus('Service Worker registered. Try clearing cache again.');
+                        }).catch(err => {
+                            showStatus('Failed to register Service Worker: ' + err.message, false);
+                        });
+                    }
+                }).catch(error => {
+                    showStatus('Error checking service worker: ' + error.message, false);
+                });
             } else {
-                showStatus('Service Worker not available. Try manual cache clearing.', false);
+                showStatus('Service Worker not supported in this browser.', false);
             }
         }
 
@@ -124,12 +141,87 @@
             }
         }
 
-        // Check if service worker is registered
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.ready.then(() => {
-                console.log('Service Worker ready');
+        function forceIconRefresh() {
+            // Force refresh all icon images by adding timestamp
+            const timestamp = Date.now();
+            const iconImages = document.querySelectorAll('img[src*="/static/icons/"]');
+
+            iconImages.forEach(img => {
+                const url = new URL(img.src);
+                url.searchParams.set('t', timestamp);
+                img.src = url.toString();
             });
+
+            // Update manifest link
+            const manifestLink = document.querySelector('link[rel="manifest"]');
+            if (manifestLink) {
+                const url = new URL(manifestLink.href);
+                url.searchParams.set('t', timestamp);
+                manifestLink.href = url.toString();
+            }
+
+            // Update apple-touch-icon
+            const appleIcon = document.querySelector('link[rel="apple-touch-icon"]');
+            if (appleIcon) {
+                const url = new URL(appleIcon.href);
+                url.searchParams.set('t', timestamp);
+                appleIcon.href = url.toString();
+            }
+
+            showStatus('Icons refreshed with timestamp. Try reinstalling PWA now.');
         }
+
+        function checkSWStatus() {
+            const swStatus = document.getElementById('sw-status');
+            swStatus.style.display = 'block';
+
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistration().then(registration => {
+                    let status = 'Service Worker Status:\n';
+                    if (registration) {
+                        status += `✅ Registered at: ${registration.scope}\n`;
+                        status += `Active: ${!!registration.active}\n`;
+                        status += `Waiting: ${!!registration.waiting}\n`;
+                        status += `Installing: ${!!registration.installing}\n`;
+
+                        if (registration.active) {
+                            status += `Version: ${registration.active.scriptURL}\n`;
+                        }
+                    } else {
+                        status += '❌ No Service Worker registered\n';
+                        status += 'Try registering it manually...\n';
+
+                        // Try to register
+                        navigator.serviceWorker.register('/static/sw.js').then(reg => {
+                            status += `✅ Service Worker registered at: ${reg.scope}`;
+                            updateSWStatus(status);
+                        }).catch(err => {
+                            status += `❌ Registration failed: ${err.message}`;
+                            updateSWStatus(status);
+                        });
+                        return;
+                    }
+                    updateSWStatus(status);
+                }).catch(error => {
+                    updateSWStatus('❌ Error checking Service Worker: ' + error.message);
+                });
+            } else {
+                updateSWStatus('❌ Service Worker not supported in this browser');
+            }
+        }
+
+        function updateSWStatus(message) {
+            const swStatus = document.getElementById('sw-status');
+            swStatus.textContent = message;
+            swStatus.className = 'status success';
+            swStatus.style.display = 'block';
+            swStatus.style.whiteSpace = 'pre-line';
+        }
+
+        // Auto-check service worker status on page load
+        window.addEventListener('load', () => {
+            setTimeout(checkSWStatus, 1000);
+        });
     </script>
 </body>
 </html>
