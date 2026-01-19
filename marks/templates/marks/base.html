@@ -118,12 +118,14 @@
                                 Manage
                             </a>
                             {% endif %}
+                            {% if user.teacher_profile %}
                             <a href="{% url 'delete_account' %}" class="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                 </svg>
                                 Delete Account
                             </a>
+                            {% endif %}
                             <a href="{% url 'logout' %}" class="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
@@ -187,7 +189,7 @@
         </div>
 
         <!-- Navigation Links - Scrollable Content -->
-        <div class="flex-1 overflow-y-auto overscroll-contain" style="max-height: calc(100vh - 120px);">
+        <div class="overflow-y-auto overscroll-contain" style="height: calc(100vh - 80px); max-height: calc(100vh - 80px);">
             {% if user.is_authenticated %}
             <p class="px-3 py-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Main Menu</p>
             {% endif %}
@@ -305,6 +307,7 @@
             <!-- Divider -->
             <div class="my-2 mx-3 border-t border-gray-200"></div>
 
+            {% if user.teacher_profile %}
             <a href="{% url 'delete_account' %}" class="text-red-600 hover:bg-red-50 border-l-2 border-transparent flex items-center gap-2.5 px-3 py-2.5 rounded-r-lg font-medium transition-all text-sm">
                 <div class="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center">
                     <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -313,6 +316,7 @@
                 </div>
                 <span>Delete Account</span>
             </a>
+            {% endif %}
             <a href="{% url 'logout' %}" class="text-red-600 hover:bg-red-50 border-l-2 border-transparent flex items-center gap-2.5 px-3 py-2.5 rounded-r-lg font-medium transition-all text-sm">
                 <div class="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center">
                     <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

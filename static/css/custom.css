@@ -279,8 +279,6 @@ html {
     box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1);
     border-left: 1px solid rgba(139, 92, 246, 0.1);
     display: none;
-    display: flex;
-    flex-direction: column;
 }
 
 .mobile-menu-panel.open {
