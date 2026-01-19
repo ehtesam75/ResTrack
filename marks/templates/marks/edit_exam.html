@@ -17,10 +17,10 @@
 
         <!-- Messages -->
         {% if messages %}
-        <div class="mb-6">
+        <div class="mb-4">
             {% for message in messages %}
-            <div class="p-4 rounded-lg {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
-                {{ message }}
+            <div class="px-3 py-2 rounded-lg text-sm {% if message.tags == 'error' %}bg-red-50 border border-red-200 text-red-700{% else %}bg-green-50 border border-green-200 text-green-700{% endif %}">
+                {% if message.tags == 'error' %}❌{% else %}✅{% endif %} {{ message }}
             </div>
             {% endfor %}
         </div>
