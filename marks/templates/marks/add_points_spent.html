@@ -103,10 +103,11 @@
 
         // Check if date is after today
         if (dateInput.value) {
-            const selectedDate = new Date(dateInput.value);
+            // Always compare at midnight local time to avoid timezone issues
+            const selectedDate = new Date(dateInput.value + 'T00:00:00');
             const today = new Date();
             today.setHours(0,0,0,0);
-            if (selectedDate > today) {
+            if (selectedDate.getTime() > today.getTime()) {
                 hasError = true;
             }
         }
