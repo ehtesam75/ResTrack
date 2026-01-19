@@ -212,9 +212,12 @@ class DashboardService:
         return sorted(performance_data, key=lambda x: x['average_percentage'], reverse=True)
     
     @staticmethod
-    def get_grade_distribution():
-        """Get grade distribution across all exams"""
-        exams = Exam.objects.all()
+    def get_grade_distribution(teacher=None):
+        """Get grade distribution across exams (optionally filtered by teacher)"""
+        if teacher:
+            exams = Exam.objects.filter(teacher=teacher)
+        else:
+            exams = Exam.objects.all()
         grades = [exam.grade for exam in exams]
         distribution = Counter(grades)
 
@@ -368,11 +371,11 @@ class ChartDataService:
         return {'labels': labels, 'data': data}
     
     @staticmethod
-    def overall_grade_distribution():
-        """Generate chart for overall grade distribution"""
-        grade_data = DashboardService.get_grade_distribution()
+    def overall_grade_distribution(teacher=None):
+        """Generate chart for overall grade distribution (optionally filtered by teacher)"""
+        grade_data = DashboardService.get_grade_distribution(teacher=teacher)
         labels = [item['grade'] for item in grade_data]
         data = [item['count'] for item in grade_data]
         colors = [item['color'] for item in grade_data]
-        
+
         return {'labels': labels, 'data': data, 'colors': colors}

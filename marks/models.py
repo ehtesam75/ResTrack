@@ -488,6 +488,12 @@ class Exam(models.Model):
         null=True,
         help_text="PDF file containing exam questions"
     )
+    cloudinary_public_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Cloudinary public ID for the uploaded PDF file"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -551,12 +557,12 @@ class Exam(models.Model):
     def grade_color(self):
         """
         Get display color for the grade based on the grade name.
-        
+
         Returns:
             str: Hex color code (e.g., "#4CAF50")
         """
         grade_name = self.grade
-        
+
         # Map grade names to colors
         color_map = {
             "Superb": "#A7F3D0",  # Emerald-200 (darker green)
@@ -566,8 +572,55 @@ class Exam(models.Model):
             "Fail": "#FECACA",       # Red-200 (very light red)
             "Horrible": "#FCA5A5",   # Red-300 (light red)
         }
-        
+
         return color_map.get(grade_name, "#000000")
+
+    def save(self, *args, **kwargs):
+        """Override save to extract and store Cloudinary public ID when PDF is uploaded"""
+        super().save(*args, **kwargs)
+
+        # Extract Cloudinary public ID if question_pdf exists and cloudinary_public_id is not set
+        if self.question_pdf and not self.cloudinary_public_id:
+            self._extract_cloudinary_public_id()
+
+    def _extract_cloudinary_public_id(self):
+        """Extract and store the Cloudinary public ID from the file URL"""
+        if not self.question_pdf:
+            return
+
+        try:
+            # Get the file URL
+            file_url = self.question_pdf.url
+
+            # Cloudinary URL format: https://res.cloudinary.com/{cloud_name}/image/upload/{transformations}/{public_id}.{extension}
+            # We need to extract the public_id part
+
+            # Split by '/' and find the part after 'upload'
+            url_parts = file_url.split('/')
+            upload_index = -1
+            for i, part in enumerate(url_parts):
+                if part == 'upload':
+                    upload_index = i
+                    break
+
+            if upload_index >= 0 and upload_index + 1 < len(url_parts):
+                # Everything after 'upload/' until the file extension is the public ID
+                public_id_with_extension = url_parts[upload_index + 1:]
+                # Join all parts and remove file extension
+                full_path = '/'.join(public_id_with_extension)
+                # Remove file extension (.pdf)
+                if '.' in full_path:
+                    public_id = full_path.rsplit('.', 1)[0]
+                else:
+                    public_id = full_path
+
+                self.cloudinary_public_id = public_id
+                # Save without triggering another save loop
+                super().save(update_fields=['cloudinary_public_id'])
+        except Exception as e:
+            # Log the error but don't fail the save operation
+            print(f"Error extracting Cloudinary public ID for exam {self.id}: {e}")
+            pass
 
     @property
     def points_earned(self):

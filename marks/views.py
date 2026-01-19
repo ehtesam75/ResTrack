@@ -1379,7 +1379,8 @@ def api_student_comparison(request, subject_id):
 @login_required(login_url='login')
 def api_overall_grade_distribution(request):
     """API endpoint for overall grade distribution chart data"""
-    data = ChartDataService.overall_grade_distribution()
+    teacher = get_teacher_for_user(request.user)
+    data = ChartDataService.overall_grade_distribution(teacher=teacher)
     return JsonResponse(data)
 
 
@@ -2117,6 +2118,7 @@ def delete_account(request):
             subjects_count = Subject.objects.filter(teacher=teacher).count()
             exams_count = Exam.objects.filter(teacher=teacher).values('exam_id').distinct().count()
             points_spent_count = PointsSpent.objects.filter(teacher=teacher).count()
+            pdfs_count = Exam.objects.filter(teacher=teacher).exclude(question_pdf__isnull=True).exclude(question_pdf='').count()
 
             return render(request, 'marks/delete_account_confirm.html', {
                 'step': 3,
@@ -2125,6 +2127,7 @@ def delete_account(request):
                 'subjects_count': subjects_count,
                 'exams_count': exams_count,
                 'points_spent_count': points_spent_count,
+                'pdfs_count': pdfs_count,
             })
 
         elif step == '3':
@@ -2138,6 +2141,7 @@ def delete_account(request):
                 subjects_count = Subject.objects.filter(teacher=teacher).count()
                 exams_count = Exam.objects.filter(teacher=teacher).values('exam_id').distinct().count()
                 points_spent_count = PointsSpent.objects.filter(teacher=teacher).count()
+                pdfs_count = Exam.objects.filter(teacher=teacher).exclude(question_pdf__isnull=True).exclude(question_pdf='').count()
 
                 return render(request, 'marks/delete_account_confirm.html', {
                     'step': 3,
@@ -2146,12 +2150,12 @@ def delete_account(request):
                     'subjects_count': subjects_count,
                     'exams_count': exams_count,
                     'points_spent_count': points_spent_count,
+                    'pdfs_count': pdfs_count,
                 })
 
             # Perform the actual deletion
             try:
                 delete_teacher_account(teacher)
-                messages.success(request, 'Your account has been successfully deleted.')
                 return redirect('home')
             except Exception as e:
                 messages.error(request, f'An error occurred while deleting your account: {str(e)}')
@@ -2168,6 +2172,7 @@ def delete_teacher_account(teacher):
     """
     Safely delete a teacher account and all associated data.
     Only deletes data created by this specific teacher.
+    Includes deletion of Cloudinary PDF files uploaded by the teacher.
 
     Args:
         teacher: User instance representing the teacher
@@ -2177,10 +2182,47 @@ def delete_teacher_account(teacher):
     """
     from django.db import transaction
     from django.contrib.auth import get_user_model
+    import cloudinary
+    import cloudinary.api
 
     User = get_user_model()
 
     with transaction.atomic():
+        # Step 0: Delete Cloudinary PDF files uploaded by this teacher
+        cloudinary_files_deleted = 0
+        try:
+            # Get all cloudinary_public_id values for exams created by this teacher
+            cloudinary_public_ids = list(
+                Exam.objects.filter(teacher=teacher)
+                .exclude(cloudinary_public_id__isnull=True)
+                .exclude(cloudinary_public_id='')
+                .values_list('cloudinary_public_id', flat=True)
+                .distinct()
+            )
+
+            if cloudinary_public_ids:
+                # Delete files from Cloudinary using batch deletion
+                # Cloudinary API supports deleting multiple files at once
+                delete_result = cloudinary.api.delete_resources(
+                    cloudinary_public_ids,
+                    resource_type="raw",  # PDFs are stored as raw files
+                    type="upload"
+                )
+
+                # Count successfully deleted files
+                for public_id in cloudinary_public_ids:
+                    if public_id in delete_result.get('deleted', {}):
+                        status = delete_result['deleted'][public_id]
+                        if status == 'deleted':
+                            cloudinary_files_deleted += 1
+
+                print(f"Deleted {cloudinary_files_deleted} Cloudinary PDF files for teacher '{teacher.username}'")
+
+        except Exception as e:
+            # Log the error but continue with database deletion
+            # We don't want Cloudinary issues to prevent account deletion
+            print(f"Warning: Failed to delete Cloudinary files for teacher '{teacher.username}': {e}")
+
         # Step 1: Delete PointsSpent records created by this teacher
         points_spent_deleted, _ = PointsSpent.objects.filter(teacher=teacher).delete()
 
@@ -2194,20 +2236,37 @@ def delete_teacher_account(teacher):
         # Step 4: Delete Subject records created by this teacher
         subjects_deleted, _ = Subject.objects.filter(teacher=teacher).delete()
 
-        # Step 5: Delete Student records created by this teacher
+        # Step 5: Get student User accounts before deleting Student records
+        # We need to explicitly delete student User accounts since CASCADE might not work properly in transaction
+        student_users = list(
+            StudentProfile.objects.filter(
+                student__teacher=teacher
+            ).values_list('user', flat=True)
+        )
+
+        # Step 6: Delete Student records created by this teacher
         # This will also delete related StudentProfile and LifetimePoints (via CASCADE)
         students_deleted, _ = Student.objects.filter(teacher=teacher).delete()
 
-        # Step 6: Delete the TeacherProfile
+        # Step 7: Explicitly delete student User accounts
+        student_users_deleted = 0
+        for user_id in student_users:
+            try:
+                User.objects.filter(pk=user_id).delete()
+                student_users_deleted += 1
+            except Exception as e:
+                print(f"Warning: Failed to delete student user {user_id}: {e}")
+
+        # Step 8: Delete the TeacherProfile
         teacher_profile_deleted, _ = TeacherProfile.objects.filter(user=teacher).delete()
 
-        # Step 7: Finally, delete the User account
+        # Step 9: Finally, delete the User account
         # This will cascade to any remaining related objects
         user_deleted, _ = User.objects.filter(pk=teacher.pk).delete()
 
         # Log the deletion for audit purposes
         print(f"Teacher account '{teacher.username}' deleted successfully. "
-              f"Removed: {students_deleted} students, {subjects_deleted} subjects, "
-              f"{exams_deleted} exams, {points_spent_deleted} points records, "
-              f"{exam_types_deleted} exam types, {teacher_profile_deleted} profile, "
-              f"{user_deleted} user account.")
+              f"Removed: {cloudinary_files_deleted} Cloudinary files, {students_deleted} students, "
+              f"{student_users_deleted} student accounts, {subjects_deleted} subjects, {exams_deleted} exams, "
+              f"{points_spent_deleted} points records, {exam_types_deleted} exam types, "
+              f"{teacher_profile_deleted} profile, {user_deleted} user account.")
