@@ -82,81 +82,81 @@
     </div>
 
     <!-- Quick Actions Grid -->
-    <div class="mb-8">
-        <h2 class="text-base font-semibold text-gray-900 mb-3">Quick Actions</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+    <div class="mb-6 sm:mb-8">
+        <h2 class="text-sm sm:text-base font-semibold text-gray-900 mb-2 sm:mb-3">Quick Actions</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
             <!-- Add Student -->
-            <a href="{% url 'add_student' %}" class="group glass-effect rounded-xl p-5 border border-gray-200 hover:border-purple-300 hover:shadow-lg hover:shadow-purple-500/10 transition-all">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/30 group-hover:scale-105 transition-transform">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="{% url 'add_student' %}" class="group glass-effect rounded-xl p-3 sm:p-5 border border-gray-200 hover:border-purple-300 hover:shadow-lg hover:shadow-purple-500/10 transition-all">
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/30 group-hover:scale-105 transition-transform">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-base font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">Add Student</h3>
-                        <p class="text-xs text-gray-500">Create new student with login</p>
+                        <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">Add Student</h3>
+                        <p class="text-[10px] sm:text-xs text-gray-500">Create new student with login</p>
                     </div>
                 </div>
             </a>
 
             <!-- Add Subject -->
-            <a href="{% url 'add_subject' %}" class="group glass-effect rounded-xl p-5 border border-gray-200 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-500/10 transition-all">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:scale-105 transition-transform">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="{% url 'add_subject' %}" class="group glass-effect rounded-xl p-3 sm:p-5 border border-gray-200 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-500/10 transition-all">
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:scale-105 transition-transform">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-base font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">Add Subject</h3>
-                        <p class="text-xs text-gray-500">Create new subject</p>
+                        <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">Add Subject</h3>
+                        <p class="text-[10px] sm:text-xs text-gray-500">Create new subject</p>
                     </div>
                 </div>
             </a>
 
             <!-- Add Exam -->
-            <a href="{% url 'add_exam' %}" class="group glass-effect rounded-xl p-5 border border-gray-200 hover:border-green-300 hover:shadow-lg hover:shadow-green-500/10 transition-all">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg shadow-green-500/30 group-hover:scale-105 transition-transform">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="{% url 'add_exam' %}" class="group glass-effect rounded-xl p-3 sm:p-5 border border-gray-200 hover:border-green-300 hover:shadow-lg hover:shadow-green-500/10 transition-all">
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg shadow-green-500/30 group-hover:scale-105 transition-transform">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-base font-semibold text-gray-900 group-hover:text-green-600 transition-colors">Add Exam</h3>
-                        <p class="text-xs text-gray-500">Record single exam result</p>
+                        <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-green-600 transition-colors">Add Exam</h3>
+                        <p class="text-[10px] sm:text-xs text-gray-500">Record single exam result</p>
                     </div>
                 </div>
             </a>
 
             <!-- Add Bulk Exam -->
-            <a href="{% url 'add_bulk_exams' %}" class="group glass-effect rounded-xl p-5 border border-gray-200 hover:border-orange-300 hover:shadow-lg hover:shadow-orange-500/10 transition-all">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/30 group-hover:scale-105 transition-transform">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="{% url 'add_bulk_exams' %}" class="group glass-effect rounded-xl p-3 sm:p-5 border border-gray-200 hover:border-orange-300 hover:shadow-lg hover:shadow-orange-500/10 transition-all">
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/30 group-hover:scale-105 transition-transform">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-base font-semibold text-gray-900 group-hover:text-orange-600 transition-colors">Add Bulk Exam</h3>
-                        <p class="text-xs text-gray-500">Add results for multiple students</p>
+                        <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-orange-600 transition-colors">Add Bulk Exam</h3>
+                        <p class="text-[10px] sm:text-xs text-gray-500">Add results for multiple students</p>
                     </div>
                 </div>
             </a>
 
 
             <!-- Record Points Spent -->
-            <a href="{% url 'add_points_spent' %}" class="group glass-effect rounded-xl p-5 border border-gray-200 hover:border-yellow-300 hover:shadow-lg hover:shadow-yellow-500/10 transition-all">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center shadow-lg shadow-yellow-500/30 group-hover:scale-105 transition-transform">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="{% url 'add_points_spent' %}" class="group glass-effect rounded-xl p-3 sm:p-5 border border-gray-200 hover:border-yellow-300 hover:shadow-lg hover:shadow-yellow-500/10 transition-all">
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center shadow-lg shadow-yellow-500/30 group-hover:scale-105 transition-transform">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-base font-semibold text-gray-900 group-hover:text-yellow-600 transition-colors">Record Points Spent</h3>
-                        <p class="text-xs text-gray-500">Deduct student points</p>
+                        <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-yellow-600 transition-colors">Record Points Spent</h3>
+                        <p class="text-[10px] sm:text-xs text-gray-500">Deduct student points</p>
                     </div>
                 </div>
             </a>
@@ -167,42 +167,42 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Students List -->
         <div class="glass-effect rounded-xl border border-gray-200 overflow-hidden">
-            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
-                <h2 class="font-bold text-gray-900">Students</h2>
-                <a href="{% url 'student_list' %}" class="text-purple-600 text-xs font-medium hover:text-purple-700">View All →</a>
+            <div class="p-3 sm:p-4 border-b border-gray-100 flex items-center justify-between">
+                <h2 class="text-sm sm:text-base font-bold text-gray-900">Students</h2>
+                <a href="{% url 'student_list' %}" class="text-purple-600 text-[10px] sm:text-xs font-medium hover:text-purple-700">View All →</a>
             </div>
-            <div class="divide-y divide-gray-100 max-h-80 overflow-y-auto">
+            <div class="divide-y divide-gray-100 max-h-64 sm:max-h-80 overflow-y-auto">
                 {% for student in recent_students %}
-                <div class="p-4 hover:bg-gray-50 transition-colors flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                <div class="p-3 sm:p-4 hover:bg-gray-50 transition-colors flex items-center justify-between">
+                    <div class="flex items-center gap-2 sm:gap-3">
+                        <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-semibold text-xs sm:text-sm">
                             {{ student.name|slice:":1"|upper }}
                         </div>
                         <div>
-                            <p class="font-medium text-gray-900 text-sm">{{ student.name }}</p>
-                            <p class="text-xs text-gray-500">Class {{ student.class_name }} • Roll {{ student.roll }}</p>
+                            <p class="font-medium text-gray-900 text-xs sm:text-sm">{{ student.name }}</p>
+                            <p class="text-[10px] sm:text-xs text-gray-500">Class {{ student.class_name }} • Roll {{ student.roll }}</p>
                         </div>
                     </div>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-1 sm:gap-2">
                         <a href="{% url 'edit_student' student.id %}" class="text-gray-400 hover:text-blue-600 transition-colors" title="Edit">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                             </svg>
                         </a>
                         <a href="{% url 'student_detail' student.id %}" class="text-gray-400 hover:text-purple-600 transition-colors" title="View">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                             </svg>
                         </a>
                     </div>
                 </div>
                 {% empty %}
-                <div class="p-8 text-center text-gray-500">
-                    <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="p-6 sm:p-8 text-center text-gray-500">
+                    <svg class="w-10 h-10 sm:w-12 sm:h-12 mx-auto text-gray-300 mb-2 sm:mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
                     </svg>
-                    <p class="text-sm">No students yet</p>
-                    <a href="{% url 'add_student' %}" class="text-purple-600 text-sm font-medium mt-2 inline-block hover:text-purple-700">Add your first student →</a>
+                    <p class="text-xs sm:text-sm">No students yet</p>
+                    <a href="{% url 'add_student' %}" class="text-purple-600 text-xs sm:text-sm font-medium mt-1 sm:mt-2 inline-block hover:text-purple-700">Add your first student →</a>
                 </div>
                 {% endfor %}
             </div>
