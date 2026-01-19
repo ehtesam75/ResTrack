@@ -91,7 +91,7 @@
                             </div>
                             <span class="max-w-24 truncate">
                                 {% if user.student_profile %}
-                                    {{ user.student_profile.student.name }}
+                                    {{ user.student_profile.student.first_name }}
                                 {% else %}
                                     {{ user.first_name|default:user.username }}
                                 {% endif %}
@@ -161,7 +161,7 @@
                     {% if user.is_authenticated %}
                         <h2 class="text-lg font-bold text-white">
                             {% if user.student_profile %}
-                                {{ user.student_profile.student.name|first_word|default:user.username }}
+                                {{ user.student_profile.student.first_name|default:user.username }}
                             {% else %}
                                 {{ user.first_name|default:user.username }}
                             {% endif %}
