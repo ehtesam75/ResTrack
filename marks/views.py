@@ -2074,3 +2074,140 @@ def exam_lookup_api(request):
             'pdf_url': pdf_url,
         }
     })
+
+
+@login_required(login_url='login')
+def delete_account(request):
+    """
+    Multi-step account deletion confirmation flow for teachers.
+    Only teachers can delete their accounts, and only their own data is affected.
+    """
+    # Only teachers can delete accounts
+    if not is_teacher(request.user):
+        messages.error(request, 'Only teacher accounts can be deleted.')
+        return redirect('dashboard')
+
+    teacher = request.user
+
+    if request.method == 'POST':
+        step = request.POST.get('step', '1')
+
+        if step == '1':
+            # First confirmation step - show warning and ask for confirmation
+            return render(request, 'marks/delete_account_confirm.html', {
+                'step': 2,
+                'warning_message': 'This action is irreversible. Once deleted, your account and all associated data cannot be recovered.',
+            })
+
+        elif step == '2':
+            # Second confirmation step - require typing account name
+            typed_name = request.POST.get('typed_name', '').strip()
+            account_name = teacher.get_full_name() or teacher.username
+
+            if typed_name != account_name:
+                messages.error(request, f'Account name does not match. Please type "{account_name}" exactly.')
+                return render(request, 'marks/delete_account_confirm.html', {
+                    'step': 2,
+                    'warning_message': 'This action is irreversible. Once deleted, your account and all associated data cannot be recovered.',
+                })
+
+            # Show final confirmation with data summary
+            # Calculate what will be deleted
+            students_count = Student.objects.filter(teacher=teacher).count()
+            subjects_count = Subject.objects.filter(teacher=teacher).count()
+            exams_count = Exam.objects.filter(teacher=teacher).values('exam_id').distinct().count()
+            points_spent_count = PointsSpent.objects.filter(teacher=teacher).count()
+
+            return render(request, 'marks/delete_account_confirm.html', {
+                'step': 3,
+                'warning_message': 'This action is irreversible. Once deleted, your account and all associated data cannot be recovered.',
+                'students_count': students_count,
+                'subjects_count': subjects_count,
+                'exams_count': exams_count,
+                'points_spent_count': points_spent_count,
+            })
+
+        elif step == '3':
+            # Final confirmation - perform the deletion
+            confirm_text = request.POST.get('confirm_text', '').strip()
+
+            if confirm_text != 'DELETE MY ACCOUNT':
+                messages.error(request, 'Please type "DELETE MY ACCOUNT" exactly to confirm.')
+                # Recalculate counts and show step 3 again
+                students_count = Student.objects.filter(teacher=teacher).count()
+                subjects_count = Subject.objects.filter(teacher=teacher).count()
+                exams_count = Exam.objects.filter(teacher=teacher).values('exam_id').distinct().count()
+                points_spent_count = PointsSpent.objects.filter(teacher=teacher).count()
+
+                return render(request, 'marks/delete_account_confirm.html', {
+                    'step': 3,
+                    'warning_message': 'This action is irreversible. Once deleted, your account and all associated data cannot be recovered.',
+                    'students_count': students_count,
+                    'subjects_count': subjects_count,
+                    'exams_count': exams_count,
+                    'points_spent_count': points_spent_count,
+                })
+
+            # Perform the actual deletion
+            try:
+                delete_teacher_account(teacher)
+                messages.success(request, 'Your account has been successfully deleted.')
+                return redirect('home')
+            except Exception as e:
+                messages.error(request, f'An error occurred while deleting your account: {str(e)}')
+                return redirect('dashboard')
+
+    # Initial step - show first warning
+    return render(request, 'marks/delete_account_confirm.html', {
+        'step': 1,
+        'warning_message': 'This action is irreversible. Once deleted, your account and all associated data cannot be recovered.',
+    })
+
+
+def delete_teacher_account(teacher):
+    """
+    Safely delete a teacher account and all associated data.
+    Only deletes data created by this specific teacher.
+
+    Args:
+        teacher: User instance representing the teacher
+
+    Raises:
+        Exception: If deletion fails at any step
+    """
+    from django.db import transaction
+    from django.contrib.auth import get_user_model
+
+    User = get_user_model()
+
+    with transaction.atomic():
+        # Step 1: Delete PointsSpent records created by this teacher
+        points_spent_deleted, _ = PointsSpent.objects.filter(teacher=teacher).delete()
+
+        # Step 2: Delete Exam records created by this teacher
+        # This will also delete related LifetimePoints (via CASCADE)
+        exams_deleted, _ = Exam.objects.filter(teacher=teacher).delete()
+
+        # Step 3: Delete ExamType records created by this teacher
+        exam_types_deleted, _ = ExamType.objects.filter(teacher=teacher).delete()
+
+        # Step 4: Delete Subject records created by this teacher
+        subjects_deleted, _ = Subject.objects.filter(teacher=teacher).delete()
+
+        # Step 5: Delete Student records created by this teacher
+        # This will also delete related StudentProfile and LifetimePoints (via CASCADE)
+        students_deleted, _ = Student.objects.filter(teacher=teacher).delete()
+
+        # Step 6: Delete the TeacherProfile
+        teacher_profile_deleted, _ = TeacherProfile.objects.filter(user=teacher).delete()
+
+        # Step 7: Finally, delete the User account
+        # This will cascade to any remaining related objects
+        user_deleted, _ = User.objects.filter(pk=teacher.pk).delete()
+
+        # Log the deletion for audit purposes
+        print(f"Teacher account '{teacher.username}' deleted successfully. "
+              f"Removed: {students_deleted} students, {subjects_deleted} subjects, "
+              f"{exams_deleted} exams, {points_spent_deleted} points records, "
+              f"{exam_types_deleted} exam types, {teacher_profile_deleted} profile, "
+              f"{user_deleted} user account.")

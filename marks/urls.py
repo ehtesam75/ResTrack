@@ -8,6 +8,7 @@ urlpatterns = [
     path('login/', views.user_login, name='login'),
     path('signup/', views.teacher_signup, name='signup'),
     path('logout/', views.user_logout, name='logout'),
+    path('delete-account/', views.delete_account, name='delete_account'),
     
     # Teacher management dashboard
     path('manage/', views.manage, name='manage'),
