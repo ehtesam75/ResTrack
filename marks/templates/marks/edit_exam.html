@@ -37,7 +37,7 @@
                     <select id="student" name="student" required
                         class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors">
                         {% for s in students %}
-                        <option value="{{ s.id }}" {% if s.id == exam.student.id %}selected{% endif %}>{{ s.name }} (Roll: {{ s.roll }})</option>
+                        <option value="{{ s.id }}" {% if s.id == exam.student.id %}selected{% endif %}>{{ s.display_name }}</option>
                         {% endfor %}
                     </select>
                 </div>

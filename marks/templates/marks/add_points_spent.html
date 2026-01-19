@@ -20,7 +20,7 @@
                     <select id="student" name="student" required class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white hover:bg-gray-50 transition-colors">
                         <option value="">Select Student</option>
                         {% for student in students %}
-                        <option value="{{ student.id }}" data-points="{{ student.lifetimepoints.points_remaining }}">{{ student.name }}</option>
+                        <option value="{{ student.id }}" data-points="{{ student.lifetimepoints.points_remaining }}">{{ student.display_name }}</option>
                         {% endfor %}
                     </select>
                 </div>

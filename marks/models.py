@@ -55,6 +55,18 @@ class Student(models.Model):
             return f"{self.first_name} {self.last_name}"
         return self.first_name
 
+    @property
+    def display_name(self):
+        """Display name in format: First name (username)"""
+        username = ""
+        try:
+            if hasattr(self, 'user_profile') and self.user_profile.user:
+                username = self.user_profile.user.username
+        except:
+            # Fallback if user_profile doesn't exist or user is None
+            pass
+        return f"{self.first_name} ({username})"
+
     def __str__(self):
         return self.name
 

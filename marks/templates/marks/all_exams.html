@@ -112,7 +112,7 @@
                     <select name="student" class="mobile-filter-select w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50">
                         <option value="">All Students</option>
                         {% for student in students %}
-                            <option value="{{ student.id }}" {% if request.GET.student == student.id|stringformat:"s" %}selected{% endif %}>{{ student.name }}</option>
+                            <option value="{{ student.id }}" {% if request.GET.student == student.id|stringformat:"s" %}selected{% endif %}>{{ student.display_name }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -195,7 +195,7 @@
                         <option value="">All Students</option>
                         {% for student in students %}
                             <option value="{{ student.id }}" {% if request.GET.student == student.id|stringformat:"s" %}selected{% endif %}>
-                                {{ student.name }}
+                                {{ student.display_name }}
                             </option>
                         {% endfor %}
                     </select>

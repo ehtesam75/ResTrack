@@ -16,7 +16,7 @@
                 <option value="">Select student to compare</option>
                 {% for other_student in all_students %}
                     <option value="{{ other_student.id }}" {% if student2_stats and other_student.id == student2_stats.student.id %}selected{% endif %}>
-                        {{ other_student.name }}
+                        {{ other_student.display_name }}
                     </option>
                 {% endfor %}
             </select>

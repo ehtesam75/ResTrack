@@ -32,7 +32,7 @@
                     >
                         <option value="">Select Student</option>
                         {% for student in students %}
-                        <option value="{{ student.id }}">{{ student.name }}</option>
+                        <option value="{{ student.id }}">{{ student.display_name }}</option>
                         {% endfor %}
                     </select>
                     <p class="text-xs text-gray-500 mt-1">
