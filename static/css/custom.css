@@ -279,15 +279,41 @@ html {
     box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1);
     border-left: 1px solid rgba(139, 92, 246, 0.1);
     display: none;
+    display: flex;
+    flex-direction: column;
 }
 
 .mobile-menu-panel.open {
     transform: translateX(0);
 }
 
+/* Mobile menu scrolling containment */
+.mobile-menu-panel .overflow-y-auto {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+
+.mobile-menu-panel .overflow-y-auto::-webkit-scrollbar {
+    width: 4px;
+}
+
+.mobile-menu-panel .overflow-y-auto::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.mobile-menu-panel .overflow-y-auto::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.5);
+    border-radius: 2px;
+}
+
+.mobile-menu-panel .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+    background: rgba(156, 163, 175, 0.7);
+}
+
 @media (max-width: 639px) {
     .mobile-menu-panel {
-        display: block;
+        display: flex;
     }
     .mobile-menu-overlay {
         display: none;

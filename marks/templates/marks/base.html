@@ -161,7 +161,7 @@
     <!-- Mobile menu slide-in panel -->
     <div class="mobile-menu-panel" id="mobile-menu">
         <!-- Header with gradient -->
-        <div class="gradient-primary p-4">
+        <div class="gradient-primary p-4 flex-shrink-0">
             <div class="flex justify-between items-center">
                 <div>
                     {% if user.is_authenticated %}
@@ -185,9 +185,9 @@
                 </button>
             </div>
         </div>
-        
-        <!-- Navigation Links -->
-        <div class="p-2 space-y-0.5">
+
+        <!-- Navigation Links - Scrollable Content -->
+        <div class="flex-1 overflow-y-auto overscroll-contain" style="max-height: calc(100vh - 120px);">
             {% if user.is_authenticated %}
             <p class="px-3 py-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Main Menu</p>
             {% endif %}
@@ -336,17 +336,33 @@
             menu.classList.add('open');
             overlay.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
+            // Prevent body scrolling on iOS when menu is open
+            document.body.style.position = 'fixed';
+            document.body.style.width = '100%';
         }
-        
+
         function closeMenu() {
             menu.classList.remove('open');
             overlay.classList.add('hidden');
             document.body.style.overflow = '';
+            document.body.style.position = '';
+            document.body.style.width = '';
         }
         
         menuButton.addEventListener('click', openMenu);
         menuClose.addEventListener('click', closeMenu);
         overlay.addEventListener('click', closeMenu);
+
+        // Prevent touch events on menu from affecting body scroll
+        menu.addEventListener('touchstart', function(e) {
+            // Allow normal touch behavior within the menu
+            e.stopPropagation();
+        }, { passive: true });
+
+        menu.addEventListener('touchmove', function(e) {
+            // Allow scrolling within the menu content
+            e.stopPropagation();
+        }, { passive: true });
         
         // User dropdown menu toggle
         function toggleUserMenu() {
