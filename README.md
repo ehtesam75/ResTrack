@@ -11,7 +11,7 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
-[Features](#features) • [Installation](#installation) • [Usage](#usage) • [Documentation](#documentation) • [Contributing](#contributing)
+[Features](#-key-features) • [Usage Guide](#usage-guide) • [Grading System](#-grading-system) • [Points & Rewards](#-points--rewards) • [Screenshots](#-screenshots)
 
 </div>
 
@@ -21,7 +21,7 @@
 
 - [Overview](#-overview)
 - [Key Features](#-key-features)
-- [Technology Stack](#-technology--stack)
+- [Technology Stack](#-technology-stack)
 - [Installation](#-installation)
 - [Configuration](#-configuration)
 - [Usage Guide](#usage-guide)
