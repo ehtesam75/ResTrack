@@ -21,11 +21,11 @@
 
 - [Overview](#-overview)
 - [Key Features](#-key-features)
-- [Technology Stack](#-technology-stack)
+- [Technology Stack](#-technology--stack)
 - [Installation](#-installation)
 - [Configuration](#-configuration)
 - [Usage Guide](#usage-guide)
-- [System Architecture](#-system--architecture)
+- [System Architecture](#-system-architecture)
 - [Grading System](#-grading-system)
 - [Points & Rewards](#-points--rewards)
 - [Screenshots](#-screenshots)
