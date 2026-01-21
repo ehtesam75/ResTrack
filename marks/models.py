@@ -489,10 +489,10 @@ class Exam(models.Model):
     def exam_pdf_upload_path(instance, filename):
         """
         Returns upload path for exam question PDF in the format:
-        ResTrack/Exam Questions/<teacher username>/<filename>
+        ResTrack/<teacher username>/Exam Questions/<filename>
         """
         username = instance.teacher.username if instance.teacher else 'unknown_teacher'
-        return f"ResTrack-System/Exam Questions/{username}/{filename}"
+        return f"ResTrack/{username}/Exam Questions/{filename}"
 
     question_pdf = models.FileField(
         upload_to=exam_pdf_upload_path,
