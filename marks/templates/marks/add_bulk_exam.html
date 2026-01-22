@@ -470,9 +470,8 @@
             }
             
             if (submitBulkBtn) {
-                const isProduction = {{ is_production|yesno:"true,false" }};
-                // Disable button if validation fails OR if in production
-                submitBulkBtn.disabled = hasError || !allFieldsFilled || isProduction;
+                // Disable button if validation fails
+                submitBulkBtn.disabled = hasError || !allFieldsFilled;
             }
         }
         
@@ -507,8 +506,6 @@
         validateAllMarks();
         
         // Form submission validation
-        const isProduction = {{ is_production|yesno:"true,false" }};
-        
         form.addEventListener('submit', function(e) {
             // Check if this is the final submit (not the continue button)
             if (form.querySelector('[name="submit_exams"]')) {

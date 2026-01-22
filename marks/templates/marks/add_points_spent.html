@@ -126,8 +126,8 @@
             }
         }
 
-        // Disable submit button if production OR has error OR not all fields filled
-        submitBtn.disabled = isProduction || hasError || !allRequiredFilled;
+        // Disable submit button if has error OR not all fields filled
+        submitBtn.disabled = hasError || !allRequiredFilled;
     }
 
     studentSelect.addEventListener('change', function() {

@@ -182,8 +182,8 @@
         document.getElementById('name-count').textContent = name.length;
         document.getElementById('short-name-count').textContent = shortName.length;
 
-        // Enable submit button only if both fields are filled AND not in production
-        if (name && shortName && !isProduction) {
+        // Enable submit button only if both fields are filled
+        if (name && shortName) {
             submitBtn.disabled = false;
         } else {
             submitBtn.disabled = true;
