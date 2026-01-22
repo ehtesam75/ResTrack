@@ -97,12 +97,6 @@
             background: #a8a8a8;
         }
 
-        /* Subtle background patterns */
-        .pattern-dots {
-            background-image: radial-gradient(circle, #e2e8f0 1px, transparent 1px);
-            background-size: 20px 20px;
-        }
-
         /* Element animations */
         .animate-fade-in-up {
             animation: fadeInUp 0.5s ease-out;
@@ -118,6 +112,12 @@
                 transform: translateY(0);
             }
         }
+
+        /* Subtle background patterns */
+        .pattern-dots {
+            background-image: radial-gradient(circle, #e2e8f0 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
     </style>
 {% endblock %}
 
@@ -126,7 +126,7 @@
 <!-- Main Content -->
 
     <!-- Hero Section -->
-    <section class="pt-16 pb-16 sm:pt-20 sm:pb-24 relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20">
+    <section class="pt-8 pb-16 sm:pt-10 sm:pb-24 relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20">
         <!-- Enhanced Background decorations -->
         <div class="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-indigo-400/40 to-purple-500/30 rounded-full blur-3xl animate-pulse"></div>
         <div class="absolute bottom-10 right-10 w-96 h-96 bg-gradient-to-br from-blue-400/30 to-cyan-400/20 rounded-full blur-3xl animate-pulse" style="animation-delay: 2s;"></div>
@@ -542,4 +542,16 @@
             console.log('PWA installed successfully');
         });
     </script>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    window.addEventListener('load', function() {
+        const loader = document.getElementById('pageLoader');
+        if (loader) {
+            loader.style.opacity = '0';
+            setTimeout(() => loader.style.display = 'none', 300);
+        }
+    });
+</script>
 {% endblock %}
