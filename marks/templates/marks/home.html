@@ -1,33 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#6366f1">
-    <meta name="description" content="A comprehensive web application for managing, analyzing, and visualizing student exam performance with gamification features.">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="ResTrack">
-    <!-- Favicon -->
-    <link rel="icon" href="/static/icons/favicon.ico" type="image/x-icon">
-    <link rel="shortcut icon" href="/static/icons/favicon.ico" type="image/x-icon">
-    <link rel="icon" href="/static/icons/ResTrack-32x32.png" type="image/png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/static/icons/ResTrack-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/static/icons/ResTrack-16x16.png">
+{% extends 'marks/base.html' %}
 
-    <!-- Apple Touch Icon & PWA -->
-    <link rel="apple-touch-icon" href="/static/icons/ResTrack-192x192.png?v=1.2.0">
-    <link rel="manifest" href="/static/manifest.json?v=1.2.0">
-    <title>ResTrack - Student Result Tracking System</title>
+{% block title %}ResTrack - Student Result Tracking System{% endblock %}
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Custom CSS -->
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
-
-    <style>
+{% block extra_css %}
+<style>
         /* Modern gradient backgrounds */
         .hero-gradient {
             background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
@@ -127,29 +103,14 @@
             background-size: 20px 20px;
         }
     </style>
-</head>
-<body class="bg-slate-50 min-h-screen font-sans antialiased">
-    <!-- Navigation -->
-    <nav class="fixed top-0 left-0 right-0 z-50 glass-effect border-b border-slate-200/60">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <div class="flex items-center">
-                    <a href="{% url 'home' %}" class="text-xl font-bold gradient-text hover:opacity-80 transition-opacity">ResTrack</a>
-                </div>
-                <div class="flex items-center gap-3">
-                    <a href="{% url 'login' %}" class="text-slate-600 hover:text-indigo-600 font-medium text-sm px-4 py-2 rounded-lg hover:bg-slate-100/80 transition-all duration-200">
-                        Log In
-                    </a>
-                    <a href="{% url 'signup' %}" class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium text-sm px-5 py-2.5 rounded-lg hover:shadow-lg hover:shadow-indigo-500/30 hover:-translate-y-0.5 transition-all duration-200">
-                        Sign Up
-                    </a>
-                </div>
-            </div>
-        </div>
-    </nav>
+{% endblock %}
+
+{% block content %}
+
+<!-- Main Content -->
 
     <!-- Hero Section -->
-    <section class="pt-24 pb-16 sm:pt-32 sm:pb-24 relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20">
+    <section class="pt-16 pb-16 sm:pt-20 sm:pb-24 relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20">
         <!-- Enhanced Background decorations -->
         <div class="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-indigo-400/40 to-purple-500/30 rounded-full blur-3xl animate-pulse"></div>
         <div class="absolute bottom-10 right-10 w-96 h-96 bg-gradient-to-br from-blue-400/30 to-cyan-400/20 rounded-full blur-3xl animate-pulse" style="animation-delay: 2s;"></div>
@@ -490,7 +451,7 @@
                 <!-- Company Info -->
                 <div class="md:col-span-2">
                     <div class="flex items-center gap-3 mb-2">
-                        <img src="{% static 'icons/ResTrack-128x128.png' %}" alt="ResTrack Logo" class="w-8 h-8 rounded-lg">
+                        <img src="/static/icons/ResTrack-128x128.png" alt="ResTrack Logo" class="w-8 h-8 rounded-lg">
                         <span class="text-white font-bold text-lg">ResTrack</span>
                     </div>
                     <p class="text-slate-400 leading-relaxed max-w-sm mb-3 text-sm">
@@ -580,5 +541,4 @@
             console.log('PWA installed successfully');
         });
     </script>
-</body>
-</html>
+{% endblock %}

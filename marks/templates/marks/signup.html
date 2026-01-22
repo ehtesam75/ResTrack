@@ -1,25 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up - ResTrack</title>
+{% extends 'marks/base.html' %}
 
-    <!-- Favicon -->
-    <link rel="icon" href="/static/icons/favicon.ico" type="image/x-icon">
-    <link rel="shortcut icon" href="/static/icons/favicon.ico" type="image/x-icon">
-    <link rel="icon" href="/static/icons/ResTrack-32x32.png" type="image/png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/static/icons/ResTrack-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/static/icons/ResTrack-16x16.png">
+{% block title %}Sign Up - ResTrack{% endblock %}
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Custom CSS -->
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
-</head>
-<body class="bg-gradient-to-br from-gray-50 to-purple-50 min-h-screen flex items-center justify-center p-4 py-12">
+{% block content %}
+<div class="bg-gradient-to-br from-gray-50 to-purple-50 min-h-screen flex items-center justify-center p-4 py-12">
     <div class="w-full max-w-md">
         <!-- Logo -->
         <div class="text-center mb-8">
@@ -163,5 +147,5 @@
             </a>
         </div>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

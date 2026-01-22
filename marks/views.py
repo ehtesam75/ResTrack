@@ -1993,13 +1993,11 @@ def leaderboard(request):
     return render(request, 'marks/leaderboard.html', context)
 
 
-@login_required(login_url='login')
 def guide(request):
     """User guide page explaining grading system, points, and terminology"""
     return render(request, 'marks/guide.html')
 
 
-@login_required(login_url='login')
 def about(request):
     """About page with project and developer information"""
     return render(request, 'marks/about.html')
