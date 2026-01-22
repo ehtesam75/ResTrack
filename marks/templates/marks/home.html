@@ -102,6 +102,22 @@
             background-image: radial-gradient(circle, #e2e8f0 1px, transparent 1px);
             background-size: 20px 20px;
         }
+
+        /* Element animations */
+        .animate-fade-in-up {
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 {% endblock %}
 
@@ -121,21 +137,21 @@
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative pt-4">
             <div class="text-center max-w-4xl mx-auto">
-                <div class="inline-flex items-center gap-1.5 bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-700 px-3 py-1.5 rounded-full text-xs font-medium mb-4 border border-indigo-200/50">
+                <div class="inline-flex items-center gap-1.5 bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-700 px-3 py-1.5 rounded-full text-xs font-medium mb-4 border border-indigo-200/50 animate-fade-in-up">
                     <div class="w-1.5 h-1.5 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full animate-pulse"></div>
                     Currently in Beta - Free Access Available
                 </div>
 
-                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight animate-fade-in-up" style="animation-delay: 0.1s;">
                     Track Student Results
                     <span class="gradient-text block mt-2">Like Never Before</span>
                 </h1>
-                <p class="mt-6 text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
+                <p class="mt-6 text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto animate-fade-in-up" style="animation-delay: 0.2s;">
                     A comprehensive result tracking system designed for teachers and students.
                     Analyze performance, track progress, and achieve academic excellence.
                 </p>
 
-                <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+                <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up" style="animation-delay: 0.3s;">
                     <a href="{% url 'signup' %}" class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-500 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-purple-500/30 transition-all transform hover:-translate-y-1">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
@@ -152,7 +168,7 @@
             </div>
 
             <!-- Refined Stats Cards -->
-            <div class="mt-12 sm:mt-16 grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
+            <div class="mt-12 sm:mt-16 grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto animate-fade-in-up" style="animation-delay: 0.4s;">
                 <div class="bg-gradient-to-br from-indigo-50/60 to-purple-50/40 border border-indigo-100/50 rounded-xl p-4 text-center shadow-md hover:shadow-lg transition-all duration-300">
                     <div class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-1">{{ total_teachers|default:"0" }}</div>
                     <div class="text-xs font-medium text-slate-600 uppercase tracking-wide">Teachers</div>
@@ -179,7 +195,7 @@
     <!-- Features Section -->
     <section class="py-20 sm:py-28 bg-slate-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-20">
+            <div class="text-center mb-20 animate-fade-in-up" style="animation-delay: 0.1s;">
                 <div class="inline-flex items-center gap-1.5 bg-indigo-50 border border-indigo-200 rounded-full px-3 py-1.5 mb-4">
                     <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
@@ -190,7 +206,7 @@
                 <p class="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">Comprehensive tools designed for modern educational excellence and data-driven decision making.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in-up" style="animation-delay: 0.2s;">
                 <!-- Feature 1 -->
                 <div class="group bg-gradient-to-br from-white via-emerald-50/30 to-teal-100/40 p-6 rounded-2xl border border-slate-200/60 card-hover">
                     <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
