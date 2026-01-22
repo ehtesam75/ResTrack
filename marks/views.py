@@ -2015,9 +2015,9 @@ def exam_lookup(request):
     
     # Get exam stats for this teacher
     qs = Exam.objects.filter(teacher=teacher)
-    exam_ids = qs.values_list('exam_id', flat=True)
-    min_exam_id = exam_ids.order_by('exam_id').first() if exam_ids else None
-    max_exam_id = exam_ids.order_by('-exam_id').first() if exam_ids else None
+    min_exam_id = qs.values_list('exam_id', flat=True).distinct().order_by('exam_id').first()
+    max_exam_id = qs.values_list('exam_id', flat=True).distinct().order_by('-exam_id').first()
+    total_exams = qs.values('exam_id').distinct().count()
     exams_with_pdf = qs.exclude(question_pdf='').exclude(question_pdf__isnull=True).values('exam_id').distinct().count()
     
     # Calculate marked answer paper stats for students
@@ -2031,12 +2031,19 @@ def exam_lookup(request):
         total_student_exams = student_exams.values('exam_id').distinct().count()
         exams_with_answer_sheet = student_exams.exclude(marked_answer_paper='').exclude(marked_answer_paper__isnull=True).values('exam_id').distinct().count()
     
+    # Calculate percentages
+    pdf_percentage = round((exams_with_pdf / total_exams * 100), 1) if total_exams > 0 else 0
+    answer_sheet_percentage = round((exams_with_answer_sheet / total_student_exams * 100), 1) if total_student_exams > 0 else 0
+
     context = {
         'min_exam_id': min_exam_id or 'N/A',
         'max_exam_id': max_exam_id or 'N/A',
         'exams_with_pdf': exams_with_pdf,
+        'total_exams': total_exams,
+        'pdf_percentage': pdf_percentage,
         'exams_with_answer_sheet': exams_with_answer_sheet,
         'total_student_exams': total_student_exams,
+        'answer_sheet_percentage': answer_sheet_percentage,
         'is_student': is_student(request.user),
     }
     return render(request, 'marks/exam_lookup.html', context)
@@ -2074,22 +2081,46 @@ def exam_lookup_api(request):
     if first_exam.question_pdf:
         pdf_url = first_exam.question_pdf.url
     
-    # Get student's marked answer paper if user is a student
-    student_exam = None
-    marked_answer_url = None
-    student_marks = None
-    student_total = None
-    student_percentage = None
-    
+    # Get marked answer paper data based on user role
+    student_data = None
+    all_students_data = []
+
     if is_student(request.user):
+        # Student view - only their own data
         student = request.user.student_profile.student
         student_exam = exams.filter(student=student).first()
         if student_exam:
             student_marks = student_exam.mark_obtained
             student_total = student_exam.total_marks
             student_percentage = round(student_exam.percentage, 1)
-            if student_exam.marked_answer_paper:
-                marked_answer_url = student_exam.marked_answer_paper.url
+            marked_answer_url = student_exam.marked_answer_paper.url if student_exam.marked_answer_paper else None
+
+            student_data = {
+                'student_name': student_exam.student.name,
+                'marks': student_marks,
+                'total_marks': student_total,
+                'percentage': student_percentage,
+                'has_marked_answer': marked_answer_url is not None,
+                'marked_answer_url': marked_answer_url,
+            }
+    else:
+        # Teacher view - all students' data
+        for exam in exams:
+            marked_answer_url = exam.marked_answer_paper.url if exam.marked_answer_paper else None
+            all_students_data.append({
+                'student_name': exam.student.name,
+                'marks': exam.mark_obtained,
+                'total_marks': exam.total_marks,
+                'percentage': round(exam.percentage, 1),
+                'has_marked_answer': marked_answer_url is not None,
+                'marked_answer_url': marked_answer_url,
+            })
+
+    # For backward compatibility, keep the old fields for student view
+    student_marks = student_data['marks'] if student_data else None
+    student_total = student_data['total_marks'] if student_data else None
+    student_percentage = student_data['percentage'] if student_data else None
+    marked_answer_url = student_data['marked_answer_url'] if student_data else None
     
     return JsonResponse({
         'success': True,
@@ -2111,6 +2142,8 @@ def exam_lookup_api(request):
             'student_total': student_total,
             'student_percentage': student_percentage,
             'student_participated': student_exam is not None if is_student(request.user) else None,
+            'is_teacher': not is_student(request.user),
+            'all_students_data': all_students_data,
         }
     })
 

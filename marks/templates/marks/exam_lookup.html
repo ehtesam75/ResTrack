@@ -202,14 +202,13 @@
                 </div>
             </div>
 
-            <!-- Marked Answer Paper Card (Student Only) -->
-            {% if is_student %}
+            <!-- Marked Answer Paper Card (Student & Teacher) -->
             <div id="markedAnswerCard" class="hidden bg-white rounded-xl shadow-lg border border-gray-100 p-4">
                 <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2 text-sm">
                     <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    📄 Your Marked Answer Paper
+                    <span id="markedAnswerTitle">📄 Your Marked Answer Paper</span>
                 </h3>
                 
                 <!-- Student Score Display -->
@@ -246,12 +245,12 @@
                 </div>
 
                 <div id="markedAnswerNotAvailable" class="hidden">
-                    <div class="bg-amber-50 rounded-lg p-3 text-center border border-amber-200">
-                        <svg class="w-10 h-10 text-amber-400 mx-auto mb-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="bg-gray-50 rounded-lg p-3 text-center border border-gray-200">
+                        <svg class="w-10 h-10 text-gray-400 mx-auto mb-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                         </svg>
-                        <p class="text-amber-700 font-medium text-sm">Not Available Yet</p>
-                        <p class="text-amber-600 text-xs mt-0.5">Your marked answer paper has not been uploaded yet</p>
+                        <p class="text-gray-600 font-medium text-sm">Not Available Yet</p>
+                        <p class="text-gray-500 text-xs mt-0.5">Your marked answer paper has not been uploaded yet</p>
                     </div>
                 </div>
                 
@@ -264,8 +263,23 @@
                         <p class="text-gray-500 text-xs mt-0.5">You did not participate in this exam</p>
                     </div>
                 </div>
+
+                <!-- Teacher View: List of All Students -->
+                <div id="teacherStudentsList" class="hidden space-y-3">
+                    <!-- Student cards will be dynamically added here -->
+                </div>
+
+                <!-- No students message for teacher -->
+                <div id="noStudentsMessage" class="hidden">
+                    <div class="bg-gray-50 rounded-lg p-3 text-center border border-gray-200">
+                        <svg class="w-10 h-10 text-gray-400 mx-auto mb-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                        <p class="text-gray-600 font-medium text-sm">No Students Found</p>
+                        <p class="text-gray-500 text-xs mt-0.5">No students participated in this exam</p>
+                    </div>
+                </div>
             </div>
-            {% endif %}
         </div>
 
         <!-- Exam Paper Info (Mobile Only) -->
@@ -283,7 +297,7 @@
                         <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     </span>
                     <span class="text-xs text-gray-700">Exams with PDF Available:</span>
-                    <span class="ml-auto text-sm font-semibold text-emerald-700">{{ exams_with_pdf }}</span>
+                    <span class="ml-auto text-sm font-semibold text-emerald-700">{{ exams_with_pdf }}/{{ total_exams }}{% if total_exams > 0 %} ({{ pdf_percentage }}%){% endif %}</span>
                 </div>
                 {% if is_student %}
                 <div class="flex items-center gap-2">
@@ -291,7 +305,7 @@
                         <svg class="w-3.5 h-3.5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </span>
                     <span class="text-xs text-gray-700">Your Marked Answer Sheets:</span>
-                    <span class="ml-auto text-sm font-semibold text-green-700">{{ exams_with_answer_sheet }}/{{ total_student_exams }}{% if total_student_exams > 0 %} ({{ exams_with_answer_sheet|floatformat:0 }}%){% endif %}</span>
+                    <span class="ml-auto text-sm font-semibold text-green-700">{{ exams_with_answer_sheet }}/{{ total_student_exams }}{% if total_student_exams > 0 %} ({{ answer_sheet_percentage }}%){% endif %}</span>
                 </div>
                 {% endif %}
             </div>
@@ -368,12 +382,92 @@
         if (markedAnswerCard) {
             markedAnswerCard.classList.add('hidden');
         }
+
+        // Hide teacher-specific elements
+        const teacherStudentsList = document.getElementById('teacherStudentsList');
+        const noStudentsMessage = document.getElementById('noStudentsMessage');
+        if (teacherStudentsList) teacherStudentsList.classList.add('hidden');
+        if (noStudentsMessage) noStudentsMessage.classList.add('hidden');
     }
 
     function showError(message) {
         document.getElementById('errorMessage').textContent = message;
         document.getElementById('errorState').classList.remove('hidden');
         document.getElementById('initialState').classList.remove('hidden');
+    }
+
+    function createStudentCard(studentData) {
+        const card = document.createElement('div');
+        card.className = 'bg-gray-50 rounded-lg p-3 border border-gray-200';
+
+        const header = document.createElement('div');
+        header.className = 'flex items-center gap-2.5 mb-2';
+        header.innerHTML = `
+            <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+            </div>
+            <div>
+                <p class="text-[10px] text-gray-500 font-medium">Student</p>
+                <p class="text-gray-800 font-semibold text-sm">${studentData.student_name}</p>
+            </div>
+        `;
+
+        const score = document.createElement('div');
+        score.className = 'mb-3';
+        score.innerHTML = `
+            <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-3 border border-green-200">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center flex-shrink-0 shadow">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-green-700 font-medium">Score</p>
+                        <p class="text-gray-800 font-bold text-sm">${studentData.marks}/${studentData.total_marks} (${studentData.percentage}%)</p>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        card.appendChild(header);
+        card.appendChild(score);
+
+        if (studentData.has_marked_answer && studentData.marked_answer_url) {
+            const actions = document.createElement('div');
+            actions.className = 'space-y-2';
+            actions.innerHTML = `
+                <a href="${studentData.marked_answer_url}" target="_blank" class="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-medium py-2 px-3 rounded-lg transition-colors text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    </svg>
+                    View Answer Paper
+                </a>
+                <a href="${studentData.marked_answer_url}" download class="flex items-center justify-center gap-2 w-full bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white font-medium py-2 px-3 rounded-lg transition-colors text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    Download Answer Paper
+                </a>
+            `;
+            card.appendChild(actions);
+        } else {
+            const noPaper = document.createElement('div');
+            noPaper.className = 'bg-gray-50 rounded-lg p-3 text-center border border-gray-200';
+            noPaper.innerHTML = `
+                <svg class="w-8 h-8 text-gray-400 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+                <p class="text-gray-700 font-medium text-sm">Not Available Yet</p>
+                <p class="text-gray-600 text-xs">Marked answer paper not uploaded</p>
+            `;
+            card.appendChild(noPaper);
+        }
+
+        return card;
     }
 
     function showResults(exam) {
@@ -401,22 +495,45 @@
 
         document.getElementById('resultsSection').classList.remove('hidden');
         
-        // Handle marked answer paper for students
-        if (isStudent) {
-            const markedAnswerCard = document.getElementById('markedAnswerCard');
-            const studentScoreSection = document.getElementById('studentScoreSection');
-            const markedAnswerAvailable = document.getElementById('markedAnswerAvailable');
-            const markedAnswerNotAvailable = document.getElementById('markedAnswerNotAvailable');
-            const studentNotParticipated = document.getElementById('studentNotParticipated');
-            
-            // Reset all states
-            studentScoreSection.classList.add('hidden');
-            markedAnswerAvailable.classList.add('hidden');
-            markedAnswerNotAvailable.classList.add('hidden');
-            studentNotParticipated.classList.add('hidden');
-            
-            markedAnswerCard.classList.remove('hidden');
-            
+        // Handle marked answer paper for students and teachers
+        const markedAnswerCard = document.getElementById('markedAnswerCard');
+        const studentScoreSection = document.getElementById('studentScoreSection');
+        const markedAnswerAvailable = document.getElementById('markedAnswerAvailable');
+        const markedAnswerNotAvailable = document.getElementById('markedAnswerNotAvailable');
+        const studentNotParticipated = document.getElementById('studentNotParticipated');
+        const teacherStudentsList = document.getElementById('teacherStudentsList');
+        const noStudentsMessage = document.getElementById('noStudentsMessage');
+        const markedAnswerTitle = document.getElementById('markedAnswerTitle');
+
+        // Reset all states
+        studentScoreSection.classList.add('hidden');
+        markedAnswerAvailable.classList.add('hidden');
+        markedAnswerNotAvailable.classList.add('hidden');
+        studentNotParticipated.classList.add('hidden');
+        teacherStudentsList.classList.add('hidden');
+        noStudentsMessage.classList.add('hidden');
+
+        markedAnswerCard.classList.remove('hidden');
+
+        if (exam.is_teacher) {
+            // Teacher view - show all students
+            markedAnswerTitle.textContent = "📄 Students' Marked Answer Papers";
+
+            if (exam.all_students_data && exam.all_students_data.length > 0) {
+                teacherStudentsList.classList.remove('hidden');
+                teacherStudentsList.innerHTML = ''; // Clear existing content
+
+                exam.all_students_data.forEach(studentData => {
+                    const studentCard = createStudentCard(studentData);
+                    teacherStudentsList.appendChild(studentCard);
+                });
+            } else {
+                noStudentsMessage.classList.remove('hidden');
+            }
+        } else if (isStudent) {
+            // Student view - show only their own data
+            markedAnswerTitle.textContent = "📄 Your Marked Answer Paper";
+
             if (exam.student_participated === false) {
                 // Student did not participate in this exam
                 studentNotParticipated.classList.remove('hidden');
@@ -424,10 +541,10 @@
                 // Student participated - show their score
                 if (exam.student_marks !== null) {
                     studentScoreSection.classList.remove('hidden');
-                    document.getElementById('studentScore').textContent = 
+                    document.getElementById('studentScore').textContent =
                         `${exam.student_marks}/${exam.student_total} (${exam.student_percentage}%)`;
                 }
-                
+
                 // Handle marked answer paper availability
                 if (exam.has_marked_answer && exam.marked_answer_url) {
                     markedAnswerAvailable.classList.remove('hidden');
