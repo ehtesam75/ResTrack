@@ -1,6 +1,6 @@
 {% extends 'marks/base.html' %}
 
-{% block title %}Exam Papers | ResTrack{% endblock %}
+{% block title %}Exam Documents | ResTrack{% endblock %}
 
 {% block content %}
 <!-- Mobile Only Page - Hidden on Desktop -->
@@ -13,8 +13,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                 </svg>
             </div>
-            <h1 class="text-xl font-bold text-white mb-0.5">Exam Papers</h1>
-            <p class="text-white/80 text-xs">View & download question papers</p>
+            <h1 class="text-xl font-bold text-white mb-0.5">Exam Documents</h1>
+            <p class="text-white/80 text-xs">View & download papers and answer sheets</p>
         </div>
     </div>
 
@@ -201,6 +201,71 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Marked Answer Paper Card (Student Only) -->
+            {% if is_student %}
+            <div id="markedAnswerCard" class="hidden bg-white rounded-xl shadow-lg border border-gray-100 p-4">
+                <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2 text-sm">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    📄 Your Marked Answer Paper
+                </h3>
+                
+                <!-- Student Score Display -->
+                <div id="studentScoreSection" class="hidden mb-3">
+                    <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-3 border border-green-200">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-10 h-10 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center flex-shrink-0 shadow">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-green-700 font-medium">Your Score</p>
+                                <p id="studentScore" class="text-gray-800 font-bold text-sm"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="markedAnswerAvailable" class="hidden space-y-2">
+                    <a id="viewMarkedAnswerBtn" href="#" target="_blank" class="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-medium py-2.5 px-3 rounded-lg transition-colors text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                        View Answer Paper
+                    </a>
+                    <a id="downloadMarkedAnswerBtn" href="#" download class="flex items-center justify-center gap-2 w-full bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white font-medium py-2.5 px-3 rounded-lg transition-colors text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
+                        Download Answer Paper
+                    </a>
+                </div>
+
+                <div id="markedAnswerNotAvailable" class="hidden">
+                    <div class="bg-amber-50 rounded-lg p-3 text-center border border-amber-200">
+                        <svg class="w-10 h-10 text-amber-400 mx-auto mb-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                        <p class="text-amber-700 font-medium text-sm">Not Available Yet</p>
+                        <p class="text-amber-600 text-xs mt-0.5">Your marked answer paper has not been uploaded yet</p>
+                    </div>
+                </div>
+                
+                <div id="studentNotParticipated" class="hidden">
+                    <div class="bg-gray-50 rounded-lg p-3 text-center border border-gray-200">
+                        <svg class="w-10 h-10 text-gray-400 mx-auto mb-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                        </svg>
+                        <p class="text-gray-600 font-medium text-sm">Not Applicable</p>
+                        <p class="text-gray-500 text-xs mt-0.5">You did not participate in this exam</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
         </div>
 
         <!-- Exam Paper Info (Mobile Only) -->
@@ -220,13 +285,15 @@
                     <span class="text-xs text-gray-700">Exams with PDF Available:</span>
                     <span class="ml-auto text-sm font-semibold text-emerald-700">{{ exams_with_pdf }}</span>
                 </div>
+                {% if is_student %}
                 <div class="flex items-center gap-2">
-                    <span class="inline-flex items-center justify-center w-5 h-5 rounded-lg bg-red-50">
-                        <svg class="w-3.5 h-3.5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-1.414 1.414A9 9 0 105.636 18.364l1.414-1.414A7 7 0 1116.95 7.05z"/></svg>
+                    <span class="inline-flex items-center justify-center w-5 h-5 rounded-lg bg-green-50">
+                        <svg class="w-3.5 h-3.5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </span>
-                    <span class="text-xs text-gray-700">Exams without PDF:</span>
-                    <span class="ml-auto text-sm font-semibold text-red-600">{{ exams_without_pdf }}</span>
+                    <span class="text-xs text-gray-700">Your Marked Answer Sheets:</span>
+                    <span class="ml-auto text-sm font-semibold text-green-700">{{ exams_with_answer_sheet }}/{{ total_student_exams }}{% if total_student_exams > 0 %} ({{ exams_with_answer_sheet|floatformat:0 }}%){% endif %}</span>
                 </div>
+                {% endif %}
             </div>
             <p class="text-[10px] text-gray-400 mt-2 text-center">Enter an exam ID above to view details</p>
         </div>
@@ -242,7 +309,7 @@
             </svg>
         </div>
         <h2 class="text-2xl font-bold text-gray-800 mb-3">Mobile Only Feature</h2>
-        <p class="text-gray-600">This feature is optimized for mobile devices. Please access this page from your phone to view and download exam question papers.</p>
+        <p class="text-gray-600">This feature is optimized for mobile devices. Please access this page from your phone to view and download exam documents and answer papers.</p>
     </div>
 </div>
 {% endblock %}
@@ -250,6 +317,7 @@
 {% block extra_js %}
 <script>
     const examIdInput = document.getElementById('examIdInput');
+    const isStudent = {{ is_student|yesno:"true,false" }};
     
     // Search on Enter key
     examIdInput.addEventListener('keypress', function(e) {
@@ -294,6 +362,12 @@
         document.getElementById('errorState').classList.add('hidden');
         document.getElementById('resultsSection').classList.add('hidden');
         document.getElementById('initialState').classList.add('hidden');
+        
+        // Hide marked answer card if it exists
+        const markedAnswerCard = document.getElementById('markedAnswerCard');
+        if (markedAnswerCard) {
+            markedAnswerCard.classList.add('hidden');
+        }
     }
 
     function showError(message) {
@@ -326,6 +400,44 @@
         }
 
         document.getElementById('resultsSection').classList.remove('hidden');
+        
+        // Handle marked answer paper for students
+        if (isStudent) {
+            const markedAnswerCard = document.getElementById('markedAnswerCard');
+            const studentScoreSection = document.getElementById('studentScoreSection');
+            const markedAnswerAvailable = document.getElementById('markedAnswerAvailable');
+            const markedAnswerNotAvailable = document.getElementById('markedAnswerNotAvailable');
+            const studentNotParticipated = document.getElementById('studentNotParticipated');
+            
+            // Reset all states
+            studentScoreSection.classList.add('hidden');
+            markedAnswerAvailable.classList.add('hidden');
+            markedAnswerNotAvailable.classList.add('hidden');
+            studentNotParticipated.classList.add('hidden');
+            
+            markedAnswerCard.classList.remove('hidden');
+            
+            if (exam.student_participated === false) {
+                // Student did not participate in this exam
+                studentNotParticipated.classList.remove('hidden');
+            } else {
+                // Student participated - show their score
+                if (exam.student_marks !== null) {
+                    studentScoreSection.classList.remove('hidden');
+                    document.getElementById('studentScore').textContent = 
+                        `${exam.student_marks}/${exam.student_total} (${exam.student_percentage}%)`;
+                }
+                
+                // Handle marked answer paper availability
+                if (exam.has_marked_answer && exam.marked_answer_url) {
+                    markedAnswerAvailable.classList.remove('hidden');
+                    document.getElementById('viewMarkedAnswerBtn').href = exam.marked_answer_url;
+                    document.getElementById('downloadMarkedAnswerBtn').href = exam.marked_answer_url;
+                } else {
+                    markedAnswerNotAvailable.classList.remove('hidden');
+                }
+            }
+        }
     }
 </script>
 {% endblock %}

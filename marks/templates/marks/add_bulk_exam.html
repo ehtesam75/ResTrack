@@ -198,7 +198,7 @@
                     {% for i in student_range %}
                     <div class="glass-effect border border-gray-200 rounded-lg p-2.5 sm:p-3 hover:shadow-md transition-all">
                         <h3 class="font-semibold text-gray-700 text-xs sm:text-sm mb-2">Student #{{ i }}</h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
                             <div>
                                 <label for="student_{{ i }}" class="block text-xs font-semibold text-gray-700 mb-1">
                                     Select Student <span class="text-red-500">*</span>
@@ -232,6 +232,19 @@
                                     placeholder="e.g., 85"
                                 >
                                 <p class="text-xs text-red-600 mt-1 hidden marks-error">Cannot exceed total marks</p>
+                            </div>
+                            <div>
+                                <label for="marked_answer_{{ i }}" class="block text-xs font-semibold text-gray-700 mb-1">
+                                    Marked Paper <span class="text-gray-400 text-xs font-normal">(optional)</span>
+                                </label>
+                                <input
+                                    type="file"
+                                    id="marked_answer_{{ i }}"
+                                    name="marked_answer_{{ i }}"
+                                    accept=".pdf,.zip,.rar"
+                                    class="w-full px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors marked-answer-input file:mr-1 file:py-0.5 file:px-1.5 file:rounded file:border-0 file:text-xs file:bg-green-100 file:text-green-700"
+                                >
+                                <p class="text-xs text-red-600 mt-1 hidden marked-answer-error">Invalid file type or size &gt;10MB</p>
                             </div>
                         </div>
                     </div>
@@ -344,6 +357,17 @@
     
     if (form && form.querySelector('[name="submit_exams"]')) {
         const MAX_PDF_SIZE = 1 * 1024 * 1024; // 1MB in bytes
+        const MAX_MARKED_ANSWER_SIZE = 10 * 1024 * 1024; // 10MB in bytes
+        
+        // Helper function to validate marked answer file
+        function validateMarkedAnswerFile(file) {
+            if (!file) return true;
+            const fileName = file.name.toLowerCase();
+            const validExtensions = ['.pdf', '.zip', '.rar'];
+            const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
+            const validSize = file.size <= MAX_MARKED_ANSWER_SIZE;
+            return hasValidExtension && validSize;
+        }
         
         // Real-time validation function
         function validateAllMarks() {
@@ -406,6 +430,8 @@
                 const marksInput = document.getElementById('marks_' + i);
                 const marksError = marksInput?.nextElementSibling;
                 const markObtained = parseFloat(marksInput?.value);
+                const markedAnswerInput = document.getElementById('marked_answer_' + i);
+                const markedAnswerError = markedAnswerInput?.parentElement?.querySelector('.marked-answer-error');
                 
                 // Check if student is selected and marks are entered
                 if (!studentSelect?.value || !marksInput?.value) {
@@ -424,6 +450,22 @@
                     if (marksError && marksError.classList.contains('marks-error')) {
                         marksError.classList.add('hidden');
                     }
+                }
+                
+                // Validate marked answer paper file
+                if (markedAnswerInput?.files?.length > 0) {
+                    const file = markedAnswerInput.files[0];
+                    if (!validateMarkedAnswerFile(file)) {
+                        markedAnswerInput.classList.add('border-red-500');
+                        if (markedAnswerError) markedAnswerError.classList.remove('hidden');
+                        hasError = true;
+                    } else {
+                        markedAnswerInput.classList.remove('border-red-500');
+                        if (markedAnswerError) markedAnswerError.classList.add('hidden');
+                    }
+                } else {
+                    markedAnswerInput?.classList.remove('border-red-500');
+                    if (markedAnswerError) markedAnswerError.classList.add('hidden');
                 }
             }
             
@@ -478,6 +520,20 @@
                         e.preventDefault();
                         alert('PDF file size must be less than 1MB!');
                         return false;
+                    }
+                }
+                
+                // Check marked answer paper sizes on submit
+                const studentCount = parseInt(document.querySelector('[name="student_count"]').value);
+                for (let i = 1; i <= studentCount; i++) {
+                    const markedAnswerInput = document.getElementById('marked_answer_' + i);
+                    if (markedAnswerInput?.files?.length > 0) {
+                        const file = markedAnswerInput.files[0];
+                        if (!validateMarkedAnswerFile(file)) {
+                            e.preventDefault();
+                            alert('Student #' + i + ': Marked answer paper must be PDF/ZIP/RAR and less than 10MB!');
+                            return false;
+                        }
                     }
                 }
             }

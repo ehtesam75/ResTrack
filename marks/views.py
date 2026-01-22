@@ -1128,6 +1128,7 @@ def add_exam(request):
         total_marks = request.POST.get('total_marks')
         mark_obtained = request.POST.get('mark_obtained')
         question_pdf = request.FILES.get('question_pdf')
+        marked_answer_paper = request.FILES.get('marked_answer_paper')
         
         exam_id = request.POST.get('exam_id')
         if all([student_id, subject_id, exam_type_name, date, chapter, class_number, total_marks, mark_obtained, exam_id]):
@@ -1153,7 +1154,8 @@ def add_exam(request):
                     total_marks=total_marks,
                     mark_obtained=mark_obtained,
                     exam_id=exam_id,
-                    question_pdf=question_pdf
+                    question_pdf=question_pdf,
+                    marked_answer_paper=marked_answer_paper
                 )
                 return redirect('student_detail', student_id=student.id)
             except Exception as e:
@@ -1222,6 +1224,7 @@ def add_bulk_exam(request):
                     for i in range(1, student_count + 1):
                         student_id = request.POST.get(f'student_{i}')
                         mark_obtained = request.POST.get(f'marks_{i}')
+                        marked_answer_paper = request.FILES.get(f'marked_answer_{i}')
                         if student_id and mark_obtained:
                             # Ensure student belongs to this teacher
                             student = Student.objects.get(id=student_id, teacher=teacher)
@@ -1238,7 +1241,8 @@ def add_bulk_exam(request):
                                 mark_obtained=mark_obtained,
                                 group_id=group_id,
                                 exam_id=exam_id,
-                                question_pdf=question_pdf
+                                question_pdf=question_pdf,
+                                marked_answer_paper=marked_answer_paper
                             )
                             created_count += 1
                     return redirect('all_exams')
@@ -2006,7 +2010,7 @@ def about(request):
 @login_required(login_url='login')
 @login_required(login_url='login')
 def exam_lookup(request):
-    """Mobile-only page for looking up exam PDFs by exam ID"""
+    """Mobile-only page for looking up exam PDFs and marked answer papers by exam ID"""
     teacher = get_teacher_for_user(request.user)
     
     # Get exam stats for this teacher
@@ -2015,12 +2019,25 @@ def exam_lookup(request):
     min_exam_id = exam_ids.order_by('exam_id').first() if exam_ids else None
     max_exam_id = exam_ids.order_by('-exam_id').first() if exam_ids else None
     exams_with_pdf = qs.exclude(question_pdf='').exclude(question_pdf__isnull=True).values('exam_id').distinct().count()
-    exams_without_pdf = qs.filter(Q(question_pdf='') | Q(question_pdf__isnull=True)).values('exam_id').distinct().count()
+    
+    # Calculate marked answer paper stats for students
+    exams_with_answer_sheet = 0
+    total_student_exams = 0
+    
+    if is_student(request.user):
+        # Get the student record for the logged-in user
+        student = request.user.student_profile.student
+        student_exams = qs.filter(student=student)
+        total_student_exams = student_exams.values('exam_id').distinct().count()
+        exams_with_answer_sheet = student_exams.exclude(marked_answer_paper='').exclude(marked_answer_paper__isnull=True).values('exam_id').distinct().count()
+    
     context = {
         'min_exam_id': min_exam_id or 'N/A',
         'max_exam_id': max_exam_id or 'N/A',
         'exams_with_pdf': exams_with_pdf,
-        'exams_without_pdf': exams_without_pdf,
+        'exams_with_answer_sheet': exams_with_answer_sheet,
+        'total_student_exams': total_student_exams,
+        'is_student': is_student(request.user),
     }
     return render(request, 'marks/exam_lookup.html', context)
 
@@ -2057,6 +2074,23 @@ def exam_lookup_api(request):
     if first_exam.question_pdf:
         pdf_url = first_exam.question_pdf.url
     
+    # Get student's marked answer paper if user is a student
+    student_exam = None
+    marked_answer_url = None
+    student_marks = None
+    student_total = None
+    student_percentage = None
+    
+    if is_student(request.user):
+        student = request.user.student_profile.student
+        student_exam = exams.filter(student=student).first()
+        if student_exam:
+            student_marks = student_exam.mark_obtained
+            student_total = student_exam.total_marks
+            student_percentage = round(student_exam.percentage, 1)
+            if student_exam.marked_answer_paper:
+                marked_answer_url = student_exam.marked_answer_paper.url
+    
     return JsonResponse({
         'success': True,
         'exam': {
@@ -2071,6 +2105,12 @@ def exam_lookup_api(request):
             'total_participants': exams.count(),
             'has_pdf': pdf_url is not None,
             'pdf_url': pdf_url,
+            'has_marked_answer': marked_answer_url is not None,
+            'marked_answer_url': marked_answer_url,
+            'student_marks': student_marks,
+            'student_total': student_total,
+            'student_percentage': student_percentage,
+            'student_participated': student_exam is not None if is_student(request.user) else None,
         }
     })
 

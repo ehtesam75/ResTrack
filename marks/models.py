@@ -506,6 +506,39 @@ class Exam(models.Model):
         null=True,
         help_text="Cloudinary public ID for the uploaded PDF file"
     )
+    
+    def marked_answer_upload_path(instance, filename):
+        """
+        Returns upload path for marked answer paper in the format:
+        ResTrack/<teacher username>/Marked Answer Papers/exam_{exam_id}_{student_username}_marked_answer.{ext}
+        """
+        import os
+        username = instance.teacher.username if instance.teacher else 'unknown_teacher'
+        student_username = 'unknown_student'
+        if instance.student:
+            try:
+                if hasattr(instance.student, 'user_profile') and instance.student.user_profile.user:
+                    student_username = instance.student.user_profile.user.username
+                else:
+                    student_username = instance.student.first_name.lower().replace(' ', '_')
+            except:
+                student_username = instance.student.first_name.lower().replace(' ', '_')
+        ext = os.path.splitext(filename)[1].lower()
+        new_filename = f"exam_{instance.exam_id}_{student_username}_marked_answer{ext}"
+        return f"ResTrack/{username}/Marked Answer Papers/{new_filename}"
+
+    marked_answer_paper = models.FileField(
+        upload_to=marked_answer_upload_path,
+        blank=True,
+        null=True,
+        help_text="Marked/examined answer paper (PDF/ZIP/RAR, max 10MB)"
+    )
+    marked_answer_cloudinary_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Cloudinary public ID for the marked answer paper file"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -588,12 +621,16 @@ class Exam(models.Model):
         return color_map.get(grade_name, "#000000")
 
     def save(self, *args, **kwargs):
-        """Override save to extract and store Cloudinary public ID when PDF is uploaded"""
+        """Override save to extract and store Cloudinary public IDs when files are uploaded"""
         super().save(*args, **kwargs)
 
         # Extract Cloudinary public ID if question_pdf exists and cloudinary_public_id is not set
         if self.question_pdf and not self.cloudinary_public_id:
             self._extract_cloudinary_public_id()
+        
+        # Extract Cloudinary public ID if marked_answer_paper exists and marked_answer_cloudinary_id is not set
+        if self.marked_answer_paper and not self.marked_answer_cloudinary_id:
+            self._extract_marked_answer_cloudinary_id()
 
     def _extract_cloudinary_public_id(self):
         """Extract and store the Cloudinary public ID from the file URL"""
@@ -632,6 +669,42 @@ class Exam(models.Model):
         except Exception as e:
             # Log the error but don't fail the save operation
             print(f"Error extracting Cloudinary public ID for exam {self.id}: {e}")
+            pass
+
+    def _extract_marked_answer_cloudinary_id(self):
+        """Extract and store the Cloudinary public ID from the marked answer paper URL"""
+        if not self.marked_answer_paper:
+            return
+
+        try:
+            # Get the file URL
+            file_url = self.marked_answer_paper.url
+
+            # Split by '/' and find the part after 'upload'
+            url_parts = file_url.split('/')
+            upload_index = -1
+            for i, part in enumerate(url_parts):
+                if part == 'upload':
+                    upload_index = i
+                    break
+
+            if upload_index >= 0 and upload_index + 1 < len(url_parts):
+                # Everything after 'upload/' until the file extension is the public ID
+                public_id_with_extension = url_parts[upload_index + 1:]
+                # Join all parts and remove file extension
+                full_path = '/'.join(public_id_with_extension)
+                # Remove file extension
+                if '.' in full_path:
+                    public_id = full_path.rsplit('.', 1)[0]
+                else:
+                    public_id = full_path
+
+                self.marked_answer_cloudinary_id = public_id
+                # Save without triggering another save loop
+                super().save(update_fields=['marked_answer_cloudinary_id'])
+        except Exception as e:
+            # Log the error but don't fail the save operation
+            print(f"Error extracting Cloudinary public ID for marked answer paper in exam {self.id}: {e}")
             pass
 
     @property
