@@ -223,6 +223,10 @@
                 font-size: 1.25rem !important;
             }
 
+            .stat-label {
+                font-size: 0.625rem !important;
+            }
+
             /* Features section mobile adjustments */
             .features-section {
                 padding: 3rem 0 !important;
@@ -237,9 +241,9 @@
                 font-size: 0.9rem !important;
             }
 
-            /* Smaller feature cards */
+            /* Smaller feature cards with reduced horizontal padding */
             .feature-card {
-                padding: 1rem !important;
+                padding: 0.75rem 0.5rem !important;
             }
 
             .feature-card h3 {
@@ -415,6 +419,15 @@
                 padding: 0.625rem 1.25rem !important;
                 font-size: 0.85rem !important;
             }
+
+            /* Stats extra small mobile adjustments */
+            .stats-cards .stat-number {
+                font-size: 1.125rem !important;
+            }
+
+            .stat-label {
+                font-size: 0.6rem !important;
+            }
         }
     </style>
 {% endblock %}
@@ -469,22 +482,22 @@
             <div class="stats-cards mt-12 sm:mt-16 grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto animate-fade-in-up" style="animation-delay: 0.4s;">
                 <div class="stat-card bg-gradient-to-br from-indigo-50/60 to-purple-50/40 border border-indigo-100/50 rounded-xl p-4 text-center shadow-md hover:shadow-lg transition-all duration-300">
                     <div class="stat-number text-2xl sm:text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-1">{{ total_teachers|default:"0" }}</div>
-                    <div class="text-xs font-medium text-slate-600 uppercase tracking-wide">Teachers</div>
+                    <div class="stat-label text-xs font-medium text-slate-600 uppercase tracking-wide">Teachers</div>
                 </div>
 
                 <div class="stat-card bg-gradient-to-br from-emerald-50/60 to-teal-50/40 border border-emerald-100/50 rounded-xl p-4 text-center shadow-md hover:shadow-lg transition-all duration-300">
                     <div class="stat-number text-2xl sm:text-3xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-1">{{ total_students|default:"0" }}</div>
-                    <div class="text-xs font-medium text-slate-600 uppercase tracking-wide">Students</div>
+                    <div class="stat-label text-xs font-medium text-slate-600 uppercase tracking-wide">Students</div>
                 </div>
 
                 <div class="stat-card bg-gradient-to-br from-slate-50/60 to-gray-50/40 border border-slate-100/50 rounded-xl p-4 text-center shadow-md hover:shadow-lg transition-all duration-300">
                     <div class="stat-number text-2xl sm:text-3xl font-bold bg-gradient-to-r from-slate-600 to-gray-600 bg-clip-text text-transparent mb-1">{{ total_exams|default:"0" }}</div>
-                    <div class="text-xs font-medium text-slate-600 uppercase tracking-wide">Exams</div>
+                    <div class="stat-label text-xs font-medium text-slate-600 uppercase tracking-wide">Exams</div>
                 </div>
 
                 <div class="stat-card bg-gradient-to-br from-blue-50/60 to-cyan-50/40 border border-blue-100/50 rounded-xl p-4 text-center shadow-md hover:shadow-lg transition-all duration-300">
                     <div class="stat-number text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-1">{{ total_points|default:"0" }}</div>
-                    <div class="text-xs font-medium text-slate-600 uppercase tracking-wide">Points</div>
+                    <div class="stat-label text-xs font-medium text-slate-600 uppercase tracking-wide">Points</div>
                 </div>
             </div>
         </div>
