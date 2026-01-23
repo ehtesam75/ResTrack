@@ -19,6 +19,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='exam',
             name='question_pdf',
-            field=models.FileField(blank=True, help_text='PDF file containing exam questions', null=True, upload_to=marks.models.Exam.exam_pdf_upload_path),
+            field=models.FileField(blank=True, help_text='PDF file containing exam questions', null=True, upload_to=marks.models.Exam.exam_pdf_folder_path),
         ),
     ]

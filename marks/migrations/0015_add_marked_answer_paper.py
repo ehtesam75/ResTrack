@@ -13,12 +13,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='exam',
-            name='marked_answer_cloudinary_id',
-            field=models.CharField(blank=True, help_text='Cloudinary public ID for the marked answer paper file', max_length=255, null=True),
-        ),
-        migrations.AddField(
-            model_name='exam',
             name='marked_answer_paper',
-            field=models.FileField(blank=True, help_text='Marked/examined answer paper (PDF/ZIP/RAR, max 10MB)', null=True, upload_to=marks.models.Exam.marked_answer_upload_path),
+            field=models.FileField(blank=True, help_text='Marked/examined answer paper (PDF/ZIP/RAR, max 10MB)', null=True, upload_to=marks.models.Exam.marked_answer_folder_path),
         ),
     ]

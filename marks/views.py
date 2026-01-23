@@ -2190,6 +2190,7 @@ def delete_account(request):
             exams_count = Exam.objects.filter(teacher=teacher).values('exam_id').distinct().count()
             points_spent_count = PointsSpent.objects.filter(teacher=teacher).count()
             pdfs_count = Exam.objects.filter(teacher=teacher).exclude(question_pdf__isnull=True).exclude(question_pdf='').count()
+            marked_answer_papers_count = Exam.objects.filter(teacher=teacher).exclude(marked_answer_paper__isnull=True).exclude(marked_answer_paper='').count()
 
             return render(request, 'marks/delete_account_confirm.html', {
                 'step': 3,
@@ -2199,6 +2200,7 @@ def delete_account(request):
                 'exams_count': exams_count,
                 'points_spent_count': points_spent_count,
                 'pdfs_count': pdfs_count,
+                'marked_answer_papers_count': marked_answer_papers_count,
             })
 
         elif step == '3':
@@ -2213,6 +2215,7 @@ def delete_account(request):
                 exams_count = Exam.objects.filter(teacher=teacher).values('exam_id').distinct().count()
                 points_spent_count = PointsSpent.objects.filter(teacher=teacher).count()
                 pdfs_count = Exam.objects.filter(teacher=teacher).exclude(question_pdf__isnull=True).exclude(question_pdf='').count()
+                marked_answer_papers_count = Exam.objects.filter(teacher=teacher).exclude(marked_answer_paper__isnull=True).exclude(marked_answer_paper='').count()
 
                 return render(request, 'marks/delete_account_confirm.html', {
                     'step': 3,
@@ -2222,6 +2225,7 @@ def delete_account(request):
                     'exams_count': exams_count,
                     'points_spent_count': points_spent_count,
                     'pdfs_count': pdfs_count,
+                    'marked_answer_papers_count': marked_answer_papers_count,
                 })
 
             # Perform the actual deletion
@@ -2262,14 +2266,22 @@ def delete_teacher_account(teacher):
         # Step 0: Delete Cloudinary PDF files uploaded by this teacher
         cloudinary_files_deleted = 0
         try:
-            # Get all cloudinary_public_id values for exams created by this teacher
-            cloudinary_public_ids = list(
-                Exam.objects.filter(teacher=teacher)
-                .exclude(cloudinary_public_id__isnull=True)
-                .exclude(cloudinary_public_id='')
-                .values_list('cloudinary_public_id', flat=True)
-                .distinct()
+            # Get all exams created by this teacher that have PDF files
+            teacher_exams = Exam.objects.filter(teacher=teacher).filter(
+                Q(question_pdf__isnull=False) & ~Q(question_pdf='') |
+                Q(marked_answer_paper__isnull=False) & ~Q(marked_answer_paper='')
             )
+
+            # Collect all Cloudinary public IDs from both fields
+            cloudinary_public_ids = []
+            for exam in teacher_exams:
+                if exam.question_pdf_public_id:
+                    cloudinary_public_ids.append(exam.question_pdf_public_id)
+                if exam.marked_answer_paper_public_id:
+                    cloudinary_public_ids.append(exam.marked_answer_paper_public_id)
+
+            # Remove duplicates
+            cloudinary_public_ids = list(set(cloudinary_public_ids))
 
             if cloudinary_public_ids:
                 # Delete files from Cloudinary using batch deletion
@@ -2287,7 +2299,7 @@ def delete_teacher_account(teacher):
                         if status == 'deleted':
                             cloudinary_files_deleted += 1
 
-                print(f"Deleted {cloudinary_files_deleted} Cloudinary PDF files for teacher '{teacher.username}'")
+                print(f"Deleted {cloudinary_files_deleted} Cloudinary files for teacher '{teacher.username}'")
 
         except Exception as e:
             # Log the error but continue with database deletion
