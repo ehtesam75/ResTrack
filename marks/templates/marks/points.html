@@ -394,20 +394,25 @@
         <div class="sm:hidden space-y-2">
             {% for record in points_history %}
             <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-3 border border-blue-100/50 shadow-sm">
-                <div class="flex items-start justify-between">
-                    <div class="flex-1 min-w-0">
+                <div class="flex flex-col">
+                    <!-- Transaction Type at top -->
+                    <p class="text-[10px] text-gray-500">{{ record.get_transaction_type_display }}</p>
+
+                    <!-- Student Name and Points Change on same line -->
+                    <div class="flex items-center justify-between mt-1">
                         <a href="{% url 'student_detail' record.student.id %}" class="text-sm font-semibold text-gray-900 hover:text-purple-600">{{ record.student.name }}</a>
-                        <p class="text-[10px] text-gray-400 mt-0.5">{{ record.date|date:"M d, Y" }}</p>
-                        <p class="text-[10px] text-gray-500 mt-0.5">{{ record.get_transaction_type_display }}</p>
-                    </div>
-                    <div class="text-right flex-shrink-0 ml-3">
-                        <span class="text-sm font-bold
+                        <span class="text-sm font-bold ml-2
                             {% if record.points_change > 0 %}text-green-600
                             {% elif record.points_change < 0 %}text-red-600
                             {% else %}text-gray-600{% endif %}">
                             {{ record.points_change|floatformat:"0" }} pts
                         </span>
-                        <p class="text-[10px] text-gray-500 line-clamp-1 mt-0.5">{{ record.description }}</p>
+                    </div>
+
+                    <!-- Date and Description on same line -->
+                    <div class="flex items-center justify-between mt-1">
+                        <p class="text-[10px] text-gray-400">{{ record.date|date:"M d, Y" }}</p>
+                        <p class="text-[10px] text-gray-500 line-clamp-1 ml-2 text-right">{{ record.description }}</p>
                     </div>
                 </div>
             </div>
