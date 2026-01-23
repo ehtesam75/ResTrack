@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
 from django.db.models import Sum, Q
 import json
-from .models import Student, Subject, ExamType, Exam, GradeScale, LifetimePoints, PointsSpent, TeacherProfile, StudentProfile
+from .models import Student, Subject, ExamType, Exam, GradeScale, LifetimePoints, PointsSpent, PointTransaction, TeacherProfile, StudentProfile
 from django.db.models import Q
 from .services import LeaderboardService, DashboardService, ChartDataService, count_unique_exams
 from .forms import TeacherSignupForm, LoginForm, StudentAccountForm
@@ -1497,35 +1497,49 @@ def points(request):
     # Get all students for filters (filtered by teacher)
     students = Student.objects.filter(teacher=teacher).order_by('first_name', 'last_name')
     
-    # Get points spent history with filters (filtered by teacher)
-    points_history = PointsSpent.objects.filter(teacher=teacher).select_related('student')
-    
+    # Get points transaction history with filters (filtered by teacher)
+    points_history = PointTransaction.objects.filter(teacher=teacher).select_related('student')
+
     # Apply filters from GET parameters
     student_filter = request.GET.get('student')
     from_date = request.GET.get('from_date')
     to_date = request.GET.get('to_date')
-    min_spent = request.GET.get('min_spent')
-    
+    transaction_type = request.GET.get('transaction_type')
+    min_change = request.GET.get('min_change')
+
     if student_filter:
         points_history = points_history.filter(student_id=student_filter)
     if from_date:
         points_history = points_history.filter(date__gte=from_date)
     if to_date:
         points_history = points_history.filter(date__lte=to_date)
-    if min_spent:
-        points_history = points_history.filter(points_spent__gte=int(min_spent))
+    if transaction_type:
+        points_history = points_history.filter(transaction_type=transaction_type)
+    if min_change:
+        # For absolute value comparison (both positive and negative)
+        min_val = int(min_change)
+        points_history = points_history.filter(
+            models.Q(points_change__gte=min_val) | models.Q(points_change__lte=-min_val)
+        )
     
     # Calculate statistics for filtered records
-    total_points_spent = 0
-    average_spent = 0
-    highest_spent = 0
-    lowest_spent = 0
-    
+    total_points_change = 0
+    average_change = 0
+    highest_change = 0
+    lowest_change = 0
+    total_spent = 0  # Only negative transactions
+    total_earned = 0  # Only positive transactions
+
     if points_history.exists():
-        total_points_spent = sum(record.points_spent for record in points_history)
-        average_spent = total_points_spent / points_history.count()
-        highest_spent = max(record.points_spent for record in points_history)
-        lowest_spent = min(record.points_spent for record in points_history)
+        changes = [record.points_change for record in points_history]
+        total_points_change = sum(changes)
+        average_change = total_points_change / len(changes)
+        highest_change = max(changes)
+        lowest_change = min(changes)
+
+        # Separate spent vs earned
+        total_spent = abs(sum(change for change in changes if change < 0))
+        total_earned = sum(change for change in changes if change > 0)
     
     # Get student points summary (filtered by teacher)
     student_summary = []
@@ -1545,10 +1559,12 @@ def points(request):
         'students': students,
         'points_history': points_history,
         'student_summary': student_summary,
-        'total_points_spent': total_points_spent,
-        'average_spent': average_spent,
-        'highest_spent': highest_spent,
-        'lowest_spent': lowest_spent,
+        'total_points_change': total_points_change,
+        'average_change': average_change,
+        'highest_change': highest_change,
+        'lowest_change': lowest_change,
+        'total_spent': total_spent,
+        'total_earned': total_earned,
     }
     
     return render(request, 'marks/points.html', context)

@@ -331,24 +331,79 @@ class Student(models.Model):
         """
         Recalculate and update lifetime points based on all exam results.
         Includes 40-point bonus for each monthly win.
+        Also creates/updates PointTransaction records for exam performance.
         Called automatically when an exam is saved.
         """
-        # Calculate base points from exams (use select_related to optimize)
-        exam_points = sum(exam.points_earned for exam in self.exam_set.select_related('exam_type').all())
-        
-        # Calculate monthly wins bonus (40 points per win)
+        from django.db.models import Sum
+
+        # Clear existing exam-related transactions to avoid duplicates
+        PointTransaction.objects.filter(
+            student=self,
+            transaction_type__in=['exam_bonus', 'exam_penalty', 'monthly_win']
+        ).delete()
+
+        # Calculate points from individual exams and create transactions
+        exam_points = 0
+        for exam in self.exam_set.select_related('exam_type', 'teacher').all():
+            points_earned = exam.points_earned
+            exam_points += points_earned
+
+            # Create transaction for exam performance
+            if points_earned != 0:
+                transaction_type = 'exam_bonus' if points_earned > 0 else 'exam_penalty'
+                description = f"{exam.exam_type.name} - {exam.subject.name}: {exam.percentage:.1f}% ({exam.grade})"
+
+                PointTransaction.objects.create(
+                    student=self,
+                    teacher=exam.teacher,
+                    transaction_type=transaction_type,
+                    points_change=points_earned,
+                    description=description,
+                    date=exam.date,
+                    exam=exam
+                )
+
+        # Calculate monthly wins bonus and create transactions
         monthly_wins = self.calculate_monthly_wins()
         bonus_points = monthly_wins * 40
-        
+
+        # Create transactions for monthly wins
+        if monthly_wins > 0:
+            # Get the months where this student won
+            from datetime import date
+            current_year = date.today().year
+            current_month = date.today().month
+
+            exam_dates = Exam.objects.values_list('date', flat=True).distinct()
+            months_set = set()
+
+            for exam_date in exam_dates:
+                if exam_date:
+                    # Only count months that have fully passed
+                    if (exam_date.year < current_year) or (exam_date.year == current_year and exam_date.month < current_month):
+                        months_set.add((exam_date.year, exam_date.month))
+
+            # Create one transaction per win (simplified - we could make this more detailed)
+            if monthly_wins > 0:
+                PointTransaction.objects.create(
+                    student=self,
+                    teacher=self.teacher,  # Use student's teacher
+                    transaction_type='monthly_win',
+                    points_change=bonus_points,
+                    description=f"Monthly winner bonus ({monthly_wins} win{'s' if monthly_wins > 1 else ''})",
+                    date=date.today(),  # Use today's date for simplicity
+                    exam=None
+                )
+
         # Total points = exam points + monthly wins bonus
         total_points = exam_points + bonus_points
-        
+
         # Get or create LifetimePoints record
         lifetime_points, created = LifetimePoints.objects.get_or_create(
             student=self,
             defaults={'points_earned': total_points, 'points_spent': 0}
         )
-        
+
         # Update points if record already exists
         if not created:
             lifetime_points.points_earned = total_points
@@ -752,11 +807,12 @@ class LifetimePoints(models.Model):
 
 
 class PointsSpent(models.Model):
-    """Model tracking when students spend their points"""
+    """Legacy model for backward compatibility - now creates PointTransaction entries"""
+
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     teacher = models.ForeignKey(
-        User, 
-        on_delete=models.CASCADE, 
+        User,
+        on_delete=models.CASCADE,
         related_name='points_spent_records',
         null=True,
         blank=True,
@@ -768,6 +824,61 @@ class PointsSpent(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        verbose_name = "Points Spent (Legacy)"
+        verbose_name_plural = "Points Spent (Legacy)"
+        ordering = ['-date', '-created_at']
+
+    def __str__(self):
+        return f"{self.student.name} - {self.points_spent} points on {self.date}"
+
+    def save(self, *args, **kwargs):
+        """Create corresponding PointTransaction entry"""
+        super().save(*args, **kwargs)
+        # Create or update corresponding PointTransaction
+        PointTransaction.objects.update_or_create(
+            student=self.student,
+            teacher=self.teacher,
+            transaction_type='spent',
+            date=self.date,
+            description=self.description,
+            defaults={
+                'points_change': -self.points_spent,  # Negative for spending
+                'exam': None
+            }
+        )
+        # Update student's lifetime points
+        from django.db.models import Sum
+        lifetime_points, created = LifetimePoints.objects.get_or_create(student=self.student)
+        total_spent = PointsSpent.objects.filter(student=self.student).aggregate(
+            total=Sum('points_spent')
+        )['total'] or 0
+        lifetime_points.points_spent = total_spent
+        lifetime_points.save()
+
+    def delete(self, *args, **kwargs):
+        """Remove corresponding PointTransaction entry"""
+        # Find and delete corresponding PointTransaction
+        PointTransaction.objects.filter(
+            student=self.student,
+            teacher=self.teacher,
+            transaction_type='spent',
+            date=self.date,
+            description=self.description
+        ).delete()
+
+        student = self.student
+        super().delete(*args, **kwargs)
+        # Update the student's total points spent after deletion
+        from django.db.models import Sum
+        lifetime_points = LifetimePoints.objects.filter(student=student).first()
+        if lifetime_points:
+            total_spent = PointsSpent.objects.filter(student=student).aggregate(
+                total=Sum('points_spent')
+            )['total'] or 0
+            lifetime_points.points_spent = total_spent
+            lifetime_points.save()
+
+    class Meta:
         verbose_name = "Points Spent"
         verbose_name_plural = "Points Spent"
         ordering = ['-date', '-created_at']
@@ -776,8 +887,22 @@ class PointsSpent(models.Model):
         return f"{self.student.name} - {self.points_spent} points on {self.date}"
 
     def save(self, *args, **kwargs):
-        """Override save to update student's lifetime points"""
+        """Create corresponding PointTransaction entry and update lifetime points"""
         super().save(*args, **kwargs)
+
+        # Create or update corresponding PointTransaction
+        PointTransaction.objects.update_or_create(
+            student=self.student,
+            teacher=self.teacher,
+            transaction_type='spent',
+            date=self.date,
+            description=self.description,
+            defaults={
+                'points_change': -self.points_spent,  # Negative for spending
+                'exam': None
+            }
+        )
+
         # Update the student's total points spent
         from django.db.models import Sum
         lifetime_points, created = LifetimePoints.objects.get_or_create(student=self.student)
@@ -800,3 +925,61 @@ class PointsSpent(models.Model):
             )['total'] or 0
             lifetime_points.points_spent = total_spent
             lifetime_points.save()
+
+
+class PointTransaction(models.Model):
+    """Unified model for all point transactions (manual spending and automatic adjustments)"""
+
+    TRANSACTION_TYPES = [
+        ('spent', 'Points Spent (Manual)'),
+        ('exam_bonus', 'Exam Performance Bonus'),
+        ('exam_penalty', 'Exam Performance Penalty'),
+        ('monthly_win', 'Monthly Winner Bonus'),
+    ]
+
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    teacher = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='point_transactions',
+        null=True,
+        blank=True,
+        help_text="Teacher who recorded this transaction"
+    )
+    transaction_type = models.CharField(
+        max_length=20,
+        choices=TRANSACTION_TYPES,
+        default='spent',
+        help_text="Type of point transaction"
+    )
+    points_change = models.IntegerField(
+        help_text="Points gained (positive) or lost (negative). Use negative values for spending/penalties."
+    )
+    description = models.CharField(max_length=100, help_text="Description of the transaction")
+    date = models.DateField()
+    exam = models.ForeignKey(
+        'Exam',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text="Related exam (for exam-based transactions)"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Point Transaction"
+        verbose_name_plural = "Point Transactions"
+        ordering = ['-date', '-created_at']
+
+    def __str__(self):
+        return f"{self.student.name} - {self.get_transaction_type_display()} - {self.points_change:+d} pts on {self.date}"
+
+    @property
+    def is_positive(self):
+        """Check if this transaction adds points"""
+        return self.points_change > 0
+
+    @property
+    def is_negative(self):
+        """Check if this transaction subtracts points"""
+        return self.points_change < 0

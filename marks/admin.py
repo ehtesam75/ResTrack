@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Student, Subject, ExamType, Exam, GradeScale, LifetimePoints, PointsSpent, TeacherProfile, StudentProfile
+from .models import Student, Subject, ExamType, Exam, GradeScale, LifetimePoints, PointsSpent, PointTransaction, TeacherProfile, StudentProfile
 
 
 @admin.register(TeacherProfile)
@@ -118,7 +118,7 @@ class PointsSpentAdmin(admin.ModelAdmin):
     date_hierarchy = 'date'
     readonly_fields = ['created_at']
     list_editable = ['points_spent', 'description']
-    
+
     def delete_queryset(self, request, queryset):
         """Override bulk delete to update student points"""
         from django.db.models import Sum
@@ -137,3 +137,16 @@ class PointsSpentAdmin(admin.ModelAdmin):
                 lifetime_points.save()
             except LifetimePoints.DoesNotExist:
                 pass
+
+
+@admin.register(PointTransaction)
+class PointTransactionAdmin(admin.ModelAdmin):
+    list_display = ['student', 'transaction_type', 'points_change', 'description', 'date', 'created_at']
+    list_filter = ['transaction_type', 'date', 'student']
+    search_fields = ['student__first_name', 'student__last_name', 'description']
+    date_hierarchy = 'date'
+    readonly_fields = ['created_at']
+    list_editable = ['description']
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('student', 'exam')

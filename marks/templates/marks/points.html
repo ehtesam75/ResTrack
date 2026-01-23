@@ -61,8 +61,18 @@
                 <input type="date" name="to_date" class="points-filter-input w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50" value="{{ request.GET.to_date }}" max="{{ today|default:None }}">
             </div>
             <div>
-                <label class="block text-xs font-semibold text-gray-700 mb-1.5">Min Points Spent</label>
-                <input type="number" name="min_spent" class="points-filter-input w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50" value="{{ request.GET.min_spent }}" min="0" placeholder="e.g., 10">
+                <label class="block text-xs font-semibold text-gray-700 mb-1.5">Transaction Type</label>
+                <select name="transaction_type" class="points-filter-select w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50">
+                    <option value="">All Types</option>
+                    <option value="spent" {% if request.GET.transaction_type == 'spent' %}selected{% endif %}>Points Spent</option>
+                    <option value="exam_bonus" {% if request.GET.transaction_type == 'exam_bonus' %}selected{% endif %}>Exam Bonus</option>
+                    <option value="exam_penalty" {% if request.GET.transaction_type == 'exam_penalty' %}selected{% endif %}>Exam Penalty</option>
+                    <option value="monthly_win" {% if request.GET.transaction_type == 'monthly_win' %}selected{% endif %}>Monthly Win</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-700 mb-1.5">Min Points Change</label>
+                <input type="number" name="min_change" class="points-filter-input w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50" value="{{ request.GET.min_change }}" min="0" placeholder="e.g., 10">
             </div>
         </form>
     </div>
@@ -162,9 +172,9 @@
     <div class="glass-effect rounded-xl p-3 sm:p-6 border border-gray-200 shadow-lg mb-6 animate-fade-in-up" style="animation-delay: 0.2s;">
         <!-- Header with Filter Button for Mobile -->
         <div class="flex items-center justify-between mb-3 sm:mb-4">
-            <h2 class="text-sm sm:text-base font-bold gradient-text">📊 Points Spent History</h2>
+            <h2 class="text-sm sm:text-base font-bold gradient-text">📊 Points Transaction History</h2>
             <div class="flex items-center gap-1.5 sm:hidden">
-                {% if request.GET.student or request.GET.from_date or request.GET.to_date or request.GET.min_spent %}
+                {% if request.GET.student or request.GET.from_date or request.GET.to_date or request.GET.transaction_type or request.GET.min_change %}
                 <a href="{% url 'points' %}" class="flex items-center justify-center w-7 h-7 rounded-md bg-red-100 text-red-600">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -176,7 +186,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
                     </svg>
                     Filters
-                    {% if request.GET.student or request.GET.from_date or request.GET.to_date or request.GET.min_spent %}
+                    {% if request.GET.student or request.GET.from_date or request.GET.to_date or request.GET.transaction_type or request.GET.min_change %}
                     <span class="w-1.5 h-1.5 bg-purple-600 rounded-full"></span>
                     {% endif %}
                 </button>
@@ -233,14 +243,31 @@
                 </div>
 
                 <div>
-                    <label for="min_spent" class="block text-xs font-semibold text-gray-700 mb-1.5">
-                        Min Points Spent
+                    <label for="transaction_type" class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Transaction Type
                     </label>
-                    <input 
-                        type="number" 
-                        id="min_spent" 
-                        name="min_spent" 
-                        value="{{ request.GET.min_spent }}"
+                    <select
+                        id="transaction_type"
+                        name="transaction_type"
+                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white hover:bg-gray-50 transition-colors"
+                    >
+                        <option value="">All Types</option>
+                        <option value="spent" {% if request.GET.transaction_type == 'spent' %}selected{% endif %}>Points Spent (Manual)</option>
+                        <option value="exam_bonus" {% if request.GET.transaction_type == 'exam_bonus' %}selected{% endif %}>Exam Performance Bonus</option>
+                        <option value="exam_penalty" {% if request.GET.transaction_type == 'exam_penalty' %}selected{% endif %}>Exam Performance Penalty</option>
+                        <option value="monthly_win" {% if request.GET.transaction_type == 'monthly_win' %}selected{% endif %}>Monthly Winner Bonus</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="min_change" class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Min Points Change
+                    </label>
+                    <input
+                        type="number"
+                        id="min_change"
+                        name="min_change"
+                        value="{{ request.GET.min_change }}"
                         min="0"
                         placeholder="e.g., 10"
                         class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white hover:bg-gray-50 transition-colors"
@@ -255,7 +282,7 @@
                 >
                     Apply Filters
                 </button>
-                {% if request.GET.student or request.GET.from_date or request.GET.to_date or request.GET.min_spent %}
+                {% if request.GET.student or request.GET.from_date or request.GET.to_date or request.GET.transaction_type or request.GET.min_change %}
                 <a 
                     href="{% url 'points' %}" 
                     class="bg-gray-100 text-gray-700 px-6 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-gray-200 transition-all"
@@ -270,8 +297,8 @@
         <!-- Mobile: Compact -->
         <div class="sm:hidden bg-blue-50 border-l-4 border-blue-500 px-3 py-2 mb-4 mt-4 rounded-r-lg">
             <p class="text-xs text-blue-700">
-                <span class="font-semibold">{{ points_history.count }}</span> record{% if points_history.count != 1 %}s{% endif %}
-                {% if request.GET.student or request.GET.from_date or request.GET.to_date or request.GET.min_spent %}
+                <span class="font-semibold">{{ points_history.count }}</span> transaction{% if points_history.count != 1 %}s{% endif %}
+                {% if request.GET.student or request.GET.from_date or request.GET.to_date or request.GET.transaction_type or request.GET.min_change %}
                     <span class="text-blue-500">(filtered)</span>
                 {% endif %}
             </p>
@@ -279,8 +306,8 @@
         <!-- Desktop: Full -->
         <div class="hidden sm:block bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 mt-6">
             <p class="text-sm text-blue-700">
-                Found <span class="font-semibold">{{ points_history.count }}</span> points spent record{% if points_history.count != 1 %}s{% endif %}
-                {% if request.GET.student or request.GET.from_date or request.GET.to_date or request.GET.min_spent %}
+                Found <span class="font-semibold">{{ points_history.count }}</span> point transaction{% if points_history.count != 1 %}s{% endif %}
+                {% if request.GET.student or request.GET.from_date or request.GET.to_date or request.GET.transaction_type or request.GET.min_change %}
                     <span class="font-medium">(with active filters)</span>
                 {% endif %}
             </p>
@@ -300,8 +327,8 @@
                     </div>
                     <div class="ml-2.5 sm:ml-4 w-0 flex-1">
                         <dl>
-                            <dt class="text-[10px] sm:text-xs font-medium text-gray-500 truncate">Total Spent</dt>
-                            <dd class="text-base sm:text-xl font-semibold text-gray-900">{{ total_points_spent }}</dd>
+                            <dt class="text-[10px] sm:text-xs font-medium text-gray-500 truncate">Net Change</dt>
+                            <dd class="text-base sm:text-xl font-semibold text-gray-900">{{ total_points_change|floatformat:0 }}</dd>
                         </dl>
                     </div>
                 </div>
@@ -312,32 +339,14 @@
                     <div class="flex-shrink-0">
                         <div class="rounded-md bg-green-500 p-2 sm:p-2.5">
                             <svg class="h-4 w-4 sm:h-5 sm:w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                             </svg>
                         </div>
                     </div>
                     <div class="ml-2.5 sm:ml-4 w-0 flex-1">
                         <dl>
-                            <dt class="text-[10px] sm:text-xs font-medium text-gray-500 truncate">Average</dt>
-                            <dd class="text-base sm:text-xl font-semibold text-gray-900">{{ average_spent|floatformat:1 }}</dd>
-                        </dl>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-lg shadow-md p-2.5 sm:p-4">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="rounded-md bg-yellow-500 p-2 sm:p-2.5">
-                            <svg class="h-4 w-4 sm:h-5 sm:w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="ml-2.5 sm:ml-4 w-0 flex-1">
-                        <dl>
-                            <dt class="text-[10px] sm:text-xs font-medium text-gray-500 truncate">Highest</dt>
-                            <dd class="text-base sm:text-xl font-semibold text-gray-900">{{ highest_spent }}</dd>
+                            <dt class="text-[10px] sm:text-xs font-medium text-gray-500 truncate">Total Earned</dt>
+                            <dd class="text-base sm:text-xl font-semibold text-green-600">{{ total_earned }}</dd>
                         </dl>
                     </div>
                 </div>
@@ -348,14 +357,32 @@
                     <div class="flex-shrink-0">
                         <div class="rounded-md bg-red-500 p-2 sm:p-2.5">
                             <svg class="h-4 w-4 sm:h-5 sm:w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
                             </svg>
                         </div>
                     </div>
                     <div class="ml-2.5 sm:ml-4 w-0 flex-1">
                         <dl>
-                            <dt class="text-[10px] sm:text-xs font-medium text-gray-500 truncate">Lowest</dt>
-                            <dd class="text-base sm:text-xl font-semibold text-gray-900">{{ lowest_spent }}</dd>
+                            <dt class="text-[10px] sm:text-xs font-medium text-gray-500 truncate">Total Spent</dt>
+                            <dd class="text-base sm:text-xl font-semibold text-red-600">{{ total_spent }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-2.5 sm:p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="rounded-md bg-yellow-500 p-2 sm:p-2.5">
+                            <svg class="h-4 w-4 sm:h-5 sm:w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-2.5 sm:ml-4 w-0 flex-1">
+                        <dl>
+                            <dt class="text-[10px] sm:text-xs font-medium text-gray-500 truncate">Transactions</dt>
+                            <dd class="text-base sm:text-xl font-semibold text-gray-900">{{ points_history.count }}</dd>
                         </dl>
                     </div>
                 </div>
@@ -366,20 +393,26 @@
         <!-- Mobile: Card Layout -->
         <div class="sm:hidden space-y-2">
             {% for record in points_history %}
-            <div class="bg-gradient-to-r from-rose-50 to-orange-50 rounded-lg p-3 border border-rose-100/50 shadow-sm">
+            <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-3 border border-blue-100/50 shadow-sm">
                 <div class="flex items-start justify-between">
                     <div class="flex-1 min-w-0">
                         <a href="{% url 'student_detail' record.student.id %}" class="text-sm font-semibold text-gray-900 hover:text-purple-600">{{ record.student.name }}</a>
                         <p class="text-[10px] text-gray-400 mt-0.5">{{ record.date|date:"M d, Y" }}</p>
+                        <p class="text-[10px] text-gray-500 mt-0.5">{{ record.get_transaction_type_display }}</p>
                     </div>
                     <div class="text-right flex-shrink-0 ml-3">
-                        <span class="text-sm font-bold text-rose-600">-{{ record.points_spent }} pts</span>
+                        <span class="text-sm font-bold
+                            {% if record.points_change > 0 %}text-green-600
+                            {% elif record.points_change < 0 %}text-red-600
+                            {% else %}text-gray-600{% endif %}">
+                            {{ record.points_change|floatformat:"0" }} pts
+                        </span>
                         <p class="text-[10px] text-gray-500 line-clamp-1 mt-0.5">{{ record.description }}</p>
                     </div>
                 </div>
             </div>
             {% empty %}
-            <div class="text-center text-gray-500 text-xs py-4">No points spent records found</div>
+            <div class="text-center text-gray-500 text-xs py-4">No point transaction records found</div>
             {% endfor %}
         </div>
         
@@ -390,7 +423,8 @@
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Points Spent</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Points Change</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
                     </tr>
                 </thead>
@@ -405,8 +439,21 @@
                                 {{ record.student.name }}
                             </a>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-rose-600 text-center">
-                            {{ record.points_spent }}
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+                            <span class="px-2 py-1 text-xs font-medium rounded-full
+                                {% if record.transaction_type == 'spent' %}bg-red-100 text-red-800
+                                {% elif record.transaction_type == 'exam_bonus' %}bg-green-100 text-green-800
+                                {% elif record.transaction_type == 'exam_penalty' %}bg-orange-100 text-orange-800
+                                {% elif record.transaction_type == 'monthly_win' %}bg-blue-100 text-blue-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ record.get_transaction_type_display }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-center
+                            {% if record.points_change > 0 %}text-green-600
+                            {% elif record.points_change < 0 %}text-red-600
+                            {% else %}text-gray-600{% endif %}">
+                            {{ record.points_change|floatformat:"0" }}
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-700">
                             {{ record.description }}
@@ -414,8 +461,8 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="4" class="px-6 py-4 text-center text-gray-500 text-sm">
-                            No points spent records found
+                        <td colspan="5" class="px-6 py-4 text-center text-gray-500 text-sm">
+                            No point transaction records found
                         </td>
                     </tr>
                     {% endfor %}
