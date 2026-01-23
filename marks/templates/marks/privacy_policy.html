@@ -11,8 +11,10 @@
 <div class="sm:hidden mx-auto pt-2">
     {# Header section: logo, title, subtitle #}
     <div class="text-center mb-5 animate-fade-in-up">
-        <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg overflow-hidden">
-            <img src="{% static 'icons/ResTrack-128x128.png' %}" alt="ResTrack Logo" class="w-full h-full object-cover rounded-2xl">
+        <div class="w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+            </svg>
         </div>
         <h1 class="text-xl font-bold gradient-text">Privacy Policy</h1>
         <p class="text-xs text-gray-500 mt-1">ResTrack - Student Result Tracking System</p>
@@ -245,11 +247,13 @@
 
 {# ================= DESKTOP VIEW ================= #}
 <div id="privacy-policy" class="scroll-mt-24 hidden sm:block glass-effect rounded-xl border border-gray-200 shadow-lg overflow-hidden mb-8 mt-6 animate-fade-in-up" style="animation-delay: 0.15s;">
-    <div class="bg-gradient-to-r from-purple-400 via-indigo-400 to-blue-400 px-6 py-4">
+    <div class="bg-gradient-to-r from-purple-500 via-indigo-500 to-blue-500 px-6 py-4">
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center overflow-hidden">
-                    <img src="{% static 'icons/ResTrack-192x192.png' %}" alt="ResTrack Logo" class="w-full h-full object-cover rounded-xl">
+                <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                    </svg>
                 </div>
                 <div>
                     <h2 class="text-white font-bold text-xl">Privacy Policy</h2>
