@@ -316,7 +316,39 @@
 
             /* Reduce spacing between sections */
             section {
+                margin-bottom: 1rem !important;
+            }
+
+            /* Reduce section padding for tighter spacing */
+            .features-section,
+            .how-it-works-section,
+            .cta-section {
+                padding: 2.5rem 0 !important;
+            }
+
+            /* Reduce gap between section headers and content */
+            .features-section .text-center,
+            .how-it-works-section .text-center {
                 margin-bottom: 2rem !important;
+            }
+
+            /* Reduce section spacing on larger screens too */
+            @media (min-width: 640px) {
+                .features-section,
+                .how-it-works-section,
+                .cta-section {
+                    padding: 3rem 0 !important;
+                }
+
+                section {
+                    margin-bottom: 1.5rem !important;
+                }
+
+                /* Reduce gap between section headers and content on larger screens */
+                .features-section .text-center,
+                .how-it-works-section .text-center {
+                    margin-bottom: 3rem !important;
+                }
             }
 
             /* Smaller gap between elements */
@@ -558,7 +590,10 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-slate-900 mb-2">Multiple Leaderboards</h3>
+                    <h3 class="text-lg font-semibold text-slate-900 mb-2">
+                        <span class="hidden md:inline">Multiple Leaderboards</span>
+                        <span class="md:hidden">Multiple Rankings</span>
+                    </h3>
                     <p class="text-slate-600 text-sm leading-relaxed">View rankings overall, by subject, or by month, with class-based filtering.</p>
                 </div>
 
@@ -628,7 +663,7 @@
                 <p class="how-it-works-subtitle text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">Streamlined workflows designed for efficiency and ease of use for both educators and students.</p>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                <!-- For Teachers -->
                 <div class="process-card bg-gradient-to-br from-slate-50/80 via-purple-50/40 to-indigo-50/30 rounded-2xl p-8 shadow-xl shadow-purple-500/15 border border-purple-100/50 hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-300 group">
                         <div class="flex items-center gap-2 mb-6">
@@ -784,7 +819,7 @@
                                 <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
                             </svg>
                             <a href="https://www.linkedin.com/in/ehtesam75" target="_blank" class="footer-contact-link text-slate-400 hover:text-white transition-colors text-sm">
-                                LinkedIn Profile
+                                LinkedIn
                             </a>
                         </div>
                     </div>
@@ -805,7 +840,7 @@
             <!-- Bottom Section -->
             <div class="footer-bottom border-t border-slate-800 mt-6 pt-3">
                 <div class="flex flex-col md:flex-row justify-between items-center gap-2">
-                    <p class="footer-copyright text-slate-500 text-sm">© 2026 ResTrack. Designed for educational excellence.</p>
+                    <p class="footer-copyright text-slate-500 text-sm">© 2026 ResTrack. <span class="md:hidden">All rights reserved.</span> <span class="hidden md:inline">Designed for educational excellence.</span></p>
                     <p class="footer-tagline hidden md:block text-slate-500 text-sm">Empowering educators worldwide</p>
                 </div>
             </div>
