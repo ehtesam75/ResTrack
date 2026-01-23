@@ -2023,6 +2023,11 @@ def about(request):
     return render(request, 'marks/about.html')
 
 
+def privacy_policy(request):
+    """Privacy Policy page"""
+    return render(request, 'marks/privacy_policy.html')
+
+
 @login_required(login_url='login')
 @login_required(login_url='login')
 def exam_lookup(request):

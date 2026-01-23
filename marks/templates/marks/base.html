@@ -75,6 +75,9 @@
                             <a href="{% url 'about' %}" class="{% if 'about' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors nav-link">
                                 About
                             </a>
+                            <a href="{% url 'privacy_policy' %}" class="{% if 'privacy-policy' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors nav-link">
+                                Privacy Policy
+                            </a>
                     </div>
                     {% endif %}
                 </div>
@@ -148,6 +151,9 @@
                         </a>
                         <a href="{% url 'guide' %}" class="{% if 'guide' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-3 py-2 text-sm font-medium transition-colors">
                             Guide
+                        </a>
+                        <a href="{% url 'privacy_policy' %}" class="{% if 'privacy-policy' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-3 py-2 text-sm font-medium transition-colors">
+                            Privacy Policy
                         </a>
                         <a href="{% url 'login' %}" class="text-gray-700 hover:text-purple-600 px-3 py-2 text-sm font-medium transition-colors">
                             Log In
@@ -305,6 +311,14 @@
                 </div>
                 <span>About</span>
             </a>
+            <a href="{% url 'privacy_policy' %}" class="{% if 'privacy-policy' in request.path %}bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 border-l-2 border-purple-500{% else %}text-gray-600 hover:bg-gray-50 border-l-2 border-transparent{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-r-lg font-medium transition-all text-sm">
+                <div class="w-8 h-8 rounded-lg {% if 'privacy-policy' in request.path %}bg-purple-100{% else %}bg-gray-100{% endif %} flex items-center justify-center">
+                    <svg class="w-4 h-4 {% if 'privacy-policy' in request.path %}text-purple-600{% else %}text-gray-500{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                    </svg>
+                </div>
+                <span>Privacy Policy</span>
+            </a>
             
             {% if user.is_authenticated %}
             <!-- Divider -->
@@ -346,6 +360,14 @@
                     </svg>
                 </div>
                 <span>About</span>
+            </a>
+            <a href="{% url 'privacy_policy' %}" class="{% if 'privacy-policy' in request.path %}bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 border-l-2 border-purple-500{% else %}text-gray-600 hover:bg-gray-50 border-l-2 border-transparent{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-r-lg font-medium transition-all text-sm">
+                <div class="w-8 h-8 rounded-lg {% if 'privacy-policy' in request.path %}bg-purple-100{% else %}bg-gray-100{% endif %} flex items-center justify-center">
+                    <svg class="w-4 h-4 {% if 'privacy-policy' in request.path %}text-purple-600{% else %}text-gray-500{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                    </svg>
+                </div>
+                <span>Privacy Policy</span>
             </a>
             <a href="{% url 'guide' %}" class="{% if 'guide' in request.path %}bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 border-l-2 border-purple-500{% else %}text-gray-600 hover:bg-gray-50 border-l-2 border-transparent{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-r-lg font-medium transition-all text-sm">
                 <div class="w-8 h-8 rounded-lg {% if 'guide' in request.path %}bg-purple-100{% else %}bg-gray-100{% endif %} flex items-center justify-center">

@@ -46,7 +46,13 @@ urlpatterns = [
     
     # About page
     path('about/', views.about, name='about'),
-    
+
+    # Privacy Policy page
+    path('privacy-policy/', TemplateView.as_view(template_name='marks/privacy_policy.html'), name='privacy_policy'),
+
+    # Privacy Policy page
+    path('privacy-policy/', views.privacy_policy, name='privacy_policy'),
+
     # Exam lookup page (mobile)
     path('exam-lookup/', views.exam_lookup, name='exam_lookup'),
     path('exam-lookup-api/', views.exam_lookup_api, name='exam_lookup_api'),

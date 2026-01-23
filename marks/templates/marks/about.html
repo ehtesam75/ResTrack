@@ -1,4 +1,5 @@
 {% extends 'marks/base.html' %}
+{% load static %}
 
 {% block title %}About - ResTrack{% endblock %}
 
@@ -16,8 +17,8 @@
 <div class="sm:hidden mx-auto pt-2">
     {# Header section: logo, title, subtitle #}
     <div class="text-center mb-5 animate-fade-in-up">
-        <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg">
-            <span class="text-2xl">📊</span>
+        <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg overflow-hidden">
+            <img src="{% static 'icons/ResTrack-128x128.png' %}" alt="ResTrack Logo" class="w-full h-full object-cover rounded-2xl">
         </div>
         <h1 class="text-xl font-bold gradient-text">About ResTrack</h1>
         <p class="text-xs text-gray-500 mt-1">Student Result Tracking & Analysis System</p>
@@ -161,8 +162,8 @@
     <div class="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 px-6 py-4">
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                    <span class="text-2xl">🚀</span>
+                <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center overflow-hidden">
+                    <img src="{% static 'icons/ResTrack-192x192.png' %}" alt="ResTrack Logo" class="w-full h-full object-cover rounded-xl">
                 </div>
                 <div>
                     <h2 class="text-white font-bold text-xl">ResTrack</h2>
