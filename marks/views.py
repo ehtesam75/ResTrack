@@ -2298,8 +2298,8 @@ def exam_lookup(request):
         # Get the student record for the logged-in user
         student = request.user.student_profile.student
         student_exams = qs.filter(student=student)
-        total_student_exams = student_exams.values('exam_id').distinct().count()
-        exams_with_answer_sheet = student_exams.exclude(marked_answer_paper='').exclude(marked_answer_paper__isnull=True).values('exam_id').distinct().count()
+        total_student_exams = student_exams.count()
+        exams_with_answer_sheet = student_exams.exclude(marked_answer_paper='').exclude(marked_answer_paper__isnull=True).count()
     
     # Calculate percentages
     pdf_percentage = round((exams_with_pdf / total_exams * 100), 1) if total_exams > 0 else 0
