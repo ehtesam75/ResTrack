@@ -2066,7 +2066,6 @@ def manage_question_paper(request):
                     teacher=teacher,
                     defaults={'question_pdf': question_pdf}
                 )
-                messages.success(request, f'Question paper for Exam #{exam_id} has been updated successfully.')
                 return redirect('manage_question_paper')
             except (ValueError, Exception) as e:
                 messages.error(request, f'Error uploading question paper: {str(e)}')
@@ -2109,6 +2108,121 @@ def manage_question_paper(request):
         'is_production': is_production,
     }
     return render(request, 'marks/manage_question_paper.html', context)
+
+
+@login_required(login_url='login')
+def manage_answer_paper(request):
+    """Manage student-level marked answer paper PDFs"""
+    if not is_teacher(request.user):
+        messages.error(request, 'Only teachers can manage answer papers.')
+        return redirect('dashboard')
+    
+    teacher = request.user
+    
+    if request.method == 'POST':
+        exam_record_id = request.POST.get('exam_record_id')
+        marked_answer_paper = request.FILES.get('marked_answer_paper')
+        
+        if exam_record_id and marked_answer_paper:
+            try:
+                exam_record = Exam.objects.get(id=int(exam_record_id), teacher=teacher)
+                exam_record.marked_answer_paper = marked_answer_paper
+                exam_record.save()
+                return redirect('manage_answer_paper')
+            except (ValueError, Exam.DoesNotExist) as e:
+                messages.error(request, f'Error uploading answer paper: {str(e)}')
+        else:
+            messages.error(request, 'Please select a student record and upload a file.')
+    
+    # Get all distinct exam IDs for this teacher
+    exam_ids = (Exam.objects.filter(teacher=teacher)
+                .values('exam_id')
+                .distinct()
+                .order_by('-exam_id'))
+    
+    exam_list = []
+    for item in exam_ids:
+        eid = item['exam_id']
+        if eid is None:
+            continue
+        records = Exam.objects.filter(exam_id=eid, teacher=teacher).select_related('subject', 'exam_type', 'student')
+        first_exam = records.first()
+        total_students = records.count()
+        students_with_paper = records.exclude(marked_answer_paper='').exclude(marked_answer_paper__isnull=True).count()
+        exam_list.append({
+            'exam_id': eid,
+            'subject': first_exam.subject.name if first_exam else 'N/A',
+            'exam_type': first_exam.exam_type.name if first_exam else 'N/A',
+            'date': first_exam.date if first_exam else None,
+            'chapter': first_exam.chapter or 'N/A',
+            'total_marks': first_exam.total_marks if first_exam else 'N/A',
+            'student_count': total_students,
+            'papers_uploaded': students_with_paper,
+        })
+    
+    # Check if running on production
+    host = request.get_host().lower()
+    is_production = not (host.startswith('localhost') or host.startswith('127.0.0.1'))
+    
+    context = {
+        'exam_list': exam_list,
+        'is_production': is_production,
+    }
+    return render(request, 'marks/manage_answer_paper.html', context)
+
+
+@login_required(login_url='login')
+def answer_paper_info_api(request):
+    """API endpoint for fetching student records by exam_id for the answer paper management page"""
+    if not is_teacher(request.user):
+        return JsonResponse({'success': False, 'error': 'Not authorized'})
+    
+    teacher = request.user
+    exam_id = request.GET.get('exam_id', '').strip()
+    
+    if not exam_id:
+        return JsonResponse({'success': False, 'error': 'Please enter an exam ID'})
+    
+    try:
+        exam_id = int(exam_id)
+    except ValueError:
+        return JsonResponse({'success': False, 'error': 'Invalid exam ID'})
+    
+    exams = Exam.objects.filter(exam_id=exam_id, teacher=teacher).select_related('subject', 'exam_type', 'student')
+    
+    if not exams.exists():
+        return JsonResponse({'success': False, 'error': f'No exam found with ID #{exam_id}'})
+    
+    first_exam = exams.first()
+    
+    students = []
+    for exam in exams:
+        has_paper = bool(exam.marked_answer_paper)
+        paper_url = exam.marked_answer_paper.url if has_paper else None
+        students.append({
+            'record_id': exam.id,
+            'student_name': exam.student.name,
+            'marks': exam.mark_obtained,
+            'total_marks': exam.total_marks,
+            'percentage': round(exam.percentage, 1),
+            'grade': exam.grade,
+            'has_paper': has_paper,
+            'paper_url': paper_url,
+        })
+    
+    return JsonResponse({
+        'success': True,
+        'exam': {
+            'exam_id': exam_id,
+            'subject': first_exam.subject.name,
+            'exam_type': first_exam.exam_type.name,
+            'date': first_exam.date.strftime('%B %d, %Y') if first_exam.date else 'N/A',
+            'chapter': first_exam.chapter or 'N/A',
+            'total_marks': first_exam.total_marks,
+            'student_count': exams.count(),
+        },
+        'students': students,
+    })
 
 
 @login_required(login_url='login')
