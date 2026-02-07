@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Student, Subject, ExamType, Exam, GradeScale, LifetimePoints, PointsSpent, PointTransaction, TeacherProfile, StudentProfile
+from .models import Student, Subject, ExamType, Exam, ExamQuestionPaper, GradeScale, LifetimePoints, PointsSpent, PointTransaction, TeacherProfile, StudentProfile
 
 
 @admin.register(TeacherProfile)
@@ -42,6 +42,20 @@ class ExamTypeAdmin(admin.ModelAdmin):
     list_editable = ['name']
 
 
+@admin.register(ExamQuestionPaper)
+class ExamQuestionPaperAdmin(admin.ModelAdmin):
+    list_display = ['exam_id', 'teacher', 'has_pdf', 'uploaded_at']
+    list_filter = ['teacher']
+    search_fields = ['exam_id']
+    ordering = ['-exam_id']
+    fields = ['exam_id', 'teacher', 'question_pdf']
+
+    def has_pdf(self, obj):
+        return bool(obj.question_pdf)
+    has_pdf.boolean = True
+    has_pdf.short_description = 'PDF'
+
+
 @admin.register(Exam)
 class ExamAdmin(admin.ModelAdmin):
     list_display = ['exam_id', 'student', 'subject', 'exam_type', 'date', 'chapter', 'mark_obtained', 'total_marks', 'percentage', 'grade', 'class_number', 'has_pdf']
@@ -51,10 +65,10 @@ class ExamAdmin(admin.ModelAdmin):
     ordering = ['-exam_id']
     
     # Make fields editable in admin
-    fields = ['student', 'subject', 'exam_type', 'date', 'chapter', 'class_number', 'total_marks', 'mark_obtained', 'group_id', 'exam_id', 'question_pdf']
+    fields = ['student', 'subject', 'exam_type', 'date', 'chapter', 'class_number', 'total_marks', 'mark_obtained', 'group_id', 'exam_id', 'marked_answer_paper']
     
     def has_pdf(self, obj):
-        return bool(obj.question_pdf)
+        return obj.has_question_pdf
     has_pdf.boolean = True
     has_pdf.short_description = 'PDF'
     list_editable = ['chapter', 'mark_obtained', 'total_marks']

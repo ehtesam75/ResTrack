@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
 from django.db.models import Sum, Q
 import json
-from .models import Student, Subject, ExamType, Exam, GradeScale, LifetimePoints, PointsSpent, PointTransaction, TeacherProfile, StudentProfile
+from .models import Student, Subject, ExamType, Exam, ExamQuestionPaper, GradeScale, LifetimePoints, PointsSpent, PointTransaction, TeacherProfile, StudentProfile
 from django.db.models import Q
 from .services import LeaderboardService, DashboardService, ChartDataService, count_unique_exams
 from .forms import TeacherSignupForm, LoginForm, StudentAccountForm
@@ -1154,9 +1154,15 @@ def add_exam(request):
                     total_marks=total_marks,
                     mark_obtained=mark_obtained,
                     exam_id=exam_id,
-                    question_pdf=question_pdf,
                     marked_answer_paper=marked_answer_paper
                 )
+                # Save question paper to ExamQuestionPaper (one per exam_id)
+                if question_pdf:
+                    ExamQuestionPaper.objects.update_or_create(
+                        exam_id=exam_id,
+                        teacher=teacher,
+                        defaults={'question_pdf': question_pdf}
+                    )
                 return redirect('student_detail', student_id=student.id)
             except Exception as e:
                 messages.error(request, f'Error adding exam: {str(e)}')
@@ -1241,10 +1247,16 @@ def add_bulk_exam(request):
                                 mark_obtained=mark_obtained,
                                 group_id=group_id,
                                 exam_id=exam_id,
-                                question_pdf=question_pdf,
                                 marked_answer_paper=marked_answer_paper
                             )
                             created_count += 1
+                    # Save question paper to ExamQuestionPaper (one per exam_id)
+                    if question_pdf:
+                        ExamQuestionPaper.objects.update_or_create(
+                            exam_id=exam_id,
+                            teacher=teacher,
+                            defaults={'question_pdf': question_pdf}
+                        )
                     return redirect('all_exams')
                 except Exception as e:
                     messages.error(request, f'Error adding exams: {str(e)}')
@@ -1297,7 +1309,7 @@ def edit_exam(request, exam_id):
         total_marks = request.POST.get('total_marks')
         mark_obtained = request.POST.get('mark_obtained')
         exam_id_new = request.POST.get('exam_id')
-        question_pdf = request.FILES.get('question_pdf')
+        marked_answer_paper = request.FILES.get('marked_answer_paper')
         
         if all([student_id, subject_id, exam_type_name, date, chapter, class_number, total_marks, mark_obtained, exam_id_new]):
             try:
@@ -1317,8 +1329,8 @@ def edit_exam(request, exam_id):
                 exam.mark_obtained = int(mark_obtained)
                 exam.exam_id = int(exam_id_new)
                 
-                if question_pdf:
-                    exam.question_pdf = question_pdf
+                if marked_answer_paper:
+                    exam.marked_answer_paper = marked_answer_paper
                 
                 exam.save()
                 
@@ -2029,6 +2041,126 @@ def privacy_policy(request):
 
 
 @login_required(login_url='login')
+def manage_question_paper(request):
+    """Manage exam-level question paper PDFs"""
+    if not is_teacher(request.user):
+        messages.error(request, 'Only teachers can manage question papers.')
+        return redirect('dashboard')
+    
+    teacher = request.user
+    
+    if request.method == 'POST':
+        exam_id = request.POST.get('exam_id')
+        question_pdf = request.FILES.get('question_pdf')
+        
+        if exam_id and question_pdf:
+            try:
+                exam_id = int(exam_id)
+                # Verify this exam_id belongs to this teacher
+                if not Exam.objects.filter(exam_id=exam_id, teacher=teacher).exists():
+                    messages.error(request, f'No exam found with ID #{exam_id}.')
+                    return redirect('manage_question_paper')
+                
+                ExamQuestionPaper.objects.update_or_create(
+                    exam_id=exam_id,
+                    teacher=teacher,
+                    defaults={'question_pdf': question_pdf}
+                )
+                messages.success(request, f'Question paper for Exam #{exam_id} has been updated successfully.')
+                return redirect('manage_question_paper')
+            except (ValueError, Exception) as e:
+                messages.error(request, f'Error uploading question paper: {str(e)}')
+        else:
+            messages.error(request, 'Please select an Exam ID and upload a PDF file.')
+    
+    # Get all distinct exam IDs for this teacher
+    exam_ids = (Exam.objects.filter(teacher=teacher)
+                .values('exam_id')
+                .distinct()
+                .order_by('-exam_id'))
+    
+    # Build exam info list
+    exam_list = []
+    for item in exam_ids:
+        eid = item['exam_id']
+        if eid is None:
+            continue
+        first_exam = Exam.objects.filter(exam_id=eid, teacher=teacher).select_related('subject', 'exam_type').first()
+        qp = ExamQuestionPaper.objects.filter(exam_id=eid, teacher=teacher).first()
+        exam_list.append({
+            'exam_id': eid,
+            'subject': first_exam.subject.name if first_exam else 'N/A',
+            'exam_type': first_exam.exam_type.name if first_exam else 'N/A',
+            'date': first_exam.date if first_exam else None,
+            'chapter': first_exam.chapter or 'N/A',
+            'total_marks': first_exam.total_marks if first_exam else 'N/A',
+            'student_count': Exam.objects.filter(exam_id=eid, teacher=teacher).count(),
+            'has_pdf': bool(qp and qp.question_pdf) or bool(first_exam and first_exam.question_pdf),
+            'pdf_url': (qp.question_pdf.url if qp and qp.question_pdf else 
+                       (first_exam.question_pdf.url if first_exam and first_exam.question_pdf else None)),
+        })
+    
+    # Check if running on production
+    host = request.get_host().lower()
+    is_production = not (host.startswith('localhost') or host.startswith('127.0.0.1'))
+    
+    context = {
+        'exam_list': exam_list,
+        'is_production': is_production,
+    }
+    return render(request, 'marks/manage_question_paper.html', context)
+
+
+@login_required(login_url='login')
+def exam_info_api(request):
+    """API endpoint for fetching exam info by exam_id for the question paper management page"""
+    if not is_teacher(request.user):
+        return JsonResponse({'success': False, 'error': 'Not authorized'})
+    
+    teacher = request.user
+    exam_id = request.GET.get('exam_id', '').strip()
+    
+    if not exam_id:
+        return JsonResponse({'success': False, 'error': 'Please enter an exam ID'})
+    
+    try:
+        exam_id = int(exam_id)
+    except ValueError:
+        return JsonResponse({'success': False, 'error': 'Invalid exam ID'})
+    
+    exams = Exam.objects.filter(exam_id=exam_id, teacher=teacher).select_related('subject', 'exam_type')
+    
+    if not exams.exists():
+        return JsonResponse({'success': False, 'error': f'No exam found with ID #{exam_id}'})
+    
+    first_exam = exams.first()
+    qp = ExamQuestionPaper.objects.filter(exam_id=exam_id, teacher=teacher).first()
+    
+    # Check legacy field too
+    has_pdf = bool(qp and qp.question_pdf) or bool(first_exam.question_pdf)
+    pdf_url = None
+    if qp and qp.question_pdf:
+        pdf_url = qp.question_pdf.url
+    elif first_exam.question_pdf:
+        pdf_url = first_exam.question_pdf.url
+    
+    return JsonResponse({
+        'success': True,
+        'exam': {
+            'exam_id': exam_id,
+            'subject': first_exam.subject.name,
+            'exam_type': first_exam.exam_type.name,
+            'date': first_exam.date.strftime('%B %d, %Y') if first_exam.date else 'N/A',
+            'chapter': first_exam.chapter or 'N/A',
+            'total_marks': first_exam.total_marks,
+            'student_count': exams.count(),
+            'has_pdf': has_pdf,
+            'pdf_url': pdf_url,
+        }
+    })
+
+
+@login_required(login_url='login')
 @login_required(login_url='login')
 def exam_lookup(request):
     """Mobile-only page for looking up exam PDFs and marked answer papers by exam ID"""
@@ -2039,7 +2171,10 @@ def exam_lookup(request):
     min_exam_id = qs.values_list('exam_id', flat=True).distinct().order_by('exam_id').first()
     max_exam_id = qs.values_list('exam_id', flat=True).distinct().order_by('-exam_id').first()
     total_exams = qs.values('exam_id').distinct().count()
-    exams_with_pdf = qs.exclude(question_pdf='').exclude(question_pdf__isnull=True).values('exam_id').distinct().count()
+    # Count exams with question papers from both ExamQuestionPaper and legacy Exam field
+    exam_ids_with_new_pdf = set(ExamQuestionPaper.objects.filter(teacher=teacher).values_list('exam_id', flat=True))
+    exam_ids_with_legacy_pdf = set(qs.exclude(question_pdf='').exclude(question_pdf__isnull=True).values_list('exam_id', flat=True).distinct())
+    exams_with_pdf = len(exam_ids_with_new_pdf | exam_ids_with_legacy_pdf)
     
     # Calculate marked answer paper stats for students
     exams_with_answer_sheet = 0
@@ -2097,10 +2232,16 @@ def exam_lookup_api(request):
             best_percentage = exam.percentage
             best_student = exam.student
     
-    # Get PDF URL if available
+    # Get PDF URL if available (check ExamQuestionPaper first, then legacy)
     pdf_url = None
-    if first_exam.question_pdf:
-        pdf_url = first_exam.question_pdf.url
+    try:
+        qp = ExamQuestionPaper.objects.get(exam_id=first_exam.exam_id, teacher=teacher)
+        if qp.question_pdf:
+            pdf_url = qp.question_pdf.url
+    except ExamQuestionPaper.DoesNotExist:
+        # Fallback to legacy field on Exam
+        if first_exam.question_pdf:
+            pdf_url = first_exam.question_pdf.url
     
     # Get marked answer paper data based on user role
     student_data = None
@@ -2210,7 +2351,7 @@ def delete_account(request):
             subjects_count = Subject.objects.filter(teacher=teacher).count()
             exams_count = Exam.objects.filter(teacher=teacher).values('exam_id').distinct().count()
             points_spent_count = PointsSpent.objects.filter(teacher=teacher).count()
-            pdfs_count = Exam.objects.filter(teacher=teacher).exclude(question_pdf__isnull=True).exclude(question_pdf='').count()
+            pdfs_count = ExamQuestionPaper.objects.filter(teacher=teacher).count()
             marked_answer_papers_count = Exam.objects.filter(teacher=teacher).exclude(marked_answer_paper__isnull=True).exclude(marked_answer_paper='').count()
 
             return render(request, 'marks/delete_account_confirm.html', {
@@ -2235,7 +2376,7 @@ def delete_account(request):
                 subjects_count = Subject.objects.filter(teacher=teacher).count()
                 exams_count = Exam.objects.filter(teacher=teacher).values('exam_id').distinct().count()
                 points_spent_count = PointsSpent.objects.filter(teacher=teacher).count()
-                pdfs_count = Exam.objects.filter(teacher=teacher).exclude(question_pdf__isnull=True).exclude(question_pdf='').count()
+                pdfs_count = ExamQuestionPaper.objects.filter(teacher=teacher).count()
                 marked_answer_papers_count = Exam.objects.filter(teacher=teacher).exclude(marked_answer_paper__isnull=True).exclude(marked_answer_paper='').count()
 
                 return render(request, 'marks/delete_account_confirm.html', {

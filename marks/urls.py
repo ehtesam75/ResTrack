@@ -57,6 +57,10 @@ urlpatterns = [
     path('exam-lookup/', views.exam_lookup, name='exam_lookup'),
     path('exam-lookup-api/', views.exam_lookup_api, name='exam_lookup_api'),
 
+    # Question paper management
+    path('manage-question-paper/', views.manage_question_paper, name='manage_question_paper'),
+    path('api/exam-info/', views.exam_info_api, name='exam_info_api'),
+
     # Favicon test page
     path('favicon-test/', TemplateView.as_view(template_name='marks/favicon_test.html'), name='favicon_test'),
 

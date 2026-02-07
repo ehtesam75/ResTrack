@@ -1,0 +1,373 @@
+{% extends 'marks/base.html' %}
+
+{% block title %}Manage Question Papers - ResTrack{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-2 sm:px-0">
+    <div class="glass-effect rounded-xl p-4 sm:p-6 border border-gray-200 shadow-lg animate-fade-in-up">
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
+            <div>
+                <h1 class="text-xl sm:text-2xl font-bold gradient-text">Manage Question Papers</h1>
+                <p class="text-xs sm:text-sm text-gray-600 mt-1">Upload or replace question paper PDFs for your exams</p>
+            </div>
+            <a href="{% url 'manage' %}" class="bg-purple-100 text-purple-700 px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-purple-200 transition-all">
+                ← Back to Dashboard
+            </a>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div class="mb-4 space-y-2">
+            {% for message in messages %}
+            <div class="px-4 py-3 rounded-lg text-sm {% if message.tags == 'error' %}bg-red-50 border border-red-200 text-red-700{% elif message.tags == 'success' %}bg-green-50 border border-green-200 text-green-700{% else %}bg-blue-50 border border-blue-200 text-blue-700{% endif %}">
+                {% if message.tags == 'error' %}❌{% elif message.tags == 'success' %}✅{% else %}ℹ️{% endif %} {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Upload / Replace Section -->
+        <div class="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-xl p-4 sm:p-6 mb-6">
+            <div class="flex items-center gap-2 mb-4">
+                <div class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                    </svg>
+                </div>
+                <h2 class="text-sm sm:text-base font-bold text-gray-900">Upload Question Paper</h2>
+            </div>
+
+            <!-- Exam ID Lookup -->
+            <div class="mb-4">
+                <label for="lookup_exam_id" class="block text-xs font-semibold text-gray-700 mb-1.5">
+                    Select or Enter Exam ID <span class="text-red-500">*</span>
+                </label>
+                <div class="flex gap-2">
+                    <input type="number" id="lookup_exam_id" min="1" placeholder="Enter Exam ID"
+                        class="flex-1 max-w-xs px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white hover:bg-gray-50 transition-colors">
+                    <button type="button" id="lookup_btn" onclick="lookupExam()"
+                        class="bg-indigo-100 text-indigo-700 px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-indigo-200 transition-all">
+                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        Look Up
+                    </button>
+                </div>
+            </div>
+
+            <!-- Exam Info Display (hidden by default) -->
+            <div id="exam-info-panel" class="hidden mb-4">
+                <div class="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-sm font-bold text-gray-900">
+                            Exam <span id="info-exam-id" class="text-indigo-600">#</span>
+                        </h3>
+                        <span id="info-pdf-status" class="text-xs px-2.5 py-1 rounded-full font-medium"></span>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        <div>
+                            <p class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Subject</p>
+                            <p id="info-subject" class="text-sm font-medium text-gray-800">—</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Exam Type</p>
+                            <p id="info-exam-type" class="text-sm font-medium text-gray-800">—</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Date</p>
+                            <p id="info-date" class="text-sm font-medium text-gray-800">—</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Chapter</p>
+                            <p id="info-chapter" class="text-sm font-medium text-gray-800">—</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Total Marks</p>
+                            <p id="info-total-marks" class="text-sm font-medium text-gray-800">—</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Students</p>
+                            <p id="info-students" class="text-sm font-medium text-gray-800">—</p>
+                        </div>
+                    </div>
+
+                    <!-- View existing PDF link -->
+                    <div id="existing-pdf-link" class="hidden">
+                        <a id="pdf-download-link" href="#" target="_blank" rel="noopener noreferrer"
+                            class="inline-flex items-center gap-1.5 text-sm text-indigo-600 font-medium hover:text-indigo-800 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            View Current Question Paper
+                        </a>
+                    </div>
+
+                    <!-- Upload Form -->
+                    <form method="POST" enctype="multipart/form-data" class="pt-3 border-t border-gray-100">
+                        {% csrf_token %}
+                        <input type="hidden" id="upload_exam_id" name="exam_id" value="">
+                        <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
+                            <div class="flex-1 w-full">
+                                <label for="question_pdf" class="block text-xs font-semibold text-gray-700 mb-1.5">
+                                    Question Paper (PDF) <span class="text-gray-400 text-xs font-normal">(max 1MB)</span>
+                                </label>
+                                <input type="file" id="question_pdf" name="question_pdf" accept=".pdf" required
+                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-indigo-100 file:text-indigo-700 hover:file:bg-indigo-200">
+                                <p class="text-xs text-red-600 mt-1 hidden" id="upload-pdf-error">Please upload a PDF file</p>
+                                <p class="text-xs text-red-600 mt-1 hidden" id="upload-pdf-size-error">File size must be less than 1MB</p>
+                            </div>
+                            <button type="submit" id="upload-btn" disabled
+                                {% if is_production %}disabled{% endif %}
+                                class="bg-indigo-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap">
+                                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                </svg>
+                                <span id="upload-btn-text">Upload</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Error Display -->
+            <div id="lookup-error" class="hidden">
+                <div class="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700">
+                    <span id="lookup-error-text"></span>
+                </div>
+            </div>
+
+            <!-- Loading indicator -->
+            <div id="lookup-loading" class="hidden">
+                <div class="flex items-center gap-2 text-gray-500 text-sm">
+                    <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Loading exam details...
+                </div>
+            </div>
+        </div>
+
+        <!-- Existing Question Papers Table -->
+        <div>
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-sm sm:text-base font-bold text-gray-900">All Exams</h2>
+                <span class="text-xs text-gray-500">{{ exam_list|length }} exam{{ exam_list|length|pluralize }}</span>
+            </div>
+
+            {% if exam_list %}
+            <div class="border border-gray-200 rounded-xl overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-200">
+                                <th class="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider font-semibold text-gray-500">ID</th>
+                                <th class="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider font-semibold text-gray-500">Subject</th>
+                                <th class="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider font-semibold text-gray-500 hidden sm:table-cell">Type</th>
+                                <th class="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider font-semibold text-gray-500 hidden sm:table-cell">Date</th>
+                                <th class="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider font-semibold text-gray-500 hidden md:table-cell">Chapter</th>
+                                <th class="px-3 py-2.5 text-center text-[10px] uppercase tracking-wider font-semibold text-gray-500">Students</th>
+                                <th class="px-3 py-2.5 text-center text-[10px] uppercase tracking-wider font-semibold text-gray-500">PDF</th>
+                                <th class="px-3 py-2.5 text-center text-[10px] uppercase tracking-wider font-semibold text-gray-500">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for exam in exam_list %}
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-3 py-2.5">
+                                    <span class="text-indigo-600 font-semibold text-xs">#{{ exam.exam_id }}</span>
+                                </td>
+                                <td class="px-3 py-2.5 font-medium text-gray-800 text-xs">{{ exam.subject }}</td>
+                                <td class="px-3 py-2.5 text-gray-600 text-xs hidden sm:table-cell">{{ exam.exam_type }}</td>
+                                <td class="px-3 py-2.5 text-gray-600 text-xs hidden sm:table-cell">{{ exam.date|date:"M d, Y" }}</td>
+                                <td class="px-3 py-2.5 text-gray-600 text-xs hidden md:table-cell">{{ exam.chapter }}</td>
+                                <td class="px-3 py-2.5 text-center text-xs text-gray-600">{{ exam.student_count }}</td>
+                                <td class="px-3 py-2.5 text-center">
+                                    {% if exam.has_pdf %}
+                                    <a href="{{ exam.pdf_url }}" target="_blank" rel="noopener noreferrer" title="View PDF"
+                                        class="inline-flex items-center gap-1 text-green-600 hover:text-green-800 transition-colors">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                        </svg>
+                                        <span class="text-xs font-medium hidden sm:inline">View</span>
+                                    </a>
+                                    {% else %}
+                                    <span class="text-gray-300 text-xs">—</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-3 py-2.5 text-center">
+                                    <button type="button" onclick="selectExam({{ exam.exam_id }})"
+                                        class="text-indigo-600 hover:text-indigo-800 text-xs font-medium hover:underline transition-colors">
+                                        {% if exam.has_pdf %}Replace{% else %}Upload{% endif %}
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center py-10 text-gray-500">
+                <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <p class="text-sm">No exams found. Add an exam first.</p>
+                <a href="{% url 'add_exam' %}" class="text-indigo-600 text-sm font-medium mt-2 inline-block hover:text-indigo-700">Add Exam →</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const MAX_PDF_SIZE = 1 * 1024 * 1024; // 1MB
+const lookupInput = document.getElementById('lookup_exam_id');
+const infoPanel = document.getElementById('exam-info-panel');
+const errorDiv = document.getElementById('lookup-error');
+const errorText = document.getElementById('lookup-error-text');
+const loadingDiv = document.getElementById('lookup-loading');
+const uploadBtn = document.getElementById('upload-btn');
+const uploadBtnText = document.getElementById('upload-btn-text');
+const pdfInput = document.getElementById('question_pdf');
+const pdfError = document.getElementById('upload-pdf-error');
+const pdfSizeError = document.getElementById('upload-pdf-size-error');
+
+// Allow Enter key to trigger lookup
+lookupInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        lookupExam();
+    }
+});
+
+function selectExam(examId) {
+    lookupInput.value = examId;
+    lookupExam();
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function lookupExam() {
+    const examId = lookupInput.value.trim();
+    if (!examId) {
+        showError('Please enter an Exam ID.');
+        return;
+    }
+
+    // Show loading, hide others
+    infoPanel.classList.add('hidden');
+    errorDiv.classList.add('hidden');
+    loadingDiv.classList.remove('hidden');
+
+    fetch(`{% url 'exam_info_api' %}?exam_id=${encodeURIComponent(examId)}`)
+        .then(r => r.json())
+        .then(data => {
+            loadingDiv.classList.add('hidden');
+            if (!data.success) {
+                showError(data.error);
+                return;
+            }
+
+            const exam = data.exam;
+            document.getElementById('info-exam-id').textContent = '#' + exam.exam_id;
+            document.getElementById('info-subject').textContent = exam.subject;
+            document.getElementById('info-exam-type').textContent = exam.exam_type;
+            document.getElementById('info-date').textContent = exam.date;
+            document.getElementById('info-chapter').textContent = exam.chapter;
+            document.getElementById('info-total-marks').textContent = exam.total_marks;
+            document.getElementById('info-students').textContent = exam.student_count + ' student' + (exam.student_count !== 1 ? 's' : '');
+
+            // PDF status badge
+            const statusEl = document.getElementById('info-pdf-status');
+            if (exam.has_pdf) {
+                statusEl.textContent = '✓ PDF Attached';
+                statusEl.className = 'text-xs px-2.5 py-1 rounded-full font-medium bg-green-100 text-green-700';
+                uploadBtnText.textContent = 'Replace';
+            } else {
+                statusEl.textContent = 'No PDF';
+                statusEl.className = 'text-xs px-2.5 py-1 rounded-full font-medium bg-gray-100 text-gray-500';
+                uploadBtnText.textContent = 'Upload';
+            }
+
+            // Existing PDF link
+            const pdfLinkDiv = document.getElementById('existing-pdf-link');
+            const pdfLink = document.getElementById('pdf-download-link');
+            if (exam.has_pdf && exam.pdf_url) {
+                pdfLink.href = exam.pdf_url;
+                pdfLinkDiv.classList.remove('hidden');
+            } else {
+                pdfLinkDiv.classList.add('hidden');
+            }
+
+            // Set hidden form field
+            document.getElementById('upload_exam_id').value = exam.exam_id;
+
+            // Show panel
+            infoPanel.classList.remove('hidden');
+            errorDiv.classList.add('hidden');
+
+            // Validate upload button
+            validateUpload();
+        })
+        .catch(err => {
+            loadingDiv.classList.add('hidden');
+            showError('Failed to fetch exam details. Please try again.');
+        });
+}
+
+function showError(msg) {
+    errorText.textContent = msg;
+    errorDiv.classList.remove('hidden');
+    infoPanel.classList.add('hidden');
+}
+
+function validateUpload() {
+    const hasExamId = document.getElementById('upload_exam_id').value;
+    const hasFile = pdfInput.files.length > 0;
+    let valid = hasExamId && hasFile;
+
+    if (hasFile) {
+        const file = pdfInput.files[0];
+        if (!file.type.includes('pdf') && !file.name.toLowerCase().endsWith('.pdf')) {
+            pdfError.classList.remove('hidden');
+            pdfInput.classList.add('border-red-500');
+            valid = false;
+        } else {
+            pdfError.classList.add('hidden');
+        }
+        if (file.size > MAX_PDF_SIZE) {
+            pdfSizeError.classList.remove('hidden');
+            pdfInput.classList.add('border-red-500');
+            valid = false;
+        } else {
+            pdfSizeError.classList.add('hidden');
+        }
+        if (valid) pdfInput.classList.remove('border-red-500');
+    } else {
+        pdfError.classList.add('hidden');
+        pdfSizeError.classList.add('hidden');
+        pdfInput.classList.remove('border-red-500');
+    }
+
+    uploadBtn.disabled = !valid;
+}
+
+pdfInput.addEventListener('change', validateUpload);
+
+// Form submit validation
+document.querySelector('form').addEventListener('submit', function(e) {
+    if (pdfInput.files.length > 0) {
+        const file = pdfInput.files[0];
+        if (file.size > MAX_PDF_SIZE) {
+            e.preventDefault();
+            alert('PDF file size must be less than 1MB!');
+            return false;
+        }
+    }
+});
+</script>
+{% endblock %}

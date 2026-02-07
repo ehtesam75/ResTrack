@@ -507,6 +507,60 @@ class GradeScale(models.Model):
         return f"{self.grade_name} ({self.points:+d} points)"
 
 
+class ExamQuestionPaper(models.Model):
+    """
+    Model linking a Question Paper PDF to an Exam ID (one per exam).
+    The question paper is shared across all student records for the same exam_id.
+    """
+    exam_id = models.IntegerField(
+        help_text="Unique exam identifier this question paper belongs to"
+    )
+    teacher = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='exam_question_papers',
+        help_text="Teacher who owns this exam"
+    )
+
+    def question_pdf_folder_path(instance):
+        username = instance.teacher.username if instance.teacher else 'unknown_teacher'
+        return f"ResTrack/{username}/Exam Questions"
+
+    question_pdf = CloudinaryField(
+        resource_type='raw',
+        folder=question_pdf_folder_path,
+        help_text="PDF file containing exam questions"
+    )
+    uploaded_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Exam Question Paper"
+        verbose_name_plural = "Exam Question Papers"
+        ordering = ['-exam_id']
+        unique_together = ['exam_id', 'teacher']
+
+    def __str__(self):
+        return f"Question Paper for Exam #{self.exam_id}"
+
+    @property
+    def question_pdf_public_id(self):
+        """Extract Cloudinary public ID from question_pdf URL"""
+        if not self.question_pdf:
+            return None
+        try:
+            url = str(self.question_pdf)
+            if 'cloudinary.com' in url:
+                parts = url.split('/upload/')
+                if len(parts) > 1:
+                    path_part = parts[1]
+                    if '.' in path_part:
+                        return path_part.rsplit('.', 1)[0]
+                    return path_part
+        except:
+            pass
+        return None
+
+
 class Exam(models.Model):
     """
     Model representing a single exam result entry.
@@ -542,6 +596,7 @@ class Exam(models.Model):
         blank=True,
         help_text="Unique exam identifier (same for bulk entries)"
     )
+    # Legacy field - kept for backward compatibility, new uploads go to ExamQuestionPaper
     def exam_pdf_folder_path(instance):
         """
         Returns folder path for exam question PDF in the format:
@@ -555,29 +610,48 @@ class Exam(models.Model):
         folder=exam_pdf_folder_path,
         blank=True,
         null=True,
-        help_text="PDF file containing exam questions"
+        help_text="Legacy field - question papers now stored in ExamQuestionPaper model"
     )
 
     @property
     def question_pdf_public_id(self):
-        """Extract Cloudinary public ID from question_pdf URL"""
+        """Extract Cloudinary public ID from question_pdf URL (legacy or new model)"""
+        # First check the new ExamQuestionPaper model
+        qp = self.get_question_paper()
+        if qp:
+            return qp.question_pdf_public_id
+        # Fallback to legacy field
         if not self.question_pdf:
             return None
         try:
-            # CloudinaryField stores the full URL, extract public ID
             url = str(self.question_pdf)
             if 'cloudinary.com' in url:
-                # URL format: https://res.cloudinary.com/{cloud_name}/raw/upload/{folder}/{public_id}
                 parts = url.split('/upload/')
                 if len(parts) > 1:
                     path_part = parts[1]
-                    # Remove file extension to get public ID
                     if '.' in path_part:
                         return path_part.rsplit('.', 1)[0]
                     return path_part
         except:
             pass
         return None
+
+    def get_question_paper(self):
+        """Get the ExamQuestionPaper for this exam's exam_id, if it exists"""
+        if self.exam_id and self.teacher:
+            try:
+                return ExamQuestionPaper.objects.get(exam_id=self.exam_id, teacher=self.teacher)
+            except ExamQuestionPaper.DoesNotExist:
+                pass
+        return None
+
+    @property
+    def has_question_pdf(self):
+        """Check if this exam has a question paper (new model or legacy)"""
+        qp = self.get_question_paper()
+        if qp and qp.question_pdf:
+            return True
+        return bool(self.question_pdf)
     
     def marked_answer_folder_path(instance):
         """

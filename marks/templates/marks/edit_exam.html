@@ -135,14 +135,17 @@
                     </div>
                 </div>
                 <div>
-                    <label for="question_pdf" class="block text-xs font-semibold text-gray-700 mb-1.5">
-                        Question Paper (PDF) <span class="text-gray-400 text-xs font-normal">(optional, max 1MB)</span>
+                    <label for="marked_answer_paper" class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Marked Answer Sheet <span class="text-gray-400 text-xs font-normal">(optional, max 10MB)</span>
                     </label>
-                    <input type="file" id="question_pdf" name="question_pdf" accept=".pdf"
-                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus-border-transparent bg-gray-50 hover:bg-white transition-colors file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-purple-100 file:text-purple-700 hover:file:bg-purple-200">
+                    <input type="file" id="marked_answer_paper" name="marked_answer_paper" accept=".pdf,.zip,.rar"
+                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus-border-transparent bg-gray-50 hover:bg-white transition-colors file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-green-100 file:text-green-700 hover:file:bg-green-200">
                     <p class="text-xs text-gray-500 mt-1">Upload a new PDF to replace the current one. Leave empty to keep the current file.</p>
-                    <p class="text-xs text-red-600 mt-1 hidden" id="pdf-error">Please upload a PDF file</p>
-                    <p class="text-xs text-red-600 mt-1 hidden" id="pdf-size-error">File size must be less than 1MB</p>
+                    {% if exam.marked_answer_paper %}
+                    <p class="text-xs text-green-600 mt-1">✓ Current file attached</p>
+                    {% endif %}
+                    <p class="text-xs text-red-600 mt-1 hidden" id="marked-answer-error">Please upload a PDF, ZIP, or RAR file</p>
+                    <p class="text-xs text-red-600 mt-1 hidden" id="marked-answer-size-error">File size must be less than 10MB</p>
                 </div>
             </div>
 
@@ -161,15 +164,11 @@
     <!-- End main card -->
 </div>
 
-
-    </form>
-</div>
-
 <script>
-const MAX_PDF_SIZE = 1 * 1024 * 1024; // 1MB in bytes
-const questionPdfInput = document.getElementById('question_pdf');
-const pdfError = document.getElementById('pdf-error');
-const pdfSizeError = document.getElementById('pdf-size-error');
+const MAX_MARKED_ANSWER_SIZE = 10 * 1024 * 1024; // 10MB in bytes
+const markedAnswerInput = document.getElementById('marked_answer_paper');
+const markedAnswerError = document.getElementById('marked-answer-error');
+const markedAnswerSizeError = document.getElementById('marked-answer-size-error');
 
 const saveBtn = document.getElementById('save-btn');
 const totalMarksInput = document.getElementById('total_marks');
@@ -181,7 +180,6 @@ const classInput = document.getElementById('class_number');
 const dateInput = document.getElementById('date');
 const today = new Date();
 if (dateInput) {
-    // Set max date attribute to today (YYYY-MM-DD)
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, '0');
     const dd = String(today.getDate()).padStart(2, '0');
@@ -195,23 +193,22 @@ function validateFormFields() {
     let valid = true;
     const total = parseFloat(totalMarksInput.value);
     const obtained = parseFloat(markObtainedInput.value);
-    // Check all required fields (PDF is optional)
     if (!studentSelect.value || !subjectSelect.value || !examTypeSelect.value ||
         !classInput.value || !dateInput.value || !totalMarksInput.value || !markObtainedInput.value ||
         !chapterInput.value || !examIdInput.value || obtained > total) {
         valid = false;
     }
     saveBtn.disabled = !valid;
-    // Show/hide percentage and grade box
     const box = document.getElementById('percentage-grade-box');
-    if (obtained > total) {
-        box.classList.add('hidden');
-    } else {
-        box.classList.remove('hidden');
+    if (box) {
+        if (obtained > total) {
+            box.classList.add('hidden');
+        } else {
+            box.classList.remove('hidden');
+        }
     }
 }
 
-// Update percentage preview and validate marks
 function updatePercentage() {
     const total = parseFloat(totalMarksInput.value) || 0;
     const obtained = parseFloat(markObtainedInput.value) || 0;
@@ -220,7 +217,6 @@ function updatePercentage() {
     } else {
         markError.classList.add('hidden');
     }
-    // Live percentage and grade update
     const percentSpan = document.getElementById('live-percentage');
     const gradeSpan = document.getElementById('live-grade');
     let percent = '';
@@ -229,7 +225,6 @@ function updatePercentage() {
     if (total > 0 && obtained >= 0 && obtained <= total) {
         percent = ((obtained / total) * 100).toFixed(1) + '%';
         const p = (obtained / total) * 100;
-        // Determine exam type (CQ/MCQ)
         let examType = '';
         const examTypeSelect = document.getElementById('exam_type');
         if (examTypeSelect) {
@@ -242,7 +237,7 @@ function updatePercentage() {
             else if (p >= 40) { grade = 'Poor'; gradeColor = '#FDE68A'; }
             else if (p >= 30) { grade = 'Fail'; gradeColor = '#FECACA'; }
             else { grade = 'Horrible'; gradeColor = '#FCA5A5'; }
-        } else { // CQ or default
+        } else {
             if (p >= 85) { grade = 'Superb'; gradeColor = '#A7F3D0'; }
             else if (p >= 70) { grade = 'Good'; gradeColor = '#D1FAE5'; }
             else if (p >= 50) { grade = 'Average'; gradeColor = '#FEF08A'; }
@@ -257,43 +252,43 @@ function updatePercentage() {
     validateFormFields();
 }
 
-// Validate PDF file
-function validatePdf() {
-    if (questionPdfInput.files.length > 0) {
-        const file = questionPdfInput.files[0];
+function validateMarkedAnswer() {
+    if (markedAnswerInput.files.length > 0) {
+        const file = markedAnswerInput.files[0];
+        const fileName = file.name.toLowerCase();
+        const validExtensions = ['.pdf', '.zip', '.rar'];
+        const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
         let hasError = false;
-        
-        // Check file type
-        if (!file.type.includes('pdf') && !file.name.toLowerCase().endsWith('.pdf')) {
-            pdfError.classList.remove('hidden');
+
+        if (!hasValidExtension) {
+            markedAnswerError.classList.remove('hidden');
             hasError = true;
         } else {
-            pdfError.classList.add('hidden');
+            markedAnswerError.classList.add('hidden');
         }
-        
-        // Check file size (1MB limit)
-        if (file.size > MAX_PDF_SIZE) {
-            pdfSizeError.classList.remove('hidden');
+
+        if (file.size > MAX_MARKED_ANSWER_SIZE) {
+            markedAnswerSizeError.classList.remove('hidden');
             hasError = true;
         } else {
-            pdfSizeError.classList.add('hidden');
+            markedAnswerSizeError.classList.add('hidden');
         }
-        
+
         if (hasError) {
-            questionPdfInput.classList.add('border-red-500');
+            markedAnswerInput.classList.add('border-red-500');
         } else {
-            questionPdfInput.classList.remove('border-red-500');
+            markedAnswerInput.classList.remove('border-red-500');
         }
     } else {
-        pdfError.classList.add('hidden');
-        pdfSizeError.classList.add('hidden');
-        questionPdfInput.classList.remove('border-red-500');
+        markedAnswerError.classList.add('hidden');
+        markedAnswerSizeError.classList.add('hidden');
+        markedAnswerInput.classList.remove('border-red-500');
     }
 }
 
 totalMarksInput.addEventListener('input', updatePercentage);
 markObtainedInput.addEventListener('input', updatePercentage);
-questionPdfInput.addEventListener('change', validatePdf);
+markedAnswerInput.addEventListener('change', validateMarkedAnswer);
 studentSelect.addEventListener('change', validateFormFields);
 subjectSelect.addEventListener('change', validateFormFields);
 classInput.addEventListener('input', validateFormFields);
@@ -302,13 +297,12 @@ chapterInput.addEventListener('input', validateFormFields);
 examIdInput.addEventListener('input', validateFormFields);
 examTypeSelect.addEventListener('change', validateFormFields);
 document.addEventListener('DOMContentLoaded', validateFormFields);
-// Form submit validation
 document.querySelector('form').addEventListener('submit', function(e) {
-    if (questionPdfInput.files.length > 0) {
-        const file = questionPdfInput.files[0];
-        if (file.size > MAX_PDF_SIZE) {
+    if (markedAnswerInput.files.length > 0) {
+        const file = markedAnswerInput.files[0];
+        if (file.size > MAX_MARKED_ANSWER_SIZE) {
             e.preventDefault();
-            alert('PDF file size must be less than 1MB!');
+            alert('Marked answer sheet file size must be less than 10MB!');
             return false;
         }
     }
