@@ -394,7 +394,7 @@ class Student(models.Model):
                 teacher=self.teacher,
                 transaction_type='monthly_win',
                 points_change=40,
-                description=f"Monthly winner \u2013 {month_name}",
+                description=f"Monthly winner \u2013 {month_name} {win_year}",
                 date=transaction_date,
                 exam=None
             )
@@ -1051,6 +1051,16 @@ class PointTransaction(models.Model):
 
     def __str__(self):
         return f"{self.student.name} - {self.get_transaction_type_display()} - {self.points_change:+d} pts on {self.date}"
+
+    @property
+    def short_description(self):
+        """Return a compact description for mobile views (e.g. abbreviated year)."""
+        import re
+        # Convert "Monthly winner – January 2025" → "Monthly winner – January '25"
+        match = re.match(r"^(Monthly winner \u2013 \w+) (\d{4})$", self.description)
+        if match:
+            return f"{match.group(1)} '{match.group(2)[2:]}"
+        return self.description
 
     @property
     def is_positive(self):
