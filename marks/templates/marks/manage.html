@@ -250,7 +250,7 @@
                         <!-- Left: stacked info -->
                         <div class="flex flex-col justify-center">
                             <div class="flex items-center">
-                                <span class="text-purple-500 font-semibold mr-1 text-xs align-middle">#{{ exam.exam_id }}</span>
+                                {% if exam.exam_id %}<a href="{% url 'exam_detail' exam.exam_id %}" class="text-purple-500 font-semibold mr-1 text-xs align-middle hover:text-purple-700 hover:underline transition-colors">#{{ exam.exam_id }}</a>{% else %}<span class="text-purple-500 font-semibold mr-1 text-xs align-middle">#N/A</span>{% endif %}
                                 <span class="font-medium text-gray-900 text-sm">{{ exam.student.name }}</span>
                             </div>
                             <div class="text-xs text-gray-500 mt-0.5">{{ exam.subject.name }} • {{ exam.exam_type.name }}</div>

@@ -33,6 +33,7 @@ urlpatterns = [
     path('exams/add/', views.add_exam, name='add_exam'),
     path('exams/add-bulk/', views.add_bulk_exam, name='add_bulk_exams'),
     path('exams/<int:exam_id>/edit/', views.edit_exam, name='edit_exam'),
+    path('exams/detail/<int:exam_id>/', views.exam_detail, name='exam_detail'),
     
     # Points page
     path('points/', views.points, name='points'),

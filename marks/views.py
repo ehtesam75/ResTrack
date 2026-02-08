@@ -1502,6 +1502,90 @@ def all_exams(request):
 
 
 @login_required(login_url='login')
+def exam_detail(request, exam_id):
+    """Exam detail page showing overview and all participant results for a specific exam_id"""
+    teacher = get_teacher_for_user(request.user)
+
+    # Get all exam records sharing this exam_id for this teacher
+    exam_records = Exam.objects.filter(
+        teacher=teacher, exam_id=exam_id
+    ).select_related('student', 'subject', 'exam_type').order_by('-mark_obtained')
+
+    if not exam_records.exists():
+        from django.http import Http404
+        raise Http404("Exam not found")
+
+    # Use the first record to extract shared exam metadata
+    first = exam_records.first()
+    exam_date = first.date
+    class_number = first.class_number
+    subject = first.subject
+    chapter = first.chapter
+    exam_type = first.exam_type
+    total_marks = first.total_marks
+
+    # Participant stats
+    num_participants = exam_records.count()
+    percentages = [e.percentage for e in exam_records]
+    class_average = sum(percentages) / len(percentages) if percentages else 0
+    lowest_score = min(percentages) if percentages else 0
+    highest_score = max(percentages) if percentages else 0
+
+    # Best performer
+    best_exam = exam_records.first()  # already ordered by -mark_obtained
+    best_performer = best_exam.student if best_exam else None
+
+    # Build participant list with rank
+    participants = []
+    sorted_records = sorted(exam_records, key=lambda e: e.percentage, reverse=True)
+    current_rank = 0
+    prev_pct = None
+    for idx, exam in enumerate(sorted_records):
+        pct = round(exam.percentage, 2)
+        if pct != prev_pct:
+            current_rank = idx + 1
+        participants.append({
+            'rank': current_rank,
+            'student': exam.student,
+            'mark_obtained': exam.mark_obtained,
+            'total_marks': exam.total_marks,
+            'percentage': exam.percentage,
+            'grade': exam.grade,
+            'grade_color': exam.grade_color,
+            'exam_pk': exam.pk,
+        })
+        prev_pct = pct
+
+    # Role-based: identify logged-in student (if any)
+    current_student_id = None
+    user_is_student = is_student(request.user)
+    if user_is_student:
+        try:
+            current_student_id = request.user.student_profile.student.id
+        except Exception:
+            pass
+
+    context = {
+        'exam_id': exam_id,
+        'exam_date': exam_date,
+        'class_number': class_number,
+        'subject': subject,
+        'chapter': chapter,
+        'exam_type': exam_type,
+        'total_marks': total_marks,
+        'num_participants': num_participants,
+        'class_average': class_average,
+        'lowest_score': lowest_score,
+        'highest_score': highest_score,
+        'best_performer': best_performer,
+        'participants': participants,
+        'is_student': user_is_student,
+        'current_student_id': current_student_id,
+    }
+    return render(request, 'marks/exam_detail.html', context)
+
+
+@login_required(login_url='login')
 def points(request):
     """Points management page with history and summary - filtered by teacher"""
     teacher = get_teacher_for_user(request.user)
