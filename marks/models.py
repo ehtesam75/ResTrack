@@ -79,20 +79,20 @@ class Student(models.Model):
         """
         return queryset.values('exam_id').distinct().count()
 
-    def calculate_monthly_wins(self):
+    def get_monthly_win_months(self):
         """
-        Calculate how many months this student ranked #1 (excluding current month).
+        Get the list of (year, month) tuples where this student ranked #1 (excluding current month).
         Handles ties: if multiple students have same average score AND same total marks,
         all of them get credit for the monthly win.
         
         Returns:
-            int: Number of months where student ranked first
+            list of (year, month) tuples where student ranked first
         """
         from datetime import date
         current_year = date.today().year
         current_month = date.today().month
         
-        monthly_winner_count = 0
+        winning_months = []
         exam_dates = Exam.objects.values_list('date', flat=True).distinct()
         months_set = set()
         
@@ -149,10 +149,21 @@ class Student(models.Model):
                         # If this student has same avg AND same total marks as top, count it as a win
                         if (abs(ranking['average_percentage'] - top_avg) < 0.01 and
                             ranking['total_marks'] == top_total):
-                            monthly_winner_count += 1
+                            winning_months.append((year, month))
                         break
         
-        return monthly_winner_count
+        return winning_months
+
+    def calculate_monthly_wins(self):
+        """
+        Calculate how many months this student ranked #1 (excluding current month).
+        Handles ties: if multiple students have same average score AND same total marks,
+        all of them get credit for the monthly win.
+        
+        Returns:
+            int: Number of months where student ranked first
+        """
+        return len(self.get_monthly_win_months())
 
     @property
     def total_marks(self):
@@ -363,37 +374,30 @@ class Student(models.Model):
                     exam=exam
                 )
 
-        # Calculate monthly wins bonus and create transactions
-        monthly_wins = self.calculate_monthly_wins()
-        bonus_points = monthly_wins * 40
+        # Calculate monthly wins bonus and create individual transactions per winning month
+        import calendar
+        from datetime import date
+        winning_months = self.get_monthly_win_months()
+        bonus_points = len(winning_months) * 40
 
-        # Create transactions for monthly wins
-        if monthly_wins > 0:
-            # Get the months where this student won
-            from datetime import date
-            current_year = date.today().year
-            current_month = date.today().month
+        # Create one transaction per winning month
+        for win_year, win_month in winning_months:
+            month_name = calendar.month_name[win_month]
+            # Date the transaction on the 1st of the following month
+            if win_month == 12:
+                transaction_date = date(win_year + 1, 1, 1)
+            else:
+                transaction_date = date(win_year, win_month + 1, 1)
 
-            exam_dates = Exam.objects.values_list('date', flat=True).distinct()
-            months_set = set()
-
-            for exam_date in exam_dates:
-                if exam_date:
-                    # Only count months that have fully passed
-                    if (exam_date.year < current_year) or (exam_date.year == current_year and exam_date.month < current_month):
-                        months_set.add((exam_date.year, exam_date.month))
-
-            # Create one transaction per win (simplified - we could make this more detailed)
-            if monthly_wins > 0:
-                PointTransaction.objects.create(
-                    student=self,
-                    teacher=self.teacher,  # Use student's teacher
-                    transaction_type='monthly_win',
-                    points_change=bonus_points,
-                    description=f"Monthly winner bonus ({monthly_wins} win{'s' if monthly_wins > 1 else ''})",
-                    date=date.today(),  # Use today's date for simplicity
-                    exam=None
-                )
+            PointTransaction.objects.create(
+                student=self,
+                teacher=self.teacher,
+                transaction_type='monthly_win',
+                points_change=40,
+                description=f"Monthly winner \u2013 {month_name}",
+                date=transaction_date,
+                exam=None
+            )
 
         # Total points = exam points + monthly wins bonus
         total_points = exam_points + bonus_points
