@@ -304,7 +304,7 @@
 
 <!-- ==================== DESKTOP LAYOUT (hidden sm:block) ==================== -->
 <div class="hidden sm:block">
-    <div class="max-w-5xl mx-auto px-2 sm:px-0">
+    <div class="max-w-7xl mx-auto">
         <div class="glass-effect rounded-xl p-4 sm:p-6 border border-gray-200 shadow-lg animate-fade-in-up">
             <!-- Header -->
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
@@ -312,17 +312,20 @@
                     <h1 class="text-xl sm:text-2xl font-bold gradient-text">Exam Documents</h1>
                     <p class="text-xs sm:text-sm text-gray-600 mt-1">Look up and view exam question papers and answer sheets</p>
                 </div>
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2 flex-wrap">
                     <!-- Stats badges -->
                     <span class="bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-lg text-xs font-medium border border-indigo-100">
                         Exam ID Range: {{ min_exam_id }} → {{ max_exam_id }}
                     </span>
+                    {% comment %} <span class="bg-purple-50 text-purple-700 px-3 py-1.5 rounded-lg text-xs font-medium border border-purple-100">
+                        {{ total_exams }} unique exams
+                    </span> {% endcomment %}
                     <span class="bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg text-xs font-medium border border-emerald-100">
                         {{ exams_with_pdf }}/{{ total_exams }} with question PDF
                     </span>
                     {% if is_student %}
                     <span class="bg-green-50 text-green-700 px-3 py-1.5 rounded-lg text-xs font-medium border border-green-100">
-                        {{ exams_with_answer_sheet }}/{{ total_student_exams }} with answer paper
+                        {{ exams_with_answer_sheet }}/{{ total_student_exams }} answer papers avialable
                     </span>
                     {% endif %}
                 </div>
@@ -380,7 +383,7 @@
                         </h3>
                         <span id="dResultExamType" class="text-xs px-2.5 py-1 rounded-full font-medium bg-indigo-100 text-indigo-700"></span>
                     </div>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                         <div>
                             <p class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Subject</p>
                             <p id="dResultSubject" class="text-sm font-medium text-gray-800">—</p>
@@ -400,6 +403,14 @@
                         <div>
                             <p class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Participants</p>
                             <p id="dResultParticipants" class="text-sm font-medium text-gray-800">—</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Class Average</p>
+                            <p id="dResultClassAvg" class="text-sm font-medium text-gray-800">—</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Lowest Score</p>
+                            <p id="dResultLowest" class="text-sm font-medium text-gray-800">—</p>
                         </div>
                         <div>
                             <p class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Best Performer</p>
@@ -501,7 +512,6 @@
                                 </div>
                                 <h3 class="text-sm font-bold text-gray-900">Students' Marked Answer Papers</h3>
                             </div>
-                            <span id="dStudentCount" class="text-xs text-gray-500"></span>
                         </div>
 
                         <!-- Students table -->
@@ -514,6 +524,7 @@
                                             <th class="px-4 py-2.5 text-left text-[10px] uppercase tracking-wider font-semibold text-gray-500">Student</th>
                                             <th class="px-4 py-2.5 text-center text-[10px] uppercase tracking-wider font-semibold text-gray-500">Score</th>
                                             <th class="px-4 py-2.5 text-center text-[10px] uppercase tracking-wider font-semibold text-gray-500">Percentage</th>
+                                            <th class="px-4 py-2.5 text-center text-[10px] uppercase tracking-wider font-semibold text-gray-500">Grade</th>
                                             <th class="px-4 py-2.5 text-center text-[10px] uppercase tracking-wider font-semibold text-gray-500">Answer Paper</th>
                                         </tr>
                                     </thead>
@@ -797,6 +808,8 @@
         document.getElementById('dResultChapter').textContent = exam.chapter || 'N/A';
         document.getElementById('dResultTotalMarks').textContent = exam.total_marks;
         document.getElementById('dResultParticipants').textContent = exam.total_participants + ' student' + (exam.total_participants !== 1 ? 's' : '');
+        document.getElementById('dResultClassAvg').textContent = exam.class_average !== undefined ? exam.class_average + '%' : '—';
+        document.getElementById('dResultLowest').textContent = exam.lowest_percentage !== undefined ? exam.lowest_percentage + '%' : '—';
         document.getElementById('dResultBestStudent').textContent = exam.best_student;
         if (exam.best_student && exam.best_student !== 'N/A') {
             document.getElementById('dResultBestPercentage').textContent = exam.best_percentage;
@@ -822,7 +835,6 @@
             document.getElementById('dTeacherSection').classList.remove('hidden');
 
             if (exam.all_students_data && exam.all_students_data.length > 0) {
-                document.getElementById('dStudentCount').textContent = exam.all_students_data.length + ' student' + (exam.all_students_data.length !== 1 ? 's' : '');
                 document.getElementById('dTeacherStudentsTable').classList.remove('hidden');
                 const tbody = document.getElementById('dTeacherStudentsBody');
                 tbody.innerHTML = '';
@@ -831,7 +843,14 @@
                     const tr = document.createElement('tr');
                     tr.className = 'hover:bg-gray-50 transition-colors';
 
-                    const pctColor = s.percentage >= 80 ? 'text-green-600' : s.percentage >= 50 ? 'text-amber-600' : 'text-red-600';
+                    // Determine grade based on exam type (CQ vs MCQ thresholds)
+                    const isMCQ = exam.exam_type && exam.exam_type.toUpperCase().trim() === 'MCQ';
+                    let grade;
+                    if (isMCQ) {
+                        grade = s.percentage >= 93 ? 'Superb' : s.percentage >= 77 ? 'Good' : s.percentage >= 55 ? 'Average' : s.percentage >= 40 ? 'Poor' : s.percentage >= 30 ? 'Fail' : 'Horrible';
+                    } else {
+                        grade = s.percentage >= 85 ? 'Superb' : s.percentage >= 70 ? 'Good' : s.percentage >= 50 ? 'Average' : s.percentage >= 33 ? 'Poor' : s.percentage >= 20 ? 'Fail' : 'Horrible';
+                    }
 
                     let answerCell;
                     if (s.has_marked_answer && s.marked_answer_url) {
@@ -851,13 +870,13 @@
                         <td class="px-4 py-2.5 text-xs text-gray-500">${idx + 1}</td>
                         <td class="px-4 py-2.5 font-medium text-gray-800 text-xs">${s.student_name}</td>
                         <td class="px-4 py-2.5 text-center text-xs text-gray-700">${s.marks}/${s.total_marks}</td>
-                        <td class="px-4 py-2.5 text-center text-xs font-semibold ${pctColor}">${s.percentage}%</td>
+                        <td class="px-4 py-2.5 text-center text-xs font-semibold text-gray-700">${s.percentage}%</td>
+                        <td class="px-4 py-2.5 text-center text-xs font-medium text-gray-600">${grade}</td>
                         <td class="px-4 py-2.5 text-center">${answerCell}</td>
                     `;
                     tbody.appendChild(tr);
                 });
             } else {
-                document.getElementById('dStudentCount').textContent = '0 students';
                 document.getElementById('dNoStudentsMessage').classList.remove('hidden');
             }
         } else if (isStudent) {

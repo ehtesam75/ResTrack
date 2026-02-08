@@ -63,6 +63,9 @@
                         <a href="{% url 'all_exams' %}" class="{% if request.path == '/exams/' %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors nav-link">
                             Exams
                         </a>
+                        <a href="{% url 'exam_lookup' %}" class="{% if 'exam-lookup' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors nav-link">
+                            Exam Docs
+                        </a>
                         <a href="{% url 'points' %}" class="{% if 'points' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors nav-link">
                             Points
                         </a>
@@ -72,8 +75,8 @@
                         <a href="{% url 'guide' %}" class="{% if 'guide' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors nav-link">
                             Guide
                         </a>
-                        <a href="{% url 'exam_lookup' %}" class="{% if 'exam-lookup' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors nav-link">
-                            Exam Docs
+                        <a href="{% url 'about' %}" class="{% if 'about' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors nav-link">
+                            About
                         </a>
                     </div>
                     {% endif %}

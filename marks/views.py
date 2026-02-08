@@ -2397,7 +2397,20 @@ def exam_lookup_api(request):
     student_total = student_data['total_marks'] if student_data else None
     student_percentage = student_data['percentage'] if student_data else None
     marked_answer_url = student_data['marked_answer_url'] if student_data else None
-    
+
+    # Compute class average and lowest score for desktop stats
+    total_participants = exams.count()
+    if total_participants > 0:
+        total_marks_sum = sum(e.mark_obtained for e in exams)
+        total_possible_sum = sum(e.total_marks for e in exams)
+        class_average = round((total_marks_sum / total_possible_sum) * 100, 1) if total_possible_sum > 0 else 0
+        lowest_percentage = round(min(e.percentage for e in exams), 1)
+        marked_papers_count = sum(1 for e in exams if e.marked_answer_paper)
+    else:
+        class_average = 0
+        lowest_percentage = 0
+        marked_papers_count = 0
+
     return JsonResponse({
         'success': True,
         'exam': {
@@ -2409,7 +2422,10 @@ def exam_lookup_api(request):
             'total_marks': str(first_exam.total_marks),
             'best_student': best_student.name if best_student else 'N/A',
             'best_percentage': round(best_percentage, 1),
-            'total_participants': exams.count(),
+            'total_participants': total_participants,
+            'class_average': class_average,
+            'lowest_percentage': lowest_percentage,
+            'marked_papers_count': marked_papers_count,
             'has_pdf': pdf_url is not None,
             'pdf_url': pdf_url,
             'has_marked_answer': marked_answer_url is not None,
