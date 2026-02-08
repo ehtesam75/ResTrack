@@ -87,16 +87,26 @@
                         <label for="new_password" class="block text-xs font-semibold text-gray-700 mb-1.5">
                             New Password
                         </label>
-                        <input type="password" id="new_password" name="new_password" minlength="6"
-                            class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus-border-transparent bg-gray-50 hover:bg-white transition-colors">
+                        <div class="relative">
+                            <input type="password" id="new_password" name="new_password" minlength="6" value="{{ student_raw_password|default:'' }}"
+                                class="w-full px-3 py-2 pr-9 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus-border-transparent bg-gray-50 hover:bg-white transition-colors">
+                            <button type="button" onclick="togglePasswordVisibility('new_password', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none" tabindex="-1">
+                                <i class="fas fa-eye text-sm"></i>
+                            </button>
+                        </div>
                         <p class="text-xs text-gray-500 mt-1">Leave blank to keep the current password. Min 6 characters.</p>
                     </div>
                     <div>
                         <label for="confirm_password" class="block text-xs font-semibold text-gray-700 mb-1.5">
                             Confirm New Password
                         </label>
-                        <input type="password" id="confirm_password" name="confirm_password" minlength="6"
-                            class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus-border-transparent bg-gray-50 hover:bg-white transition-colors">
+                        <div class="relative">
+                            <input type="password" id="confirm_password" name="confirm_password" minlength="6" value="{{ student_raw_password|default:'' }}"
+                                class="w-full px-3 py-2 pr-9 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus-border-transparent bg-gray-50 hover:bg-white transition-colors">
+                            <button type="button" onclick="togglePasswordVisibility('confirm_password', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none" tabindex="-1">
+                                <i class="fas fa-eye text-sm"></i>
+                            </button>
+                        </div>
                         <p id="password-match-message" class="text-xs mt-1"></p>
                     </div>
                 </div>
@@ -126,6 +136,21 @@
 </div>
 
 <script>
+// Toggle password visibility
+function togglePasswordVisibility(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const icon = btn.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+
 // Password match validation with message
 const passwordInput = document.getElementById('new_password');
 const confirmInput = document.getElementById('confirm_password');

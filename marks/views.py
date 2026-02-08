@@ -969,7 +969,8 @@ def add_student(request):
                 StudentProfile.objects.create(
                     user=user,
                     student=student,
-                    created_by=request.user
+                    created_by=request.user,
+                    raw_password=password
                 )
                 
                 return redirect('student_detail', student_id=student.id)
@@ -1037,14 +1038,24 @@ def edit_student(request, student_id):
                             return redirect('edit_student', student_id=student_id)
                         student_user.set_password(new_password)
                         student_user.save()
+                        # Save raw password for teacher reference
+                        if hasattr(student, 'user_profile'):
+                            student.user_profile.raw_password = new_password
+                            student.user_profile.save()
                 
                 return redirect('student_detail', student_id=student.id)
             except Exception as e:
                 messages.error(request, f'Error updating student: {str(e)}')
     
+    # Get stored raw password for display
+    student_raw_password = ''
+    if student_user and hasattr(student, 'user_profile') and student.user_profile.raw_password:
+        student_raw_password = student.user_profile.raw_password
+
     context = {
         'student': student,
         'student_user': student_user,
+        'student_raw_password': student_raw_password,
         'is_teacher': True,
     }
     return render(request, 'marks/edit_student.html', context)
