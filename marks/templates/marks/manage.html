@@ -239,37 +239,37 @@
 
         <!-- Recent Exams -->
         <div class="glass-effect rounded-xl border border-gray-200 overflow-hidden">
-            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
-                <h2 class="font-bold text-gray-900">Recent Exams</h2>
+            <div class="p-3 sm:p-4 border-b border-gray-100 flex items-center justify-between">
+                <h2 class="font-bold text-gray-900 text-sm sm:text-base">Recent Exams</h2>
                 <a href="{% url 'all_exams' %}" class="text-purple-600 text-xs font-medium hover:text-purple-700">View All →</a>
             </div>
             <div class="divide-y divide-gray-100 max-h-80 overflow-y-auto">
                 {% for exam in recent_exams %}
-                <div class="p-4 hover:bg-gray-50 transition-colors">
+                <div class="p-3 sm:p-4 hover:bg-gray-50 transition-colors">
                     <div class="flex justify-between items-stretch gap-2">
                         <!-- Left: stacked info -->
                         <div class="flex flex-col justify-center">
                             <div class="flex items-center">
-                                {% if exam.exam_id %}<a href="{% url 'exam_detail' exam.exam_id %}" class="text-purple-500 font-semibold mr-1 text-xs align-middle hover:text-purple-700 hover:underline transition-colors">#{{ exam.exam_id }}</a>{% else %}<span class="text-purple-500 font-semibold mr-1 text-xs align-middle">#N/A</span>{% endif %}
-                                <span class="font-medium text-gray-900 text-sm">{{ exam.student.name }}</span>
+                                {% if exam.exam_id %}<a href="{% url 'exam_detail' exam.exam_id %}" class="text-purple-500 font-semibold mr-1 text-[10px] sm:text-xs align-middle hover:text-purple-700 hover:underline transition-colors">#{{ exam.exam_id }}</a>{% else %}<span class="text-purple-500 font-semibold mr-1 text-[10px] sm:text-xs align-middle">#N/A</span>{% endif %}
+                                <span class="font-medium text-gray-900 text-xs sm:text-sm">{{ exam.student.name }}</span>
                             </div>
-                            <div class="text-xs text-gray-500 mt-0.5">{{ exam.subject.name }} • {{ exam.exam_type.name }}</div>
+                            <div class="text-[10px] sm:text-xs text-gray-500 mt-0.5">{{ exam.subject.short_name|default:exam.subject.name }} • {{ exam.exam_type.name }}</div>
                         </div>
                         <!-- Right: stacked percentage/marks, edit icon centered -->
                         <div class="flex flex-col justify-between items-end flex-1">
                             <div class="flex items-center justify-end">
-                                <span class="text-xs px-2 py-0.5 rounded-full mr-2 {% if exam.percentage >= 80 %}bg-green-100 text-green-700{% elif exam.percentage >= 60 %}bg-blue-100 text-blue-700{% elif exam.percentage >= 40 %}bg-yellow-100 text-yellow-700{% else %}bg-red-100 text-red-700{% endif %}">
+                                <span class="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full mr-1 sm:mr-2" style="background-color: {{ exam.grade_color }};">
                                     {{ exam.percentage|floatformat:1 }}%
                                 </span>
                             </div>
                             <div class="flex items-center justify-end mt-1">
-                                <span class="text-xs text-gray-700 mr-2">{{ exam.mark_obtained }}/{{ exam.total_marks }}</span>
+                                <span class="text-[10px] sm:text-xs text-gray-700 mr-1 sm:mr-2">{{ exam.mark_obtained }}/{{ exam.total_marks }}</span>
                             </div>
                         </div>
                         <!-- Edit icon vertically centered -->
-                        <div class="flex flex-col justify-center items-end ml-2">
+                        <div class="flex flex-col justify-center items-end ml-1 sm:ml-2">
                             <a href="{% url 'edit_exam' exam.id %}" class="text-gray-400 hover:text-blue-600 transition-colors" title="Edit">
-                                <svg class="w-9 h-9 p-2 rounded-lg bg-gray-50 hover:bg-blue-50 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-7 h-7 sm:w-9 sm:h-9 p-1.5 sm:p-2 rounded-lg bg-gray-50 hover:bg-blue-50 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                 </svg>
                             </a>

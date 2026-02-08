@@ -1054,13 +1054,17 @@ class PointTransaction(models.Model):
 
     @property
     def short_description(self):
-        """Return a compact description for mobile views (e.g. abbreviated year)."""
+        """Return a compact description for mobile views (e.g. abbreviated year, short subject name)."""
         import re
+        desc = self.description
         # Convert "Monthly winner – January 2025" → "Monthly winner – January '25"
-        match = re.match(r"^(Monthly winner \u2013 \w+) (\d{4})$", self.description)
+        match = re.match(r"^(Monthly winner \u2013 \w+) (\d{4})$", desc)
         if match:
-            return f"{match.group(1)} '{match.group(2)[2:]}"
-        return self.description
+            desc = f"{match.group(1)} '{match.group(2)[2:]}"
+        # Replace full subject name with short name if available
+        if self.exam and self.exam.subject and self.exam.subject.short_name:
+            desc = desc.replace(self.exam.subject.name, self.exam.subject.short_name)
+        return desc
 
     @property
     def is_positive(self):
