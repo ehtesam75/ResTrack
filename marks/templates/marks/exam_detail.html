@@ -135,9 +135,15 @@
                 {% for p in participants %}
                 <div class="px-4 py-3 {% if is_student and current_student_id == p.student.id %}bg-indigo-50 border-l-[3px] border-l-indigo-500{% endif %}">
                     <div class="flex items-center gap-3">
-                        <span class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 {% if p.rank == 1 %}bg-yellow-400 text-yellow-900{% elif p.rank == 2 %}bg-gray-300 text-gray-700{% elif p.rank == 3 %}bg-amber-600 text-white{% else %}bg-gray-100 text-gray-600{% endif %}">
-                            {{ p.rank }}
-                        </span>
+                        {% if p.rank == 1 %}
+                        <span class="w-6 h-6 flex items-center justify-center text-base flex-shrink-0" title="1st Place">🥇</span>
+                        {% elif p.rank == 2 %}
+                        <span class="w-6 h-6 flex items-center justify-center text-base flex-shrink-0" title="2nd Place">🥈</span>
+                        {% elif p.rank == 3 %}
+                        <span class="w-6 h-6 flex items-center justify-center text-base flex-shrink-0" title="3rd Place">🥉</span>
+                        {% else %}
+                        <span class="w-6 h-6 flex items-center justify-center text-[10px] font-medium text-gray-500 flex-shrink-0">#{{ p.rank }}</span>
+                        {% endif %}
                         <div class="flex-1 min-w-0">
                             <a href="{% url 'student_detail' p.student.id %}" class="font-medium text-sm text-gray-900 hover:text-indigo-600 truncate block transition-colors">
                                 {{ p.student.name }}{% if is_student and current_student_id == p.student.id %} <span class="text-[10px] text-indigo-600 font-medium">(You)</span>{% endif %}
@@ -265,9 +271,15 @@
                             {% for p in participants %}
                             <tr class="hover:bg-gray-50 transition-colors {% if is_student and current_student_id == p.student.id %}bg-indigo-50/60{% endif %}">
                                 <td class="px-4 py-2.5 text-center">
-                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-[10px] font-bold {% if p.rank == 1 %}bg-yellow-400 text-yellow-900{% elif p.rank == 2 %}bg-gray-300 text-gray-700{% elif p.rank == 3 %}bg-amber-600 text-white{% else %}bg-gray-100 text-gray-600{% endif %}">
-                                        {{ p.rank }}
-                                    </span>
+                                    {% if p.rank == 1 %}
+                                    <span class="inline-flex items-center justify-center w-6 h-6 text-base" title="1st Place">🥇</span>
+                                    {% elif p.rank == 2 %}
+                                    <span class="inline-flex items-center justify-center w-6 h-6 text-base" title="2nd Place">🥈</span>
+                                    {% elif p.rank == 3 %}
+                                    <span class="inline-flex items-center justify-center w-6 h-6 text-base" title="3rd Place">🥉</span>
+                                    {% else %}
+                                    <span class="inline-flex items-center justify-center w-6 h-6 text-[10px] font-medium text-gray-500">#{{ p.rank }}</span>
+                                    {% endif %}
                                 </td>
                                 <td class="px-4 py-2.5">
                                     <a href="{% url 'student_detail' p.student.id %}" class="text-sm font-medium text-gray-800 hover:text-indigo-600 transition-colors">

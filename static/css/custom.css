@@ -79,9 +79,18 @@ button, .btn, a[class*="bg-"], a[class*="text-white"] {
     overflow: hidden;
 }
 
-button:hover:not(:disabled), .btn:hover, a[class*="bg-"]:hover {
+button:hover:not(:disabled):not(.password-toggle), .btn:hover, a[class*="bg-"]:hover {
     transform: translateY(-1px);
     box-shadow: var(--shadow-lg);
+}
+
+/* Password toggle button - prevent movement on hover */
+button.password-toggle,
+button.password-toggle:hover,
+button.password-toggle:focus,
+button.password-toggle:active {
+    transform: none !important;
+    box-shadow: none !important;
 }
 
 button:active:not(:disabled), .btn:active, a[class*="bg-"]:active {
