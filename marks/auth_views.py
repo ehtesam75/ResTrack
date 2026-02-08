@@ -19,6 +19,7 @@ def teacher_signup(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
     
+    field_errors = {}
     if request.method == 'POST':
         form = TeacherSignupForm(request.POST)
         if form.is_valid():
@@ -28,12 +29,14 @@ def teacher_signup(request):
             return redirect('dashboard')
         else:
             for field, errors in form.errors.items():
-                for error in errors:
-                    messages.error(request, f'{error}')
+                if field != '__all__':
+                    field_errors[field] = str(errors[0])
+                else:
+                    field_errors.setdefault('password2', str(errors[0]))
     else:
         form = TeacherSignupForm()
     
-    return render(request, 'marks/signup.html', {'form': form})
+    return render(request, 'marks/signup.html', {'form': form, 'field_errors': field_errors})
 
 
 def user_login(request):
@@ -41,6 +44,7 @@ def user_login(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
     
+    field_errors = {}
     if request.method == 'POST':
         form = LoginForm(request, data=request.POST)
         if form.is_valid():
@@ -57,11 +61,15 @@ def user_login(request):
             next_url = request.GET.get('next', 'dashboard')
             return redirect(next_url)
         else:
-            messages.error(request, 'Invalid username or password.')
+            if form.non_field_errors():
+                field_errors['password'] = 'Invalid username or password'
+            for field, errors in form.errors.items():
+                if field != '__all__':
+                    field_errors[field] = str(errors[0])
     else:
         form = LoginForm()
     
-    return render(request, 'marks/login.html', {'form': form})
+    return render(request, 'marks/login.html', {'form': form, 'field_errors': field_errors})
 
 
 def user_logout(request):

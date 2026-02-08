@@ -7,6 +7,10 @@ from .models import Student, TeacherProfile, StudentProfile
 
 class TeacherSignupForm(UserCreationForm):
     """Form for teacher registration"""
+    error_messages = {
+        **UserCreationForm.error_messages,
+        'password_mismatch': "Passwords don't match",
+    }
     email = forms.EmailField(
         required=True,
         widget=forms.EmailInput(attrs={
@@ -57,6 +61,18 @@ class TeacherSignupForm(UserCreationForm):
             'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all',
             'placeholder': 'Confirm your password'
         })
+        self.fields['username'].error_messages['unique'] = 'Username already taken'
+
+    def _post_clean(self):
+        """Attach password validation errors to password1 instead of password2"""
+        super(UserCreationForm, self)._post_clean()
+        password = self.cleaned_data.get('password2')
+        if password:
+            try:
+                from django.contrib.auth.password_validation import validate_password
+                validate_password(password, self.instance)
+            except ValidationError as error:
+                self.add_error('password1', error)
 
     def save(self, commit=True):
         user = super().save(commit=False)

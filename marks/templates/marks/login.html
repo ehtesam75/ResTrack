@@ -40,21 +40,6 @@
         </div>
 
 
-
-        <!-- Messages -->
-        {% if messages %}
-        <div class="mt-4 mb-4 animate-fade-in-up" style="animation-delay: 0.1s;">
-            {% for message in messages %}
-            <div class="{% if message.tags == 'success' %}bg-green-50 border-l-4 border-green-500 text-green-800{% elif message.tags == 'error' %}bg-red-50 border-l-4 border-red-500 text-red-800{% else %}bg-blue-50 border-l-4 border-blue-500 text-blue-800{% endif %} px-3 py-2 rounded-r-lg shadow-sm mb-2 text-sm" role="alert">
-                <span class="block sm:inline font-medium">
-                    {% if message.tags == 'success' %}✅{% elif message.tags == 'error' %}❌{% else %}ℹ️{% endif %}
-                    {{ message }}
-                </span>
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-
     <div class="glass-effect rounded-xl border border-gray-200 shadow-lg p-4 sm:p-6 animate-fade-in-up mt-2">
         <div class="mb-4 sm:mb-6 text-center">
             <h1 class="text-xl sm:text-2xl font-bold gradient-text">Welcome Back</h1>
@@ -72,10 +57,14 @@
                         type="text"
                         id="username"
                         name="username"
+                        value="{{ form.username.value|default_if_none:'' }}"
                         required
-                        class="w-full px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors"
+                        class="w-full px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border {% if field_errors.username %}border-red-400{% else %}border-gray-300{% endif %} rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors"
                         placeholder="Enter your username"
                     >
+                    {% if field_errors.username %}
+                    <p class="text-red-500 text-xs mt-1">{{ field_errors.username }}</p>
+                    {% endif %}
                 </div>
 
                 <div>
@@ -87,9 +76,12 @@
                         id="password"
                         name="password"
                         required
-                        class="w-full px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors"
+                        class="w-full px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border {% if field_errors.password %}border-red-400{% else %}border-gray-300{% endif %} rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors"
                         placeholder="Enter your password"
                     >
+                    {% if field_errors.password %}
+                    <p class="text-red-500 text-xs mt-1">{{ field_errors.password }}</p>
+                    {% endif %}
                 </div>
 
                 <div class="pt-2">
