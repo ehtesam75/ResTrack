@@ -38,15 +38,17 @@
                 <div>
                     <h1 class="text-xl sm:text-2xl font-bold text-gray-900 mb-1">{{ exam.subject }}</h1>
                     <div class="flex flex-wrap gap-2 text-xs text-gray-500">
-                        <span class="px-2 py-0.5 bg-gray-100 rounded-full font-medium">{{ exam.exam_display_id }}</span>
+                        <span class="px-2 py-0.5 bg-gray-100 rounded-full font-medium">Exam ID : {{ exam.exam_display_id }}</span>
                         <span class="px-2 py-0.5 bg-gray-100 rounded-full">Class {{ exam.class_number }}</span>
                         <span class="px-2 py-0.5 bg-gray-100 rounded-full">{{ exam.get_exam_type_display }}</span>
                         <span class="px-2 py-0.5 {% if exam.exam_mode == 'online' %}bg-blue-100 text-blue-700{% else %}bg-gray-100{% endif %} rounded-full font-medium">{{ exam.get_exam_mode_display }}</span>
                     </div>
                 </div>
                 <div class="text-right flex-shrink-0">
-                    <p class="text-2xl font-bold text-gray-900">{{ exam.total_marks }}</p>
-                    <p class="text-xs text-gray-400">Total Marks</p>
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-purple-50 border border-purple-200 rounded-xl">
+                        <p class="text-2xl font-bold text-purple-700">{{ exam.total_marks }}</p>
+                        <p class="text-xs text-purple-500 font-semibold">Total<br>Marks</p>
+                    </div>
                 </div>
             </div>
 
@@ -62,7 +64,7 @@
                 </div>
                 <div>
                     <p class="text-[11px] text-gray-400 uppercase font-semibold">Duration</p>
-                    <p class="text-sm font-semibold text-gray-800">{{ exam.duration_minutes }} min</p>
+                    <p class="text-sm font-semibold text-gray-800">{{ exam.duration_minutes }}{% if exam.exam_bonus_minutes %}+{{ exam.exam_bonus_minutes }}{% endif %} min</p>
                 </div>
                 <div>
                     <p class="text-[11px] text-gray-400 uppercase font-semibold">
@@ -70,9 +72,9 @@
                     </p>
                     <p class="text-sm font-semibold text-gray-800">
                         {% if exam.exam_mode == 'online' %}
-                            {{ exam.submission_duration_minutes }}{% if exam.bonus_time_minutes %}+{{ exam.bonus_time_minutes }}{% endif %} min
+                            {{ exam.submission_duration_minutes }}{% if exam.submission_bonus_minutes %}+{{ exam.submission_bonus_minutes }}{% endif %} min
                         {% else %}
-                            {% if exam.bonus_time_minutes %}+{{ exam.bonus_time_minutes }} min{% else %}—{% endif %}
+                            {% if exam.exam_bonus_minutes %}+{{ exam.exam_bonus_minutes }} min{% else %}—{% endif %}
                         {% endif %}
                     </p>
                 </div>
@@ -102,12 +104,13 @@
         <!-- Bonus time grant -->
         <div class="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2 shadow-sm">
             <label class="text-xs font-medium text-gray-600 whitespace-nowrap">Bonus time:</label>
-            <input type="number" id="bonus-input" min="1" max="120" value="5" class="w-16 px-2 py-1 border border-gray-200 rounded-lg text-sm text-center focus:ring-2 focus:ring-purple-400 focus:border-purple-400">
+            <input type="number" id="bonus-input" min="1" max="{% if status == 'running' %}15{% else %}120{% endif %}" value="5" class="w-16 px-2 py-1 border border-gray-200 rounded-lg text-sm text-center focus:ring-2 focus:ring-purple-400 focus:border-purple-400">
             <span class="text-xs text-gray-400">min</span>
             <button id="grant-bonus-btn" type="button"
                     class="px-3 py-1 bg-amber-500 text-white rounded-lg text-xs font-semibold hover:bg-amber-600 transition-colors">
                 Grant
             </button>
+            <span class="text-[10px] text-gray-400">{% if status == 'running' %}(max 15, adds to exam){% else %}(adds to submission){% endif %}</span>
         </div>
         {% endif %}
 
@@ -130,7 +133,9 @@
         </div>
         <p class="text-sm text-gray-500 mb-2">Exam starts in</p>
         <div id="countdown-display" class="countdown-big font-bold text-indigo-600 timer-display mb-3">--:--:--</div>
+        {% if is_student %}
         <p class="text-xs text-gray-400">Question paper will be available when the exam starts</p>
+        {% endif %}
     </div>
     {% endif %}
 
@@ -149,18 +154,32 @@
             </div>
         </div>
 
-        <!-- Question Paper (visible to students during running exam) -->
+        <!-- Question Paper -->
         {% if exam.question_pdf %}
-        <div class="bg-white rounded-2xl shadow-md overflow-hidden">
-            <div class="px-5 py-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
-                <h3 class="text-sm font-bold text-gray-700"><i class="fa-solid fa-file-pdf text-red-500 mr-2"></i>Question Paper</h3>
-                <a href="{{ exam.question_pdf.url }}" target="_blank" rel="noopener"
-                   class="text-xs text-purple-600 font-semibold hover:underline">Open in new tab &rarr;</a>
+            {% if is_student %}
+            <!-- Students see the question paper open during running -->
+            <div class="bg-white rounded-2xl shadow-md overflow-hidden">
+                <div class="px-5 py-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+                    <h3 class="text-sm font-bold text-gray-700"><i class="fa-solid fa-file-pdf text-red-500 mr-2"></i>Question Paper</h3>
+                    <a href="{{ exam.question_pdf.url }}" target="_blank" rel="noopener"
+                       class="text-xs text-purple-600 font-semibold hover:underline">Open in new tab &rarr;</a>
+                </div>
+                <div class="p-3 sm:p-4">
+                    <iframe src="{{ exam.question_pdf.url }}" class="pdf-frame" style="height:70vh;min-height:400px"></iframe>
+                </div>
             </div>
-            <div class="p-3 sm:p-4">
-                <iframe src="{{ exam.question_pdf.url }}" class="pdf-frame" style="height:70vh;min-height:400px"></iframe>
-            </div>
-        </div>
+            {% else %}
+            <!-- Teacher sees it collapsed -->
+            <details class="bg-white rounded-2xl shadow-md overflow-hidden">
+                <summary class="px-5 py-3 bg-gray-50 border-b border-gray-100 cursor-pointer text-sm font-bold text-gray-700 select-none flex items-center justify-between">
+                    <span><i class="fa-solid fa-file-pdf text-red-500 mr-2"></i>Question Paper</span>
+                    <span class="text-xs text-gray-400 font-normal">Click to expand</span>
+                </summary>
+                <div class="p-3 sm:p-4">
+                    <iframe src="{{ exam.question_pdf.url }}" class="pdf-frame" style="height:70vh;min-height:400px"></iframe>
+                </div>
+            </details>
+            {% endif %}
         {% else %}
         <div class="bg-yellow-50 border border-yellow-200 rounded-2xl p-6 text-center">
             <p class="text-sm text-yellow-700 font-medium">No question paper uploaded for this exam.</p>
@@ -176,7 +195,9 @@
         <div class="bg-amber-50 rounded-2xl shadow-md p-6 text-center border border-amber-200">
             <p class="text-xs text-amber-600 uppercase font-semibold mb-1">Submission Window Closing In</p>
             <div id="countdown-display" class="countdown-big font-bold text-amber-600 timer-display mb-2">--:--:--</div>
+            {% if is_student %}
             <p class="text-xs text-gray-500">Upload your answer sheet before time runs out</p>
+            {% endif %}
         </div>
 
         {% if is_student %}
@@ -240,16 +261,28 @@
         </div>
         {% endif %}
 
-        <!-- Question paper still visible during submission -->
+        <!-- Question paper during submission -->
         {% if exam.question_pdf %}
-        <details class="bg-white rounded-2xl shadow-md overflow-hidden">
-            <summary class="px-5 py-3 bg-gray-50 border-b border-gray-100 cursor-pointer text-sm font-bold text-gray-700 select-none">
-                <i class="fa-solid fa-file-pdf text-red-500 mr-2"></i>Question Paper
-            </summary>
-            <div class="p-3 sm:p-4">
-                <iframe src="{{ exam.question_pdf.url }}" class="pdf-frame" style="height:60vh;min-height:350px"></iframe>
-            </div>
-        </details>
+            {% if is_student %}
+            <details class="bg-white rounded-2xl shadow-md overflow-hidden">
+                <summary class="px-5 py-3 bg-gray-50 border-b border-gray-100 cursor-pointer text-sm font-bold text-gray-700 select-none">
+                    <i class="fa-solid fa-file-pdf text-red-500 mr-2"></i>Question Paper
+                </summary>
+                <div class="p-3 sm:p-4">
+                    <iframe src="{{ exam.question_pdf.url }}" class="pdf-frame" style="height:60vh;min-height:350px"></iframe>
+                </div>
+            </details>
+            {% else %}
+            <details class="bg-white rounded-2xl shadow-md overflow-hidden">
+                <summary class="px-5 py-3 bg-gray-50 border-b border-gray-100 cursor-pointer text-sm font-bold text-gray-700 select-none flex items-center justify-between">
+                    <span><i class="fa-solid fa-file-pdf text-red-500 mr-2"></i>Question Paper</span>
+                    <span class="text-xs text-gray-400 font-normal">Click to expand</span>
+                </summary>
+                <div class="p-3 sm:p-4">
+                    <iframe src="{{ exam.question_pdf.url }}" class="pdf-frame" style="height:60vh;min-height:350px"></iframe>
+                </div>
+            </details>
+            {% endif %}
         {% endif %}
     </div>
     {% endif %}
@@ -390,9 +423,11 @@
     const bonusBtn = document.getElementById('grant-bonus-btn');
     if(bonusBtn){
         bonusBtn.addEventListener('click', function(){
+            const maxMins = STATUS === 'running' ? 15 : 120;
             const mins = parseInt(document.getElementById('bonus-input').value)||0;
-            if(mins<1||mins>120){alert('Enter 1–120 minutes.');return;}
-            if(!confirm(`Grant ${mins} minutes of bonus time?`)) return;
+            if(mins<1||mins>maxMins){alert(`Enter 1–${maxMins} minutes.`);return;}
+            const target = STATUS === 'running' ? 'exam duration' : 'submission time';
+            if(!confirm(`Grant ${mins} minutes of bonus time to ${target}?`)) return;
             fetch("{% url 'exam_center_bonus_time' exam.pk %}", {
                 method:'POST',
                 headers:{'Content-Type':'application/json','X-CSRFToken':'{{ csrf_token }}'},

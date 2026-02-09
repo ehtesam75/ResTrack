@@ -1151,7 +1151,15 @@ class ExamCenterExam(models.Model):
 
     bonus_time_minutes = models.PositiveIntegerField(
         default=0,
-        help_text="Bonus time granted by teacher (extends submission for online, extends exam for offline)"
+        help_text="Legacy bonus time field (deprecated, kept for migration compatibility)"
+    )
+    exam_bonus_minutes = models.PositiveIntegerField(
+        default=0,
+        help_text="Bonus time added to exam duration (granted while running)"
+    )
+    submission_bonus_minutes = models.PositiveIntegerField(
+        default=0,
+        help_text="Bonus time added to submission window (granted during submission)"
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -1178,9 +1186,7 @@ class ExamCenterExam(models.Model):
     def exam_end_datetime(self):
         """End of the exam writing period."""
         import datetime as _dt
-        if self.exam_mode == 'offline':
-            return self.start_datetime + _dt.timedelta(minutes=self.duration_minutes + self.bonus_time_minutes)
-        return self.start_datetime + _dt.timedelta(minutes=self.duration_minutes)
+        return self.start_datetime + _dt.timedelta(minutes=self.duration_minutes + self.exam_bonus_minutes)
 
     @property
     def final_end_datetime(self):
@@ -1188,7 +1194,7 @@ class ExamCenterExam(models.Model):
         import datetime as _dt
         if self.exam_mode == 'online':
             return self.exam_end_datetime + _dt.timedelta(
-                minutes=self.submission_duration_minutes + self.bonus_time_minutes
+                minutes=self.submission_duration_minutes + self.submission_bonus_minutes
             )
         return self.exam_end_datetime
 

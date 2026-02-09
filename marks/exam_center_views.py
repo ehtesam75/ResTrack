@@ -107,7 +107,6 @@ def exam_center_create(request):
             exam = form.save(commit=False)
             exam.teacher = request.user
             exam.save()
-            messages.success(request, f'Exam "{exam.exam_display_id}" created successfully.')
             return redirect('exam_center')
     else:
         form = ExamCenterExamForm(teacher=request.user)
@@ -137,7 +136,6 @@ def exam_center_edit(request, exam_id):
         form = ExamCenterExamForm(request.POST, request.FILES, instance=exam, teacher=request.user)
         if form.is_valid():
             form.save()
-            messages.success(request, f'Exam "{exam.exam_display_id}" updated.')
             return redirect('exam_center')
     else:
         form = ExamCenterExamForm(instance=exam, teacher=request.user)
@@ -165,7 +163,6 @@ def exam_center_delete(request, exam_id):
 
     label = exam.exam_display_id
     exam.delete()
-    messages.success(request, f'Exam "{label}" deleted.')
     return redirect('exam_center')
 
 
@@ -275,7 +272,6 @@ def exam_center_submit_answer(request, exam_id):
         is_final=True,
     )
 
-    messages.success(request, f'Answer submitted successfully (attempt {existing.count() + 1}/3).')
     return redirect('exam_center_detail', exam_id=exam.pk)
 
 
@@ -302,15 +298,23 @@ def exam_center_bonus_time(request, exam_id):
     except (ValueError, TypeError):
         return JsonResponse({'error': 'Invalid minutes value.'}, status=400)
 
-    if minutes < 1 or minutes > 120:
-        return JsonResponse({'error': 'Bonus time must be between 1 and 120 minutes.'}, status=400)
+    if status == 'running':
+        # During running: max 15 min per grant, adds to exam duration
+        if minutes < 1 or minutes > 15:
+            return JsonResponse({'error': 'Bonus time during exam must be between 1 and 15 minutes.'}, status=400)
+        exam.exam_bonus_minutes += minutes
+    else:
+        # During submission: any amount, adds to submission time
+        if minutes < 1 or minutes > 120:
+            return JsonResponse({'error': 'Bonus time must be between 1 and 120 minutes.'}, status=400)
+        exam.submission_bonus_minutes += minutes
 
-    exam.bonus_time_minutes += minutes
-    exam.save(update_fields=['bonus_time_minutes', 'updated_at'])
+    exam.save(update_fields=['exam_bonus_minutes', 'submission_bonus_minutes', 'updated_at'])
 
     return JsonResponse({
         'success': True,
-        'total_bonus': exam.bonus_time_minutes,
+        'exam_bonus': exam.exam_bonus_minutes,
+        'submission_bonus': exam.submission_bonus_minutes,
         'final_end_iso': _iso(exam.final_end_datetime),
         'exam_end_iso': _iso(exam.exam_end_datetime),
     })
@@ -336,7 +340,8 @@ def exam_center_status_api(request, exam_id):
         'start_iso': _iso(exam.start_datetime),
         'exam_end_iso': _iso(exam.exam_end_datetime),
         'final_end_iso': _iso(exam.final_end_datetime),
-        'bonus_time_minutes': exam.bonus_time_minutes,
+        'exam_bonus_minutes': exam.exam_bonus_minutes,
+        'submission_bonus_minutes': exam.submission_bonus_minutes,
         'exam_mode': exam.exam_mode,
     })
 

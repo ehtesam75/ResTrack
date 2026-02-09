@@ -243,7 +243,7 @@ class EditStudentForm(forms.Form):
 # Exam Center forms
 # ---------------------------------------------------------------------------
 
-_INPUT_CLS = 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all'
+_INPUT_CLS = 'w-full px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors'
 _SELECT_CLS = _INPUT_CLS
 
 
