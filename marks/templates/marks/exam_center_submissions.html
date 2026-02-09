@@ -26,42 +26,42 @@
 
     {% if submission_list %}
     <div class="bg-white rounded-2xl shadow-md overflow-hidden">
-        <!-- Header row (desktop) -->
-        <div class="hidden sm:grid grid-cols-12 gap-4 px-5 py-3 bg-gray-50 text-[11px] font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100">
-            <div class="col-span-4">Student</div>
-            <div class="col-span-2 text-center">Attempts</div>
-            <div class="col-span-3 text-center">Submitted At</div>
-            <div class="col-span-3 text-right">Download</div>
-        </div>
-
-        <div class="divide-y divide-gray-50">
-            {% for item in submission_list %}
-            <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 px-5 py-4 items-center">
-                <!-- Student name -->
-                <div class="sm:col-span-4">
-                    <p class="text-sm font-semibold text-gray-800">{{ item.student_name }}</p>
-                </div>
-                <!-- Attempts -->
-                <div class="sm:col-span-2 text-center">
-                    <span class="text-xs text-gray-500 sm:text-sm">{{ item.total_attempts }}/3 attempt{{ item.total_attempts|pluralize }}</span>
-                </div>
-                <!-- Time -->
-                <div class="sm:col-span-3 text-center">
-                    <span class="text-xs text-gray-400">{{ item.submitted_at|date:"M d, H:i:s" }}</span>
-                </div>
-                <!-- Download link -->
-                <div class="sm:col-span-3 text-right">
-                    {% if item.file_url %}
-                    <a href="{{ item.file_url }}" target="_blank" rel="noopener"
-                       class="inline-flex items-center gap-1 px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg text-xs font-semibold hover:bg-purple-100 transition-colors">
-                        <i class="fa-solid fa-download"></i> Download
-                    </a>
-                    {% else %}
-                    <span class="text-xs text-gray-400">No file</span>
-                    {% endif %}
-                </div>
-            </div>
-            {% endfor %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="bg-gray-50 border-b border-gray-100">
+                        <th class="px-4 py-3 text-left text-[11px] font-bold text-gray-500 uppercase tracking-wider">Student</th>
+                        <th class="px-4 py-3 text-center text-[11px] font-bold text-gray-500 uppercase tracking-wider hidden sm:table-cell">Attempts</th>
+                        <th class="px-4 py-3 text-center text-[11px] font-bold text-gray-500 uppercase tracking-wider">Submitted At</th>
+                        <th class="px-4 py-3 text-right text-[11px] font-bold text-gray-500 uppercase tracking-wider">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    {% for item in submission_list %}
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-4 py-3">
+                            <span class="text-sm font-semibold text-gray-800">{{ item.student_name }}</span>
+                        </td>
+                        <td class="px-4 py-3 text-center hidden sm:table-cell">
+                            <span class="text-xs text-gray-500">{{ item.total_attempts }}/3</span>
+                        </td>
+                        <td class="px-4 py-3 text-center">
+                            <span class="text-xs text-gray-400">{{ item.submitted_at|date:"M d, H:i:s" }}</span>
+                        </td>
+                        <td class="px-4 py-3 text-right">
+                            {% if item.file_url %}
+                            <a href="{{ item.file_url }}" target="_blank" rel="noopener"
+                               class="inline-flex items-center gap-1 px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg text-xs font-semibold hover:bg-purple-100 transition-colors">
+                                <i class="fa-solid fa-eye"></i> View
+                            </a>
+                            {% else %}
+                            <span class="text-xs text-gray-400">No file</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 

@@ -154,9 +154,6 @@
                         <span><i class="fa-regular fa-calendar mr-1"></i>{{ exam.exam_date|date:"M d, Y" }}</span>
                         <span class="inline-flex items-center gap-1.5">
                             <span class="px-2 py-0.5 bg-gray-200 text-gray-600 rounded-full font-semibold">{{ exam.total_marks }} marks</span>
-                            {% if is_teacher and exam.exam_mode == 'online' %}
-                            <span class="ml-1 text-purple-500 font-semibold"><i class="fa-solid fa-file-lines mr-1"></i>View Submissions</span>
-                            {% endif %}
                         </span>
                     </div>
                 </a>
