@@ -323,23 +323,24 @@
         <div class="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 px-3 sm:px-4 py-2.5">
             <div class="flex items-center space-x-2">
                 <span class="text-lg sm:text-xl">📈</span>
-                <h3 class="text-white text-sm font-semibold tracking-wide sm:hidden">Top 3 Performing Months</h3>
-                <h3 class="text-white text-xs font-semibold tracking-wide hidden sm:block">Best Performing Months</h3>
+                <h3 class="text-white text-sm font-semibold tracking-wide sm:hidden">Top Performing Months</h3>
+                <h3 class="text-white text-xs font-semibold tracking-wide hidden sm:block">Top Performing Months</h3>
             </div>
         </div>
         <div class="p-2.5 sm:p-3 bg-gradient-to-br from-gray-50 to-white">
-            <!-- Mobile: Top 3 Only, Compact Card Layout -->
+            <!-- Mobile: Top 5, Compact Card Layout -->
             <div class="sm:hidden space-y-2">
                 {% for month in best_5_months %}
-                {% if forloop.counter <= 3 %}
                 <div class="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg p-2.5 border border-emerald-100/50 shadow-sm flex items-center gap-3">
-                    <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full {% if forloop.counter == 1 %}bg-yellow-100{% elif forloop.counter == 2 %}bg-gray-100{% elif forloop.counter == 3 %}bg-orange-100{% endif %}">
+                    <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full {% if forloop.counter == 1 %}bg-yellow-100{% elif forloop.counter == 2 %}bg-gray-100{% elif forloop.counter == 3 %}bg-orange-100{% elif forloop.counter == 4 %}bg-blue-50{% else %}bg-blue-50{% endif %}">
                         {% if forloop.counter == 1 %}
                             <span class="text-base">🥇</span>
                         {% elif forloop.counter == 2 %}
                             <span class="text-base">🥈</span>
                         {% elif forloop.counter == 3 %}
                             <span class="text-base">🥉</span>
+                        {% else %}
+                            <span class="text-xs font-bold text-emerald-600">#{{ forloop.counter }}</span>
                         {% endif %}
                     </div>
                     <div class="flex-1 min-w-0">
@@ -351,7 +352,6 @@
                         <p class="text-xs text-gray-500">avg</p>
                     </div>
                 </div>
-                {% endif %}
                 {% endfor %}
             </div>
             

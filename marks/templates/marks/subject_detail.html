@@ -66,7 +66,8 @@
                     {% if best_student %}
                     <p class="text-base sm:text-lg font-bold text-gray-900 mt-0.5 sm:mt-1 truncate">
                         <a href="{% url 'student_detail' best_student.id %}" class="gradient-text hover:opacity-80 transition-opacity">
-                            {{ best_student.name }}
+                            <span class="sm:hidden">{{ best_student.first_name }}</span>
+                            <span class="hidden sm:inline">{{ best_student.name }}</span>
                         </a>
                     </p>
                     {% else %}
@@ -94,7 +95,7 @@
                         <span class="text-xs text-gray-400 ml-1">· {{ cq_stats.exam_count }} exams</span>
                     </div>
                     {% if cq_stats.best_student %}
-                    <span class="text-xs text-gray-500">Best: <a href="{% url 'student_detail' cq_stats.best_student.id %}" class="font-medium text-blue-600">{{ cq_stats.best_student.name }}</a></span>
+                    <span class="text-xs text-gray-500">Best: <a href="{% url 'student_detail' cq_stats.best_student.id %}" class="font-medium text-blue-600">{{ cq_stats.best_student.first_name }}</a></span>
                     {% endif %}
                 </div>
                 <div class="flex items-center justify-between">
@@ -116,7 +117,7 @@
                         <span class="text-xs text-gray-400 ml-1">· {{ mcq_stats.exam_count }} exams</span>
                     </div>
                     {% if mcq_stats.best_student %}
-                    <span class="text-xs text-gray-500">Best: <a href="{% url 'student_detail' mcq_stats.best_student.id %}" class="font-medium text-green-600">{{ mcq_stats.best_student.name }}</a></span>
+                    <span class="text-xs text-gray-500">Best: <a href="{% url 'student_detail' mcq_stats.best_student.id %}" class="font-medium text-green-600">{{ mcq_stats.best_student.first_name }}</a></span>
                     {% endif %}
                 </div>
                 <div class="flex items-center justify-between">

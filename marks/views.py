@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
@@ -1576,6 +1576,24 @@ def exam_detail(request, exam_id):
         except Exception:
             pass
 
+    # Document availability for download buttons
+    question_paper_url = None
+    # Check ExamQuestionPaper model first, then legacy field
+    try:
+        qp = ExamQuestionPaper.objects.get(exam_id=exam_id, teacher=teacher)
+        if qp.question_pdf:
+            question_paper_url = qp.question_pdf.url if hasattr(qp.question_pdf, 'url') else str(qp.question_pdf)
+    except ExamQuestionPaper.DoesNotExist:
+        # Fallback to legacy field on first exam record
+        if first.question_pdf:
+            question_paper_url = first.question_pdf.url if hasattr(first.question_pdf, 'url') else str(first.question_pdf)
+
+    # Build per-participant marked answer paper info
+    for p in participants:
+        exam_record = next((e for e in exam_records if e.student_id == p['student'].id), None)
+        p['has_answer_paper'] = bool(exam_record and exam_record.marked_answer_paper)
+        p['answer_paper_exam_pk'] = exam_record.pk if exam_record else None
+
     context = {
         'exam_id': exam_id,
         'exam_date': exam_date,
@@ -1592,8 +1610,59 @@ def exam_detail(request, exam_id):
         'participants': participants,
         'is_student': user_is_student,
         'current_student_id': current_student_id,
+        'has_question_paper': bool(question_paper_url),
     }
     return render(request, 'marks/exam_detail.html', context)
+
+
+def _cloudinary_download_url(url):
+    """Convert a Cloudinary URL to force-download by inserting fl_attachment."""
+    url = str(url)
+    if 'cloudinary.com' in url and '/upload/' in url:
+        return url.replace('/upload/', '/upload/fl_attachment/', 1)
+    # Non-cloudinary or unexpected format — return as-is
+    return url
+
+
+@login_required(login_url='login')
+def exam_download_question(request, exam_id):
+    """Download question paper for an exam (Cloudinary redirect with fl_attachment)."""
+    from django.http import Http404
+    teacher = get_teacher_for_user(request.user)
+
+    # Try ExamQuestionPaper model first
+    url = None
+    try:
+        qp = ExamQuestionPaper.objects.get(exam_id=exam_id, teacher=teacher)
+        if qp.question_pdf:
+            url = qp.question_pdf.url if hasattr(qp.question_pdf, 'url') else str(qp.question_pdf)
+    except ExamQuestionPaper.DoesNotExist:
+        pass
+
+    # Fallback to legacy field
+    if not url:
+        exam_record = Exam.objects.filter(exam_id=exam_id, teacher=teacher).first()
+        if exam_record and exam_record.question_pdf:
+            url = exam_record.question_pdf.url if hasattr(exam_record.question_pdf, 'url') else str(exam_record.question_pdf)
+
+    if not url:
+        raise Http404("Question paper not found")
+
+    return redirect(_cloudinary_download_url(url))
+
+
+@login_required(login_url='login')
+def exam_download_answer(request, exam_pk):
+    """Download marked answer paper for a specific exam record."""
+    from django.http import Http404
+    teacher = get_teacher_for_user(request.user)
+    exam = get_object_or_404(Exam, pk=exam_pk, teacher=teacher)
+
+    if not exam.marked_answer_paper:
+        raise Http404("Answer paper not found")
+
+    url = exam.marked_answer_paper.url if hasattr(exam.marked_answer_paper, 'url') else str(exam.marked_answer_paper)
+    return redirect(_cloudinary_download_url(url))
 
 
 @login_required(login_url='login')

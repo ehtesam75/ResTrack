@@ -106,6 +106,29 @@
             </div>
         </div>
 
+        <!-- Documents Download Card (Mobile) -->
+        {% if has_question_paper %}
+        <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+            <div class="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
+                <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <h3 class="font-semibold text-gray-800 text-sm">Documents</h3>
+            </div>
+            <div class="p-4 space-y-2">
+                <a href="{% url 'exam_download_question' exam_id %}"
+                   class="flex items-center gap-3 p-3 bg-red-50 rounded-lg border border-red-100 hover:bg-red-100 transition-colors">
+                    <div class="w-9 h-9 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <svg class="w-4.5 h-4.5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold text-gray-800">Question Paper</p>
+                        <p class="text-[10px] text-gray-500">PDF · Tap to download</p>
+                    </div>
+                    <svg class="w-5 h-5 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Summary Stats Card -->
         <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-4">
             <h3 class="font-semibold text-gray-800 mb-3 text-sm">Summary Statistics</h3>
@@ -150,9 +173,19 @@
                             </a>
                             <p class="text-[10px] text-gray-500">{{ p.mark_obtained|floatformat:0 }}/{{ p.total_marks|floatformat:0 }}</p>
                         </div>
-                        <div class="text-right flex-shrink-0">
-                            <p class="text-sm font-bold text-gray-900">{{ p.percentage|floatformat:1 }}%</p>
-                            <span class="inline-block px-1.5 py-0.5 text-[10px] font-semibold rounded-full" style="background-color: {{ p.grade_color }};">{{ p.grade }}</span>
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            {% if p.has_answer_paper %}
+                            {% if not is_student or current_student_id == p.student.id %}
+                            <a href="{% url 'exam_download_answer' p.answer_paper_exam_pk %}" title="Download Answer Sheet"
+                               class="w-7 h-7 flex items-center justify-center rounded-lg bg-blue-50 text-blue-500 hover:bg-blue-100 transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            </a>
+                            {% endif %}
+                            {% endif %}
+                            <div class="text-right">
+                                <p class="text-sm font-bold text-gray-900">{{ p.percentage|floatformat:1 }}%</p>
+                                <span class="inline-block px-1.5 py-0.5 text-[10px] font-semibold rounded-full" style="background-color: {{ p.grade_color }};">{{ p.grade }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -182,7 +215,16 @@
             <div class="bg-white border border-gray-200 rounded-xl p-5 mb-6">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-sm font-bold text-gray-900">Exam Information</h3>
-                    <span class="text-xs px-2.5 py-1 rounded-full font-medium bg-indigo-100 text-indigo-700">{{ exam_type.name }}</span>
+                    <div class="flex items-center gap-2">
+                        {% if has_question_paper %}
+                        <a href="{% url 'exam_download_question' exam_id %}" title="Download Question Paper"
+                           class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 border border-red-200 rounded-lg text-xs font-semibold hover:bg-red-100 transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            Question Paper
+                        </a>
+                        {% endif %}
+                        <span class="text-xs px-2.5 py-1 rounded-full font-medium bg-indigo-100 text-indigo-700">{{ exam_type.name }}</span>
+                    </div>
                 </div>
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     <div>
@@ -265,6 +307,7 @@
                                 <th class="px-4 py-2.5 text-center text-[10px] uppercase tracking-wider font-semibold text-gray-500">Score</th>
                                 <th class="px-4 py-2.5 text-center text-[10px] uppercase tracking-wider font-semibold text-gray-500">Percentage</th>
                                 <th class="px-4 py-2.5 text-center text-[10px] uppercase tracking-wider font-semibold text-gray-500">Grade</th>
+                                <th class="px-4 py-2.5 text-center text-[10px] uppercase tracking-wider font-semibold text-gray-500 w-20">Answer</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
@@ -293,6 +336,20 @@
                                 <td class="px-4 py-2.5 text-center text-sm font-bold text-gray-900">{{ p.percentage|floatformat:1 }}%</td>
                                 <td class="px-4 py-2.5 text-center">
                                     <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-xl text-gray-800" style="background-color: {{ p.grade_color }};">{{ p.grade }}</span>
+                                </td>
+                                <td class="px-4 py-2.5 text-center">
+                                    {% if p.has_answer_paper %}
+                                    {% if not is_student or current_student_id == p.student.id %}
+                                    <a href="{% url 'exam_download_answer' p.answer_paper_exam_pk %}" title="Download Answer Sheet"
+                                       class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 text-blue-500 hover:bg-blue-100 transition-colors">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                    </a>
+                                    {% else %}
+                                    <span class="text-gray-300">—</span>
+                                    {% endif %}
+                                    {% else %}
+                                    <span class="text-gray-300">—</span>
+                                    {% endif %}
                                 </td>
                             </tr>
                             {% endfor %}
