@@ -1,0 +1,165 @@
+{% extends 'marks/base.html' %}
+{% load static %}
+
+{% block title %}{% if editing %}Edit{% else %}Create{% endif %} Exam — Exam Center{% endblock %}
+
+{% block extra_css %}
+<style>
+.form-section{background:white;border-radius:1rem;box-shadow:0 4px 6px -1px rgba(0,0,0,.08);padding:1.5rem}
+.field-label{display:block;font-size:.8rem;font-weight:600;color:#374151;margin-bottom:.35rem}
+.help-text{font-size:.7rem;color:#9ca3af;margin-top:.2rem}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <!-- Back link -->
+    <a href="{% url 'exam_center' %}" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-purple-600 mb-6 transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        Back to Exam Center
+    </a>
+
+    <h1 class="text-2xl font-bold gradient-text mb-6">
+        {% if editing %}Edit Exam <span class="text-gray-400 text-lg font-mono">{{ exam.exam_display_id }}</span>{% else %}Create New Exam{% endif %}
+    </h1>
+
+    <!-- Form errors -->
+    {% if form.non_field_errors %}
+    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6 text-sm">
+        {% for error in form.non_field_errors %}
+        <p>{{ error }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="POST" enctype="multipart/form-data" class="space-y-6">
+        {% csrf_token %}
+
+        <!-- Basic Info -->
+        <div class="form-section">
+            <h2 class="text-sm font-bold text-gray-700 uppercase tracking-wider mb-4">Exam Details</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Exam ID -->
+                <div>
+                    <label class="field-label" for="{{ form.exam_display_id.id_for_label }}">Exam ID</label>
+                    {{ form.exam_display_id }}
+                    {% if form.exam_display_id.errors %}<p class="text-red-500 text-xs mt-1">{{ form.exam_display_id.errors.0 }}</p>{% endif %}
+                </div>
+                <!-- Class -->
+                <div>
+                    <label class="field-label" for="{{ form.class_number.id_for_label }}">Class</label>
+                    {{ form.class_number }}
+                    {% if form.class_number.errors %}<p class="text-red-500 text-xs mt-1">{{ form.class_number.errors.0 }}</p>{% endif %}
+                </div>
+                <!-- Subject -->
+                <div class="sm:col-span-2">
+                    <label class="field-label" for="{{ form.subject.id_for_label }}">Subject</label>
+                    {{ form.subject }}
+                    {% if form.subject.errors %}<p class="text-red-500 text-xs mt-1">{{ form.subject.errors.0 }}</p>{% endif %}
+                </div>
+                <!-- Mode -->
+                <div>
+                    <label class="field-label" for="{{ form.exam_mode.id_for_label }}">Exam Mode</label>
+                    {{ form.exam_mode }}
+                    {% if form.exam_mode.errors %}<p class="text-red-500 text-xs mt-1">{{ form.exam_mode.errors.0 }}</p>{% endif %}
+                </div>
+                <!-- Type -->
+                <div>
+                    <label class="field-label" for="{{ form.exam_type.id_for_label }}">Exam Type</label>
+                    {{ form.exam_type }}
+                    {% if form.exam_type.errors %}<p class="text-red-500 text-xs mt-1">{{ form.exam_type.errors.0 }}</p>{% endif %}
+                </div>
+                <!-- Total Marks -->
+                <div>
+                    <label class="field-label" for="{{ form.total_marks.id_for_label }}">Total Marks</label>
+                    {{ form.total_marks }}
+                    {% if form.total_marks.errors %}<p class="text-red-500 text-xs mt-1">{{ form.total_marks.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Schedule -->
+        <div class="form-section">
+            <h2 class="text-sm font-bold text-gray-700 uppercase tracking-wider mb-4">Schedule</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Date -->
+                <div>
+                    <label class="field-label" for="{{ form.exam_date.id_for_label }}">Exam Date</label>
+                    {{ form.exam_date }}
+                    {% if form.exam_date.errors %}<p class="text-red-500 text-xs mt-1">{{ form.exam_date.errors.0 }}</p>{% endif %}
+                </div>
+                <!-- Start Time -->
+                <div>
+                    <label class="field-label" for="{{ form.start_time.id_for_label }}">Start Time</label>
+                    {{ form.start_time }}
+                    {% if form.start_time.errors %}<p class="text-red-500 text-xs mt-1">{{ form.start_time.errors.0 }}</p>{% endif %}
+                </div>
+                <!-- Duration -->
+                <div>
+                    <label class="field-label" for="{{ form.duration_minutes.id_for_label }}">Duration (minutes)</label>
+                    {{ form.duration_minutes }}
+                    <p class="help-text">How long students can write the exam</p>
+                    {% if form.duration_minutes.errors %}<p class="text-red-500 text-xs mt-1">{{ form.duration_minutes.errors.0 }}</p>{% endif %}
+                </div>
+                <!-- Submission Duration -->
+                <div id="submission-duration-field">
+                    <label class="field-label" for="{{ form.submission_duration_minutes.id_for_label }}">Submission Window (min)</label>
+                    {{ form.submission_duration_minutes }}
+                    <p class="help-text">Time for students to upload answers (online only)</p>
+                    {% if form.submission_duration_minutes.errors %}<p class="text-red-500 text-xs mt-1">{{ form.submission_duration_minutes.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Question Paper -->
+        <div class="form-section">
+            <h2 class="text-sm font-bold text-gray-700 uppercase tracking-wider mb-4">Question Paper</h2>
+            {% if editing and exam.question_pdf %}
+            <div class="flex items-center gap-3 mb-3 p-3 bg-green-50 rounded-lg">
+                <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"/></svg>
+                <span class="text-sm text-green-700">A question paper is already uploaded. Upload a new one to replace it.</span>
+            </div>
+            {% endif %}
+            <div>
+                <label class="field-label" for="{{ form.question_pdf.id_for_label }}">
+                    Upload PDF
+                    <span id="pdf-required-badge" class="text-red-500 text-xs ml-1">(required for online)</span>
+                </label>
+                {{ form.question_pdf }}
+                <p class="help-text">PDF only, max 1 MB. Mandatory for online exams.</p>
+                {% if form.question_pdf.errors %}<p class="text-red-500 text-xs mt-1">{{ form.question_pdf.errors.0 }}</p>{% endif %}
+            </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="flex items-center justify-end gap-3">
+            <a href="{% url 'exam_center' %}" class="px-5 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors">Cancel</a>
+            <button type="submit"
+                    class="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transition-all">
+                {% if editing %}Update Exam{% else %}Create Exam{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Toggle submission duration field based on exam mode
+(function(){
+    const modeSelect = document.getElementById('id_exam_mode');
+    const submField = document.getElementById('submission-duration-field');
+    const pdfBadge = document.getElementById('pdf-required-badge');
+
+    function toggle(){
+        const isOnline = modeSelect.value === 'online';
+        submField.style.display = isOnline ? '' : 'none';
+        pdfBadge.style.display = isOnline ? '' : 'none';
+    }
+    if(modeSelect){
+        modeSelect.addEventListener('change', toggle);
+        toggle();
+    }
+})();
+</script>
+{% endblock %}

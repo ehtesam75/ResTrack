@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from .models import Student, TeacherProfile, StudentProfile
+from .models import Student, TeacherProfile, StudentProfile, ExamCenterExam
 
 
 class TeacherSignupForm(UserCreationForm):
@@ -237,3 +237,77 @@ class EditStudentForm(forms.Form):
             'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all'
         })
     )
+
+
+# ---------------------------------------------------------------------------
+# Exam Center forms
+# ---------------------------------------------------------------------------
+
+_INPUT_CLS = 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all'
+_SELECT_CLS = _INPUT_CLS
+
+
+class ExamCenterExamForm(forms.ModelForm):
+    """Form for creating / editing Exam Center exams."""
+
+    class Meta:
+        model = ExamCenterExam
+        fields = [
+            'exam_display_id', 'class_number', 'subject', 'exam_mode',
+            'exam_type', 'total_marks', 'exam_date', 'start_time',
+            'duration_minutes', 'submission_duration_minutes', 'question_pdf',
+        ]
+        widgets = {
+            'exam_display_id': forms.TextInput(attrs={'class': _INPUT_CLS, 'placeholder': 'e.g. EX-101'}),
+            'class_number': forms.NumberInput(attrs={'class': _INPUT_CLS, 'min': 1, 'max': 12, 'placeholder': '1–12'}),
+            'subject': forms.TextInput(attrs={'class': _INPUT_CLS, 'placeholder': 'Subject name'}),
+            'exam_mode': forms.Select(attrs={'class': _SELECT_CLS}),
+            'exam_type': forms.Select(attrs={'class': _SELECT_CLS}),
+            'total_marks': forms.NumberInput(attrs={'class': _INPUT_CLS, 'min': 1, 'placeholder': 'Total marks'}),
+            'exam_date': forms.DateInput(attrs={'class': _INPUT_CLS, 'type': 'date'}),
+            'start_time': forms.TimeInput(attrs={'class': _INPUT_CLS, 'type': 'time'}),
+            'duration_minutes': forms.NumberInput(attrs={'class': _INPUT_CLS, 'min': 1, 'placeholder': 'Minutes'}),
+            'submission_duration_minutes': forms.NumberInput(attrs={'class': _INPUT_CLS, 'min': 1, 'placeholder': 'Default 10 min'}),
+            'question_pdf': forms.ClearableFileInput(attrs={'class': _INPUT_CLS, 'accept': '.pdf'}),
+        }
+
+    def __init__(self, *args, teacher=None, **kwargs):
+        self.teacher = teacher
+        super().__init__(*args, **kwargs)
+        self.fields['submission_duration_minutes'].required = False
+
+    def clean_class_number(self):
+        val = self.cleaned_data.get('class_number')
+        if val is not None and (val < 1 or val > 12):
+            raise ValidationError('Class must be between 1 and 12.')
+        return val
+
+    def clean_question_pdf(self):
+        pdf = self.cleaned_data.get('question_pdf')
+        if pdf and hasattr(pdf, 'size'):
+            if pdf.size > 1 * 1024 * 1024:
+                raise ValidationError('Question paper must be 1 MB or smaller.')
+            if not pdf.name.lower().endswith('.pdf'):
+                raise ValidationError('Only PDF files are allowed.')
+        return pdf
+
+    def clean(self):
+        cleaned = super().clean()
+        mode = cleaned.get('exam_mode')
+
+        # Require question PDF for online exams (only on create, or if no existing PDF)
+        if mode == 'online':
+            pdf = cleaned.get('question_pdf')
+            if not pdf and not (self.instance and self.instance.pk and self.instance.question_pdf):
+                self.add_error('question_pdf', 'Question paper is mandatory for online exams.')
+
+        # Default submission duration
+        if not cleaned.get('submission_duration_minutes'):
+            cleaned['submission_duration_minutes'] = 10
+
+        # Enforce 3-exam limit (skip for edits)
+        if self.teacher and not self.instance.pk:
+            if not ExamCenterExam.can_create_exam(self.teacher):
+                raise ValidationError('You already have 3 active exams. Wait until one finishes before creating another.')
+
+        return cleaned

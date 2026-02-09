@@ -1,6 +1,7 @@
 from django.urls import path
 from django.views.generic import TemplateView
 from . import views
+from . import exam_center_views
 
 urlpatterns = [
     # Authentication URLs
@@ -78,4 +79,15 @@ urlpatterns = [
     path('api/grade-distribution/<int:student_id>/', views.api_grade_distribution, name='api_grade_distribution'),
     path('api/student-comparison/<int:subject_id>/', views.api_student_comparison, name='api_student_comparison'),
     path('api/overall-grade-distribution/', views.api_overall_grade_distribution, name='api_overall_grade_distribution'),
+
+    # Exam Center
+    path('exam-center/', exam_center_views.exam_center, name='exam_center'),
+    path('exam-center/create/', exam_center_views.exam_center_create, name='exam_center_create'),
+    path('exam-center/<int:exam_id>/edit/', exam_center_views.exam_center_edit, name='exam_center_edit'),
+    path('exam-center/<int:exam_id>/delete/', exam_center_views.exam_center_delete, name='exam_center_delete'),
+    path('exam-center/<int:exam_id>/', exam_center_views.exam_center_detail, name='exam_center_detail'),
+    path('exam-center/<int:exam_id>/submit/', exam_center_views.exam_center_submit_answer, name='exam_center_submit_answer'),
+    path('exam-center/<int:exam_id>/bonus-time/', exam_center_views.exam_center_bonus_time, name='exam_center_bonus_time'),
+    path('exam-center/<int:exam_id>/submissions/', exam_center_views.exam_center_submissions, name='exam_center_submissions'),
+    path('api/exam-center/<int:exam_id>/status/', exam_center_views.exam_center_status_api, name='exam_center_status_api'),
 ]

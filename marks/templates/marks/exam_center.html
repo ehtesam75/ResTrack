@@ -1,0 +1,219 @@
+{% extends 'marks/base.html' %}
+{% load static %}
+
+{% block title %}Exam Center — ResTrack{% endblock %}
+
+{% block extra_css %}
+<style>
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.4}}
+.pulse-dot{animation:pulse-dot 1.5s ease-in-out infinite}
+.exam-card{transition:all .25s ease}
+.exam-card:hover{transform:translateY(-2px);box-shadow:0 12px 24px -6px rgba(0,0,0,.12)}
+.status-running{border-left:4px solid #10b981}
+.status-submission{border-left:4px solid #f59e0b}
+.status-upcoming{border-left:4px solid #6366f1}
+.status-finished{border-left:4px solid #9ca3af}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-bold gradient-text">Exam Center</h1>
+            <p class="text-gray-500 text-sm mt-1">
+                {% if is_teacher %}Manage your upcoming exams{% else %}View and participate in exams{% endif %}
+            </p>
+        </div>
+        {% if is_teacher %}
+        <div class="flex items-center gap-3">
+            <span class="text-xs text-gray-400">{{ active_count }}/3 active</span>
+            {% if can_create %}
+            <a href="{% url 'exam_center_create' %}"
+               class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Create Exam
+            </a>
+            {% else %}
+            <span class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-200 text-gray-500 rounded-xl text-sm font-semibold cursor-not-allowed">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Limit Reached
+            </span>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ==================== UPCOMING / ACTIVE EXAMS ==================== -->
+    <section class="mb-10">
+        <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Active Exams
+            {% if active_count > 0 %}
+            <span class="ml-1 px-2 py-0.5 text-xs font-bold rounded-full bg-purple-100 text-purple-700">{{ active_count }}</span>
+            {% endif %}
+        </h2>
+
+        {% if active_exams %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {% for exam in active_exams %}
+            {% with st=exam.computed_status %}
+            <a href="{% url 'exam_center_detail' exam.pk %}"
+               class="exam-card block bg-white rounded-2xl shadow-md overflow-hidden status-{{ st }}">
+                <!-- Card header -->
+                <div class="px-5 pt-5 pb-3">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold tracking-wide uppercase
+                            {% if st == 'running' %}text-emerald-600
+                            {% elif st == 'submission' %}text-amber-600
+                            {% else %}text-indigo-600{% endif %}">
+                            {% if st == 'running' %}
+                            <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 pulse-dot mr-1"></span>
+                            {% endif %}
+                            {{ exam.status_label }}
+                        </span>
+                        <span class="text-[11px] text-gray-400 font-mono">{{ exam.exam_display_id }}</span>
+                    </div>
+                    <h3 class="text-base font-bold text-gray-900 leading-snug mb-1">{{ exam.subject }}</h3>
+                    <p class="text-xs text-gray-500">
+                        Class {{ exam.class_number }} &middot;
+                        {{ exam.get_exam_type_display }} &middot;
+                        {{ exam.get_exam_mode_display }}
+                    </p>
+                </div>
+                <!-- Card footer -->
+                <div class="bg-gray-50 px-5 py-3 flex items-center justify-between text-xs text-gray-500">
+                    <span>
+                        <i class="fa-regular fa-calendar mr-1"></i>
+                        {{ exam.exam_date|date:"M d, Y" }}
+                    </span>
+                    <span>
+                        <i class="fa-regular fa-clock mr-1"></i>
+                        {{ exam.start_time|time:"H:i" }} &middot; {{ exam.duration_minutes }}min
+                    </span>
+                </div>
+                <!-- Live mini-countdown for active exams -->
+                <div class="px-5 py-2 text-center text-xs font-semibold
+                    {% if st == 'running' %}bg-emerald-50 text-emerald-700
+                    {% elif st == 'submission' %}bg-amber-50 text-amber-700
+                    {% else %}bg-indigo-50 text-indigo-700{% endif %}"
+                    data-mini-countdown
+                    data-status="{{ st }}"
+                    data-start="{{ exam.start_datetime|date:'c' }}"
+                    data-exam-end="{{ exam.exam_end_datetime|date:'c' }}"
+                    data-final-end="{{ exam.final_end_datetime|date:'c' }}">
+                    —
+                </div>
+            </a>
+            {% endwith %}
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-12 bg-white rounded-2xl shadow-sm border border-dashed border-gray-200">
+            <svg class="mx-auto w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <p class="text-gray-400 text-sm font-medium">No active exams right now</p>
+            {% if is_teacher %}
+            <a href="{% url 'exam_center_create' %}" class="inline-block mt-3 text-purple-600 text-sm font-semibold hover:underline">+ Create one</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- ==================== FINISHED EXAMS ==================== -->
+    <section>
+        <details {% if finished_exams %}open{% endif %} class="group">
+            <summary class="cursor-pointer select-none text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2 list-none">
+                <svg class="w-4 h-4 text-gray-400 transition-transform group-open:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                Finished Exams
+                {% if finished_exams %}
+                <span class="ml-1 px-2 py-0.5 text-xs font-bold rounded-full bg-gray-100 text-gray-500">{{ finished_exams|length }}</span>
+                {% endif %}
+            </summary>
+
+            {% if finished_exams %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-4">
+                {% for exam in finished_exams %}
+                <a href="{% url 'exam_center_detail' exam.pk %}"
+                   class="exam-card block bg-white rounded-2xl shadow-sm overflow-hidden status-finished opacity-80 hover:opacity-100">
+                    <div class="px-5 pt-5 pb-3">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs font-bold tracking-wide uppercase text-gray-400">
+                                <i class="fa-solid fa-check-circle mr-1"></i> Finished
+                            </span>
+                            <span class="text-[11px] text-gray-400 font-mono">{{ exam.exam_display_id }}</span>
+                        </div>
+                        <h3 class="text-base font-bold text-gray-700 leading-snug mb-1">{{ exam.subject }}</h3>
+                        <p class="text-xs text-gray-400">
+                            Class {{ exam.class_number }} &middot;
+                            {{ exam.get_exam_type_display }} &middot;
+                            {{ exam.get_exam_mode_display }}
+                        </p>
+                    </div>
+                    <div class="bg-gray-50 px-5 py-3 flex items-center justify-between text-xs text-gray-400">
+                        <span><i class="fa-regular fa-calendar mr-1"></i>{{ exam.exam_date|date:"M d, Y" }}</span>
+                        {% if is_teacher and exam.exam_mode == 'online' %}
+                        <span class="text-purple-500 font-semibold"><i class="fa-solid fa-file-lines mr-1"></i>View Submissions</span>
+                        {% else %}
+                        <span>{{ exam.total_marks }} marks</span>
+                        {% endif %}
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-gray-400 text-sm mt-2">No finished exams yet.</p>
+            {% endif %}
+        </details>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Mini countdown on exam cards
+(function(){
+    const SERVER_NOW = new Date("{{ server_now }}");
+    const CLIENT_NOW = new Date();
+    const OFFSET = SERVER_NOW - CLIENT_NOW;
+
+    function serverTime(){ return new Date(Date.now() + OFFSET); }
+
+    function fmtDuration(ms){
+        if(ms<=0) return '00:00:00';
+        let s = Math.floor(ms/1000);
+        const h = Math.floor(s/3600); s%=3600;
+        const m = Math.floor(s/60); s%=60;
+        return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+
+    function tick(){
+        const now = serverTime();
+        document.querySelectorAll('[data-mini-countdown]').forEach(el=>{
+            const st = el.dataset.status;
+            const start = new Date(el.dataset.start);
+            const examEnd = new Date(el.dataset.examEnd);
+            const finalEnd = new Date(el.dataset.finalEnd);
+            let text = '';
+            if(st==='upcoming'){
+                const diff = start - now;
+                if(diff<=0){ location.reload(); return; }
+                text = 'Starts in ' + fmtDuration(diff);
+            } else if(st==='running'){
+                const diff = examEnd - now;
+                if(diff<=0){ location.reload(); return; }
+                text = 'Ends in ' + fmtDuration(diff);
+            } else if(st==='submission'){
+                const diff = finalEnd - now;
+                if(diff<=0){ location.reload(); return; }
+                text = 'Submission closes in ' + fmtDuration(diff);
+            }
+            el.textContent = text;
+        });
+    }
+    tick();
+    setInterval(tick, 1000);
+})();
+</script>
+{% endblock %}

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Student, Subject, ExamType, Exam, ExamQuestionPaper, GradeScale, LifetimePoints, PointsSpent, PointTransaction, TeacherProfile, StudentProfile
+from .models import Student, Subject, ExamType, Exam, ExamQuestionPaper, GradeScale, LifetimePoints, PointsSpent, PointTransaction, TeacherProfile, StudentProfile, ExamCenterExam, AnswerSubmission
 
 
 @admin.register(TeacherProfile)
@@ -164,3 +164,24 @@ class PointTransactionAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('student', 'exam')
+
+
+@admin.register(ExamCenterExam)
+class ExamCenterExamAdmin(admin.ModelAdmin):
+    list_display = ['exam_display_id', 'subject', 'class_number', 'exam_mode', 'exam_type', 'exam_date', 'start_time', 'duration_minutes', 'computed_status', 'teacher']
+    list_filter = ['exam_mode', 'exam_type', 'exam_date', 'teacher']
+    search_fields = ['exam_display_id', 'subject']
+    date_hierarchy = 'exam_date'
+    readonly_fields = ['created_at', 'updated_at']
+
+    def computed_status(self, obj):
+        return obj.computed_status
+    computed_status.short_description = 'Status'
+
+
+@admin.register(AnswerSubmission)
+class AnswerSubmissionAdmin(admin.ModelAdmin):
+    list_display = ['exam', 'student_user', 'is_final', 'submitted_at']
+    list_filter = ['is_final', 'submitted_at']
+    search_fields = ['student_user__username', 'exam__exam_display_id']
+    readonly_fields = ['submitted_at']

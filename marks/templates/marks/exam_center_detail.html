@@ -1,0 +1,460 @@
+{% extends 'marks/base.html' %}
+{% load static %}
+
+{% block title %}{{ exam.subject }} — Exam Center{% endblock %}
+
+{% block extra_css %}
+<style>
+@keyframes pulse-glow{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.25)}50%{box-shadow:0 0 20px 4px rgba(16,185,129,.15)}}
+.glow-running{animation:pulse-glow 2s ease-in-out infinite}
+.timer-display{font-variant-numeric:tabular-nums;letter-spacing:.04em}
+.countdown-big{font-size:2rem;line-height:1}
+@media(min-width:640px){.countdown-big{font-size:2.75rem}}
+.pdf-frame{width:100%;border:none;border-radius:.75rem;background:#f9fafb}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Back link -->
+    <a href="{% url 'exam_center' %}" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-purple-600 mb-5 transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        Exam Center
+    </a>
+
+    <!-- ===================== EXAM INFO HEADER ===================== -->
+    <div class="bg-white rounded-2xl shadow-md overflow-hidden mb-6 {% if status == 'running' %}glow-running{% endif %}">
+        <!-- Status bar -->
+        <div class="px-5 py-2 text-xs font-bold uppercase tracking-wider text-center
+            {% if status == 'running' %}bg-emerald-500 text-white
+            {% elif status == 'submission' %}bg-amber-500 text-white
+            {% elif status == 'upcoming' %}bg-indigo-500 text-white
+            {% else %}bg-gray-400 text-white{% endif %}">
+            {{ exam.status_label }}
+        </div>
+
+        <div class="p-5 sm:p-6">
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold text-gray-900 mb-1">{{ exam.subject }}</h1>
+                    <div class="flex flex-wrap gap-2 text-xs text-gray-500">
+                        <span class="px-2 py-0.5 bg-gray-100 rounded-full font-medium">{{ exam.exam_display_id }}</span>
+                        <span class="px-2 py-0.5 bg-gray-100 rounded-full">Class {{ exam.class_number }}</span>
+                        <span class="px-2 py-0.5 bg-gray-100 rounded-full">{{ exam.get_exam_type_display }}</span>
+                        <span class="px-2 py-0.5 {% if exam.exam_mode == 'online' %}bg-blue-100 text-blue-700{% else %}bg-gray-100{% endif %} rounded-full font-medium">{{ exam.get_exam_mode_display }}</span>
+                    </div>
+                </div>
+                <div class="text-right flex-shrink-0">
+                    <p class="text-2xl font-bold text-gray-900">{{ exam.total_marks }}</p>
+                    <p class="text-xs text-gray-400">Total Marks</p>
+                </div>
+            </div>
+
+            <!-- Schedule details -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-5 pt-5 border-t border-gray-100">
+                <div>
+                    <p class="text-[11px] text-gray-400 uppercase font-semibold">Date</p>
+                    <p class="text-sm font-semibold text-gray-800">{{ exam.exam_date|date:"M d, Y" }}</p>
+                </div>
+                <div>
+                    <p class="text-[11px] text-gray-400 uppercase font-semibold">Start</p>
+                    <p class="text-sm font-semibold text-gray-800">{{ exam.start_time|time:"h:i A" }}</p>
+                </div>
+                <div>
+                    <p class="text-[11px] text-gray-400 uppercase font-semibold">Duration</p>
+                    <p class="text-sm font-semibold text-gray-800">{{ exam.duration_minutes }} min</p>
+                </div>
+                <div>
+                    <p class="text-[11px] text-gray-400 uppercase font-semibold">
+                        {% if exam.exam_mode == 'online' %}Submission{% else %}Bonus{% endif %}
+                    </p>
+                    <p class="text-sm font-semibold text-gray-800">
+                        {% if exam.exam_mode == 'online' %}
+                            {{ exam.submission_duration_minutes }}{% if exam.bonus_time_minutes %}+{{ exam.bonus_time_minutes }}{% endif %} min
+                        {% else %}
+                            {% if exam.bonus_time_minutes %}+{{ exam.bonus_time_minutes }} min{% else %}—{% endif %}
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== TEACHER ACTIONS ===================== -->
+    {% if is_teacher %}
+    <div class="flex flex-wrap gap-3 mb-6">
+        {% if status == 'upcoming' %}
+        <a href="{% url 'exam_center_edit' exam.pk %}"
+           class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:border-purple-300 hover:text-purple-600 transition-all shadow-sm">
+            <i class="fa-solid fa-pen-to-square"></i> Edit
+        </a>
+        <form method="POST" action="{% url 'exam_center_delete' exam.pk %}" class="inline"
+              onsubmit="return confirm('Delete this exam? This cannot be undone.')">
+            {% csrf_token %}
+            <button type="submit"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-red-200 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 transition-all shadow-sm">
+                <i class="fa-solid fa-trash"></i> Delete
+            </button>
+        </form>
+        {% endif %}
+
+        {% if status == 'running' or status == 'submission' %}
+        <!-- Bonus time grant -->
+        <div class="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2 shadow-sm">
+            <label class="text-xs font-medium text-gray-600 whitespace-nowrap">Bonus time:</label>
+            <input type="number" id="bonus-input" min="1" max="120" value="5" class="w-16 px-2 py-1 border border-gray-200 rounded-lg text-sm text-center focus:ring-2 focus:ring-purple-400 focus:border-purple-400">
+            <span class="text-xs text-gray-400">min</span>
+            <button id="grant-bonus-btn" type="button"
+                    class="px-3 py-1 bg-amber-500 text-white rounded-lg text-xs font-semibold hover:bg-amber-600 transition-colors">
+                Grant
+            </button>
+        </div>
+        {% endif %}
+
+        {% if exam.exam_mode == 'online' and status == 'finished' %}
+        <a href="{% url 'exam_center_submissions' exam.pk %}"
+           class="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-xl text-sm font-semibold hover:bg-purple-700 transition-all shadow-md">
+            <i class="fa-solid fa-file-lines"></i> View Submissions
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- ===================== DYNAMIC CONTENT ===================== -->
+
+    <!-- UPCOMING: Countdown to start -->
+    {% if status == 'upcoming' %}
+    <div class="bg-white rounded-2xl shadow-md p-8 text-center">
+        <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-indigo-100 flex items-center justify-center">
+            <svg class="w-8 h-8 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <p class="text-sm text-gray-500 mb-2">Exam starts in</p>
+        <div id="countdown-display" class="countdown-big font-bold text-indigo-600 timer-display mb-3">--:--:--</div>
+        <p class="text-xs text-gray-400">Question paper will be available when the exam starts</p>
+    </div>
+    {% endif %}
+
+    <!-- RUNNING: Timer + Question Paper -->
+    {% if status == 'running' %}
+    <div class="space-y-5">
+        <!-- Timers -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="bg-white rounded-2xl shadow-md p-6 text-center">
+                <p class="text-xs text-gray-400 uppercase font-semibold mb-1">Time Remaining</p>
+                <div id="countdown-display" class="countdown-big font-bold text-emerald-600 timer-display">--:--:--</div>
+            </div>
+            <div class="bg-white rounded-2xl shadow-md p-6 text-center">
+                <p class="text-xs text-gray-400 uppercase font-semibold mb-1">Elapsed</p>
+                <div id="elapsed-display" class="countdown-big font-bold text-gray-500 timer-display">--:--:--</div>
+            </div>
+        </div>
+
+        <!-- Question Paper (visible to students during running exam) -->
+        {% if exam.question_pdf %}
+        <div class="bg-white rounded-2xl shadow-md overflow-hidden">
+            <div class="px-5 py-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="text-sm font-bold text-gray-700"><i class="fa-solid fa-file-pdf text-red-500 mr-2"></i>Question Paper</h3>
+                <a href="{{ exam.question_pdf.url }}" target="_blank" rel="noopener"
+                   class="text-xs text-purple-600 font-semibold hover:underline">Open in new tab &rarr;</a>
+            </div>
+            <div class="p-3 sm:p-4">
+                <iframe src="{{ exam.question_pdf.url }}" class="pdf-frame" style="height:70vh;min-height:400px"></iframe>
+            </div>
+        </div>
+        {% else %}
+        <div class="bg-yellow-50 border border-yellow-200 rounded-2xl p-6 text-center">
+            <p class="text-sm text-yellow-700 font-medium">No question paper uploaded for this exam.</p>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- SUBMISSION PERIOD: Upload form + countdown -->
+    {% if status == 'submission' %}
+    <div class="space-y-5">
+        <!-- Submission countdown -->
+        <div class="bg-amber-50 rounded-2xl shadow-md p-6 text-center border border-amber-200">
+            <p class="text-xs text-amber-600 uppercase font-semibold mb-1">Submission Window Closing In</p>
+            <div id="countdown-display" class="countdown-big font-bold text-amber-600 timer-display mb-2">--:--:--</div>
+            <p class="text-xs text-gray-500">Upload your answer sheet before time runs out</p>
+        </div>
+
+        {% if is_student %}
+        <!-- Upload form -->
+        <div class="bg-white rounded-2xl shadow-md p-6">
+            <h3 class="text-base font-bold text-gray-800 mb-4">
+                <i class="fa-solid fa-upload text-purple-500 mr-2"></i>
+                Submit Answer Sheet
+            </h3>
+
+            {% if submission_count >= max_submissions %}
+            <div class="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
+                <p class="text-sm text-red-700 font-medium">You have used all 3 submission attempts.</p>
+                <p class="text-xs text-red-500 mt-1">Your last submission is considered final.</p>
+            </div>
+            {% else %}
+            <form method="POST" action="{% url 'exam_center_submit_answer' exam.pk %}" enctype="multipart/form-data" id="upload-form">
+                {% csrf_token %}
+                <div class="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-purple-300 transition-colors" id="drop-zone">
+                    <svg class="mx-auto w-10 h-10 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                    <p class="text-sm text-gray-500 mb-1">Drag & drop or click to select</p>
+                    <p class="text-xs text-gray-400">PDF / ZIP / RAR &middot; Max 10 MB</p>
+                    <input type="file" name="answer_file" accept=".pdf,.zip,.rar" required
+                           class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                           id="file-input">
+                </div>
+                <div id="file-info" class="hidden mt-3 p-3 bg-gray-50 rounded-lg flex items-center justify-between text-sm">
+                    <span id="file-name" class="text-gray-700 font-medium truncate"></span>
+                    <span id="file-size" class="text-gray-400 text-xs flex-shrink-0 ml-2"></span>
+                </div>
+                <div class="mt-4 flex items-center justify-between">
+                    <span class="text-xs text-gray-400">Attempt {{ submission_count|add:1 }} of {{ max_submissions }}</span>
+                    <button type="submit" id="submit-btn"
+                            class="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        Upload Answer Sheet
+                    </button>
+                </div>
+            </form>
+            {% endif %}
+
+            <!-- Previous submissions -->
+            {% if submissions %}
+            <div class="mt-6 pt-5 border-t border-gray-100">
+                <h4 class="text-xs font-bold text-gray-500 uppercase mb-3">Your Submissions</h4>
+                {% for sub in submissions %}
+                <div class="flex items-center justify-between py-2 {% if not forloop.last %}border-b border-gray-50{% endif %}">
+                    <div class="flex items-center gap-2">
+                        {% if sub.is_final %}
+                        <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                        <span class="text-xs font-semibold text-green-600">Final</span>
+                        {% else %}
+                        <span class="w-2 h-2 rounded-full bg-gray-300"></span>
+                        <span class="text-xs text-gray-400">Superseded</span>
+                        {% endif %}
+                    </div>
+                    <span class="text-xs text-gray-400">{{ sub.submitted_at|date:"H:i:s" }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Question paper still visible during submission -->
+        {% if exam.question_pdf %}
+        <details class="bg-white rounded-2xl shadow-md overflow-hidden">
+            <summary class="px-5 py-3 bg-gray-50 border-b border-gray-100 cursor-pointer text-sm font-bold text-gray-700 select-none">
+                <i class="fa-solid fa-file-pdf text-red-500 mr-2"></i>Question Paper
+            </summary>
+            <div class="p-3 sm:p-4">
+                <iframe src="{{ exam.question_pdf.url }}" class="pdf-frame" style="height:60vh;min-height:350px"></iframe>
+            </div>
+        </details>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- FINISHED -->
+    {% if status == 'finished' %}
+    <div class="bg-white rounded-2xl shadow-md p-8 text-center">
+        <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        </div>
+        <h2 class="text-xl font-bold text-gray-700 mb-1">Exam Concluded</h2>
+        <p class="text-sm text-gray-400">This exam has finished.</p>
+
+        {% if is_student and submissions %}
+        <div class="mt-6 pt-5 border-t border-gray-100 text-left max-w-sm mx-auto">
+            <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">Your Submissions</h4>
+            {% for sub in submissions %}
+            <div class="flex items-center justify-between py-2 {% if not forloop.last %}border-b border-gray-50{% endif %}">
+                <div class="flex items-center gap-2">
+                    {% if sub.is_final %}
+                    <span class="px-2 py-0.5 text-[10px] font-bold bg-green-100 text-green-700 rounded">FINAL</span>
+                    {% else %}
+                    <span class="px-2 py-0.5 text-[10px] text-gray-400 bg-gray-100 rounded">Replaced</span>
+                    {% endif %}
+                </div>
+                <span class="text-xs text-gray-400">{{ sub.submitted_at|date:"M d, H:i" }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if is_teacher and exam.exam_mode == 'online' %}
+        <a href="{% url 'exam_center_submissions' exam.pk %}"
+           class="inline-flex items-center gap-2 mt-6 px-6 py-2.5 bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transition-all">
+            <i class="fa-solid fa-file-lines"></i> View All Submissions
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Teacher: all submissions preview (for running/submission status) -->
+    {% if is_teacher and all_submissions and status != 'finished' %}
+    <div class="bg-white rounded-2xl shadow-md p-5 mt-6">
+        <h3 class="text-sm font-bold text-gray-700 mb-3"><i class="fa-solid fa-users mr-2 text-purple-500"></i>Student Submissions ({{ all_submissions|length }})</h3>
+        <div class="divide-y divide-gray-50">
+            {% for sub in all_submissions %}
+            <div class="flex items-center justify-between py-2 text-sm">
+                <span class="text-gray-700 font-medium">
+                    {% if sub.student_user.student_profile %}{{ sub.student_user.student_profile.student.name }}{% else %}{{ sub.student_user.username }}{% endif %}
+                </span>
+                <span class="text-xs text-gray-400">{{ sub.submitted_at|date:"H:i:s" }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function(){
+    // Server time sync
+    const SERVER_NOW = new Date("{{ server_now }}");
+    const CLIENT_NOW = new Date();
+    const OFFSET = SERVER_NOW - CLIENT_NOW;
+    function serverTime(){ return new Date(Date.now() + OFFSET); }
+
+    const START    = new Date("{{ start_iso }}");
+    const EXAM_END = new Date("{{ exam_end_iso }}");
+    const FINAL_END= new Date("{{ final_end_iso }}");
+    const STATUS   = "{{ status }}";
+    const EXAM_ID  = {{ exam.pk }};
+
+    function fmtDuration(ms){
+        if(ms<=0) return '00:00:00';
+        let s = Math.floor(ms/1000);
+        const h = Math.floor(s/3600); s%=3600;
+        const m = Math.floor(s/60); s%=60;
+        return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+
+    const countdownEl = document.getElementById('countdown-display');
+    const elapsedEl   = document.getElementById('elapsed-display');
+    let lastStatus = STATUS;
+
+    function tick(){
+        const now = serverTime();
+        let currentStatus;
+        if(now < START) currentStatus = 'upcoming';
+        else if(now < EXAM_END) currentStatus = 'running';
+        else if("{{ exam.exam_mode }}" === 'online' && now < FINAL_END) currentStatus = 'submission';
+        else if(now < FINAL_END) currentStatus = 'running';
+        else currentStatus = 'finished';
+
+        // Reload on status change
+        if(currentStatus !== lastStatus){
+            location.reload();
+            return;
+        }
+
+        if(countdownEl){
+            if(currentStatus === 'upcoming'){
+                countdownEl.textContent = fmtDuration(START - now);
+            } else if(currentStatus === 'running'){
+                countdownEl.textContent = fmtDuration(EXAM_END - now);
+            } else if(currentStatus === 'submission'){
+                countdownEl.textContent = fmtDuration(FINAL_END - now);
+            }
+        }
+        if(elapsedEl && currentStatus === 'running'){
+            elapsedEl.textContent = fmtDuration(now - START);
+        }
+    }
+    tick();
+    setInterval(tick, 1000);
+
+    // Poll for bonus time updates every 15s (for students during running/submission)
+    {% if is_student %}
+    if(STATUS === 'running' || STATUS === 'submission'){
+        setInterval(()=>{
+            fetch("{% url 'exam_center_status_api' exam.pk %}")
+            .then(r=>r.json())
+            .then(data=>{
+                // If bonus time changed, update final end so countdown adapts
+                if(data.final_end_iso){
+                    const newFinal = new Date(data.final_end_iso);
+                    if(Math.abs(newFinal - FINAL_END)>1000){
+                        location.reload();
+                    }
+                }
+            }).catch(()=>{});
+        }, 15000);
+    }
+    {% endif %}
+
+    // Bonus time grant (teacher)
+    const bonusBtn = document.getElementById('grant-bonus-btn');
+    if(bonusBtn){
+        bonusBtn.addEventListener('click', function(){
+            const mins = parseInt(document.getElementById('bonus-input').value)||0;
+            if(mins<1||mins>120){alert('Enter 1–120 minutes.');return;}
+            if(!confirm(`Grant ${mins} minutes of bonus time?`)) return;
+            fetch("{% url 'exam_center_bonus_time' exam.pk %}", {
+                method:'POST',
+                headers:{'Content-Type':'application/json','X-CSRFToken':'{{ csrf_token }}'},
+                body:JSON.stringify({minutes:mins})
+            })
+            .then(r=>r.json())
+            .then(data=>{
+                if(data.success) location.reload();
+                else alert(data.error||'Failed to grant bonus time.');
+            }).catch(()=>alert('Network error.'));
+        });
+    }
+
+    // File input UX
+    const fileInput = document.getElementById('file-input');
+    const fileInfo = document.getElementById('file-info');
+    const fileName = document.getElementById('file-name');
+    const fileSize = document.getElementById('file-size');
+    const submitBtn = document.getElementById('submit-btn');
+    const dropZone = document.getElementById('drop-zone');
+
+    if(fileInput){
+        fileInput.addEventListener('change', function(){
+            const f = this.files[0];
+            if(f){
+                fileName.textContent = f.name;
+                fileSize.textContent = (f.size/(1024*1024)).toFixed(2)+' MB';
+                fileInfo.classList.remove('hidden');
+                submitBtn.disabled = false;
+
+                // Client-side validations
+                const ext = f.name.split('.').pop().toLowerCase();
+                if(!['pdf','zip','rar'].includes(ext)){
+                    alert('Only PDF, ZIP, or RAR files allowed.');
+                    this.value=''; submitBtn.disabled=true; fileInfo.classList.add('hidden');
+                } else if(f.size > 10*1024*1024){
+                    alert('File must be 10 MB or smaller.');
+                    this.value=''; submitBtn.disabled=true; fileInfo.classList.add('hidden');
+                }
+            }
+        });
+    }
+
+    // Drop zone visual
+    if(dropZone){
+        ['dragenter','dragover'].forEach(e=>dropZone.addEventListener(e,ev=>{ev.preventDefault();dropZone.classList.add('border-purple-400','bg-purple-50')}));
+        ['dragleave','drop'].forEach(e=>dropZone.addEventListener(e,ev=>{ev.preventDefault();dropZone.classList.remove('border-purple-400','bg-purple-50')}));
+        dropZone.addEventListener('drop',ev=>{
+            if(ev.dataTransfer.files.length && fileInput){
+                fileInput.files = ev.dataTransfer.files;
+                fileInput.dispatchEvent(new Event('change'));
+            }
+        });
+    }
+
+    // Disable submit on form submission to prevent double-click
+    const uploadForm = document.getElementById('upload-form');
+    if(uploadForm){
+        uploadForm.addEventListener('submit',function(){
+            if(submitBtn){submitBtn.disabled=true;submitBtn.textContent='Uploading…';}
+        });
+    }
+})();
+</script>
+{% endblock %}

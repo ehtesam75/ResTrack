@@ -69,6 +69,9 @@
                         <a href="{% url 'exam_lookup' %}" class="{% if 'exam-lookup' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors nav-link">
                             Exam Docs
                         </a>
+                        <a href="{% url 'exam_center' %}" class="{% if 'exam-center' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors nav-link">
+                            Exam Center
+                        </a>
                         <a href="{% url 'points' %}" class="{% if 'points' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors nav-link">
                             Points
                         </a>
@@ -258,6 +261,14 @@
                     </svg>
                 </div>
                 <span>Exam Documents</span>
+            </a>
+            <a href="{% url 'exam_center' %}" class="{% if 'exam-center' in request.path %}bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 border-l-2 border-purple-500{% else %}text-gray-600 hover:bg-gray-50 border-l-2 border-transparent{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-r-lg font-medium transition-all text-sm">
+                <div class="w-8 h-8 rounded-lg {% if 'exam-center' in request.path %}bg-purple-100{% else %}bg-gray-100{% endif %} flex items-center justify-center">
+                    <svg class="w-4 h-4 {% if 'exam-center' in request.path %}text-purple-600{% else %}text-gray-500{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                    </svg>
+                </div>
+                <span>Exam Center</span>
             </a>
             <a href="{% url 'points' %}" class="{% if 'points' in request.path %}bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 border-l-2 border-purple-500{% else %}text-gray-600 hover:bg-gray-50 border-l-2 border-transparent{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-r-lg font-medium transition-all text-sm">
                 <div class="w-8 h-8 rounded-lg {% if 'points' in request.path %}bg-purple-100{% else %}bg-gray-100{% endif %} flex items-center justify-center">

@@ -1,0 +1,78 @@
+{% extends 'marks/base.html' %}
+{% load static %}
+
+{% block title %}Submissions — {{ exam.subject }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Back link -->
+    <a href="{% url 'exam_center_detail' exam.pk %}" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-purple-600 mb-5 transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        Back to Exam
+    </a>
+
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-2xl font-bold gradient-text">Answer Submissions</h1>
+            <p class="text-sm text-gray-500 mt-1">
+                {{ exam.subject }} &middot; {{ exam.exam_display_id }} &middot; Class {{ exam.class_number }}
+            </p>
+        </div>
+        <span class="px-3 py-1 text-xs font-bold rounded-full
+            {% if status == 'finished' %}bg-gray-100 text-gray-500{% else %}bg-amber-100 text-amber-700{% endif %}">
+            {{ exam.status_label }}
+        </span>
+    </div>
+
+    {% if submission_list %}
+    <div class="bg-white rounded-2xl shadow-md overflow-hidden">
+        <!-- Header row (desktop) -->
+        <div class="hidden sm:grid grid-cols-12 gap-4 px-5 py-3 bg-gray-50 text-[11px] font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100">
+            <div class="col-span-4">Student</div>
+            <div class="col-span-2 text-center">Attempts</div>
+            <div class="col-span-3 text-center">Submitted At</div>
+            <div class="col-span-3 text-right">Download</div>
+        </div>
+
+        <div class="divide-y divide-gray-50">
+            {% for item in submission_list %}
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 px-5 py-4 items-center">
+                <!-- Student name -->
+                <div class="sm:col-span-4">
+                    <p class="text-sm font-semibold text-gray-800">{{ item.student_name }}</p>
+                </div>
+                <!-- Attempts -->
+                <div class="sm:col-span-2 text-center">
+                    <span class="text-xs text-gray-500 sm:text-sm">{{ item.total_attempts }}/3 attempt{{ item.total_attempts|pluralize }}</span>
+                </div>
+                <!-- Time -->
+                <div class="sm:col-span-3 text-center">
+                    <span class="text-xs text-gray-400">{{ item.submitted_at|date:"M d, H:i:s" }}</span>
+                </div>
+                <!-- Download link -->
+                <div class="sm:col-span-3 text-right">
+                    {% if item.file_url %}
+                    <a href="{{ item.file_url }}" target="_blank" rel="noopener"
+                       class="inline-flex items-center gap-1 px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg text-xs font-semibold hover:bg-purple-100 transition-colors">
+                        <i class="fa-solid fa-download"></i> Download
+                    </a>
+                    {% else %}
+                    <span class="text-xs text-gray-400">No file</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <p class="text-xs text-gray-400 mt-4 text-center">
+        {{ submission_list|length }} submission{{ submission_list|length|pluralize }} &middot; Only the final (latest) submission per student is shown.
+    </p>
+    {% else %}
+    <div class="bg-white rounded-2xl shadow-md p-12 text-center">
+        <svg class="mx-auto w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        <p class="text-sm text-gray-400 font-medium">No submissions received yet.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

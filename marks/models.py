@@ -1076,3 +1076,209 @@ class PointTransaction(models.Model):
     def is_negative(self):
         """Check if this transaction subtracts points"""
         return self.points_change < 0
+
+
+class ExamCenterExam(models.Model):
+    """
+    Model for the Exam Center feature.
+    Manages upcoming and finished exams with real-time countdown support.
+    A teacher can have at most 3 non-finished exams at any time.
+    """
+    MODE_CHOICES = [
+        ('online', 'Online'),
+        ('offline', 'Offline'),
+    ]
+    TYPE_CHOICES = [
+        ('cq', 'CQ'),
+        ('mcq', 'MCQ'),
+    ]
+
+    teacher = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='exam_center_exams',
+        help_text="Teacher who created this exam"
+    )
+    exam_display_id = models.CharField(
+        max_length=50,
+        help_text="Exam identifier displayed to students"
+    )
+    class_number = models.IntegerField(
+        help_text="Class number (1-12)"
+    )
+    subject = models.CharField(
+        max_length=200,
+        help_text="Subject name"
+    )
+    exam_mode = models.CharField(
+        max_length=10,
+        choices=MODE_CHOICES,
+        help_text="Online or Offline exam"
+    )
+    exam_type = models.CharField(
+        max_length=5,
+        choices=TYPE_CHOICES,
+        help_text="CQ or MCQ"
+    )
+    total_marks = models.PositiveIntegerField(
+        help_text="Total marks for the exam"
+    )
+    exam_date = models.DateField(
+        help_text="Date of the exam"
+    )
+    start_time = models.TimeField(
+        help_text="Start time of the exam"
+    )
+    duration_minutes = models.PositiveIntegerField(
+        help_text="Exam duration in minutes"
+    )
+    submission_duration_minutes = models.PositiveIntegerField(
+        default=10,
+        help_text="Answer submission window in minutes (online exams only)"
+    )
+
+    def _question_pdf_folder(instance):
+        username = instance.teacher.username if instance.teacher else 'unknown'
+        return f"ResTrack/{username}/Exam Center/Questions"
+
+    question_pdf = CloudinaryField(
+        resource_type='raw',
+        folder=_question_pdf_folder,
+        blank=True,
+        null=True,
+        help_text="Question paper PDF (mandatory for online exams, max 1 MB)"
+    )
+
+    bonus_time_minutes = models.PositiveIntegerField(
+        default=0,
+        help_text="Bonus time granted by teacher (extends submission for online, extends exam for offline)"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Exam Center Exam"
+        verbose_name_plural = "Exam Center Exams"
+        ordering = ['-exam_date', '-start_time']
+
+    def __str__(self):
+        return f"[{self.exam_display_id}] {self.subject} — Class {self.class_number}"
+
+    # ---- datetime helpers ------------------------------------------------
+
+    @property
+    def start_datetime(self):
+        """Timezone-aware start datetime."""
+        from django.utils import timezone
+        import datetime as _dt
+        naive = _dt.datetime.combine(self.exam_date, self.start_time)
+        return timezone.make_aware(naive, timezone.get_current_timezone())
+
+    @property
+    def exam_end_datetime(self):
+        """End of the exam writing period."""
+        import datetime as _dt
+        if self.exam_mode == 'offline':
+            return self.start_datetime + _dt.timedelta(minutes=self.duration_minutes + self.bonus_time_minutes)
+        return self.start_datetime + _dt.timedelta(minutes=self.duration_minutes)
+
+    @property
+    def final_end_datetime(self):
+        """Absolute final datetime (incl. submission window for online)."""
+        import datetime as _dt
+        if self.exam_mode == 'online':
+            return self.exam_end_datetime + _dt.timedelta(
+                minutes=self.submission_duration_minutes + self.bonus_time_minutes
+            )
+        return self.exam_end_datetime
+
+    # ---- computed status -------------------------------------------------
+
+    @property
+    def computed_status(self):
+        """Dynamic status based on current server time."""
+        from django.utils import timezone
+        now = timezone.now()
+        if now < self.start_datetime:
+            return 'upcoming'
+        if now < self.exam_end_datetime:
+            return 'running'
+        if self.exam_mode == 'online' and now < self.final_end_datetime:
+            return 'submission'
+        if now >= self.final_end_datetime:
+            return 'finished'
+        return 'finished'
+
+    @property
+    def is_finished(self):
+        return self.computed_status == 'finished'
+
+    @property
+    def is_upcoming(self):
+        return self.computed_status == 'upcoming'
+
+    @property
+    def is_running(self):
+        return self.computed_status == 'running'
+
+    @property
+    def status_label(self):
+        labels = {
+            'upcoming': 'Upcoming',
+            'running': 'Running Now',
+            'submission': 'Submission Open',
+            'finished': 'Finished',
+        }
+        return labels.get(self.computed_status, 'Unknown')
+
+    # ---- class-level helpers ---------------------------------------------
+
+    @classmethod
+    def active_exams_for_teacher(cls, teacher):
+        """Return non-finished exams for a teacher (queryset evaluated in Python)."""
+        return [e for e in cls.objects.filter(teacher=teacher) if not e.is_finished]
+
+    @classmethod
+    def can_create_exam(cls, teacher):
+        return len(cls.active_exams_for_teacher(teacher)) < 3
+
+
+class AnswerSubmission(models.Model):
+    """Student answer-sheet submission for an online Exam Center exam."""
+    exam = models.ForeignKey(
+        ExamCenterExam,
+        on_delete=models.CASCADE,
+        related_name='answer_submissions'
+    )
+    student_user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='exam_center_submissions'
+    )
+
+    def _answer_folder(instance):
+        username = instance.exam.teacher.username if instance.exam.teacher else 'unknown'
+        return f"ResTrack/{username}/Exam Center/Answers"
+
+    answer_file = CloudinaryField(
+        resource_type='raw',
+        folder=_answer_folder,
+        help_text="Answer sheet (PDF / ZIP / RAR, max 10 MB)"
+    )
+    is_final = models.BooleanField(
+        default=True,
+        help_text="Whether this is the final (latest) submission"
+    )
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Answer Submission"
+        verbose_name_plural = "Answer Submissions"
+        ordering = ['-submitted_at']
+
+    def __str__(self):
+        try:
+            name = self.student_user.student_profile.student.name
+        except Exception:
+            name = self.student_user.username
+        return f"{name} — Exam {self.exam.exam_display_id}"
