@@ -399,22 +399,22 @@
         <!-- Mobile: Card Layout -->
         <div class="sm:hidden space-y-2">
             {% for exam in recent_exams %}
-            <div class="bg-white rounded-lg p-3 border border-gray-100 shadow-sm{% if exam.exam_id %} cursor-pointer{% endif %}" {% if exam.exam_id %}onclick="window.location.href='{% url 'exam_detail' exam.exam_id %}'"{% endif %}>
+            <div class="bg-gradient-to-r from-purple-50/70 to-blue-50/70 rounded-lg p-3 border border-purple-100/50 shadow-sm{% if exam.exam_id %} cursor-pointer{% endif %}" {% if exam.exam_id %}onclick="window.location.href='{% url 'exam_detail' exam.exam_id %}'"{% endif %}>
                 <div class="flex items-center justify-between mb-2">
                     <div class="flex items-center gap-2">
                         {% if exam.exam_id %}<a href="{% url 'exam_detail' exam.exam_id %}" class="text-xs font-semibold text-purple-600 hover:text-purple-800 hover:underline transition-colors">#{{ exam.exam_id }}</a>{% else %}<span class="text-xs font-semibold text-purple-600">#N/A</span>{% endif %}
-                        <span class="text-xs text-gray-400">{{ exam.date|date:"M d" }}</span>
+                        <span class="text-[10px] text-gray-400">{{ exam.date|date:"M d" }}</span>
                     </div>
-                    <span class="grade-badge text-gray-900 text-xs px-2 py-0.5" style="background-color: {{ exam.grade_color }};">{{ exam.grade }}</span>
+                    <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full" style="background-color: {{ exam.grade_color }};">{{ exam.grade }}</span>
                 </div>
                 <div class="flex items-center justify-between">
                     <div class="flex-1 min-w-0">
                         <p class="text-sm text-gray-900 truncate">{{ exam.subject.name }}</p>
-                        <p class="text-xs text-gray-500">{{ exam.exam_type.name }} · Ch {{ exam.chapter|default:"—" }}</p>
+                        <p class="text-[10px] text-gray-500">{{ exam.exam_type.name }} · Ch {{ exam.chapter|default:"—" }}</p>
                     </div>
                     <div class="text-right flex-shrink-0 ml-3">
                         <p class="text-sm font-bold gradient-text">{{ exam.percentage|floatformat:1 }}%</p>
-                        <p class="text-xs text-gray-500">{{ exam.mark_obtained|floatformat:0 }}/{{ exam.total_marks|floatformat:0 }}</p>
+                        <p class="text-[10px] text-gray-500">{{ exam.mark_obtained|floatformat:0 }}/{{ exam.total_marks|floatformat:0 }}</p>
                     </div>
                 </div>
             </div>
