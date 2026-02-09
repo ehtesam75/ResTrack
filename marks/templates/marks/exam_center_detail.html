@@ -38,7 +38,7 @@
                 <div class="w-full">
                     <div class="flex items-start justify-between mb-1">
                         <h1 class="text-xl sm:text-2xl font-bold text-gray-900">{{ exam.subject }}</h1>
-                        <span class="px-2 py-0.5 bg-gray-100 rounded-full font-medium text-xs text-gray-500 whitespace-nowrap ml-3 mt-1">Exam ID : {{ exam.exam_display_id }}</span>
+                        <span class="px-2 py-0.5 bg-gray-200 rounded-full font-medium text-xs text-gray-500 whitespace-nowrap ml-3 mt-1">Exam ID : {{ exam.exam_display_id }}</span>
                     </div>
                     <div class="flex flex-wrap gap-2 text-xs text-gray-500">
                         <span class="px-2 py-0.5 bg-gray-100 rounded-full">Class {{ exam.class_number }}</span>
@@ -139,7 +139,7 @@
                 <p class="text-xs text-gray-400 uppercase font-semibold mb-1">Time Remaining</p>
                 <div id="countdown-display" class="countdown-big font-bold text-emerald-600 timer-display">--:--:--</div>
             </div>
-            <div class="bg-white rounded-2xl shadow-md p-6 text-center">
+            <div class="bg-white rounded-2xl shadow-md p-6 text-center hidden sm:block">
                 <p class="text-xs text-gray-400 uppercase font-semibold mb-1">Elapsed</p>
                 <div id="elapsed-display" class="countdown-big font-bold text-gray-500 timer-display">--:--:--</div>
             </div>

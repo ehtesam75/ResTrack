@@ -47,7 +47,7 @@
                 </label>
                 <div class="flex gap-2">
                     <input type="number" id="lookup_exam_id" min="1" placeholder="Enter Exam ID"
-                        class="flex-1 max-w-xs px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent bg-white hover:bg-gray-50 transition-colors">
+                        class="flex-1 max-w-[140px] sm:max-w-xs px-2 py-1.5 sm:px-3 sm:py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent bg-white hover:bg-gray-50 transition-colors">
                     <button type="button" id="lookup_btn" onclick="lookupExam()"
                         class="bg-teal-100 text-teal-700 px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-teal-200 transition-all">
                         <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -144,7 +144,7 @@
                                 <th class="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider font-semibold text-gray-500 hidden sm:table-cell">Type</th>
                                 <th class="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider font-semibold text-gray-500 hidden sm:table-cell">Date</th>
                                 <th class="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider font-semibold text-gray-500 hidden md:table-cell">Chapter</th>
-                                <th class="px-3 py-2.5 text-center text-[10px] uppercase tracking-wider font-semibold text-gray-500">Students</th>
+                                <th class="px-3 py-2.5 text-center text-[10px] uppercase tracking-wider font-semibold text-gray-500 hidden sm:table-cell">Students</th>
                                 <th class="px-3 py-2.5 text-center text-[10px] uppercase tracking-wider font-semibold text-gray-500">Uploaded</th>
                                 <th class="px-3 py-2.5 text-center text-[10px] uppercase tracking-wider font-semibold text-gray-500">Action</th>
                             </tr>
@@ -159,7 +159,7 @@
                                 <td class="px-3 py-2.5 text-gray-600 text-xs hidden sm:table-cell">{{ exam.exam_type }}</td>
                                 <td class="px-3 py-2.5 text-gray-600 text-xs hidden sm:table-cell">{{ exam.date|date:"M d, Y" }}</td>
                                 <td class="px-3 py-2.5 text-gray-600 text-xs hidden md:table-cell">{{ exam.chapter }}</td>
-                                <td class="px-3 py-2.5 text-center text-xs text-gray-600">{{ exam.student_count }}</td>
+                                <td class="px-3 py-2.5 text-center text-xs text-gray-600 hidden sm:table-cell">{{ exam.student_count }}</td>
                                 <td class="px-3 py-2.5 text-center">
                                     {% if exam.papers_uploaded > 0 %}
                                     <span class="text-xs font-medium {% if exam.papers_uploaded == exam.student_count %}text-green-600{% else %}text-amber-600{% endif %}">
@@ -265,7 +265,7 @@ function lookupExam() {
             studentList.innerHTML = '';
             data.students.forEach(stu => {
                 const card = document.createElement('div');
-                card.className = 'flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-lg border ' +
+                card.className = 'flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-lg border w-full ' +
                     (stu.has_paper ? 'border-green-200 bg-green-50/50' : 'border-gray-200 bg-gray-50/50');
 
                 const gradeColors = {
