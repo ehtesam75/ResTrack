@@ -183,6 +183,12 @@
                         </svg>
                         View PDF
                     </a>
+                    <a id="downloadPdfBtn" href="#" class="flex items-center justify-center gap-2 w-full bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 font-medium py-2.5 px-3 rounded-lg transition-colors text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
+                        Download PDF
+                    </a>
                 </div>
 
                 <div id="pdfNotAvailable" class="hidden">
@@ -229,6 +235,12 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                         </svg>
                         View Answer Paper
+                    </a>
+                    <a id="downloadMarkedAnswerBtn" href="#" class="flex items-center justify-center gap-2 w-full bg-green-50 border border-green-200 text-green-600 hover:bg-green-100 font-medium py-2.5 px-3 rounded-lg transition-colors text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
+                        Download Answer Paper
                     </a>
                 </div>
 
@@ -434,14 +446,23 @@
                             <h3 class="text-sm font-bold text-gray-900">Question Paper</h3>
                         </div>
                         <div id="dPdfAvailable" class="hidden">
-                            <a id="dViewPdfBtn" href="#" target="_blank" rel="noopener noreferrer"
-                                class="inline-flex items-center gap-1.5 text-sm text-indigo-600 font-medium hover:text-indigo-800 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                </svg>
-                                View Question Paper
-                            </a>
+                            <div class="flex items-center gap-3">
+                                <a id="dViewPdfBtn" href="#" target="_blank" rel="noopener noreferrer"
+                                    class="inline-flex items-center gap-1.5 text-sm text-indigo-600 font-medium hover:text-indigo-800 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                    View Question Paper
+                                </a>
+                                <a id="dDownloadPdfBtn" href="#"
+                                    class="inline-flex items-center gap-1.5 text-sm text-red-600 font-medium hover:text-red-800 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                    </svg>
+                                    Download
+                                </a>
+                            </div>
                         </div>
                         <div id="dPdfNotAvailable" class="hidden">
                             <span class="text-xs text-gray-400 font-medium">No PDF uploaded</span>
@@ -476,16 +497,25 @@
                             </div>
                         </div>
 
-                        <!-- View button -->
+                        <!-- View and Download buttons -->
                         <div id="dMarkedAnswerAvailable" class="hidden">
-                            <a id="dViewMarkedAnswerBtn" href="#" target="_blank" rel="noopener noreferrer"
-                                class="inline-flex items-center gap-1.5 text-sm text-green-600 font-medium hover:text-green-800 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                </svg>
-                                View Answer Paper
-                            </a>
+                            <div class="flex items-center gap-3">
+                                <a id="dViewMarkedAnswerBtn" href="#" target="_blank" rel="noopener noreferrer"
+                                    class="inline-flex items-center gap-1.5 text-sm text-green-600 font-medium hover:text-green-800 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                    View Answer Paper
+                                </a>
+                                <a id="dDownloadMarkedAnswerBtn" href="#"
+                                    class="inline-flex items-center gap-1.5 text-sm text-green-600 font-medium hover:text-green-800 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                    </svg>
+                                    Download
+                                </a>
+                            </div>
                         </div>
 
                         <!-- Not available -->
@@ -563,6 +593,11 @@
 {% block extra_js %}
 <script>
     const isStudent = {{ is_student|yesno:"true,false" }};
+
+    function toDownloadUrl(url) {
+        if (!url) return '#';
+        return url.replace('/upload/', '/upload/fl_attachment/');
+    }
 
     // ==================== MOBILE LOGIC ====================
     const examIdInput = document.getElementById('examIdInput');
@@ -663,6 +698,12 @@
                     </svg>
                     View Answer Paper
                 </a>
+                <a href="${toDownloadUrl(studentData.marked_answer_url)}" class="flex items-center justify-center gap-2 w-full bg-green-50 border border-green-200 text-green-600 hover:bg-green-100 font-medium py-2 px-3 rounded-lg transition-colors text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    Download Answer Paper
+                </a>
             `;
             card.appendChild(actions);
         } else {
@@ -698,6 +739,7 @@
             document.getElementById('pdfAvailable').classList.remove('hidden');
             document.getElementById('pdfNotAvailable').classList.add('hidden');
             document.getElementById('viewPdfBtn').href = exam.pdf_url;
+            document.getElementById('downloadPdfBtn').href = toDownloadUrl(exam.pdf_url);
         } else {
             document.getElementById('pdfAvailable').classList.add('hidden');
             document.getElementById('pdfNotAvailable').classList.remove('hidden');
@@ -745,6 +787,7 @@
                 if (exam.has_marked_answer && exam.marked_answer_url) {
                     markedAnswerAvailable.classList.remove('hidden');
                     document.getElementById('viewMarkedAnswerBtn').href = exam.marked_answer_url;
+                    document.getElementById('downloadMarkedAnswerBtn').href = toDownloadUrl(exam.marked_answer_url);
                 } else {
                     markedAnswerNotAvailable.classList.remove('hidden');
                 }
@@ -823,6 +866,7 @@
             document.getElementById('dPdfAvailable').classList.remove('hidden');
             document.getElementById('dPdfNotAvailable').classList.add('hidden');
             document.getElementById('dViewPdfBtn').href = exam.pdf_url;
+            document.getElementById('dDownloadPdfBtn').href = toDownloadUrl(exam.pdf_url);
         } else {
             document.getElementById('dPdfAvailable').classList.add('hidden');
             document.getElementById('dPdfNotAvailable').classList.remove('hidden');
@@ -854,14 +898,21 @@
 
                     let answerCell;
                     if (s.has_marked_answer && s.marked_answer_url) {
-                        answerCell = `<a href="${s.marked_answer_url}" target="_blank" rel="noopener noreferrer"
-                            class="inline-flex items-center gap-1 text-green-600 hover:text-green-800 transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                            </svg>
-                            <span class="text-xs font-medium">View</span>
-                        </a>`;
+                        answerCell = `<div class="inline-flex items-center gap-1.5">
+                            <a href="${s.marked_answer_url}" target="_blank" rel="noopener noreferrer" title="View"
+                                class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-green-50 text-green-600 hover:bg-green-100 transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                            </a>
+                            <a href="${toDownloadUrl(s.marked_answer_url)}" title="Download"
+                                class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-blue-50 text-blue-500 hover:bg-blue-100 transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                </svg>
+                            </a>
+                        </div>`;
                     } else {
                         answerCell = `<span class="text-gray-300 text-xs">—</span>`;
                     }
@@ -904,6 +955,7 @@
                 if (exam.has_marked_answer && exam.marked_answer_url) {
                     dMarkedAvail.classList.remove('hidden');
                     document.getElementById('dViewMarkedAnswerBtn').href = exam.marked_answer_url;
+                    document.getElementById('dDownloadMarkedAnswerBtn').href = toDownloadUrl(exam.marked_answer_url);
                 } else {
                     dMarkedNotAvail.classList.remove('hidden');
                 }

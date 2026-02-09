@@ -1593,6 +1593,10 @@ def exam_detail(request, exam_id):
         exam_record = next((e for e in exam_records if e.student_id == p['student'].id), None)
         p['has_answer_paper'] = bool(exam_record and exam_record.marked_answer_paper)
         p['answer_paper_exam_pk'] = exam_record.pk if exam_record else None
+        if exam_record and exam_record.marked_answer_paper:
+            p['answer_paper_url'] = exam_record.marked_answer_paper.url if hasattr(exam_record.marked_answer_paper, 'url') else str(exam_record.marked_answer_paper)
+        else:
+            p['answer_paper_url'] = None
 
     context = {
         'exam_id': exam_id,
@@ -1611,6 +1615,7 @@ def exam_detail(request, exam_id):
         'is_student': user_is_student,
         'current_student_id': current_student_id,
         'has_question_paper': bool(question_paper_url),
+        'question_paper_url': question_paper_url,
     }
     return render(request, 'marks/exam_detail.html', context)
 
