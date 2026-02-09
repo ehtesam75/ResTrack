@@ -260,7 +260,7 @@ class ExamCenterExamForm(forms.ModelForm):
         widgets = {
             'exam_display_id': forms.TextInput(attrs={'class': _INPUT_CLS, 'placeholder': 'e.g. EX-101'}),
             'class_number': forms.NumberInput(attrs={'class': _INPUT_CLS, 'min': 1, 'max': 12, 'placeholder': '1–12'}),
-            'subject': forms.TextInput(attrs={'class': _INPUT_CLS, 'placeholder': 'Subject name'}),
+            'subject': forms.Select(attrs={'class': _SELECT_CLS}),
             'exam_mode': forms.Select(attrs={'class': _SELECT_CLS}),
             'exam_type': forms.Select(attrs={'class': _SELECT_CLS}),
             'total_marks': forms.NumberInput(attrs={'class': _INPUT_CLS, 'min': 1, 'placeholder': 'Total marks'}),
@@ -275,6 +275,32 @@ class ExamCenterExamForm(forms.ModelForm):
         self.teacher = teacher
         super().__init__(*args, **kwargs)
         self.fields['submission_duration_minutes'].required = False
+
+        # Build subject choices from teacher's subjects
+        from .models import Subject
+        subject_choices = [('', 'Select Subject')]
+        if teacher:
+            subjects = Subject.objects.filter(teacher=teacher).order_by('name')
+            subject_choices += [(s.name, s.name) for s in subjects]
+        self.fields['subject'] = forms.ChoiceField(
+            choices=subject_choices,
+            widget=forms.Select(attrs={'class': _SELECT_CLS}),
+            required=True,
+        )
+
+        # Add blank default for exam_mode, exam_type, start_time
+        mode_choices = [('', 'Select Mode')] + list(ExamCenterExam.MODE_CHOICES)
+        type_choices = [('', 'Select Type')] + list(ExamCenterExam.TYPE_CHOICES)
+        self.fields['exam_mode'].choices = mode_choices
+        self.fields['exam_type'].choices = type_choices
+
+        # Pre-select values when editing
+        if self.instance and self.instance.pk:
+            # Subject: set initial to existing value, ensure it's in choices
+            existing_subject = self.instance.subject
+            if existing_subject and not any(c[0] == existing_subject for c in subject_choices):
+                self.fields['subject'].choices.append((existing_subject, existing_subject))
+            self.fields['subject'].initial = existing_subject
 
     def clean_class_number(self):
         val = self.cleaned_data.get('class_number')

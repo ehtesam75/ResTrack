@@ -21,7 +21,7 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
-            <h1 class="text-2xl sm:text-3xl font-bold gradient-text">Exam Center</h1>
+            <h1 class="text-xl sm:text-2xl font-bold gradient-text">Exam Center</h1>
             <p class="text-gray-500 text-sm mt-1">
                 {% if is_teacher %}Manage your upcoming exams{% else %}View and participate in exams{% endif %}
             </p>
@@ -30,15 +30,13 @@
         <div class="flex items-center gap-3">
             <span class="text-xs text-gray-400">{{ active_count }}/3 active</span>
             {% if can_create %}
-            <a href="{% url 'exam_center_create' %}"
-               class="inline-flex items-center gap-2 px-5 py-2.5 bg-white border-2 border-purple-600 text-purple-700 rounded-xl text-sm font-semibold shadow-sm hover:bg-purple-600 hover:text-white hover:shadow-md transition-all duration-200">
+            <a href="{% url 'exam_center_create' %}" title="Create Exam"
+               class="inline-flex items-center justify-center w-9 h-9 bg-white border-2 border-purple-600 text-purple-700 rounded-lg shadow-sm hover:bg-purple-600 hover:text-white hover:shadow-md transition-all duration-200">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                Create Exam
             </a>
             {% else %}
-            <span class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-100 text-gray-400 rounded-xl text-sm font-semibold cursor-not-allowed border border-gray-200">
+            <span title="Limit Reached" class="inline-flex items-center justify-center w-9 h-9 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed border border-gray-200">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                Limit Reached
             </span>
             {% endif %}
         </div>

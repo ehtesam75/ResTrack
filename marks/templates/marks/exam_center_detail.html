@@ -42,12 +42,7 @@
                         <span class="px-2 py-0.5 bg-gray-100 rounded-full">Class {{ exam.class_number }}</span>
                         <span class="px-2 py-0.5 bg-gray-100 rounded-full">{{ exam.get_exam_type_display }}</span>
                         <span class="px-2 py-0.5 {% if exam.exam_mode == 'online' %}bg-blue-100 text-blue-700{% else %}bg-gray-100{% endif %} rounded-full font-medium">{{ exam.get_exam_mode_display }}</span>
-                    </div>
-                </div>
-                <div class="text-right flex-shrink-0">
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-purple-50 border border-purple-200 rounded-xl">
-                        <p class="text-2xl font-bold text-purple-700">{{ exam.total_marks }}</p>
-                        <p class="text-xs text-purple-500 font-semibold">Total<br>Marks</p>
+                        <span class="px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full font-semibold">{{ exam.total_marks }} marks</span>
                     </div>
                 </div>
             </div>
@@ -114,12 +109,6 @@
         </div>
         {% endif %}
 
-        {% if exam.exam_mode == 'online' and status == 'finished' %}
-        <a href="{% url 'exam_center_submissions' exam.pk %}"
-           class="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-xl text-sm font-semibold hover:bg-purple-700 transition-all shadow-md">
-            <i class="fa-solid fa-file-lines"></i> View Submissions
-        </a>
-        {% endif %}
     </div>
     {% endif %}
 
