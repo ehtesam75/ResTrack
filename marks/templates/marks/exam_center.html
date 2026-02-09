@@ -27,7 +27,7 @@
             </p>
         </div>
         {% if is_teacher %}
-        <div class="flex items-center gap-3">
+        <div class="hidden sm:flex items-center gap-3">
             <span class="text-xs text-gray-400">{{ active_count }}/3 active</span>
             {% if can_create %}
             <a href="{% url 'exam_center_create' %}" title="Create Exam"

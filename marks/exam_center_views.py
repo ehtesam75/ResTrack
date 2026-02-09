@@ -37,8 +37,8 @@ def _get_ordered_active_exams(teacher):
             submission.append(e)
         elif s == 'upcoming':
             upcoming.append(e)
-    # Sort upcoming by start_datetime descending (latest first)
-    upcoming.sort(key=lambda e: e.start_datetime, reverse=True)
+    # Sort upcoming by start_datetime ascending (soonest first — closest countdown ahead)
+    upcoming.sort(key=lambda e: e.start_datetime)
     return running + submission + upcoming
 
 

@@ -16,7 +16,7 @@
                     {% if editing %}Update exam details below{% else %}Set up a new exam for your students{% endif %}
                 </p>
             </div>
-            <a href="{% url 'exam_center' %}" class="bg-gray-100 text-gray-600 px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-gray-200 transition-all">
+            <a href="{% url 'exam_center' %}" class="hidden sm:inline-flex bg-gray-100 text-gray-600 px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-gray-200 transition-all">
                 ← Back
             </a>
         </div>
@@ -175,6 +175,31 @@
     if(modeSelect){
         modeSelect.addEventListener('change', toggle);
         toggle();
+    }
+
+    // Set min date/time to prevent past dates
+    const dateInput = document.getElementById('id_exam_date');
+    const timeInput = document.getElementById('id_start_time');
+    if(dateInput){
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth()+1).padStart(2,'0');
+        const dd = String(now.getDate()).padStart(2,'0');
+        dateInput.setAttribute('min', `${yyyy}-${mm}-${dd}`);
+
+        function enforceMinTime(){
+            const today = `${yyyy}-${mm}-${dd}`;
+            if(dateInput.value === today && timeInput){
+                const hh = String(now.getHours()).padStart(2,'0');
+                const mi = String(now.getMinutes()).padStart(2,'0');
+                timeInput.setAttribute('min', `${hh}:${mi}`);
+            } else if(timeInput){
+                timeInput.removeAttribute('min');
+            }
+        }
+        dateInput.addEventListener('change', enforceMinTime);
+        if(timeInput) timeInput.addEventListener('change', enforceMinTime);
+        enforceMinTime();
     }
 })();
 </script>

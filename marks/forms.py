@@ -321,6 +321,19 @@ class ExamCenterExamForm(forms.ModelForm):
         cleaned = super().clean()
         mode = cleaned.get('exam_mode')
 
+        # Validate that exam date/time is in the future (only for new exams)
+        exam_date = cleaned.get('exam_date')
+        start_time = cleaned.get('start_time')
+        if exam_date and start_time:
+            import datetime as _dt
+            from django.utils import timezone as _tz
+            exam_dt = _tz.make_aware(
+                _dt.datetime.combine(exam_date, start_time),
+                _tz.get_current_timezone(),
+            )
+            if not (self.instance and self.instance.pk) and exam_dt <= _tz.now():
+                raise ValidationError('Exam date and time must be in the future.')
+
         # Require question PDF for online exams (only on create, or if no existing PDF)
         if mode == 'online':
             pdf = cleaned.get('question_pdf')
