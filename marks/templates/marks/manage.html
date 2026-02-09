@@ -115,7 +115,7 @@
                 </div>
             </a>
 
-            <!-- Add Exam -->
+            <!-- Add Exam Result -->
             <a href="{% url 'add_exam' %}" class="group glass-effect rounded-xl p-3 sm:p-5 border border-gray-200 hover:border-green-300 hover:shadow-lg hover:shadow-green-500/10 transition-all">
                 <div class="flex items-center gap-2 sm:gap-3">
                     <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg shadow-green-500/30 group-hover:scale-105 transition-transform">
@@ -124,13 +124,13 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-green-600 transition-colors">Add Exam</h3>
+                        <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-green-600 transition-colors">Add Exam Result</h3>
                         <p class="text-[10px] sm:text-xs text-gray-500">Record single exam result</p>
                     </div>
                 </div>
             </a>
 
-            <!-- Add Bulk Exam -->
+            <!-- Add Bulk Exam Result -->
             <a href="{% url 'add_bulk_exams' %}" class="group glass-effect rounded-xl p-3 sm:p-5 border border-gray-200 hover:border-orange-300 hover:shadow-lg hover:shadow-orange-500/10 transition-all">
                 <div class="flex items-center gap-2 sm:gap-3">
                     <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/30 group-hover:scale-105 transition-transform">
@@ -139,7 +139,7 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-orange-600 transition-colors">Add Bulk Exam</h3>
+                        <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-orange-600 transition-colors">Add Bulk Exam Result</h3>
                         <p class="text-[10px] sm:text-xs text-gray-500">Add results for multiple students</p>
                     </div>
                 </div>
@@ -252,15 +252,15 @@
             </div>
         </div>
 
-        <!-- Recent Exams -->
+        <!-- Recent Exam Results -->
         <div class="glass-effect rounded-xl border border-gray-200 overflow-hidden">
             <div class="p-3 sm:p-4 border-b border-gray-100 flex items-center justify-between">
-                <h2 class="font-bold text-gray-900 text-sm sm:text-base">Recent Exams</h2>
+                <h2 class="font-bold text-gray-900 text-sm sm:text-base">Recent Exam Results</h2>
                 <a href="{% url 'all_exams' %}" class="text-purple-600 text-xs font-medium hover:text-purple-700">View All →</a>
             </div>
             <div class="divide-y divide-gray-100 max-h-80 overflow-y-auto">
                 {% for exam in recent_exams %}
-                <div class="p-3 sm:p-4 hover:bg-gray-50 transition-colors">
+                <div class="p-3 sm:p-4 hover:bg-gray-50 transition-colors{% if exam.exam_id %} cursor-pointer{% endif %}" {% if exam.exam_id %}onclick="if(event.target.tagName!=='A')window.location.href='{% url 'exam_detail' exam.exam_id %}'"{% endif %}>
                     <div class="flex justify-between items-stretch gap-2">
                         <!-- Left: stacked info -->
                         <div class="flex flex-col justify-center">

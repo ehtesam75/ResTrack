@@ -8,8 +8,8 @@
 @keyframes pulse-glow{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.25)}50%{box-shadow:0 0 20px 4px rgba(16,185,129,.15)}}
 .glow-running{animation:pulse-glow 2s ease-in-out infinite}
 .timer-display{font-variant-numeric:tabular-nums;letter-spacing:.04em}
-.countdown-big{font-size:2rem;line-height:1}
-@media(min-width:640px){.countdown-big{font-size:2.75rem}}
+.countdown-big{font-size:1.75rem;line-height:1}
+@media(min-width:640px){.countdown-big{font-size:2.25rem}}
 .pdf-frame{width:100%;border:none;border-radius:.75rem;background:#f9fafb}
 </style>
 {% endblock %}
@@ -134,14 +134,12 @@
     {% if status == 'running' %}
     <div class="space-y-5">
         <!-- Timers -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="bg-white rounded-2xl shadow-md p-6 text-center">
-                <p class="text-xs text-gray-400 uppercase font-semibold mb-1">Time Remaining</p>
-                <div id="countdown-display" class="countdown-big font-bold text-emerald-600 timer-display">--:--:--</div>
-            </div>
-            <div class="bg-white rounded-2xl shadow-md p-6 sm:p-6 py-3 sm:py-6 text-center">
-                <p class="text-[10px] sm:text-xs text-gray-300 sm:text-gray-400 uppercase font-semibold mb-0.5 sm:mb-1">Elapsed</p>
-                <div id="elapsed-display" class="text-lg sm:countdown-big font-bold text-gray-300 sm:text-gray-500 timer-display">--:--:--</div>
+        <div class="bg-white rounded-2xl shadow-md p-6 text-center">
+            <p class="text-xs text-gray-400 uppercase font-semibold mb-1">Time Remaining</p>
+            <div id="countdown-display" class="countdown-big font-bold text-emerald-600 timer-display">--:--:--</div>
+            <div class="inline-flex items-center gap-2 mt-3 px-4 py-1.5 bg-gray-100 rounded-full">
+                <span class="text-[10px] sm:text-xs text-gray-400 uppercase font-semibold">Elapsed</span>
+                <span id="elapsed-display" class="text-sm sm:text-base font-bold text-gray-500 timer-display">--:--:--</span>
             </div>
         </div>
 
@@ -207,7 +205,7 @@
             {% else %}
             <form method="POST" action="{% url 'exam_center_submit_answer' exam.pk %}" enctype="multipart/form-data" id="upload-form">
                 {% csrf_token %}
-                <div class="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-purple-300 transition-colors" id="drop-zone">
+                <div class="relative border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-purple-300 transition-colors" id="drop-zone">
                     <svg class="mx-auto w-10 h-10 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
                     <p class="text-sm text-gray-500 mb-1">Drag & drop or click to select</p>
                     <p class="text-xs text-gray-400">PDF / ZIP / RAR &middot; Max 10 MB</p>
