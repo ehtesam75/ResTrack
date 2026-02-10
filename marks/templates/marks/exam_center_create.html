@@ -127,7 +127,7 @@
                         Duration (minutes) <span class="text-red-500">*</span>
                     </label>
                     {{ form.duration_minutes }}
-                    <p class="text-xs text-gray-500 mt-1">How long students can write the exam</p>
+                    <p class="text-xs text-gray-500 mt-1">How long students can write the exam (max 300 min)</p>
                     {% if form.duration_minutes.errors %}<p class="text-xs text-red-600 mt-1">{{ form.duration_minutes.errors.0 }}</p>{% endif %}
                 </div>
                 <div id="submission-duration-field">
@@ -135,7 +135,7 @@
                         Submission Window (min)
                     </label>
                     {{ form.submission_duration_minutes }}
-                    <p class="text-xs text-gray-500 mt-1">Time for students to upload answers (online only)</p>
+                    <p class="text-xs text-gray-500 mt-1">Time for students to upload answers (max 30 min, online only)</p>
                     {% if form.submission_duration_minutes.errors %}<p class="text-xs text-red-600 mt-1">{{ form.submission_duration_minutes.errors.0 }}</p>{% endif %}
                 </div>
             </div>
@@ -162,7 +162,7 @@
             <div class="flex gap-2 sm:gap-3 pt-2">
                 <button type="submit" id="create-exam-btn"
                         class="flex-1 bg-purple-100 text-purple-700 font-medium py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm shadow-sm hover:shadow-md hover:bg-purple-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-sm disabled:hover:bg-purple-100"
-                        {% if not editing %}disabled{% endif %}>
+                        disabled>
                     {% if editing %}Update Exam{% else %}Create Exam{% endif %}
                 </button>
                 <a href="{% url 'exam_center' %}"
@@ -218,11 +218,10 @@
         enforceMinTime();
     }
 
-    // Disable submit button until all required fields are filled (create mode only)
-    {% if not editing %}
+    // Disable submit button until all required fields are filled with correct data
     const submitBtn = document.getElementById('create-exam-btn');
     const requiredIds = [
-        'id_exam_display_id', 'id_class_number', 'id_subject',
+        {% if not editing %}'id_exam_display_id',{% endif %} 'id_class_number', 'id_subject',
         'id_exam_mode', 'id_exam_type', 'id_total_marks',
         'id_exam_date', 'id_start_time', 'id_duration_minutes'
     ];
@@ -232,11 +231,24 @@
             const el = document.getElementById(id);
             if(!el || !el.value || el.value === '') { ready = false; break; }
         }
-        // If online mode, also require question PDF
+        // If online mode, also require question PDF (only on create, or if no existing PDF)
         const mode = document.getElementById('id_exam_mode');
+        {% if not editing %}
         if(mode && mode.value === 'online'){
             const pdf = document.getElementById('id_question_pdf');
             if(!pdf || !pdf.value) ready = false;
+        }
+        {% endif %}
+        // Validate duration constraints
+        const dur = document.getElementById('id_duration_minutes');
+        if(dur && dur.value){
+            const v = parseInt(dur.value);
+            if(isNaN(v) || v < 1 || v > 300) ready = false;
+        }
+        const subDur = document.getElementById('id_submission_duration_minutes');
+        if(mode && mode.value === 'online' && subDur && subDur.value){
+            const v = parseInt(subDur.value);
+            if(isNaN(v) || v < 1 || v > 30) ready = false;
         }
         submitBtn.disabled = !ready;
     }
@@ -247,8 +259,9 @@
     });
     const pdfEl = document.getElementById('id_question_pdf');
     if(pdfEl){ pdfEl.addEventListener('change', checkFormReady); }
+    const subDurEl = document.getElementById('id_submission_duration_minutes');
+    if(subDurEl){ subDurEl.addEventListener('input', checkFormReady); subDurEl.addEventListener('change', checkFormReady); }
     checkFormReady();
-    {% endif %}
 })();
 </script>
 {% endblock %}

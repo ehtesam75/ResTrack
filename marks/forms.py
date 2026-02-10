@@ -266,8 +266,8 @@ class ExamCenterExamForm(forms.ModelForm):
             'total_marks': forms.NumberInput(attrs={'class': _INPUT_CLS, 'min': 1, 'placeholder': 'Total marks'}),
             'exam_date': forms.DateInput(attrs={'class': _INPUT_CLS, 'type': 'date'}),
             'start_time': forms.TimeInput(attrs={'class': _INPUT_CLS, 'type': 'time'}),
-            'duration_minutes': forms.NumberInput(attrs={'class': _INPUT_CLS, 'min': 1, 'placeholder': 'Minutes'}),
-            'submission_duration_minutes': forms.NumberInput(attrs={'class': _INPUT_CLS, 'min': 1, 'placeholder': 'Default 10 min'}),
+            'duration_minutes': forms.NumberInput(attrs={'class': _INPUT_CLS, 'min': 1, 'max': 300, 'placeholder': 'Minutes (max 300)'}),
+            'submission_duration_minutes': forms.NumberInput(attrs={'class': _INPUT_CLS, 'min': 1, 'max': 30, 'placeholder': 'Default 10 min (max 30)'}),
             'question_pdf': forms.ClearableFileInput(attrs={'class': _INPUT_CLS, 'accept': '.pdf'}),
         }
 
@@ -306,6 +306,18 @@ class ExamCenterExamForm(forms.ModelForm):
         val = self.cleaned_data.get('class_number')
         if val is not None and (val < 1 or val > 12):
             raise ValidationError('Class must be between 1 and 12.')
+        return val
+
+    def clean_duration_minutes(self):
+        val = self.cleaned_data.get('duration_minutes')
+        if val is not None and val > 300:
+            raise ValidationError('Exam duration cannot exceed 300 minutes.')
+        return val
+
+    def clean_submission_duration_minutes(self):
+        val = self.cleaned_data.get('submission_duration_minutes')
+        if val is not None and val > 30:
+            raise ValidationError('Submission window cannot exceed 30 minutes.')
         return val
 
     def clean_question_pdf(self):

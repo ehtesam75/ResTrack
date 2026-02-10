@@ -311,14 +311,14 @@ def exam_center_bonus_time(request, exam_id):
         return JsonResponse({'error': 'Invalid minutes value.'}, status=400)
 
     if status == 'running':
-        # During running: max 15 min per grant, adds to exam duration
-        if minutes < 1 or minutes > 15:
-            return JsonResponse({'error': 'Bonus time during exam must be between 1 and 15 minutes.'}, status=400)
+        # During running: max 10 min per grant, adds to exam duration
+        if minutes < 1 or minutes > 10:
+            return JsonResponse({'error': 'Bonus time during exam must be between 1 and 10 minutes.'}, status=400)
         exam.exam_bonus_minutes += minutes
     else:
-        # During submission: any amount, adds to submission time
-        if minutes < 1 or minutes > 120:
-            return JsonResponse({'error': 'Bonus time must be between 1 and 120 minutes.'}, status=400)
+        # During submission: max 10 min per grant, adds to submission time
+        if minutes < 1 or minutes > 10:
+            return JsonResponse({'error': 'Bonus time must be between 1 and 10 minutes.'}, status=400)
         exam.submission_bonus_minutes += minutes
 
     exam.save(update_fields=['exam_bonus_minutes', 'submission_bonus_minutes', 'updated_at'])
