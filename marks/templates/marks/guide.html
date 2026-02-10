@@ -36,6 +36,18 @@
                 <span class="mr-1.5 sm:mr-2 text-blue-500 group-hover:text-blue-700">→</span>
                 <span>Rankings</span>
             </a>
+            <a href="#exam-center" class="flex items-center text-xs sm:text-sm text-blue-600 hover:text-blue-800 transition group p-2 sm:p-0 rounded-lg hover:bg-blue-50 sm:hover:bg-transparent">
+                <span class="mr-1.5 sm:mr-2 text-blue-500 group-hover:text-blue-700">→</span>
+                <span>Exam Center</span>
+            </a>
+            <a href="#exam-documents" class="flex items-center text-xs sm:text-sm text-blue-600 hover:text-blue-800 transition group p-2 sm:p-0 rounded-lg hover:bg-blue-50 sm:hover:bg-transparent">
+                <span class="mr-1.5 sm:mr-2 text-blue-500 group-hover:text-blue-700">→</span>
+                <span>Exam Documents</span>
+            </a>
+            <a href="#exam-management" class="flex items-center text-xs sm:text-sm text-blue-600 hover:text-blue-800 transition group p-2 sm:p-0 rounded-lg hover:bg-blue-50 sm:hover:bg-transparent">
+                <span class="mr-1.5 sm:mr-2 text-blue-500 group-hover:text-blue-700">→</span>
+                <span>Exam Papers</span>
+            </a>
             <a href="#terminology" class="flex items-center text-xs sm:text-sm text-blue-600 hover:text-blue-800 transition group p-2 sm:p-0 rounded-lg hover:bg-blue-50 sm:hover:bg-transparent">
                 <span class="mr-1.5 sm:mr-2 text-blue-500 group-hover:text-blue-700">→</span>
                 <span>Key Terminology</span>
@@ -426,8 +438,164 @@
         </div>
     </div>
 
+    <!-- Exam Center -->
+    <div id="exam-center" class="scroll-mt-24 bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-5 border border-gray-200 animate-fade-in-up" style="animation-delay: 0.45s;">
+        <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-1 sm:mb-2">🎯 Exam Center</h2>
+        <div class="h-0.5 w-12 sm:w-16 bg-blue-600 mb-3 sm:mb-4"></div>
+
+        <p class="text-xs sm:text-sm text-gray-700 mb-3 sm:mb-5 leading-relaxed">
+            The Exam Center allows teachers to schedule timed exams and students to participate in them. Teachers can create exams with a specific date, start time, duration, and (for online exams) a submission window for uploading answers.
+        </p>
+
+        <!-- Exam Lifecycle -->
+        <div class="mb-3 sm:mb-4">
+            <h3 class="text-sm font-semibold text-gray-800 mb-2 sm:mb-3">Exam Lifecycle</h3>
+            <div class="space-y-2">
+                <div class="bg-indigo-50 border-l-4 border-indigo-500 p-2.5 sm:p-3 rounded-lg">
+                    <h4 class="text-xs sm:text-sm font-semibold text-indigo-800 mb-0.5">Upcoming</h4>
+                    <p class="text-[10px] sm:text-sm text-gray-700">Exam is scheduled but hasn't started yet. Teachers can still edit or delete the exam during this phase.</p>
+                </div>
+                <div class="bg-emerald-50 border-l-4 border-emerald-500 p-2.5 sm:p-3 rounded-lg">
+                    <h4 class="text-xs sm:text-sm font-semibold text-emerald-800 mb-0.5">Running</h4>
+                    <p class="text-[10px] sm:text-sm text-gray-700">The exam is in progress. Students can view the question paper (online mode) and a live countdown timer is displayed.</p>
+                </div>
+                <div class="bg-amber-50 border-l-4 border-amber-500 p-2.5 sm:p-3 rounded-lg">
+                    <h4 class="text-xs sm:text-sm font-semibold text-amber-800 mb-0.5">Submission Open</h4>
+                    <p class="text-[10px] sm:text-sm text-gray-700">Writing period is over. Students can upload their answer sheets during this window (online exams only).</p>
+                </div>
+                <div class="bg-gray-50 border-l-4 border-gray-400 p-2.5 sm:p-3 rounded-lg">
+                    <h4 class="text-xs sm:text-sm font-semibold text-gray-700 mb-0.5">Finished</h4>
+                    <p class="text-[10px] sm:text-sm text-gray-700">The exam and submission window have ended. Teachers can review all submitted answer sheets.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mode -->
+        <div class="mb-3 sm:mb-4">
+            <h3 class="text-sm font-semibold text-gray-800 mb-2 sm:mb-3">Online vs Offline Mode</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                <div class="bg-blue-50 border border-blue-200 p-2.5 sm:p-3 rounded-lg">
+                    <h4 class="text-xs sm:text-sm font-semibold text-blue-800 mb-1">🌐 Online</h4>
+                    <ul class="space-y-1 text-[10px] sm:text-sm text-gray-700">
+                        <li class="flex items-start"><span class="text-blue-500 mr-1.5">•</span>Question paper PDF viewable during exam</li>
+                        <li class="flex items-start"><span class="text-blue-500 mr-1.5">•</span>Students upload answer sheets (PDF/ZIP/RAR)</li>
+                        <li class="flex items-start"><span class="text-blue-500 mr-1.5">•</span>Dedicated submission window after writing ends</li>
+                        <li class="flex items-start"><span class="text-blue-500 mr-1.5">•</span>Up to 3 submission attempts per student</li>
+                    </ul>
+                </div>
+                <div class="bg-gray-50 border border-gray-200 p-2.5 sm:p-3 rounded-lg">
+                    <h4 class="text-xs sm:text-sm font-semibold text-gray-700 mb-1">🏫 Offline</h4>
+                    <ul class="space-y-1 text-[10px] sm:text-sm text-gray-700">
+                        <li class="flex items-start"><span class="text-gray-500 mr-1.5">•</span>Exam conducted in person</li>
+                        <li class="flex items-start"><span class="text-gray-500 mr-1.5">•</span>No answer upload or submission window</li>
+                        <li class="flex items-start"><span class="text-gray-500 mr-1.5">•</span>Transitions directly from running to finished</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bonus Time & Limits -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
+            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-2.5 sm:p-3 rounded-lg">
+                <h4 class="text-xs sm:text-sm font-semibold text-gray-900 mb-1">⏱️ Bonus Time</h4>
+                <p class="text-[10px] sm:text-sm text-gray-700">
+                    Teachers can grant extra time during an active exam. Bonus time can extend the writing period (while running) or the submission window (while submission is open). Timers update in real time.
+                </p>
+            </div>
+            <div class="bg-red-50 border-l-4 border-red-400 p-2.5 sm:p-3 rounded-lg">
+                <h4 class="text-xs sm:text-sm font-semibold text-gray-900 mb-1">📌 Limits</h4>
+                <ul class="space-y-1 text-[10px] sm:text-sm text-gray-700">
+                    <li class="flex items-start"><span class="text-red-400 mr-1.5">•</span>Max 3 active (non-finished) exams at a time</li>
+                    <li class="flex items-start"><span class="text-red-400 mr-1.5">•</span>Only upcoming exams can be edited or deleted</li>
+                    <li class="flex items-start"><span class="text-red-400 mr-1.5">•</span>Question PDF required for online exams</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="bg-blue-50 border-l-4 border-blue-600 p-2.5 sm:p-3 rounded-lg">
+            <p class="text-[10px] sm:text-sm text-gray-700">
+                <strong>Tip:</strong> Both teachers and students can view the exam detail page with live countdown timers. The page updates automatically — no need to refresh.
+            </p>
+        </div>
+    </div>
+
+    <!-- Exam Documents / Exam Lookup -->
+    <div id="exam-documents" class="scroll-mt-24 bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-5 border border-gray-200 animate-fade-in-up" style="animation-delay: 0.5s;">
+        <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-1 sm:mb-2">🔍 Exam Documents</h2>
+        <div class="h-0.5 w-12 sm:w-16 bg-blue-600 mb-3 sm:mb-4"></div>
+
+        <p class="text-xs sm:text-sm text-gray-700 mb-3 sm:mb-5 leading-relaxed">
+            The Exam Documents page lets you look up any exam by its Exam ID and access its associated documents — question papers and marked answer papers.
+        </p>
+
+        <div class="space-y-2 sm:space-y-3 mb-3 sm:mb-4">
+            <div class="bg-indigo-50 border-l-4 border-indigo-500 p-2.5 sm:p-3 rounded-lg">
+                <h4 class="text-xs sm:text-sm font-semibold text-gray-900 mb-1">How It Works</h4>
+                <ul class="space-y-1 text-[10px] sm:text-sm text-gray-700">
+                    <li class="flex items-start"><span class="text-indigo-500 mr-1.5">1.</span>Enter an Exam ID in the search field</li>
+                    <li class="flex items-start"><span class="text-indigo-500 mr-1.5">2.</span>View exam details — subject, date, type, total marks, participants, and class average</li>
+                    <li class="flex items-start"><span class="text-indigo-500 mr-1.5">3.</span>Access question paper (view online or download PDF)</li>
+                    <li class="flex items-start"><span class="text-indigo-500 mr-1.5">4.</span>Access marked answer papers (role-dependent, see below)</li>
+                </ul>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                <div class="bg-purple-50 border border-purple-200 p-2.5 sm:p-3 rounded-lg">
+                    <h4 class="text-xs sm:text-sm font-semibold text-purple-800 mb-1">👨‍🏫 Teachers</h4>
+                    <p class="text-[10px] sm:text-sm text-gray-700">See all participating students with individual marked answer paper links for each student.</p>
+                </div>
+                <div class="bg-blue-50 border border-blue-200 p-2.5 sm:p-3 rounded-lg">
+                    <h4 class="text-xs sm:text-sm font-semibold text-blue-800 mb-1">👨‍🎓 Students</h4>
+                    <p class="text-[10px] sm:text-sm text-gray-700">See only your own marked answer paper and score for the exam, if uploaded by the teacher.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gray-50 border border-gray-200 p-2.5 sm:p-3 rounded-lg">
+            <p class="text-[10px] sm:text-sm text-gray-700">
+                <strong>Note:</strong> The page header shows your valid exam ID range and how many exams have question papers or marked answer sheets uploaded.
+            </p>
+        </div>
+    </div>
+
+    <!-- Manage Exam Papers -->
+    <div id="exam-management" class="scroll-mt-24 bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-5 border border-gray-200 animate-fade-in-up" style="animation-delay: 0.55s;">
+        <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-1 sm:mb-2">📄 Manage Exam Papers</h2>
+        <div class="h-0.5 w-12 sm:w-16 bg-blue-600 mb-3 sm:mb-4"></div>
+
+        <p class="text-xs sm:text-sm text-gray-700 mb-3 sm:mb-5 leading-relaxed">
+            Teachers can upload and manage question papers and marked answer papers for any exam. These documents become available to students through the Exam Documents page.
+        </p>
+
+        <div class="space-y-2 sm:space-y-3 mb-3 sm:mb-4">
+            <div class="bg-indigo-50 border-l-4 border-indigo-600 p-2.5 sm:p-3 rounded-lg">
+                <h4 class="text-xs sm:text-sm font-semibold text-gray-900 mb-1">📝 Question Papers</h4>
+                <ul class="space-y-1 text-[10px] sm:text-sm text-gray-700">
+                    <li class="flex items-start"><span class="text-indigo-500 mr-1.5">•</span>Upload one question paper PDF per exam (max 1 MB)</li>
+                    <li class="flex items-start"><span class="text-indigo-500 mr-1.5">•</span>Look up an exam by ID to upload or replace its PDF</li>
+                    <li class="flex items-start"><span class="text-indigo-500 mr-1.5">•</span>Overview table shows all exams with their upload status</li>
+                </ul>
+            </div>
+
+            <div class="bg-teal-50 border-l-4 border-teal-600 p-2.5 sm:p-3 rounded-lg">
+                <h4 class="text-xs sm:text-sm font-semibold text-gray-900 mb-1">📋 Marked Answer Papers</h4>
+                <ul class="space-y-1 text-[10px] sm:text-sm text-gray-700">
+                    <li class="flex items-start"><span class="text-teal-500 mr-1.5">•</span>Upload marked answer papers per student for each exam</li>
+                    <li class="flex items-start"><span class="text-teal-500 mr-1.5">•</span>Look up an exam to see all participating students</li>
+                    <li class="flex items-start"><span class="text-teal-500 mr-1.5">•</span>Upload or replace individual answer papers for each student</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="bg-blue-50 border-l-4 border-blue-600 p-2.5 sm:p-3 rounded-lg">
+            <p class="text-[10px] sm:text-sm text-gray-700">
+                <strong>Tip:</strong> Once uploaded, question papers and marked answer papers are immediately accessible to students via the Exam Documents page.
+            </p>
+        </div>
+    </div>
+
     <!-- Key Terminology -->
-    <div id="terminology" class="scroll-mt-24 bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-5 border border-gray-200 animate-fade-in-up" style="animation-delay: 0.45s;">
+    <div id="terminology" class="scroll-mt-24 bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-5 border border-gray-200 animate-fade-in-up" style="animation-delay: 0.65s;">
         <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-1 sm:mb-2">📖 Key Terminology</h2>
         <div class="h-0.5 w-12 sm:w-16 bg-blue-600 mb-3 sm:mb-4"></div>
 
@@ -491,7 +659,7 @@
     </div>
 
     <!-- Go to Top -->
-    <div class="text-center mt-6 sm:mt-8 animate-fade-in-up" style="animation-delay: 0.5s;">
+    <div class="text-center mt-6 sm:mt-8 animate-fade-in-up" style="animation-delay: 0.7s;">
         <a href="#top" class="inline-block bg-gray-600 text-white text-xs sm:text-sm font-semibold px-5 sm:px-6 py-2 sm:py-2.5 rounded-xl hover:bg-gray-700 transition duration-200 shadow-md">
             ↑ Back to Top
         </a>
