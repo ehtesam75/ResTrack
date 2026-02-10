@@ -1,6 +1,6 @@
 // Service Worker for ResTrack PWA
-const CACHE_NAME = 'restrack-v1.3.1';
-const STATIC_CACHE_NAME = 'restrack-static-v1.3.1';
+const CACHE_NAME = 'restrack-v1.4.1';
+const STATIC_CACHE_NAME = 'restrack-static-v1.4.1';
 
 // Static assets to cache - same-origin ONLY, no CDN/external URLs
 const STATIC_ASSETS = [
