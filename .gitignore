@@ -6,6 +6,11 @@ docs/
 setup.ps1
 .env
 exam_questions/
+media/
 backup.json
 data.json
 db.sqlite3
+favicon_test.html
+generate_icons.py
+icon_cache_test.html
+mobile_pwa_debug.html
