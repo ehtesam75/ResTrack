@@ -583,7 +583,7 @@
             loading.classList.add('hidden');
             renderPage(1);
         }).catch(function(){
-            loading.innerHTML = '<div class="pdf-error"><p>Unable to load PDF in viewer.</p><p style="margin-top:.5rem"><a href="'+url+'" target="_blank" rel="noopener" style="color:#7c3aed;font-weight:600">Download PDF directly &rarr;</a></p></div>';
+            loading.innerHTML = '<div class="pdf-error"><p>Unable to load PDF in viewer.</p><p style="margin-top:.5rem"><a href="'+url+'" target="_blank" rel="noopener" style="color:#7c3aed;font-weight:600">View PDF directly &rarr;</a></p></div>';
         });
 
         prevBtn.addEventListener('click', function(){ if(pageNum > 1) renderPage(pageNum - 1); });

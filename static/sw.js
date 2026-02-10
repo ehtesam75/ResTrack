@@ -1,8 +1,8 @@
 // Service Worker for ResTrack PWA
-const CACHE_NAME = 'restrack-v1.2.0';
-const STATIC_CACHE_NAME = 'restrack-static-v1.2.0';
+const CACHE_NAME = 'restrack-v1.3.0';
+const STATIC_CACHE_NAME = 'restrack-static-v1.3.0';
 
-// Static assets to cache - ONLY static files, no authenticated pages
+// Static assets to cache - same-origin ONLY, no CDN/external URLs
 const STATIC_ASSETS = [
   '/static/manifest.json',
   '/static/css/custom.css',
@@ -17,8 +17,6 @@ const STATIC_ASSETS = [
   '/static/icons/ResTrack-144x144.png',
   '/static/icons/ResTrack-192x192.png',
   '/static/icons/ResTrack-512x512.png',
-  'https://cdn.tailwindcss.com',
-  'https://cdn.jsdelivr.net/npm/chart.js'
 ];
 
 // Install event - cache static assets
@@ -61,18 +59,22 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Fetch event - serve from cache when possible
+// Fetch event - only handle same-origin static assets
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  // Handle static assets (CSS, JS, images, fonts)
-  if (event.request.destination === 'style' ||
+  // NEVER intercept cross-origin requests (CDN, Cloudinary, external APIs, PDF.js worker, etc.)
+  // Let the browser handle them natively to avoid CORS issues (e.g. Chrome blocking PDF.js)
+  if (url.origin !== self.location.origin) {
+    return;
+  }
+
+  // Only cache same-origin static assets (/static/*, CSS, JS, images, fonts)
+  if (url.pathname.startsWith('/static/') ||
+      event.request.destination === 'style' ||
       event.request.destination === 'script' ||
       event.request.destination === 'image' ||
-      event.request.destination === 'font' ||
-      url.pathname.startsWith('/static/') ||
-      url.hostname === 'cdn.tailwindcss.com' ||
-      url.hostname === 'cdn.jsdelivr.net') {
+      event.request.destination === 'font') {
 
     event.respondWith(
       caches.match(event.request)
@@ -82,7 +84,7 @@ self.addEventListener('fetch', event => {
           }
           return fetch(event.request)
             .then(response => {
-              // Cache successful static asset responses
+              // Cache successful same-origin static asset responses
               if (response.status === 200) {
                 const responseClone = response.clone();
                 caches.open(STATIC_CACHE_NAME)
@@ -91,9 +93,7 @@ self.addEventListener('fetch', event => {
               return response;
             })
             .catch(() => {
-              // Return a basic fallback response for failed static assets
               console.log('Failed to fetch static asset:', event.request.url);
-              // Don't return undefined - browsers handle undefined poorly
               return new Response('', { status: 404 });
             });
         })
@@ -101,9 +101,8 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // For all other requests (navigation, API calls, etc.) - network only
+  // For all other same-origin requests (navigation, API calls, etc.) - network only
   // No caching of authenticated pages or dynamic content
-  event.respondWith(fetch(event.request));
 });
 
 // Message event - handle updates from the main thread
