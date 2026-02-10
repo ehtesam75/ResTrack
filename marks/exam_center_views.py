@@ -101,6 +101,17 @@ def exam_center_create(request):
         messages.warning(request, 'You already have 3 active exams. Wait until one finishes.')
         return redirect('exam_center')
 
+    # Compute next sequential exam ID across all sources
+    from .models import Exam
+    max_exam_id = Exam.objects.filter(teacher=request.user).values_list('exam_id', flat=True).order_by('-exam_id').first() or 0
+    # Also check ExamCenterExam display IDs (numeric ones)
+    for eid_str in ExamCenterExam.objects.filter(teacher=request.user).values_list('exam_display_id', flat=True):
+        try:
+            max_exam_id = max(max_exam_id, int(eid_str))
+        except (ValueError, TypeError):
+            pass
+    next_exam_id = max_exam_id + 1
+
     if request.method == 'POST':
         form = ExamCenterExamForm(request.POST, request.FILES, teacher=request.user)
         if form.is_valid():
@@ -109,12 +120,13 @@ def exam_center_create(request):
             exam.save()
             return redirect('exam_center')
     else:
-        form = ExamCenterExamForm(teacher=request.user)
+        form = ExamCenterExamForm(teacher=request.user, initial={'exam_display_id': str(next_exam_id)})
 
     context = {
         'form': form,
         'editing': False,
         'can_create': ExamCenterExam.can_create_exam(request.user),
+        'next_exam_id': next_exam_id,
     }
     return render(request, 'marks/exam_center_create.html', context)
 

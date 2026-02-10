@@ -38,8 +38,22 @@
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1" for="{{ form.exam_display_id.id_for_label }}">
                         Exam ID <span class="text-red-500">*</span>
+                        <span class="relative inline-block ml-1 group">
+                            <svg class="w-3.5 h-3.5 inline text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span class="invisible group-hover:visible absolute z-10 bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 px-3 py-2 text-xs font-normal text-white bg-gray-800 rounded-lg shadow-lg">
+                                {% if editing %}This is the exam's unique ID.{% else %}Auto-generated as the next sequential ID. It equals the highest existing Exam ID (across all exam records and Exam Center exams) + 1.{% endif %}
+                                <span class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800"></span>
+                            </span>
+                        </span>
                     </label>
+                    {% if editing %}
                     {{ form.exam_display_id }}
+                    {% else %}
+                    <input type="text" id="{{ form.exam_display_id.id_for_label }}" name="exam_display_id" value="{{ next_exam_id }}" readonly
+                           class="w-full px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed focus:outline-none">
+                    {% endif %}
                     {% if form.exam_display_id.errors %}<p class="text-xs text-red-600 mt-1">{{ form.exam_display_id.errors.0 }}</p>{% endif %}
                 </div>
                 <div>
