@@ -1154,6 +1154,11 @@ def add_exam(request):
                 total_marks = int(total_marks)
                 mark_obtained = int(mark_obtained)
                 exam_id = int(exam_id)
+                # Validate exam_id range
+                max_existing = Exam.objects.filter(teacher=teacher).values_list('exam_id', flat=True).order_by('-exam_id').first() or 0
+                if exam_id < 1 or exam_id > max_existing + 1:
+                    messages.error(request, f'Exam ID must be between 1 and {max_existing + 1}.')
+                    return redirect('add_exam')
                 exam = Exam.objects.create(
                     student=student,
                     subject=subject,
@@ -1185,6 +1190,9 @@ def add_exam(request):
     subjects = Subject.objects.filter(teacher=teacher).order_by('name')
     exam_types = ExamType.objects.filter(teacher=teacher).order_by('name')
     
+    # Get max exam ID for validation
+    max_exam_id = Exam.objects.filter(teacher=teacher).values_list('exam_id', flat=True).order_by('-exam_id').first() or 0
+    
     # Check if running on production (non-localhost)
     host = request.get_host().lower()
     is_production = not (host.startswith('localhost') or host.startswith('127.0.0.1'))
@@ -1194,6 +1202,7 @@ def add_exam(request):
         'subjects': subjects,
         'exam_types': exam_types,
         'is_production': is_production,
+        'max_exam_id': max_exam_id,
     }
     
     return render(request, 'marks/add_exam.html', context)
@@ -1232,6 +1241,11 @@ def add_bulk_exam(request):
                     class_number = int(class_number)
                     total_marks = int(total_marks)
                     exam_id = int(exam_id)
+                    # Validate exam_id range
+                    max_existing = Exam.objects.filter(teacher=teacher).values_list('exam_id', flat=True).order_by('-exam_id').first() or 0
+                    if exam_id < 1 or exam_id > max_existing + 1:
+                        messages.error(request, f'Exam ID must be between 1 and {max_existing + 1}.')
+                        return redirect('add_bulk_exams')
                     # Generate unique group ID for this exam session
                     import uuid
                     from datetime import datetime
@@ -1284,6 +1298,9 @@ def add_bulk_exam(request):
     subjects = Subject.objects.filter(teacher=teacher).order_by('name')
     exam_types = ExamType.objects.filter(teacher=teacher).order_by('name')
     
+    # Get max exam ID for validation
+    max_exam_id = Exam.objects.filter(teacher=teacher).values_list('exam_id', flat=True).order_by('-exam_id').first() or 0
+    
     # Check if running on production (non-localhost)
     host = request.get_host().lower()
     is_production = not (host.startswith('localhost') or host.startswith('127.0.0.1'))
@@ -1295,6 +1312,7 @@ def add_bulk_exam(request):
         'student_count': student_count,
         'student_range': range(1, student_count + 1) if student_count else [],
         'is_production': is_production,
+        'max_exam_id': max_exam_id,
     }
     
     return render(request, 'marks/add_bulk_exam.html', context)
@@ -2391,6 +2409,46 @@ def answer_paper_info_api(request):
             'student_count': exams.count(),
         },
         'students': students,
+    })
+
+
+@login_required(login_url='login')
+def exam_id_lookup_api(request):
+    """API endpoint for fetching exam info by exam_id for add exam forms (auto-populate fields)"""
+    if not is_teacher(request.user):
+        return JsonResponse({'found': False})
+    
+    teacher = request.user
+    exam_id = request.GET.get('exam_id', '').strip()
+    
+    # Always return max_exam_id
+    max_id = Exam.objects.filter(teacher=teacher).values_list('exam_id', flat=True).order_by('-exam_id').first() or 0
+    
+    if not exam_id:
+        return JsonResponse({'found': False, 'max_exam_id': max_id})
+    
+    try:
+        exam_id = int(exam_id)
+    except ValueError:
+        return JsonResponse({'found': False, 'max_exam_id': max_id})
+    
+    exams = Exam.objects.filter(exam_id=exam_id, teacher=teacher).select_related('subject', 'exam_type')
+    
+    if not exams.exists():
+        return JsonResponse({'found': False, 'max_exam_id': max_id})
+    
+    first_exam = exams.first()
+    return JsonResponse({
+        'found': True,
+        'max_exam_id': max_id,
+        'exam': {
+            'exam_type': first_exam.exam_type.name,
+            'subject_id': first_exam.subject.id,
+            'date': first_exam.date.strftime('%Y-%m-%d') if first_exam.date else '',
+            'total_marks': first_exam.total_marks,
+            'class_number': first_exam.class_number,
+            'chapter': first_exam.chapter or '',
+        }
     })
 
 

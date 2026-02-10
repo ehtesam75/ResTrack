@@ -64,6 +64,7 @@ urlpatterns = [
     # Question paper management
     path('manage-question-paper/', views.manage_question_paper, name='manage_question_paper'),
     path('api/exam-info/', views.exam_info_api, name='exam_info_api'),
+    path('api/exam-id-lookup/', views.exam_id_lookup_api, name='exam_id_lookup_api'),
 
     # Answer paper management
     path('manage-answer-paper/', views.manage_answer_paper, name='manage_answer_paper'),

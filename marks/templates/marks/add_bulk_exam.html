@@ -63,16 +63,28 @@
                     <div>
                         <label for="exam_id" class="block text-xs font-semibold text-gray-700 mb-1">
                             Exam ID <span class="text-red-500">*</span>
+                            <span class="relative inline-block ml-1 group">
+                                <svg class="w-3.5 h-3.5 inline text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span class="invisible group-hover:visible absolute z-10 bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 px-3 py-2 text-xs font-normal text-white bg-gray-800 rounded-lg shadow-lg">
+                                    Enter an existing Exam ID to add results for a previous exam, or use the next available ID ({{ max_exam_id|add:1 }}) for a new exam.
+                                    <span class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800"></span>
+                                </span>
+                            </span>
                         </label>
                         <input
                             type="number"
                             id="exam_id"
                             name="exam_id"
                             min="1"
+                            max="{{ max_exam_id|add:1 }}"
                             required
                             class="w-full px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white hover:bg-gray-50 transition-colors"
-                            placeholder="Enter exam ID manually"
+                            placeholder="Enter exam ID (1–{{ max_exam_id|add:1 }})"
                         >
+                        <p class="text-xs text-red-600 mt-1 hidden" id="exam-id-error">Exam ID must be between 1 and {{ max_exam_id|add:1 }}</p>
+                        <p class="text-xs text-blue-600 mt-1 hidden" id="exam-id-info"></p>
                     </div>
 
                     <div>
@@ -282,6 +294,11 @@
 
 {% block extra_js %}
 <script>
+    // Max exam ID from server
+    let maxExamId = {{ max_exam_id }};
+    const LOOKUP_URL = '{% url "exam_id_lookup_api" %}';
+    let isExamLocked = false;
+
     // Set today's date as default and max
     const dateInput = document.getElementById('date');
     const today = new Date();
@@ -292,6 +309,107 @@
         const mm = String(today.getMonth() + 1).padStart(2, '0');
         const dd = String(today.getDate()).padStart(2, '0');
         dateInput.max = `${yyyy}-${mm}-${dd}`;
+    }
+
+    // Helper: set a field's value and toggle readonly state
+    function setFieldLocked(id, value, locked) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (value !== null && value !== undefined) {
+            el.value = value;
+        }
+        if (el.tagName === 'SELECT') {
+            el.disabled = locked;
+            const hiddenId = id + '_hidden';
+            const existing = document.getElementById(hiddenId);
+            if (locked) {
+                if (!existing) {
+                    const hidden = document.createElement('input');
+                    hidden.type = 'hidden';
+                    hidden.name = el.name;
+                    hidden.id = hiddenId;
+                    hidden.value = el.value;
+                    el.parentNode.appendChild(hidden);
+                } else {
+                    existing.value = el.value;
+                }
+            } else {
+                if (existing) existing.remove();
+            }
+        } else {
+            el.readOnly = locked;
+        }
+        if (locked) {
+            el.classList.add('bg-gray-100', 'cursor-not-allowed');
+            el.classList.remove('bg-white', 'hover:bg-gray-50', 'bg-gray-50', 'hover:bg-white');
+        } else {
+            el.classList.remove('bg-gray-100', 'cursor-not-allowed');
+            el.classList.add('bg-white', 'hover:bg-gray-50');
+        }
+    }
+
+    function unlockExamFields() {
+        isExamLocked = false;
+        ['exam_type', 'subject', 'date', 'total_marks', 'class_number', 'chapter'].forEach(id => {
+            setFieldLocked(id, null, false);
+        });
+        const info = document.getElementById('exam-id-info');
+        if (info) info.classList.add('hidden');
+    }
+
+    // Exam ID lookup with debounce
+    let examLookupTimer = null;
+    const examIdInput = document.getElementById('exam_id');
+    const examIdError = document.getElementById('exam-id-error');
+    const examIdInfo = document.getElementById('exam-id-info');
+
+    if (examIdInput) {
+        examIdInput.addEventListener('input', function() {
+            clearTimeout(examLookupTimer);
+            const val = parseInt(this.value);
+
+            if (this.value && (val < 1 || val > maxExamId + 1)) {
+                examIdError.classList.remove('hidden');
+                this.classList.add('border-red-500');
+                unlockExamFields();
+                if (typeof validateAllMarks === 'function') validateAllMarks();
+                return;
+            } else {
+                examIdError.classList.add('hidden');
+                this.classList.remove('border-red-500');
+            }
+
+            if (!this.value) {
+                unlockExamFields();
+                if (typeof validateAllMarks === 'function') validateAllMarks();
+                return;
+            }
+
+            examLookupTimer = setTimeout(() => {
+                fetch(`${LOOKUP_URL}?exam_id=${val}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.max_exam_id !== undefined) maxExamId = data.max_exam_id;
+
+                        if (data.found) {
+                            const e = data.exam;
+                            setFieldLocked('exam_type', e.exam_type, true);
+                            setFieldLocked('subject', String(e.subject_id), true);
+                            setFieldLocked('date', e.date, true);
+                            setFieldLocked('total_marks', e.total_marks, true);
+                            setFieldLocked('class_number', e.class_number, true);
+                            setFieldLocked('chapter', e.chapter, true);
+                            isExamLocked = true;
+                            examIdInfo.textContent = 'Existing exam detected \u2014 fields auto-filled and locked.';
+                            examIdInfo.classList.remove('hidden');
+                        } else {
+                            unlockExamFields();
+                        }
+                        if (typeof validateAllMarks === 'function') validateAllMarks();
+                    })
+                    .catch(() => { unlockExamFields(); if (typeof validateAllMarks === 'function') validateAllMarks(); });
+            }, 350);
+        });
     }
     
     // Hide already selected students from dropdowns
@@ -388,6 +506,12 @@
             // PDF is optional
             if (!subject || !selectedExamType || !classNumber || !date || !totalMarks || !chapter || !examId) {
                 allFieldsFilled = false;
+            }
+
+            // Exam ID range validation
+            const eid = parseInt(examId);
+            if (examId && (eid < 1 || eid > maxExamId + 1)) {
+                hasError = true;
             }
             
             // Validate PDF file type and size (only if a file is selected)
