@@ -10,7 +10,18 @@
 .timer-display{font-variant-numeric:tabular-nums;letter-spacing:.04em}
 .countdown-big{font-size:1.75rem;line-height:1}
 @media(min-width:640px){.countdown-big{font-size:2.25rem}}
-.pdf-frame{width:100%;border:none;border-radius:.75rem;background:#f9fafb}
+.pdfjs-viewer{display:flex;flex-direction:column;background:#f9fafb;border-radius:.75rem;overflow:hidden;position:relative}
+.pdf-toolbar{display:flex;align-items:center;justify-content:center;gap:.75rem;padding:.5rem 1rem;background:#fff;border-bottom:1px solid #e5e7eb;flex-shrink:0}
+.pdf-toolbar button{display:inline-flex;align-items:center;justify-content:center;width:2rem;height:2rem;border-radius:.5rem;border:1px solid #e5e7eb;background:#fff;color:#374151;cursor:pointer;transition:all .15s}
+.pdf-toolbar button:hover:not(:disabled){background:#f3f4f6;border-color:#d1d5db}.pdf-toolbar button:disabled{opacity:.35;cursor:not-allowed}
+.pdf-page-info{font-size:.8125rem;color:#6b7280;font-variant-numeric:tabular-nums}
+.pdf-newtab{font-size:.75rem;color:#7c3aed;font-weight:600;text-decoration:none;margin-left:auto;display:inline-flex;align-items:center;gap:.25rem}.pdf-newtab:hover{text-decoration:underline}
+.pdf-canvas-wrap{flex:1;overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:.5rem}.pdf-canvas-wrap canvas{max-width:100%;display:block}
+.pdf-loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(249,250,251,.92);gap:.5rem;font-size:.875rem;color:#6b7280;z-index:5}
+.pdf-loading.hidden{display:none}
+.pdf-spinner{width:1.5rem;height:1.5rem;border:2px solid #e5e7eb;border-top-color:#7c3aed;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pdf-error{text-align:center;padding:2rem;color:#dc2626;font-size:.875rem}
 </style>
 {% endblock %}
 
@@ -154,7 +165,16 @@
                        class="text-xs text-purple-600 font-semibold hover:underline">Open in new tab &rarr;</a>
                 </div>
                 <div class="p-3 sm:p-4">
-                    <iframe src="{{ exam.question_pdf.url }}" class="pdf-frame" style="height:70vh;min-height:400px"></iframe>
+                    <div class="pdfjs-viewer" data-pdf-url="{{ exam.question_pdf.url }}" style="height:70vh;min-height:400px">
+                        <div class="pdf-toolbar">
+                            <button type="button" class="pdf-prev" title="Previous page" disabled><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></button>
+                            <span class="pdf-page-info"><span class="pdf-current">&ndash;</span> / <span class="pdf-total">&ndash;</span></span>
+                            <button type="button" class="pdf-next" title="Next page" disabled><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button>
+                            <a href="{{ exam.question_pdf.url }}" target="_blank" rel="noopener" class="pdf-newtab">Open in new tab &#8599;</a>
+                        </div>
+                        <div class="pdf-canvas-wrap"><canvas></canvas></div>
+                        <div class="pdf-loading"><div class="pdf-spinner"></div><span>Loading PDF&hellip;</span></div>
+                    </div>
                 </div>
             </div>
             {% else %}
@@ -165,7 +185,16 @@
                     <span class="text-xs text-gray-400 font-normal">Click to expand</span>
                 </summary>
                 <div class="p-3 sm:p-4">
-                    <iframe src="{{ exam.question_pdf.url }}" class="pdf-frame" style="height:70vh;min-height:400px"></iframe>
+                    <div class="pdfjs-viewer" data-pdf-url="{{ exam.question_pdf.url }}" style="height:70vh;min-height:400px">
+                        <div class="pdf-toolbar">
+                            <button type="button" class="pdf-prev" title="Previous page" disabled><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></button>
+                            <span class="pdf-page-info"><span class="pdf-current">&ndash;</span> / <span class="pdf-total">&ndash;</span></span>
+                            <button type="button" class="pdf-next" title="Next page" disabled><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button>
+                            <a href="{{ exam.question_pdf.url }}" target="_blank" rel="noopener" class="pdf-newtab">Open in new tab &#8599;</a>
+                        </div>
+                        <div class="pdf-canvas-wrap"><canvas></canvas></div>
+                        <div class="pdf-loading"><div class="pdf-spinner"></div><span>Loading PDF&hellip;</span></div>
+                    </div>
                 </div>
             </details>
             {% endif %}
@@ -258,7 +287,16 @@
                     <i class="fa-solid fa-file-pdf text-red-500 mr-2"></i>Question Paper
                 </summary>
                 <div class="p-3 sm:p-4">
-                    <iframe src="{{ exam.question_pdf.url }}" class="pdf-frame" style="height:60vh;min-height:350px"></iframe>
+                    <div class="pdfjs-viewer" data-pdf-url="{{ exam.question_pdf.url }}" style="height:60vh;min-height:350px">
+                        <div class="pdf-toolbar">
+                            <button type="button" class="pdf-prev" title="Previous page" disabled><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></button>
+                            <span class="pdf-page-info"><span class="pdf-current">&ndash;</span> / <span class="pdf-total">&ndash;</span></span>
+                            <button type="button" class="pdf-next" title="Next page" disabled><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button>
+                            <a href="{{ exam.question_pdf.url }}" target="_blank" rel="noopener" class="pdf-newtab">Open in new tab &#8599;</a>
+                        </div>
+                        <div class="pdf-canvas-wrap"><canvas></canvas></div>
+                        <div class="pdf-loading"><div class="pdf-spinner"></div><span>Loading PDF&hellip;</span></div>
+                    </div>
                 </div>
             </details>
             {% else %}
@@ -268,7 +306,16 @@
                     <span class="text-xs text-gray-400 font-normal">Click to expand</span>
                 </summary>
                 <div class="p-3 sm:p-4">
-                    <iframe src="{{ exam.question_pdf.url }}" class="pdf-frame" style="height:60vh;min-height:350px"></iframe>
+                    <div class="pdfjs-viewer" data-pdf-url="{{ exam.question_pdf.url }}" style="height:60vh;min-height:350px">
+                        <div class="pdf-toolbar">
+                            <button type="button" class="pdf-prev" title="Previous page" disabled><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></button>
+                            <span class="pdf-page-info"><span class="pdf-current">&ndash;</span> / <span class="pdf-total">&ndash;</span></span>
+                            <button type="button" class="pdf-next" title="Next page" disabled><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button>
+                            <a href="{{ exam.question_pdf.url }}" target="_blank" rel="noopener" class="pdf-newtab">Open in new tab &#8599;</a>
+                        </div>
+                        <div class="pdf-canvas-wrap"><canvas></canvas></div>
+                        <div class="pdf-loading"><div class="pdf-spinner"></div><span>Loading PDF&hellip;</span></div>
+                    </div>
                 </div>
             </details>
             {% endif %}
@@ -479,6 +526,92 @@
             if(submitBtn){submitBtn.disabled=true;submitBtn.textContent='Uploading…';}
         });
     }
+})();
+</script>
+
+<!-- PDF.js Viewer -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+(function(){
+    if(typeof pdfjsLib === 'undefined') return;
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    function initViewer(el){
+        var url = el.dataset.pdfUrl;
+        if(!url || el._pdfInit) return;
+        el._pdfInit = true;
+
+        var canvas  = el.querySelector('canvas');
+        var ctx     = canvas.getContext('2d');
+        var prevBtn = el.querySelector('.pdf-prev');
+        var nextBtn = el.querySelector('.pdf-next');
+        var curSpan = el.querySelector('.pdf-current');
+        var totSpan = el.querySelector('.pdf-total');
+        var loading = el.querySelector('.pdf-loading');
+        var pdfDoc  = null, pageNum = 1, rendering = false, pendingPage = null;
+
+        function renderPage(num){
+            if(rendering){ pendingPage = num; return; }
+            rendering = true;
+            pageNum = num;
+            pdfDoc.getPage(num).then(function(page){
+                var wrap   = el.querySelector('.pdf-canvas-wrap');
+                var wrapW  = wrap.clientWidth - 16;
+                var baseVp = page.getViewport({scale:1});
+                var scale  = wrapW / baseVp.width;
+                var dpr    = window.devicePixelRatio || 1;
+                var viewport = page.getViewport({scale: scale * dpr});
+
+                canvas.width  = viewport.width;
+                canvas.height = viewport.height;
+                canvas.style.width  = Math.floor(scale * baseVp.width)  + 'px';
+                canvas.style.height = Math.floor(scale * baseVp.height) + 'px';
+
+                page.render({canvasContext: ctx, viewport: viewport}).promise.then(function(){
+                    rendering = false;
+                    curSpan.textContent = num;
+                    prevBtn.disabled = (num <= 1);
+                    nextBtn.disabled = (num >= pdfDoc.numPages);
+                    if(pendingPage !== null){ var p = pendingPage; pendingPage = null; renderPage(p); }
+                });
+            });
+        }
+
+        pdfjsLib.getDocument(url).promise.then(function(pdf){
+            pdfDoc = pdf;
+            totSpan.textContent = pdf.numPages;
+            loading.classList.add('hidden');
+            renderPage(1);
+        }).catch(function(){
+            loading.innerHTML = '<div class="pdf-error"><p>Unable to load PDF in viewer.</p><p style="margin-top:.5rem"><a href="'+url+'" target="_blank" rel="noopener" style="color:#7c3aed;font-weight:600">Download PDF directly &rarr;</a></p></div>';
+        });
+
+        prevBtn.addEventListener('click', function(){ if(pageNum > 1) renderPage(pageNum - 1); });
+        nextBtn.addEventListener('click', function(){ if(pdfDoc && pageNum < pdfDoc.numPages) renderPage(pageNum + 1); });
+
+        var resizeTimer;
+        window.addEventListener('resize', function(){
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function(){ if(pdfDoc) renderPage(pageNum); }, 250);
+        });
+    }
+
+    // Initialise visible viewers immediately
+    document.querySelectorAll('.pdfjs-viewer').forEach(function(el){
+        if(el.closest('details') && !el.closest('details').open) return;
+        initViewer(el);
+    });
+
+    // Lazy-init viewers inside collapsed <details> when opened
+    document.querySelectorAll('details').forEach(function(d){
+        d.addEventListener('toggle', function(){
+            if(d.open){
+                setTimeout(function(){
+                    d.querySelectorAll('.pdfjs-viewer').forEach(function(v){ initViewer(v); });
+                }, 50);
+            }
+        });
+    });
 })();
 </script>
 {% endblock %}
