@@ -15,20 +15,6 @@
 
 </div>
 
----
-
-## 📋 Table of Contents
-
-- [Overview](#-overview)
-- [Key Features](#-key-features)
-- [Technology Stack](#-technology-stack)
-- [Usage Guide](#usage-guide)
-- [Grading System](#-grading-system)
-- [Points & Rewards](#-points--rewards)
-- [Screenshots](#-screenshots)
-- [License](#-license)
-
----
 
 ## 🎯 Overview
 
