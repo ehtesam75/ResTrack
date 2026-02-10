@@ -1,6 +1,6 @@
 // Service Worker for ResTrack PWA
-const CACHE_NAME = 'restrack-v1.3.0';
-const STATIC_CACHE_NAME = 'restrack-static-v1.3.0';
+const CACHE_NAME = 'restrack-v1.3.1';
+const STATIC_CACHE_NAME = 'restrack-static-v1.3.1';
 
 // Static assets to cache - same-origin ONLY, no CDN/external URLs
 const STATIC_ASSETS = [
@@ -24,9 +24,15 @@ self.addEventListener('install', event => {
   console.log('Service Worker installing.');
   event.waitUntil(
     caches.open(STATIC_CACHE_NAME)
-      .then(cache => {
+      .then(async cache => {
         console.log('Caching static assets...');
-        return cache.addAll(STATIC_ASSETS);
+        const results = await Promise.allSettled(
+          STATIC_ASSETS.map(asset => cache.add(asset))
+        );
+        const failed = results.filter(r => r.status === 'rejected');
+        if (failed.length) {
+          console.warn(`Failed to cache ${failed.length} asset(s):`, failed.map(r => r.reason));
+        }
       })
       .then(() => {
         console.log('Service Worker installed.');
@@ -59,23 +65,19 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Fetch event - only handle same-origin static assets
+// Fetch event - only handle same-origin /static/ assets
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  // NEVER intercept cross-origin requests (CDN, Cloudinary, external APIs, PDF.js worker, etc.)
-  // Let the browser handle them natively to avoid CORS issues (e.g. Chrome blocking PDF.js)
+  // Cross-origin requests (CDN, Cloudinary, PDF.js worker, etc.) — pass through explicitly
+  // Chrome logs CORS / (canceled) errors if we intercept without respondWith()
   if (url.origin !== self.location.origin) {
-    return;
+    return event.respondWith(fetch(event.request));
   }
 
-  // Only cache same-origin static assets (/static/*, CSS, JS, images, fonts)
-  if (url.pathname.startsWith('/static/') ||
-      event.request.destination === 'style' ||
-      event.request.destination === 'script' ||
-      event.request.destination === 'image' ||
-      event.request.destination === 'font') {
-
+  // Only cache same-origin assets under /static/ — nothing else
+  // Avoids catching PDF.js blob workers, inline scripts, or dynamic API routes
+  if (url.pathname.startsWith('/static/')) {
     event.respondWith(
       caches.match(event.request)
         .then(cachedResponse => {
@@ -84,7 +86,6 @@ self.addEventListener('fetch', event => {
           }
           return fetch(event.request)
             .then(response => {
-              // Cache successful same-origin static asset responses
               if (response.status === 200) {
                 const responseClone = response.clone();
                 caches.open(STATIC_CACHE_NAME)
@@ -101,8 +102,8 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // For all other same-origin requests (navigation, API calls, etc.) - network only
-  // No caching of authenticated pages or dynamic content
+  // All other same-origin requests (navigation, API calls, etc.) — network only
+  event.respondWith(fetch(event.request));
 });
 
 // Message event - handle updates from the main thread
