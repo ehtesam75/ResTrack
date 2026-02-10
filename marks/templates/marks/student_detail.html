@@ -269,7 +269,7 @@
                 <div class="flex items-center justify-between mb-2">
                     <div class="flex items-center gap-2">
                         <span class="text-xs font-bold text-purple-600">#{{ item.rank }}</span>
-                        <span class="text-sm text-gray-900">{{ item.subject.name }}</span>
+                        <a href="{% url 'subject_detail' item.subject.id %}" class="text-sm text-gray-900 hover:text-indigo-600 transition-colors">{{ item.subject.name }}</a>
                     </div>
                     <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-medium">{{ item.exam_count }} exams</span>
                 </div>
@@ -295,7 +295,7 @@
             <div class="border-l-3 border-purple-500 bg-gradient-to-r from-purple-50 to-blue-50 p-3 rounded">
                 <div class="flex justify-between items-center mb-2">
                     <div class="flex items-center gap-2">
-                        <h3 class="font-bold text-gray-900 text-sm mb-0">{{ item.subject.name }}</h3>
+                        <h3 class="font-bold text-gray-900 text-sm mb-0"><a href="{% url 'subject_detail' item.subject.id %}" class="hover:text-indigo-600 transition-colors">{{ item.subject.name }}</a></h3>
                         <span class="text-[10px] gradient-blue text-white px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap ml-1">{{ item.exam_count }} exams</span>
                     </div>
                     <span class="text-[10px] gradient-orange text-white px-1.5 py-0.5 rounded font-semibold shadow-sm whitespace-nowrap">Rank #{{ item.rank }}</span>
@@ -323,7 +323,7 @@
         <div class="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 px-3 sm:px-4 py-2.5">
             <div class="flex items-center space-x-2">
                 <span class="text-lg sm:text-xl">📈</span>
-                <h3 class="text-white text-sm font-semibold tracking-wide sm:hidden">Top Performing Months</h3>
+                <h3 class="text-white text-xs font-semibold tracking-wide sm:hidden">Top Performing Months</h3>
                 <h3 class="text-white text-xs font-semibold tracking-wide hidden sm:block">Top Performing Months</h3>
             </div>
         </div>
@@ -332,24 +332,24 @@
             <div class="sm:hidden space-y-2">
                 {% for month in best_5_months %}
                 <div class="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg p-2.5 border border-emerald-100/50 shadow-sm flex items-center gap-3">
-                    <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full {% if forloop.counter == 1 %}bg-yellow-100{% elif forloop.counter == 2 %}bg-gray-100{% elif forloop.counter == 3 %}bg-orange-100{% elif forloop.counter == 4 %}bg-blue-50{% else %}bg-blue-50{% endif %}">
+                    <div class="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full {% if forloop.counter == 1 %}bg-yellow-100{% elif forloop.counter == 2 %}bg-gray-100{% elif forloop.counter == 3 %}bg-orange-100{% elif forloop.counter == 4 %}bg-blue-50{% else %}bg-blue-50{% endif %}">
                         {% if forloop.counter == 1 %}
-                            <span class="text-base">🥇</span>
+                            <span class="text-sm">🥇</span>
                         {% elif forloop.counter == 2 %}
-                            <span class="text-base">🥈</span>
+                            <span class="text-sm">🥈</span>
                         {% elif forloop.counter == 3 %}
-                            <span class="text-base">🥉</span>
+                            <span class="text-sm">🥉</span>
                         {% else %}
-                            <span class="text-xs font-bold text-emerald-600">#{{ forloop.counter }}</span>
+                            <span class="text-[10px] font-bold text-emerald-600">#{{ forloop.counter }}</span>
                         {% endif %}
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p class="font-semibold text-sm text-gray-900">{{ month.month_name }}</p>
-                        <p class="text-xs text-gray-500">{{ month.exams_count }} exams · {{ month.points_earned }} pts</p>
+                        <p class="font-semibold text-xs text-gray-900">{{ month.month_name }}</p>
+                        <p class="text-[10px] text-gray-500">{{ month.exams_count }} exams · {{ month.points_earned }} pts</p>
                     </div>
                     <div class="text-right flex-shrink-0">
-                        <p class="text-sm font-bold" style="color: #6D67CA;">{{ month.average_percentage|floatformat:1 }}%</p>
-                        <p class="text-xs text-gray-500">avg</p>
+                        <p class="text-xs font-bold" style="color: #6D67CA;">{{ month.average_percentage|floatformat:1 }}%</p>
+                        <p class="text-[10px] text-gray-500">avg</p>
                     </div>
                 </div>
                 {% endfor %}
