@@ -69,10 +69,10 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  // Cross-origin requests (CDN, Cloudinary, PDF.js worker, etc.) — pass through explicitly
-  // Chrome logs CORS / (canceled) errors if we intercept without respondWith()
+  // Cross-origin requests (CDN, Cloudinary, PDF.js worker, etc.) — don't intercept at all
+  // Let the browser handle them natively with proper CORS headers
   if (url.origin !== self.location.origin) {
-    return event.respondWith(fetch(event.request));
+    return;
   }
 
   // Only cache same-origin assets under /static/ — nothing else
