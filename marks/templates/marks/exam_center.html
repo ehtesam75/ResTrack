@@ -76,6 +76,7 @@
                     <h3 class="text-base font-bold text-gray-900 leading-snug mb-1">{{ exam.subject }}</h3>
                     <p class="text-xs text-gray-500">
                         Class {{ exam.class_number }} &middot;
+                        {% if exam.chapter %}Ch. {{ exam.chapter }} &middot; {% endif %}
                         {{ exam.get_exam_type_display }} &middot;
                         {{ exam.get_exam_mode_display }}
                     </p>
@@ -146,6 +147,7 @@
                         <h3 class="text-base font-bold text-gray-700 leading-snug mb-1">{{ exam.subject }}</h3>
                         <p class="text-xs text-gray-400">
                             Class {{ exam.class_number }} &middot;
+                            {% if exam.chapter %}Ch. {{ exam.chapter }} &middot; {% endif %}
                             {{ exam.get_exam_type_display }} &middot;
                             {{ exam.get_exam_mode_display }}
                         </p>

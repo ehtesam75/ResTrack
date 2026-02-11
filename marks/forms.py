@@ -253,7 +253,7 @@ class ExamCenterExamForm(forms.ModelForm):
     class Meta:
         model = ExamCenterExam
         fields = [
-            'exam_display_id', 'class_number', 'subject', 'exam_mode',
+            'exam_display_id', 'class_number', 'subject', 'chapter', 'exam_mode',
             'exam_type', 'total_marks', 'exam_date', 'start_time',
             'duration_minutes', 'submission_duration_minutes', 'question_pdf',
         ]
@@ -261,6 +261,7 @@ class ExamCenterExamForm(forms.ModelForm):
             'exam_display_id': forms.TextInput(attrs={'class': _INPUT_CLS, 'placeholder': 'e.g. EX-101'}),
             'class_number': forms.NumberInput(attrs={'class': _INPUT_CLS, 'min': 1, 'max': 12, 'placeholder': '1–12'}),
             'subject': forms.Select(attrs={'class': _SELECT_CLS}),
+            'chapter': forms.TextInput(attrs={'class': _INPUT_CLS, 'placeholder': 'e.g. 5 or Ch-3', 'maxlength': '10'}),
             'exam_mode': forms.Select(attrs={'class': _SELECT_CLS}),
             'exam_type': forms.Select(attrs={'class': _SELECT_CLS}),
             'total_marks': forms.NumberInput(attrs={'class': _INPUT_CLS, 'min': 1, 'placeholder': 'Total marks'}),
@@ -275,6 +276,7 @@ class ExamCenterExamForm(forms.ModelForm):
         self.teacher = teacher
         super().__init__(*args, **kwargs)
         self.fields['submission_duration_minutes'].required = False
+        self.fields['chapter'].required = True
 
         # Build subject choices from teacher's subjects
         from .models import Subject

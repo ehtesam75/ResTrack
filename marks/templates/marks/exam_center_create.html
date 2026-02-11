@@ -66,6 +66,7 @@
                 </div>
             </div>
 
+            <!-- Row 2: Subject + Chapter -->
             <!-- Row 2: Subject + Total Marks -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
@@ -81,6 +82,18 @@
                     </label>
                     {{ form.total_marks }}
                     {% if form.total_marks.errors %}<p class="text-xs text-red-600 mt-1">{{ form.total_marks.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
+
+            <!-- Row 2b: Chapter -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1" for="{{ form.chapter.id_for_label }}">
+                        Chapter <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.chapter }}
+                    <p class="text-xs text-gray-500 mt-1">Max 10 characters</p>
+                    {% if form.chapter.errors %}<p class="text-xs text-red-600 mt-1">{{ form.chapter.errors.0 }}</p>{% endif %}
                 </div>
             </div>
 
@@ -186,33 +199,27 @@
 // Toggle submission duration field based on exam mode
 (function(){
     // Clean up the ClearableFileInput widget in edit mode:
-    // Remove "Currently: <link>" text and "Change:" label, keep clear checkbox
+    // Remove "Currently: <link>" text and "Change:" label, keep clear checkbox + file input
     const pdfWidget = document.getElementById('question-pdf-widget');
     if(pdfWidget){
-        const container = pdfWidget.querySelector('div, span, p') ? pdfWidget : pdfWidget;
-        // The ClearableFileInput renders: "Currently: <a>...</a> <input checkbox> Clear<br> Change: <input file>"
-        // We need to remove "Currently:" text node, the <a> link, "Change:" text, and <br>
-        container.childNodes.forEach(function(node){
-            // Iterate through all child nodes of the wrapper that Django renders
-        });
-        // Simpler approach: manipulate the innerHTML
-        const wrapper = pdfWidget.firstElementChild || pdfWidget;
-        const allNodes = Array.from(wrapper.childNodes);
-        // Walk through nodes and remove text nodes containing 'Currently' or 'Change'
-        // and remove anchor tags (the file path link)
-        allNodes.forEach(function(node){
-            if(node.nodeType === Node.TEXT_NODE){
-                if(node.textContent.match(/Currently|Change\s*:/i)){
-                    node.textContent = '';
+        // Walk ALL descendant nodes recursively
+        function cleanNodes(parent){
+            const nodes = Array.from(parent.childNodes);
+            nodes.forEach(function(node){
+                if(node.nodeType === Node.TEXT_NODE){
+                    if(node.textContent.match(/Currently\s*:|Change\s*:/i)){
+                        node.textContent = '';
+                    }
+                } else if(node.nodeName === 'A'){
+                    node.remove();
+                } else if(node.nodeName === 'BR'){
+                    node.remove();
+                } else if(node.childNodes && node.childNodes.length){
+                    cleanNodes(node);
                 }
-            }
-            if(node.nodeName === 'A'){
-                node.style.display = 'none';
-            }
-            if(node.nodeName === 'BR'){
-                node.style.display = 'none';
-            }
-        });
+            });
+        }
+        cleanNodes(pdfWidget);
     }
 
     const modeSelect = document.getElementById('id_exam_mode');
@@ -258,7 +265,7 @@
     const submitBtn = document.getElementById('create-exam-btn');
     const requiredIds = [
         {% if not editing %}'id_exam_display_id',{% endif %} 'id_class_number', 'id_subject',
-        'id_exam_mode', 'id_exam_type', 'id_total_marks',
+        'id_chapter', 'id_exam_mode', 'id_exam_type', 'id_total_marks',
         'id_exam_date', 'id_start_time', 'id_duration_minutes'
     ];
     function checkFormReady(){

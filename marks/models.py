@@ -1110,6 +1110,12 @@ class ExamCenterExam(models.Model):
         max_length=200,
         help_text="Subject name"
     )
+    chapter = models.CharField(
+        max_length=10,
+        blank=True,
+        default='',
+        help_text="Chapter number or name (max 10 chars)"
+    )
     exam_mode = models.CharField(
         max_length=10,
         choices=MODE_CHOICES,
