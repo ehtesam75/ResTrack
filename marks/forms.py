@@ -261,7 +261,7 @@ class ExamCenterExamForm(forms.ModelForm):
             'exam_display_id': forms.TextInput(attrs={'class': _INPUT_CLS, 'placeholder': 'e.g. EX-101'}),
             'class_number': forms.NumberInput(attrs={'class': _INPUT_CLS, 'min': 1, 'max': 12, 'placeholder': '1–12'}),
             'subject': forms.Select(attrs={'class': _SELECT_CLS}),
-            'chapter': forms.TextInput(attrs={'class': _INPUT_CLS, 'placeholder': 'e.g. 5 or Ch-3', 'maxlength': '10'}),
+            'chapter': forms.TextInput(attrs={'class': _INPUT_CLS, 'placeholder': 'e.g. 5 or Tense', 'maxlength': '10'}),
             'exam_mode': forms.Select(attrs={'class': _SELECT_CLS}),
             'exam_type': forms.Select(attrs={'class': _SELECT_CLS}),
             'total_marks': forms.NumberInput(attrs={'class': _INPUT_CLS, 'min': 1, 'placeholder': 'Total marks'}),
