@@ -152,7 +152,13 @@
                         <span class="text-xs text-green-700">Already uploaded. Upload a new one to replace.</span>
                     </div>
                     {% endif %}
+                    {% if editing %}
+                    <div id="question-pdf-widget">
+                        {{ form.question_pdf }}
+                    </div>
+                    {% else %}
                     {{ form.question_pdf }}
+                    {% endif %}
                     <p class="text-xs text-gray-500 mt-1">PDF only, max 1 MB</p>
                     {% if form.question_pdf.errors %}<p class="text-xs text-red-600 mt-1">{{ form.question_pdf.errors.0 }}</p>{% endif %}
                 </div>
@@ -179,6 +185,36 @@
 <script>
 // Toggle submission duration field based on exam mode
 (function(){
+    // Clean up the ClearableFileInput widget in edit mode:
+    // Remove "Currently: <link>" text and "Change:" label, keep clear checkbox
+    const pdfWidget = document.getElementById('question-pdf-widget');
+    if(pdfWidget){
+        const container = pdfWidget.querySelector('div, span, p') ? pdfWidget : pdfWidget;
+        // The ClearableFileInput renders: "Currently: <a>...</a> <input checkbox> Clear<br> Change: <input file>"
+        // We need to remove "Currently:" text node, the <a> link, "Change:" text, and <br>
+        container.childNodes.forEach(function(node){
+            // Iterate through all child nodes of the wrapper that Django renders
+        });
+        // Simpler approach: manipulate the innerHTML
+        const wrapper = pdfWidget.firstElementChild || pdfWidget;
+        const allNodes = Array.from(wrapper.childNodes);
+        // Walk through nodes and remove text nodes containing 'Currently' or 'Change'
+        // and remove anchor tags (the file path link)
+        allNodes.forEach(function(node){
+            if(node.nodeType === Node.TEXT_NODE){
+                if(node.textContent.match(/Currently|Change\s*:/i)){
+                    node.textContent = '';
+                }
+            }
+            if(node.nodeName === 'A'){
+                node.style.display = 'none';
+            }
+            if(node.nodeName === 'BR'){
+                node.style.display = 'none';
+            }
+        });
+    }
+
     const modeSelect = document.getElementById('id_exam_mode');
     const submField = document.getElementById('submission-duration-field');
     const pdfBadge = document.getElementById('pdf-required-badge');
@@ -243,12 +279,26 @@
         const dur = document.getElementById('id_duration_minutes');
         if(dur && dur.value){
             const v = parseInt(dur.value);
-            if(isNaN(v) || v < 1 || v > 300) ready = false;
+            if(isNaN(v) || v < 1 || v > 300){
+                ready = false;
+                dur.classList.add('border-red-500','ring-1','ring-red-500');
+            } else {
+                dur.classList.remove('border-red-500','ring-1','ring-red-500');
+            }
+        } else if(dur){
+            dur.classList.remove('border-red-500','ring-1','ring-red-500');
         }
         const subDur = document.getElementById('id_submission_duration_minutes');
         if(mode && mode.value === 'online' && subDur && subDur.value){
             const v = parseInt(subDur.value);
-            if(isNaN(v) || v < 1 || v > 30) ready = false;
+            if(isNaN(v) || v < 1 || v > 30){
+                ready = false;
+                subDur.classList.add('border-red-500','ring-1','ring-red-500');
+            } else {
+                subDur.classList.remove('border-red-500','ring-1','ring-red-500');
+            }
+        } else if(subDur){
+            subDur.classList.remove('border-red-500','ring-1','ring-red-500');
         }
         submitBtn.disabled = !ready;
     }

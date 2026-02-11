@@ -2520,16 +2520,22 @@ def exam_lookup(request):
     # Calculate marked answer paper stats for students
     exams_with_answer_sheet = 0
     total_student_exams = 0
+    total_student_unique_exams = 0
     
     if is_student(request.user):
         # Get the student record for the logged-in user
         student = request.user.student_profile.student
         student_exams = qs.filter(student=student)
         total_student_exams = student_exams.count()
+        total_student_unique_exams = student_exams.values('exam_id').distinct().count()
         exams_with_answer_sheet = student_exams.exclude(marked_answer_paper='').exclude(marked_answer_paper__isnull=True).count()
+        # For students, filter exams_with_pdf to only exams they participated in
+        student_exam_ids = set(student_exams.values_list('exam_id', flat=True).distinct())
+        exams_with_pdf = len((exam_ids_with_new_pdf | exam_ids_with_legacy_pdf) & student_exam_ids)
     
     # Calculate percentages
-    pdf_percentage = round((exams_with_pdf / total_exams * 100), 1) if total_exams > 0 else 0
+    pdf_denom = total_student_unique_exams if is_student(request.user) and total_student_unique_exams > 0 else total_exams
+    pdf_percentage = round((exams_with_pdf / pdf_denom * 100), 1) if pdf_denom > 0 else 0
     answer_sheet_percentage = round((exams_with_answer_sheet / total_student_exams * 100), 1) if total_student_exams > 0 else 0
 
     context = {
@@ -2537,6 +2543,7 @@ def exam_lookup(request):
         'max_exam_id': max_exam_id or 'N/A',
         'exams_with_pdf': exams_with_pdf,
         'total_exams': total_exams,
+        'total_student_unique_exams': total_student_unique_exams,
         'pdf_percentage': pdf_percentage,
         'exams_with_answer_sheet': exams_with_answer_sheet,
         'total_student_exams': total_student_exams,

@@ -296,8 +296,8 @@
                     <span class="inline-flex items-center justify-center w-5 h-5 rounded-lg bg-emerald-50">
                         <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     </span>
-                    <span class="text-xs text-gray-700">Exams with PDF Available:</span>
-                    <span class="ml-auto text-sm font-semibold text-emerald-700">{{ exams_with_pdf }}/{{ total_exams }}{% if total_exams > 0 %} ({{ pdf_percentage }}%){% endif %}</span>
+                    <span class="text-xs text-gray-700">Exams with Question Available:</span>
+                    <span class="ml-auto text-sm font-semibold text-emerald-700">{{ exams_with_pdf }}/{% if is_student %}{{ total_student_unique_exams }}{% else %}{{ total_exams }}{% endif %}{% if total_exams > 0 %} ({{ pdf_percentage }}%){% endif %}</span>
                 </div>
                 {% if is_student %}
                 <div class="flex items-center gap-2">
@@ -333,7 +333,7 @@
                         {{ total_exams }} unique exams
                     </span> {% endcomment %}
                     <span class="bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg text-xs font-medium border border-emerald-100">
-                        {{ exams_with_pdf }}/{{ total_exams }} with question PDF
+                        {{ exams_with_pdf }}/{% if is_student %}{{ total_student_unique_exams }}{% else %}{{ total_exams }}{% endif %} with question PDF
                     </span>
                     {% if is_student %}
                     <span class="bg-green-50 text-green-700 px-3 py-1.5 rounded-lg text-xs font-medium border border-green-100">
