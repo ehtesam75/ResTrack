@@ -36,32 +36,32 @@
 
 ### For Teachers
 
-- 📊 **Comprehensive Dashboard** - Real-time analytics and performance overview
-- 👥 **Student Management** - Create accounts, manage & edit profiles, and track individual progress
-- 📝 **Exam Entry** - Single and bulk exam result recording with PDF question paper upload
-- 📚 **Subject Organization** - Create and manage subjects with performance tracking
-- 💰 **Points Management** - Track and manage student points spending
-- 📈 **Advanced Analytics** - Grade distribution, subject performance, and trend analysis
-- 🏆 **Leaderboards** - Overall, subject-wise, and monthly rankings
+-  **Comprehensive Dashboard** - Real-time analytics and performance overview
+-  **Student Management** - Create accounts, manage & edit profiles, and track individual progress
+-  **Exam Entry** - Single and bulk exam result recording with PDF question paper upload
+-  **Subject Organization** - Create and manage subjects with performance tracking
+-  **Points Management** - Track and manage student points spending
+-  **Advanced Analytics** - Grade distribution, subject performance, and trend analysis
+-  **Leaderboards** - Overall, subject-wise, and monthly rankings
 
 ### For Students
 
-- 📊 **Personal Dashboard** - View your performance metrics and rankings
-- 📈 **Progress Tracking** - Monitor improvement over time with visual charts
-- 🎯 **Subject Analysis** - Detailed breakdown by subject and exam type
-- 💎 **Points Balance** - Track earned, spent, and remaining points
-- 🏅 **Achievements** - View monthly wins, subject tops, and excellence rate
-- 📱 **Mobile Access** - Full functionality on smartphones and tablets
+-  **Personal Dashboard** - View your performance metrics and rankings
+-  **Progress Tracking** - Monitor improvement over time with visual charts
+-  **Subject Analysis** - Detailed breakdown by subject and exam type
+-  **Points Balance** - Track earned, spent, and remaining points
+-  **Achievements** - View monthly wins, subject tops, and excellence rate
+-  **Mobile Access** - Full functionality on smartphones and tablets
 
 ### System Features
 
-- 🔐 **Secure Authentication** - Role-based access (Teacher/Student)
-- 📄 **PDF Question Papers** - Upload and access exam question papers
-- 🎨 **Modern UI/UX** - Clean, intuitive interface with Tailwind CSS
-- 📊 **Interactive Charts** - Chart.js visualizations for data analysis
-- 🔍 **Advanced Filtering** - Filter exams by student, subject, date, and more
-- 🌙 **Responsive Design** - Optimized for all screen sizes
-- ⚡ **PWA Support** - Install as a Progressive Web App
+-  **Secure Authentication** - Role-based access (Teacher/Student)
+-  **PDF Question Papers** - Upload and access exam question papers
+-  **Modern UI/UX** - Clean, intuitive interface with Tailwind CSS
+-  **Interactive Charts** - Chart.js visualizations for data analysis
+-  **Advanced Filtering** - Filter exams by student, subject, date, and more
+-  **Responsive Design** - Optimized for all screen sizes
+-  **PWA Support** - Install as a Progressive Web App
 
 ---
 
