@@ -90,7 +90,7 @@
                 <!-- Marks & Mode: shown below duration/submission on mobile -->
                 <div class="sm:hidden">
                     <p class="text-[11px] text-gray-400 uppercase font-semibold">Marks</p>
-                    <p class="text-sm font-semibold text-purple-700">{{ exam.total_marks }}</p>
+                    <p class="text-sm font-semibold text-gray-800">{{ exam.total_marks }}</p>
                 </div>
                 <div class="sm:hidden">
                     <p class="text-[11px] text-gray-400 uppercase font-semibold">Mode</p>
@@ -154,7 +154,7 @@
     <details class="bg-white rounded-2xl shadow-md overflow-hidden mt-5">
         <summary class="px-5 py-3 bg-gray-50 border-b border-gray-100 cursor-pointer text-sm font-bold text-gray-700 select-none flex items-center justify-between">
             <span><i class="fa-solid fa-file-pdf text-red-500 mr-2"></i>Question Paper</span>
-            <span class="text-xs text-gray-400 font-normal">Click to expand</span>
+            <span class="text-xs text-gray-400 font-normal details-toggle-text">Click to expand</span>
         </summary>
         <div class="p-3 sm:p-4">
             <div class="pdfjs-viewer" data-pdf-url="{{ exam.question_pdf.url }}" style="height:70vh;min-height:400px">
@@ -213,7 +213,7 @@
             <details class="bg-white rounded-2xl shadow-md overflow-hidden">
                 <summary class="px-5 py-3 bg-gray-50 border-b border-gray-100 cursor-pointer text-sm font-bold text-gray-700 select-none flex items-center justify-between">
                     <span><i class="fa-solid fa-file-pdf text-red-500 mr-2"></i>Question Paper</span>
-                    <span class="text-xs text-gray-400 font-normal">Click to expand</span>
+                    <span class="text-xs text-gray-400 font-normal details-toggle-text">Click to expand</span>
                 </summary>
                 <div class="p-3 sm:p-4">
                     <div class="pdfjs-viewer" data-pdf-url="{{ exam.question_pdf.url }}" style="height:70vh;min-height:400px">
@@ -334,7 +334,7 @@
             <details class="bg-white rounded-2xl shadow-md overflow-hidden">
                 <summary class="px-5 py-3 bg-gray-50 border-b border-gray-100 cursor-pointer text-sm font-bold text-gray-700 select-none flex items-center justify-between">
                     <span><i class="fa-solid fa-file-pdf text-red-500 mr-2"></i>Question Paper</span>
-                    <span class="text-xs text-gray-400 font-normal">Click to expand</span>
+                    <span class="text-xs text-gray-400 font-normal details-toggle-text">Click to expand</span>
                 </summary>
                 <div class="p-3 sm:p-4">
                     <div class="pdfjs-viewer" data-pdf-url="{{ exam.question_pdf.url }}" style="height:60vh;min-height:350px">
@@ -557,6 +557,15 @@
             if(submitBtn){submitBtn.disabled=true;submitBtn.textContent='Uploading…';}
         });
     }
+
+    // Toggle expand/collapse label on <details> elements
+    document.querySelectorAll('details').forEach(function(d){
+        var toggle = d.querySelector('.details-toggle-text');
+        if(!toggle) return;
+        function update(){ toggle.textContent = d.open ? 'Click to collapse' : 'Click to expand'; }
+        d.addEventListener('toggle', update);
+        update();
+    });
 })();
 </script>
 
