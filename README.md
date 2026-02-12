@@ -11,7 +11,7 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
-[Features](#-key-features) • [Usage Guide](#usage-guide) • [Grading System](#-grading-system) • [Points & Rewards](#-points--rewards) • [Screenshots](#-screenshots)
+[Features](#-key-features) • [Usage Guide](#-usage-guide) • [Grading System](#-grading-system) • [Points & Rewards](#-points--rewards) • [Screenshots](#-screenshots)
 
 </div>
 
@@ -24,6 +24,7 @@
 ### Why ResTrack?
 
 - **Automated Grading**: Instant calculation with customizable CQ and MCQ grading scales
+- **Real-time Exam Center**: Schedule and conduct live timed exams with countdown timers
 - **Performance Analytics**: Visual insights through interactive charts and detailed reports
 - **Gamification**: Points system converts academic achievement into tangible rewards
 - **Competitive Rankings**: Multiple leaderboards to motivate and track top performers
@@ -36,6 +37,13 @@
 
 ### For Teachers
 
+- 🎯 **Live Exam Center** - Schedule and manage real-time timed exams with countdown timers
+  - Create online and offline exams with custom duration
+  - Live status tracking (Upcoming → Running → Submission → Finished)
+  - Grant bonus time during active exams or submission periods
+  - View all student answer submissions with attempt tracking
+  - Question paper PDF upload and management
+
 -  **Comprehensive Dashboard** - Real-time analytics and performance overview
 -  **Student Management** - Create accounts, manage & edit profiles, and track individual progress
 -  **Exam Entry** - Single and bulk exam result recording with PDF question paper upload
@@ -46,6 +54,14 @@
 
 ### For Students
 
+- ⏱️ **Exam Participation** - Attend real-time timed exams in online or offline modes
+  - Live countdown timers for exam duration
+  - Online: View question papers and submit answer sheets (PDF/ZIP/RAR)
+  - Up to 3 submission attempts per online exam
+  - Automatic page reload on status changes
+  - Bonus time automatically extends your timer
+
+-  **Exam Documents** - Look up any exam by ID to access question papers and marked answers
 -  **Personal Dashboard** - View your performance metrics and rankings
 -  **Progress Tracking** - Monitor improvement over time with visual charts
 -  **Subject Analysis** - Detailed breakdown by subject and exam type
@@ -56,11 +72,12 @@
 ### System Features
 
 -  **Secure Authentication** - Role-based access (Teacher/Student)
--  **PDF Question Papers** - Upload and access exam question papers
+-  **Real-time Exam System** - Live countdown timers with auto-refresh
+-  **PDF Management** - Upload and access exam question papers and answer sheets
 -  **Modern UI/UX** - Clean, intuitive interface with Tailwind CSS
 -  **Interactive Charts** - Chart.js visualizations for data analysis
 -  **Advanced Filtering** - Filter exams by student, subject, date, and more
--  **Responsive Design** - Optimized for all screen sizes
+-  **Responsive Design** - Optimized for desktop and mobile screen size
 -  **PWA Support** - Install as a Progressive Web App
 
 ---
@@ -78,6 +95,7 @@
 - **Charts**: Chart.js
 - **Icons**: Lucide Icons, Font Awesome
 - **JavaScript**: Vanilla JS for interactivity
+- **Real-time Updates**: AJAX polling for live exam status
 
 ### Deployment & Storage
 - **Server**: Render (Web Service)
@@ -92,60 +110,123 @@
 
 ### For Teachers
 
-#### 1. **Sign Up**
-   - Navigate to `/signup`
-   - Create a teacher account with your credentials
-   - Only teachers can sign up directly
+#### 1. Getting Started
+- Sign up as a teacher
+- Complete your profile
+- Set up your grading scales (optional)
 
-#### 2. **Add Students**
-   - Go to "Manage" → "Add Student"
-   - Enter student details (name, class, roll number)
-   - System creates login credentials automatically
-   - Share credentials with students
+#### 2. Student Management
+- Create student accounts with usernames and passwords
+- Edit student profiles and class information
+- View individual student performance
 
-#### 3. **Create Subjects**
-   - Navigate to "Add Subject"
-   - Enter subject name
-   - Subjects are teacher-specific
+#### 3. Exam Center - Schedule Live Exams
+- Navigate to **Exam Center** from the dashboard
+- Click **"Create New Exam"**
+- Fill in exam details:
+  - **Exam ID**: Unique identifier for students to reference
+  - **Class & Subject**: Select from your existing subjects
+  - **Mode**: Choose Online or Offline
+  - **Type**: CQ or MCQ
+  - **Date & Time**: When the exam starts
+  - **Duration**: Exam writing time in minutes
+  - **Submission Window**: (Online only) Time for students to upload answers
+  - **Question Paper**: (Online only) Upload PDF (required, max 1 MB)
+- Click **"Create Exam"**
+- View exam status on the main Exam Center page
 
-#### 4. **Record Exam Results**
-   
-   **Single Entry**:
-   - Go to "Add Exam"
-   - Select student, subject, exam type
-   - Enter marks and optional PDF question paper
-   - System auto-calculates grade and points
-   
-   **Bulk Entry**:
-   - Go to "Bulk Exam Entry"
-   - Enter number of students
-   - Fill common exam details
-   - Enter individual marks for each student
+**Exam Status Flow:**
+-  **Upcoming** - Not yet started, can edit or delete
+-  **Running** - Exam in progress, timer counting down
+-  **Submission** - (Online only) Students uploading answer sheets
+-  **Finished** - Exam completed, view submissions
 
-#### 5. **Manage Points**
-   - Record when students spend points
-   - View points history and balances
-   - Track remaining vs. spent points
+**During Active Exams:**
+- Grant bonus time (1-10 minutes per grant)
+- Monitor real-time countdown
+- View participant list
+- For online exams: Download student submissions after finish
+
+**Limitations:**
+- Maximum 3 active (non-finished) exams at once
+- Only upcoming exams can be edited or deleted
+- Online exams require question paper PDF
+
+#### 4. Exam Entry - Record Results
+- Click **"Add Exam"** from dashboard
+- Select student, subject, and exam type (CQ/MCQ)
+- Enter marks and exam date
+- Optionally upload question paper PDF
+- **Bulk Entry**: Upload multiple exams via CSV file
+
+#### 5. View Analytics
+- Access dashboard for overview
+- Check subject-wise performance
+- Monitor grade distribution
+- Track points and rankings
+
+#### 6. Manage Points
+- View student lifetime points
+- Track points spent
+- Monitor monthly rankings
 
 ### For Students
 
-#### 1. **Log In**
-   - Use credentials provided by teacher
-   - Access personal dashboard
+#### 1. Login & Dashboard
+- Login with username and password provided by teacher
+- View your performance summary on dashboard
+- Check your current rankings and points balance
 
-#### 2. **View Performance**
-   - Check exam results and grades
-   - Monitor points balance
-   - View rankings and achievements
+#### 2. Attend Live Exams
+- Navigate to **Exam Center**
+- Find your scheduled exam by ID or list
+- Click **"View Exam"** to see details
+- Watch the live countdown timer
 
-#### 3. **Track Progress**
-   - Analyze subject-wise performance
-   - View performance trends over time
-   - Compare with classmates
+**For Online Exams:**
+- When status is **Running**: View question paper PDF
+- Write your answers on paper/offline
+- When status changes to **Submission**: Upload answer sheet
+  - Supported formats: PDF, ZIP, RAR
+  - Maximum file size: 10 MB
+  - Up to 3 submission attempts allowed
+- Latest submission is marked as final
 
-#### 4. **Access Question Papers**
-   - Navigate to "Exam Papers" (mobile)
-   - Enter exam ID to view/download PDFs
+**For Offline Exams:**
+- Attend the exam in person at the scheduled time
+- Timer helps you track time remaining
+- No answer submission needed
+
+**Live Timer Features:**
+- Automatic countdown to zero
+- Page auto-reloads on status change
+- Bonus time automatically extends your timer
+- Shows elapsed time during exam
+
+#### 3. Access Exam Documents
+- Navigate to **Exam Documents**
+- Enter the Exam ID to search
+- View and download:
+  - Question paper PDF
+  - Marked answer paper (if uploaded by teacher)
+
+#### 4. Track Performance
+- View your exam history
+- Check subject-wise analysis
+- Monitor your improvement trends
+- Compare with class averages
+
+#### 5. Check Rankings
+- **Overall Leaderboard**: Ranked by lifetime points
+- **Subject Rankings**: Average score per subject
+- **Monthly Rankings**: Current month performance
+- **Best Students**: Top performer per subject
+
+#### 6. Monitor Points
+- View lifetime points earned
+- Track points spent on rewards
+- Check remaining balance
+- See monthly bonus points from #1 ranks
 
 ---
 
@@ -206,6 +287,31 @@
 - **CQ**: % of exams with ≥80% score
 - **MCQ**: % of exams with ≥85% score
 - Measures consistency in high-level performance
+
+---
+
+## 🏆 Rankings & Leaderboards
+
+### 1. Overall Leaderboard
+- Ranked by **lifetime points** (exam + bonus)
+- Shows top performers across all subjects
+- Updates automatically as new exams are recorded
+
+### 2. Subject Rankings
+- Separate ranking for each subject
+- Ranked by **average score** in that subject
+- Minimum 3 exams required to appear
+
+### 3. Monthly Rankings
+- Ranked by **monthly average score**
+- Resets at the start of each month
+- #1 position earns 40 bonus points
+- Eligibility: ≥40% attendance AND ≥3 exams in month
+
+### 4. Best Student per Subject
+- Top performer in each subject
+- Based on **weighted average** considering exam type
+- Displayed on dashboard and leaderboard page
 
 ---
 
