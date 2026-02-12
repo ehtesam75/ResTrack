@@ -1616,6 +1616,9 @@ def exam_detail(request, exam_id):
         else:
             p['answer_paper_url'] = None
 
+    # Track whether a question paper was uploaded at all (before access checks)
+    question_paper_uploaded = bool(question_paper_url)
+
     # Check if the logged-in student participated in this exam
     student_participated = True
     if user_is_student:
@@ -1642,6 +1645,7 @@ def exam_detail(request, exam_id):
         'current_student_id': current_student_id,
         'has_question_paper': bool(question_paper_url),
         'question_paper_url': question_paper_url,
+        'question_paper_uploaded': question_paper_uploaded,
         'student_participated': student_participated,
     }
     return render(request, 'marks/exam_detail.html', context)
