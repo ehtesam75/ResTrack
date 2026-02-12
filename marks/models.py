@@ -529,7 +529,8 @@ class ExamQuestionPaper(models.Model):
 
     def question_pdf_folder_path(instance):
         username = instance.teacher.username if instance.teacher else 'unknown_teacher'
-        return f"ResTrack/{username}/Exam Questions"
+        exam_id = instance.exam_id if instance.exam_id else 'unknown'
+        return f"ResTrack/{username}/Exam Questions/{exam_id}"
 
     question_pdf = CloudinaryField(
         resource_type='raw',
@@ -605,10 +606,11 @@ class Exam(models.Model):
     def exam_pdf_folder_path(instance):
         """
         Returns folder path for exam question PDF in the format:
-        ResTrack/<teacher username>/Exam Questions
+        ResTrack/<teacher username>/Exam Questions/<exam_id>
         """
         username = instance.teacher.username if instance.teacher else 'unknown_teacher'
-        return f"ResTrack/{username}/Exam Questions"
+        exam_id = instance.exam_id if instance.exam_id else 'unknown'
+        return f"ResTrack/{username}/Exam Questions/{exam_id}"
 
     question_pdf = CloudinaryField(
         resource_type='raw',
@@ -661,10 +663,11 @@ class Exam(models.Model):
     def marked_answer_folder_path(instance):
         """
         Returns folder path for marked answer paper in the format:
-        ResTrack/<teacher username>/Marked Answer Papers
+        ResTrack/<teacher username>/Marked Answer Papers/<exam_id>
         """
         username = instance.teacher.username if instance.teacher else 'unknown_teacher'
-        return f"ResTrack/{username}/Marked Answer Papers"
+        exam_id = instance.exam_id if instance.exam_id else 'unknown'
+        return f"ResTrack/{username}/Marked Answer Papers/{exam_id}"
 
     marked_answer_paper = CloudinaryField(
         resource_type='raw',
@@ -1145,7 +1148,8 @@ class ExamCenterExam(models.Model):
 
     def _question_pdf_folder(instance):
         username = instance.teacher.username if instance.teacher else 'unknown'
-        return f"ResTrack/{username}/Exam Center/Questions"
+        exam_id = instance.exam_display_id if instance.exam_display_id else 'unknown'
+        return f"ResTrack/{username}/Exam Center/Questions/{exam_id}"
 
     question_pdf = CloudinaryField(
         resource_type='raw',
@@ -1270,7 +1274,8 @@ class AnswerSubmission(models.Model):
 
     def _answer_folder(instance):
         username = instance.exam.teacher.username if instance.exam.teacher else 'unknown'
-        return f"ResTrack/{username}/Exam Center/Answers"
+        exam_id = instance.exam.exam_display_id if instance.exam.exam_display_id else 'unknown'
+        return f"ResTrack/{username}/Exam Center/Answers/{exam_id}"
 
     answer_file = CloudinaryField(
         resource_type='raw',
