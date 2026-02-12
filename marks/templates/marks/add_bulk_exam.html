@@ -400,7 +400,11 @@
                             setFieldLocked('class_number', e.class_number, true);
                             setFieldLocked('chapter', e.chapter, true);
                             isExamLocked = true;
-                            examIdInfo.textContent = 'Existing exam detected \u2014 fields auto-filled and locked.';
+                            if (data.source === 'exam_center') {
+                                examIdInfo.textContent = 'Exam Center exam detected \u2014 fields auto-filled and locked.';
+                            } else {
+                                examIdInfo.textContent = 'Existing exam detected \u2014 fields auto-filled and locked.';
+                            }
                             examIdInfo.classList.remove('hidden');
                         } else {
                             unlockExamFields();

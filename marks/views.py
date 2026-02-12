@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
 from django.db.models import Sum, Q
 import json
-from .models import Student, Subject, ExamType, Exam, ExamQuestionPaper, GradeScale, LifetimePoints, PointsSpent, PointTransaction, TeacherProfile, StudentProfile
+from .models import Student, Subject, ExamType, Exam, ExamQuestionPaper, GradeScale, LifetimePoints, PointsSpent, PointTransaction, TeacherProfile, StudentProfile, ExamCenterExam
 from django.db.models import Q
 from .services import LeaderboardService, DashboardService, ChartDataService, count_unique_exams
 from .forms import TeacherSignupForm, LoginForm, StudentAccountForm
@@ -1616,6 +1616,14 @@ def exam_detail(request, exam_id):
         else:
             p['answer_paper_url'] = None
 
+    # Check if the logged-in student participated in this exam
+    student_participated = True
+    if user_is_student:
+        student_participated = any(p['student'].id == current_student_id for p in participants)
+        # If student didn't participate, hide question paper
+        if not student_participated:
+            question_paper_url = None
+
     context = {
         'exam_id': exam_id,
         'exam_date': exam_date,
@@ -1634,6 +1642,7 @@ def exam_detail(request, exam_id):
         'current_student_id': current_student_id,
         'has_question_paper': bool(question_paper_url),
         'question_paper_url': question_paper_url,
+        'student_participated': student_participated,
     }
     return render(request, 'marks/exam_detail.html', context)
 
@@ -1650,8 +1659,17 @@ def _cloudinary_download_url(url):
 @login_required(login_url='login')
 def exam_download_question(request, exam_id):
     """Download question paper for an exam (Cloudinary redirect with fl_attachment)."""
-    from django.http import Http404
+    from django.http import Http404, HttpResponseForbidden
     teacher = get_teacher_for_user(request.user)
+
+    # If the user is a student, verify they participated in this exam
+    if is_student(request.user):
+        try:
+            student = request.user.student_profile.student
+            if not Exam.objects.filter(exam_id=exam_id, teacher=teacher, student=student).exists():
+                return HttpResponseForbidden("You did not participate in this exam.")
+        except Exception:
+            return HttpResponseForbidden("You did not participate in this exam.")
 
     # Try ExamQuestionPaper model first
     url = None
@@ -2434,22 +2452,46 @@ def exam_id_lookup_api(request):
     
     exams = Exam.objects.filter(exam_id=exam_id, teacher=teacher).select_related('subject', 'exam_type')
     
-    if not exams.exists():
-        return JsonResponse({'found': False, 'max_exam_id': max_id})
-    
-    first_exam = exams.first()
-    return JsonResponse({
-        'found': True,
-        'max_exam_id': max_id,
-        'exam': {
-            'exam_type': first_exam.exam_type.name,
-            'subject_id': first_exam.subject.id,
-            'date': first_exam.date.strftime('%Y-%m-%d') if first_exam.date else '',
-            'total_marks': first_exam.total_marks,
-            'class_number': first_exam.class_number,
-            'chapter': first_exam.chapter or '',
-        }
-    })
+    if exams.exists():
+        first_exam = exams.first()
+        return JsonResponse({
+            'found': True,
+            'max_exam_id': max_id,
+            'exam': {
+                'exam_type': first_exam.exam_type.name,
+                'subject_id': first_exam.subject.id,
+                'date': first_exam.date.strftime('%Y-%m-%d') if first_exam.date else '',
+                'total_marks': first_exam.total_marks,
+                'class_number': first_exam.class_number,
+                'chapter': first_exam.chapter or '',
+            }
+        })
+
+    # Also search ExamCenterExam (upcoming/finished exams) by exam_display_id
+    ec_exam = ExamCenterExam.objects.filter(
+        exam_display_id=str(exam_id), teacher=teacher
+    ).first()
+
+    if ec_exam:
+        # Map ExamCenterExam subject (string) to Subject FK id
+        subject_match = Subject.objects.filter(name__iexact=ec_exam.subject, teacher=teacher).first()
+        subject_id = subject_match.id if subject_match else ''
+
+        return JsonResponse({
+            'found': True,
+            'max_exam_id': max_id,
+            'source': 'exam_center',
+            'exam': {
+                'exam_type': ec_exam.exam_type.upper(),  # 'cq' -> 'CQ', 'mcq' -> 'MCQ'
+                'subject_id': subject_id,
+                'date': ec_exam.exam_date.strftime('%Y-%m-%d') if ec_exam.exam_date else '',
+                'total_marks': ec_exam.total_marks,
+                'class_number': ec_exam.class_number,
+                'chapter': ec_exam.chapter or '',
+            }
+        })
+
+    return JsonResponse({'found': False, 'max_exam_id': max_id})
 
 
 @login_required(login_url='login')
@@ -2590,6 +2632,18 @@ def exam_lookup_api(request):
         # Fallback to legacy field on Exam
         if first_exam.question_pdf:
             pdf_url = first_exam.question_pdf.url
+
+    # If the user is a student who didn't participate, hide the question paper
+    student_participated_in_exam = None
+    if is_student(request.user):
+        try:
+            student = request.user.student_profile.student
+            student_participated_in_exam = exams.filter(student=student).exists()
+            if not student_participated_in_exam:
+                pdf_url = None
+        except Exception:
+            student_participated_in_exam = False
+            pdf_url = None
     
     # Get marked answer paper data based on user role
     student_data = None

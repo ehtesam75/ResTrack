@@ -200,6 +200,20 @@
                         <p class="text-gray-500 text-xs mt-0.5">Question paper has not been uploaded for this exam</p>
                     </div>
                 </div>
+
+                <div id="pdfNotParticipated" class="hidden">
+                    <div class="bg-amber-50 rounded-lg p-3 border border-amber-200">
+                        <div class="flex items-center gap-2.5">
+                            <div class="flex-shrink-0 w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
+                                <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+                            </div>
+                            <div>
+                                <p class="text-amber-800 font-semibold text-sm">Question Paper Unavailable</p>
+                                <p class="text-amber-600 text-xs">You did not participate in this exam.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Marked Answer Paper Card (Student & Teacher) -->
@@ -466,6 +480,12 @@
                         </div>
                         <div id="dPdfNotAvailable" class="hidden">
                             <span class="text-xs text-gray-400 font-medium">No PDF uploaded</span>
+                        </div>
+                        <div id="dPdfNotParticipated" class="hidden">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-xs font-semibold">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+                                You did not participate in this exam.
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -735,7 +755,13 @@
         document.getElementById('resultParticipants').textContent = exam.total_participants;
 
         // PDF
-        if (exam.has_pdf && exam.pdf_url) {
+        const pdfNotParticipated = document.getElementById('pdfNotParticipated');
+        pdfNotParticipated.classList.add('hidden');
+        if (isStudent && exam.student_participated === false) {
+            document.getElementById('pdfAvailable').classList.add('hidden');
+            document.getElementById('pdfNotAvailable').classList.add('hidden');
+            pdfNotParticipated.classList.remove('hidden');
+        } else if (exam.has_pdf && exam.pdf_url) {
             document.getElementById('pdfAvailable').classList.remove('hidden');
             document.getElementById('pdfNotAvailable').classList.add('hidden');
             document.getElementById('viewPdfBtn').href = exam.pdf_url;
@@ -834,6 +860,7 @@
         document.getElementById('dTeacherSection').classList.add('hidden');
         document.getElementById('dTeacherStudentsTable').classList.add('hidden');
         document.getElementById('dNoStudentsMessage').classList.add('hidden');
+        document.getElementById('dPdfNotParticipated').classList.add('hidden');
     }
 
     function dShowError(message) {
@@ -862,7 +889,13 @@
         }
 
         // PDF
-        if (exam.has_pdf && exam.pdf_url) {
+        const dPdfNotParticipated = document.getElementById('dPdfNotParticipated');
+        dPdfNotParticipated.classList.add('hidden');
+        if (isStudent && exam.student_participated === false) {
+            document.getElementById('dPdfAvailable').classList.add('hidden');
+            document.getElementById('dPdfNotAvailable').classList.add('hidden');
+            dPdfNotParticipated.classList.remove('hidden');
+        } else if (exam.has_pdf && exam.pdf_url) {
             document.getElementById('dPdfAvailable').classList.remove('hidden');
             document.getElementById('dPdfNotAvailable').classList.add('hidden');
             document.getElementById('dViewPdfBtn').href = exam.pdf_url;
