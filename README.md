@@ -38,11 +38,11 @@
 ### For Teachers
 
 -  **Live Exam Center** - Schedule and manage real-time timed exams with countdown timers
-      Create online and offline exams with custom duration
-  - Live status tracking (Upcoming → Running → Submission → Finished)
-  - Grant bonus time during active exams or submission periods
-  - View all student answer submissions with attempt tracking
-  - Question paper PDF upload and management
+   - Create online and offline exams with custom duration
+   - Live status tracking (Upcoming → Running → Submission → Finished)
+   - Grant bonus time during active exams or submission periods
+   - View all student answer submissions with attempt tracking
+   - Question paper PDF upload and management
 
 -  **Comprehensive Dashboard** - Real-time analytics and performance overview
 -  **Student Management** - Create accounts, manage & edit profiles, and track individual progress
@@ -55,11 +55,11 @@
 ### For Students
 
 -  **Exam Participation** - Attend real-time timed exams in online or offline modes
-  - Live countdown timers for exam duration
-  - Online: View question papers and submit answer sheets (PDF/ZIP/RAR)
-  - Up to 3 submission attempts per online exam
-  - Automatic page reload on status changes
-  - Bonus time automatically extends your timer
+   - Live countdown timers for exam duration
+   - Online: View question papers and submit answer sheets (PDF/ZIP/RAR)
+   - Up to 3 submission attempts per online exam
+   - Automatic page reload on status changes
+   - Bonus time automatically extends your timer
 
 -  **Exam Documents** - Look up any exam by ID to access question papers and marked answers
 -  **Personal Dashboard** - View your performance metrics and rankings
@@ -67,7 +67,7 @@
 -  **Subject Analysis** - Detailed breakdown by subject and exam type
 -  **Points Balance** - Track earned, spent, and remaining points
 -  **Achievements** - View monthly wins, subject tops, and excellence rate
--  **Mobile Access** - Full functionality on smartphones and tablets
+-  **Mobile Access** - Full functionality on smartphones
 
 ### System Features
 
