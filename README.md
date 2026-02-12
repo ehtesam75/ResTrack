@@ -37,7 +37,7 @@
 
 ### For Teachers
 
-- 🎯 **Live Exam Center** - Schedule and manage real-time timed exams with countdown timers
+-  **Live Exam Center** - Schedule and manage real-time timed exams with countdown timers
   - Create online and offline exams with custom duration
   - Live status tracking (Upcoming → Running → Submission → Finished)
   - Grant bonus time during active exams or submission periods
@@ -54,7 +54,7 @@
 
 ### For Students
 
-- ⏱️ **Exam Participation** - Attend real-time timed exams in online or offline modes
+-  **Exam Participation** - Attend real-time timed exams in online or offline modes
   - Live countdown timers for exam duration
   - Online: View question papers and submit answer sheets (PDF/ZIP/RAR)
   - Up to 3 submission attempts per online exam
