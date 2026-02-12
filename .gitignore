@@ -1,11 +1,5 @@
-GRADING_SYSTEM.md
-QUICKSTART.md
-REFACTORING_SUMMARY.md
-CHECKLIST.md
-docs/
 setup.ps1
 .env
-exam_questions/
 media/
 backup.json
 data.json
