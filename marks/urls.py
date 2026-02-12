@@ -2,6 +2,7 @@ from django.urls import path
 from django.views.generic import TemplateView
 from . import views
 from . import exam_center_views
+from . import push_views
 
 urlpatterns = [
     # Authentication URLs
@@ -93,4 +94,9 @@ urlpatterns = [
     path('exam-center/<int:exam_id>/bonus-time/', exam_center_views.exam_center_bonus_time, name='exam_center_bonus_time'),
     path('exam-center/<int:exam_id>/submissions/', exam_center_views.exam_center_submissions, name='exam_center_submissions'),
     path('api/exam-center/<int:exam_id>/status/', exam_center_views.exam_center_status_api, name='exam_center_status_api'),
+
+    # Push notification endpoints
+    path('api/push/vapid-key/', push_views.vapid_public_key, name='vapid_public_key'),
+    path('api/push/subscribe/', push_views.push_subscribe, name='push_subscribe'),
+    path('api/push/unsubscribe/', push_views.push_unsubscribe, name='push_unsubscribe'),
 ]

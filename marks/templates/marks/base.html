@@ -541,6 +541,89 @@
             console.log('PWA installed successfully');
         });
 
+        // ---------------------------------------------------------------
+        // Push Notification Subscription (students only)
+        // ---------------------------------------------------------------
+        {% if user.is_authenticated %}
+        (function initPushSubscription() {
+            if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+                console.log('Push notifications not supported.');
+                return;
+            }
+
+            navigator.serviceWorker.ready.then(function(registration) {
+                // Check current subscription state
+                registration.pushManager.getSubscription().then(function(existingSub) {
+                    if (existingSub) {
+                        // Already subscribed — send to server in case it's a new session / device
+                        sendSubscriptionToServer(existingSub);
+                        return;
+                    }
+
+                    // Not subscribed yet — fetch VAPID key and subscribe
+                    fetch('/api/push/vapid-key/', { credentials: 'same-origin' })
+                        .then(function(res) { return res.json(); })
+                        .then(function(data) {
+                            if (!data.publicKey) {
+                                console.log('VAPID public key not configured on server.');
+                                return;
+                            }
+                            var applicationServerKey = urlBase64ToUint8Array(data.publicKey);
+                            return registration.pushManager.subscribe({
+                                userVisibleOnly: true,
+                                applicationServerKey: applicationServerKey
+                            });
+                        })
+                        .then(function(subscription) {
+                            if (subscription) {
+                                sendSubscriptionToServer(subscription);
+                            }
+                        })
+                        .catch(function(err) {
+                            console.log('Push subscription failed:', err);
+                        });
+                });
+            });
+
+            function sendSubscriptionToServer(subscription) {
+                var subJSON = subscription.toJSON();
+                fetch('/api/push/subscribe/', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({
+                        endpoint: subJSON.endpoint,
+                        keys: {
+                            p256dh: subJSON.keys.p256dh,
+                            auth: subJSON.keys.auth
+                        }
+                    })
+                })
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    console.log('Push subscription saved:', data);
+                })
+                .catch(function(err) {
+                    console.error('Failed to save push subscription:', err);
+                });
+            }
+
+            function urlBase64ToUint8Array(base64String) {
+                var padding = '='.repeat((4 - base64String.length % 4) % 4);
+                var base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+                var rawData = atob(base64);
+                var outputArray = new Uint8Array(rawData.length);
+                for (var i = 0; i < rawData.length; ++i) {
+                    outputArray[i] = rawData.charCodeAt(i);
+                }
+                return outputArray;
+            }
+        })();
+        {% endif %}
+
         // Function to clear icon cache (useful when updating icons)
         window.clearIconCache = function() {
             if ('serviceWorker' in navigator) {

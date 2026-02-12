@@ -1299,3 +1299,37 @@ class AnswerSubmission(models.Model):
         except Exception:
             name = self.student_user.username
         return f"{name} — Exam {self.exam.exam_display_id}"
+
+
+class PushSubscription(models.Model):
+    """
+    Stores Web Push API subscription info for each user's browser/device.
+    A user can have multiple subscriptions (multiple devices or browsers).
+    """
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='push_subscriptions'
+    )
+    endpoint = models.URLField(max_length=500, unique=True)
+    p256dh = models.CharField(max_length=200, help_text="Client public key")
+    auth = models.CharField(max_length=100, help_text="Client auth secret")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Push Subscription"
+        verbose_name_plural = "Push Subscriptions"
+
+    def __str__(self):
+        return f"Push sub for {self.user.username} ({self.endpoint[:50]}...)"
+
+    @property
+    def subscription_info(self):
+        """Return dict in the format expected by pywebpush."""
+        return {
+            "endpoint": self.endpoint,
+            "keys": {
+                "p256dh": self.p256dh,
+                "auth": self.auth,
+            }
+        }

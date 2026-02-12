@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Student, Subject, ExamType, Exam, ExamQuestionPaper, GradeScale, LifetimePoints, PointsSpent, PointTransaction, TeacherProfile, StudentProfile, ExamCenterExam, AnswerSubmission
+from .models import Student, Subject, ExamType, Exam, ExamQuestionPaper, GradeScale, LifetimePoints, PointsSpent, PointTransaction, TeacherProfile, StudentProfile, ExamCenterExam, AnswerSubmission, PushSubscription
 
 
 @admin.register(TeacherProfile)
@@ -185,3 +185,11 @@ class AnswerSubmissionAdmin(admin.ModelAdmin):
     list_filter = ['is_final', 'submitted_at']
     search_fields = ['student_user__username', 'exam__exam_display_id']
     readonly_fields = ['submitted_at']
+
+
+@admin.register(PushSubscription)
+class PushSubscriptionAdmin(admin.ModelAdmin):
+    list_display = ['user', 'endpoint', 'created_at']
+    search_fields = ['user__username', 'endpoint']
+    list_filter = ['created_at']
+    readonly_fields = ['created_at']

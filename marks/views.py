@@ -9,6 +9,7 @@ from .models import Student, Subject, ExamType, Exam, ExamQuestionPaper, GradeSc
 from django.db.models import Q
 from .services import LeaderboardService, DashboardService, ChartDataService, count_unique_exams
 from .forms import TeacherSignupForm, LoginForm, StudentAccountForm
+from .notifications import notify_result_published
 
 
 def is_teacher(user):
@@ -1179,6 +1180,8 @@ def add_exam(request):
                         teacher=teacher,
                         defaults={'question_pdf': question_pdf}
                     )
+                # Notify the student about published results
+                notify_result_published(exam_id, [student.id], teacher)
                 return redirect('student_detail', student_id=student.id)
             except Exception as e:
                 messages.error(request, f'Error adding exam: {str(e)}')
@@ -1282,6 +1285,14 @@ def add_bulk_exam(request):
                             teacher=teacher,
                             defaults={'question_pdf': question_pdf}
                         )
+                    # Notify all participating students about published results
+                    participating_student_ids = []
+                    for i in range(1, student_count + 1):
+                        sid = request.POST.get(f'student_{i}')
+                        if sid and request.POST.get(f'marks_{i}'):
+                            participating_student_ids.append(int(sid))
+                    if participating_student_ids:
+                        notify_result_published(exam_id, participating_student_ids, teacher)
                     return redirect('all_exams')
                 except Exception as e:
                     messages.error(request, f'Error adding exams: {str(e)}')

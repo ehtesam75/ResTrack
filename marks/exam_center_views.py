@@ -17,6 +17,7 @@ from django.views.decorators.http import require_POST
 from .models import ExamCenterExam, AnswerSubmission
 from .forms import ExamCenterExamForm
 from .views import is_teacher, is_student, get_teacher_for_user
+from .notifications import notify_exam_created
 
 
 # ---------------------------------------------------------------------------
@@ -118,6 +119,8 @@ def exam_center_create(request):
             exam = form.save(commit=False)
             exam.teacher = request.user
             exam.save()
+            # Send push notification to all enrolled students
+            notify_exam_created(exam)
             return redirect('exam_center')
     else:
         form = ExamCenterExamForm(teacher=request.user, initial={'exam_display_id': str(next_exam_id)})

@@ -1,6 +1,6 @@
 // Service Worker for ResTrack PWA
-const CACHE_NAME = 'restrack-v1.4.1';
-const STATIC_CACHE_NAME = 'restrack-static-v1.4.1';
+const CACHE_NAME = 'restrack-v1.5.0';
+const STATIC_CACHE_NAME = 'restrack-static-v1.5.0';
 
 // Static assets to cache - same-origin ONLY, no CDN/external URLs
 const STATIC_ASSETS = [
@@ -124,4 +124,66 @@ self.addEventListener('message', event => {
       clients.forEach(client => client.navigate(client.url));
     });
   }
+});
+
+// ---------------------------------------------------------------------------
+// Push Notification handling
+// ---------------------------------------------------------------------------
+
+// Receive push messages from the server
+self.addEventListener('push', event => {
+  console.log('Push notification received.');
+
+  let data = { title: 'ResTrack', body: 'You have a new notification.', url: '/' };
+  if (event.data) {
+    try {
+      data = event.data.json();
+    } catch (e) {
+      data.body = event.data.text();
+    }
+  }
+
+  const options = {
+    body: data.body || '',
+    icon: '/static/icons/ResTrack-192x192.png',
+    badge: '/static/icons/ResTrack-96x96.png',
+    tag: data.tag || 'restrack-notification',
+    renotify: true,
+    data: { url: data.url || '/' },
+    vibrate: [200, 100, 200],
+    actions: [
+      { action: 'open', title: 'Open' },
+      { action: 'dismiss', title: 'Dismiss' },
+    ],
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title || 'ResTrack', options)
+  );
+});
+
+// Handle notification click — navigate to the target URL
+self.addEventListener('notificationclick', event => {
+  console.log('Notification clicked:', event.notification.tag);
+  event.notification.close();
+
+  if (event.action === 'dismiss') {
+    return;
+  }
+
+  const targetUrl = (event.notification.data && event.notification.data.url) || '/';
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
+      // If a ResTrack tab is already open, focus it and navigate
+      for (const client of windowClients) {
+        if (client.url.includes(self.location.origin)) {
+          client.focus();
+          return client.navigate(targetUrl);
+        }
+      }
+      // Otherwise open a new window
+      return clients.openWindow(targetUrl);
+    })
+  );
 });

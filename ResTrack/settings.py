@@ -160,3 +160,10 @@ LOGOUT_REDIRECT_URL = 'home'
 # Misc
 # ======================
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ======================
+# Web Push Notifications (VAPID)
+# ======================
+VAPID_PUBLIC_KEY = os.environ.get("VAPID_PUBLIC_KEY", "")
+VAPID_PRIVATE_KEY = os.environ.get("VAPID_PRIVATE_KEY", "")
+VAPID_ADMIN_EMAIL = os.environ.get("VAPID_ADMIN_EMAIL", "admin@restrack.app")
