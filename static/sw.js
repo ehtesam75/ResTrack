@@ -143,10 +143,11 @@ self.addEventListener('push', event => {
     }
   }
 
+  const origin = self.location.origin;
   const options = {
     body: data.body || '',
-    icon: '/static/icons/ResTrack-192x192.png',
-    badge: '/static/icons/ResTrack-96x96.png',
+    icon: origin + '/static/icons/ResTrack-192x192.png',
+    badge: origin + '/static/icons/ResTrack-96x96.png',
     tag: data.tag || 'restrack-notification',
     renotify: true,
     data: { url: data.url || '/' },
