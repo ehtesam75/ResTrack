@@ -120,7 +120,10 @@ def exam_center_create(request):
             exam.teacher = request.user
             exam.save()
             # Send push notification to all enrolled students
-            notify_exam_created(exam)
+            try:
+                notify_exam_created(exam)
+            except Exception:
+                pass  # Don't let push failures block exam creation
             return redirect('exam_center')
     else:
         form = ExamCenterExamForm(teacher=request.user, initial={'exam_display_id': str(next_exam_id)})

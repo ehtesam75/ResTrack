@@ -1181,7 +1181,10 @@ def add_exam(request):
                         defaults={'question_pdf': question_pdf}
                     )
                 # Notify the student about published results
-                notify_result_published(exam_id, [student.id], teacher)
+                try:
+                    notify_result_published(exam_id, [student.id], teacher)
+                except Exception:
+                    pass  # Don't let push failures block result publishing
                 return redirect('student_detail', student_id=student.id)
             except Exception as e:
                 messages.error(request, f'Error adding exam: {str(e)}')
@@ -1292,7 +1295,10 @@ def add_bulk_exam(request):
                         if sid and request.POST.get(f'marks_{i}'):
                             participating_student_ids.append(int(sid))
                     if participating_student_ids:
-                        notify_result_published(exam_id, participating_student_ids, teacher)
+                        try:
+                            notify_result_published(exam_id, participating_student_ids, teacher)
+                        except Exception:
+                            pass  # Don't let push failures block result publishing
                     return redirect('all_exams')
                 except Exception as e:
                     messages.error(request, f'Error adding exams: {str(e)}')

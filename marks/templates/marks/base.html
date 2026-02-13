@@ -498,8 +498,18 @@
         // Register service worker for PWA functionality
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
+                // Clean up old service worker registrations with /static/ scope
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    registrations.forEach(function(reg) {
+                        if (reg.scope && reg.scope.endsWith('/static/')) {
+                            console.log('Unregistering old SW with scope:', reg.scope);
+                            reg.unregister();
+                        }
+                    });
+                });
+
                 console.log('Attempting to register service worker...');
-                navigator.serviceWorker.register('/static/sw.js')
+                navigator.serviceWorker.register('/sw.js')
                     .then(function(registration) {
                         console.log('Service Worker registered successfully:', registration.scope);
                         console.log('Service worker state:', registration.active ? 'active' : 'inactive');
@@ -674,7 +684,7 @@
         window.clearIconCache = function() {
             if ('serviceWorker' in navigator) {
                 // Check if service worker is registered
-                navigator.serviceWorker.getRegistration('/static/sw.js').then(registration => {
+                navigator.serviceWorker.getRegistration('/').then(registration => {
                     if (registration && registration.active) {
                         registration.active.postMessage({ type: 'CLEAR_ICON_CACHE' });
                         console.log('Icon cache clear request sent to service worker');
@@ -684,7 +694,7 @@
                     } else {
                         console.log('Service worker not active');
                         // Try to register it first
-                        navigator.serviceWorker.register('/static/sw.js').then(reg => {
+                        navigator.serviceWorker.register('/sw.js').then(reg => {
                             console.log('Service worker registered for cache clearing');
                             setTimeout(() => {
                                 window.location.reload();
