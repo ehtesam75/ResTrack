@@ -17,9 +17,9 @@ class Command(BaseCommand):
         vapid = Vapid()
         vapid.generate_keys()
 
-        # Private key in PEM format
-        raw_priv = vapid.private_pem()
-        priv_str = raw_priv.decode() if isinstance(raw_priv, bytes) else raw_priv
+        # Private key as URL-safe base64 raw bytes (single-line, .env friendly)
+        priv_raw = vapid.private_key.private_numbers().private_value.to_bytes(32, "big")
+        priv_key = base64.urlsafe_b64encode(priv_raw).rstrip(b"=").decode()
 
         # Public key as URL-safe base64 (applicationServerKey format)
         pub_bytes = vapid.public_key.public_bytes(
@@ -29,8 +29,8 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS("\n=== VAPID Keys Generated ===\n"))
         self.stdout.write(f"VAPID_PUBLIC_KEY={pub_key}\n")
-        self.stdout.write(f"VAPID_PRIVATE_KEY={priv_str}\n")
+        self.stdout.write(f"VAPID_PRIVATE_KEY={priv_key}\n")
         self.stdout.write(self.style.WARNING(
-            "\nAdd these to your .env file. "
+            "\nAdd these to your .env file (and Render environment variables). "
             "The PRIVATE key must be kept secret!\n"
         ))
