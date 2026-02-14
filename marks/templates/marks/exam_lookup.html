@@ -311,7 +311,7 @@
                         <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     </span>
                     <span class="text-xs text-gray-700">Exams with Question Available:</span>
-                    <span class="ml-auto text-sm font-semibold text-emerald-700">{{ exams_with_pdf }}/{% if is_student %}{{ total_student_unique_exams }}{% else %}{{ total_exams }}{% endif %}{% if total_exams > 0 %} ({{ pdf_percentage }}%){% endif %}</span>
+                    <span class="ml-auto text-sm font-semibold text-emerald-700">{{ exams_with_pdf }}/{% if is_student %}{{ total_student_unique_exams }}{% else %}{{ total_exams }}{% endif %}</span>
                 </div>
                 {% if is_student %}
                 <div class="flex items-center gap-2">
@@ -319,7 +319,7 @@
                         <svg class="w-3.5 h-3.5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </span>
                     <span class="text-xs text-gray-700">Your Marked Answer Sheets:</span>
-                    <span class="ml-auto text-sm font-semibold text-green-700">{{ exams_with_answer_sheet }}/{{ total_student_exams }}{% if total_student_exams > 0 %} ({{ answer_sheet_percentage }}%){% endif %}</span>
+                    <span class="ml-auto text-sm font-semibold text-green-700">{{ exams_with_answer_sheet }}/{{ total_student_exams }}</span>
                 </div>
                 {% endif %}
             </div>

@@ -318,7 +318,7 @@ html {
     background: rgba(156, 163, 175, 0.7);
 }
 
-@media (max-width: 639px) {
+@media (max-width: 1023px) {
     .mobile-menu-panel {
         display: flex;
     }

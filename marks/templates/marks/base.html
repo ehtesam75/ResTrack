@@ -53,7 +53,7 @@
                         <a href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}" class="text-xl font-bold gradient-text hover:opacity-80 transition-opacity">ResTrack</a>
                     </div>
                     {% if user.is_authenticated %}
-                    <div class="hidden sm:ml-8 sm:flex sm:space-x-6">
+                    <div class="hidden lg:ml-8 lg:flex lg:space-x-6">
                         <a href="{% url 'dashboard' %}" class="{% if request.path == '/dashboard/' %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors nav-link">
                             Dashboard
                         </a>
@@ -88,7 +88,7 @@
                     {% if user.is_authenticated %}
                     <!-- Remove Manage button from top bar -->
                     <!-- User dropdown -->
-                    <div class="hidden sm:flex sm:items-center relative" x-data="{ open: false }">
+                    <div class="hidden lg:flex lg:items-center relative" x-data="{ open: false }">
                         <button onclick="toggleUserMenu()" class="flex items-center gap-2 text-gray-700 hover:text-purple-600 px-3 py-2 rounded-lg hover:bg-gray-100 transition-all text-sm font-medium">
                             <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white text-xs font-semibold">
                                 {% if user.student_profile %}
@@ -144,9 +144,9 @@
                     </div>
                     {% else %}
                     <!-- Navigation links for logged-out users -->
-                    <div class="hidden sm:flex sm:items-center gap-3">
+                    <div class="hidden lg:flex lg:items-center gap-3">
                         <!-- Home link only visible on mobile -->
-                        <a href="{% url 'home' %}" class="sm:hidden {% if request.path == '/' %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-3 py-2 text-sm font-medium transition-colors">
+                        <a href="{% url 'home' %}" class="lg:hidden {% if request.path == '/' %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-3 py-2 text-sm font-medium transition-colors">
                             Home
                         </a>
                         <a href="{% url 'about' %}" class="{% if 'about' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-3 py-2 text-sm font-medium transition-colors">
@@ -167,7 +167,7 @@
                     </div>
                     {% endif %}
                     <!-- Mobile menu button -->
-                    <button type="button" class="sm:hidden mobile-menu-btn ml-2 inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-purple-600 hover:bg-gray-100 focus:outline-none transition-colors" id="mobile-menu-button">
+                    <button type="button" class="lg:hidden mobile-menu-btn ml-2 inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-purple-600 hover:bg-gray-100 focus:outline-none transition-colors" id="mobile-menu-button">
                         <span class="sr-only">Open main menu</span>
                         <!-- Hamburger icon -->
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
