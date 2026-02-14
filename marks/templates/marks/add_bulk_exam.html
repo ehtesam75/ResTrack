@@ -299,6 +299,41 @@
     const LOOKUP_URL = '{% url "exam_id_lookup_api" %}';
     let isExamLocked = false;
 
+    // Store all students for client-side filtering
+    const allStudents = [
+        {% for student in students %}
+        { id: '{{ student.id }}', displayName: '{{ student.display_name|escapejs }}' },
+        {% endfor %}
+    ];
+    // Track which students are available (not yet recorded for the current exam_id)
+    let availableStudentIds = new Set(allStudents.map(s => s.id));
+
+    // Rebuild all student dropdowns with only available students
+    function rebuildStudentDropdowns(availableList) {
+        availableStudentIds = new Set(availableList.map(s => String(s.id)));
+        const studentCount = parseInt(document.querySelector('[name="student_count"]')?.value || 0);
+        for (let i = 1; i <= studentCount; i++) {
+            const select = document.getElementById('student_' + i);
+            if (!select) continue;
+            const currentValue = select.value;
+            select.innerHTML = '<option value="">Select Student</option>';
+            availableList.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = s.displayName || s.display_name;
+                if (String(s.id) === currentValue) opt.selected = true;
+                select.appendChild(opt);
+            });
+        }
+        // Re-apply hide-already-selected logic
+        updateStudentDropdowns();
+    }
+
+    // Reset all student dropdowns to show all students
+    function resetStudentDropdowns() {
+        rebuildStudentDropdowns(allStudents.map(s => ({ id: s.id, display_name: s.displayName })));
+    }
+
     // Set today's date as default and max
     const dateInput = document.getElementById('date');
     const today = new Date();
@@ -355,6 +390,7 @@
         });
         const info = document.getElementById('exam-id-info');
         if (info) info.classList.add('hidden');
+        resetStudentDropdowns();
     }
 
     // Exam ID lookup with debounce
@@ -390,6 +426,13 @@
                     .then(r => r.json())
                     .then(data => {
                         if (data.max_exam_id !== undefined) maxExamId = data.max_exam_id;
+
+                        // Update student dropdowns with available students
+                        if (data.available_students) {
+                            rebuildStudentDropdowns(data.available_students);
+                        } else {
+                            resetStudentDropdowns();
+                        }
 
                         if (data.found) {
                             const e = data.exam;

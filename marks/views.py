@@ -1160,6 +1160,10 @@ def add_exam(request):
                 if exam_id < 1 or exam_id > max_existing + 1:
                     messages.error(request, f'Exam ID must be between 1 and {max_existing + 1}.')
                     return redirect('add_exam')
+                # Prevent duplicate: same student + same exam_id for this teacher
+                if Exam.objects.filter(exam_id=exam_id, student=student, teacher=teacher).exists():
+                    messages.error(request, f'A result for {student.display_name} already exists for Exam ID {exam_id}.')
+                    return redirect('add_exam')
                 exam = Exam.objects.create(
                     student=student,
                     subject=subject,
@@ -1258,6 +1262,7 @@ def add_bulk_exam(request):
                     group_id = f"bulk_{datetime.now().strftime('%Y%m%d%H%M%S')}_{uuid.uuid4().hex[:8]}"
                     # Create exams for all students
                     created_count = 0
+                    skipped_students = []
                     for i in range(1, student_count + 1):
                         student_id = request.POST.get(f'student_{i}')
                         mark_obtained = request.POST.get(f'marks_{i}')
@@ -1265,6 +1270,10 @@ def add_bulk_exam(request):
                         if student_id and mark_obtained:
                             # Ensure student belongs to this teacher
                             student = Student.objects.get(id=student_id, teacher=teacher)
+                            # Prevent duplicate: same student + same exam_id
+                            if Exam.objects.filter(exam_id=exam_id, student=student, teacher=teacher).exists():
+                                skipped_students.append(student.display_name)
+                                continue
                             mark_obtained = int(mark_obtained)
                             Exam.objects.create(
                                 student=student,
@@ -1288,6 +1297,10 @@ def add_bulk_exam(request):
                             teacher=teacher,
                             defaults={'question_pdf': question_pdf}
                         )
+                    # Warn about skipped duplicates
+                    if skipped_students:
+                        names = ', '.join(skipped_students)
+                        messages.warning(request, f'Skipped duplicate entries for: {names} (already have results for Exam ID {exam_id}).')
                     # Notify all participating students about published results
                     participating_student_ids = []
                     for i in range(1, student_count + 1):
@@ -2471,6 +2484,19 @@ def exam_id_lookup_api(request):
     except ValueError:
         return JsonResponse({'found': False, 'max_exam_id': max_id})
     
+    # Find students who already have results for this exam_id (to exclude from dropdown)
+    existing_student_ids = list(
+        Exam.objects.filter(exam_id=exam_id, teacher=teacher)
+        .values_list('student_id', flat=True)
+    )
+    
+    # Build list of available students (all teacher's students minus those already recorded)
+    all_students = Student.objects.filter(teacher=teacher).order_by('first_name', 'last_name')
+    available_students = [
+        {'id': s.id, 'display_name': s.display_name}
+        for s in all_students if s.id not in existing_student_ids
+    ]
+    
     exams = Exam.objects.filter(exam_id=exam_id, teacher=teacher).select_related('subject', 'exam_type')
     
     if exams.exists():
@@ -2478,6 +2504,8 @@ def exam_id_lookup_api(request):
         return JsonResponse({
             'found': True,
             'max_exam_id': max_id,
+            'existing_student_ids': existing_student_ids,
+            'available_students': available_students,
             'exam': {
                 'exam_type': first_exam.exam_type.name,
                 'subject_id': first_exam.subject.id,
@@ -2502,6 +2530,8 @@ def exam_id_lookup_api(request):
             'found': True,
             'max_exam_id': max_id,
             'source': 'exam_center',
+            'existing_student_ids': existing_student_ids,
+            'available_students': available_students,
             'exam': {
                 'exam_type': ec_exam.exam_type.upper(),  # 'cq' -> 'CQ', 'mcq' -> 'MCQ'
                 'subject_id': subject_id,
@@ -2512,7 +2542,13 @@ def exam_id_lookup_api(request):
             }
         })
 
-    return JsonResponse({'found': False, 'max_exam_id': max_id})
+    # Exam ID not found yet — all students are available
+    return JsonResponse({
+        'found': False,
+        'max_exam_id': max_id,
+        'existing_student_ids': existing_student_ids,
+        'available_students': available_students,
+    })
 
 
 @login_required(login_url='login')
