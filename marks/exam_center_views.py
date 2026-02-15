@@ -174,17 +174,12 @@ def exam_center_edit(request, exam_id):
 @login_required
 @require_POST
 def exam_center_delete(request, exam_id):
-    """Delete an upcoming exam (teacher only)."""
+    """Delete an exam – upcoming, running, or finished (teacher only)."""
     exam = get_object_or_404(ExamCenterExam, pk=exam_id, teacher=request.user)
 
     if not is_teacher(request.user):
         return JsonResponse({'error': 'Forbidden'}, status=403)
 
-    if not exam.is_upcoming:
-        messages.warning(request, 'Only upcoming exams can be deleted.')
-        return redirect('exam_center')
-
-    label = exam.exam_display_id
     exam.delete()
     return redirect('exam_center')
 

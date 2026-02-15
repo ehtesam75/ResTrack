@@ -119,6 +119,28 @@
         {% endif %}
 
         {% if status == 'running' or status == 'submission' %}
+        <form method="POST" action="{% url 'exam_center_delete' exam.pk %}" class="inline"
+              onsubmit="return confirm('This exam is currently running. Deleting it will remove all student submissions. Are you sure?')">
+            {% csrf_token %}
+            <button type="submit"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-red-200 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 transition-all shadow-sm">
+                <i class="fa-solid fa-trash"></i> Delete
+            </button>
+        </form>
+        {% endif %}
+
+        {% if status == 'finished' %}
+        <form method="POST" action="{% url 'exam_center_delete' exam.pk %}" class="inline"
+              onsubmit="return confirm('This exam is finished. Deleting it will permanently remove all student submissions. Are you sure?')">
+            {% csrf_token %}
+            <button type="submit"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-red-200 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 transition-all shadow-sm">
+                <i class="fa-solid fa-trash"></i> Delete
+            </button>
+        </form>
+        {% endif %}
+
+        {% if status == 'running' or status == 'submission' %}
         <!-- Bonus time grant -->
         <div class="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2 shadow-sm">
             <label class="text-xs font-medium text-gray-600 whitespace-nowrap">Bonus time:</label>
