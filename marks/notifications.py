@@ -31,6 +31,7 @@ def _send_push(subscription, payload):
             vapid_private_key=settings.VAPID_PRIVATE_KEY,
             vapid_claims={"sub": f"mailto:{settings.VAPID_ADMIN_EMAIL}"},
             ttl=604800,  # 7 days — push service queues if device is offline
+            headers={"Urgency": "high"},  # High priority — triggers heads-up/banner on Android
         )
         return True
     except WebPushException as e:
