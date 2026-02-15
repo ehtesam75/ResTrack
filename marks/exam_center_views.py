@@ -17,7 +17,7 @@ from django.views.decorators.http import require_POST
 from .models import ExamCenterExam, AnswerSubmission
 from .forms import ExamCenterExamForm
 from .views import is_teacher, is_student, get_teacher_for_user
-from .notifications import notify_exam_created
+from .notifications import notify_exam_created, notify_exam_edited
 
 
 # ---------------------------------------------------------------------------
@@ -154,6 +154,11 @@ def exam_center_edit(request, exam_id):
         form = ExamCenterExamForm(request.POST, request.FILES, instance=exam, teacher=request.user)
         if form.is_valid():
             form.save()
+            # Notify enrolled students about the exam update
+            try:
+                notify_exam_edited(exam)
+            except Exception:
+                pass  # Don't let push failures block exam editing
             return redirect('exam_center')
     else:
         form = ExamCenterExamForm(instance=exam, teacher=request.user)

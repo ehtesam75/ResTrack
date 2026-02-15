@@ -9,7 +9,7 @@ from .models import Student, Subject, ExamType, Exam, ExamQuestionPaper, GradeSc
 from django.db.models import Q
 from .services import LeaderboardService, DashboardService, ChartDataService, count_unique_exams
 from .forms import TeacherSignupForm, LoginForm, StudentAccountForm
-from .notifications import notify_result_published
+from .notifications import notify_result_published, notify_result_edited
 
 
 def is_teacher(user):
@@ -1395,6 +1395,12 @@ def edit_exam(request, exam_id):
                 
                 # Recalculate student's lifetime points
                 exam.student.recalculate_lifetime_points()
+                
+                # Notify the student about the updated result
+                try:
+                    notify_result_edited(exam)
+                except Exception:
+                    pass  # Don't let push failures block result editing
                 
                 return redirect('all_exams')
             except Exception as e:

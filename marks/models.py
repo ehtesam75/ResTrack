@@ -1333,3 +1333,33 @@ class PushSubscription(models.Model):
                 "auth": self.auth,
             }
         }
+
+
+class ExamNotificationLog(models.Model):
+    """
+    Tracks which scheduled push notifications have already been sent
+    for a given ExamCenterExam to avoid duplicate sends.
+    """
+    NOTIFICATION_TYPES = [
+        ('reminder_5min', '5-minute reminder before exam'),
+        ('reminder_start', 'Exam has started'),
+        ('reminder_3min_end', '3-minute warning before exam ends'),
+        ('exam_ended', 'Exam has ended / submission open'),
+        ('submission_3min', '3-minute warning before submission closes'),
+    ]
+
+    exam = models.ForeignKey(
+        ExamCenterExam,
+        on_delete=models.CASCADE,
+        related_name='notification_logs',
+    )
+    notification_type = models.CharField(max_length=30, choices=NOTIFICATION_TYPES)
+    sent_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Exam Notification Log"
+        verbose_name_plural = "Exam Notification Logs"
+        unique_together = ('exam', 'notification_type')
+
+    def __str__(self):
+        return f"{self.exam} — {self.get_notification_type_display()}"
