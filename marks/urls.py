@@ -100,4 +100,7 @@ urlpatterns = [
     path('api/push/vapid-key/', push_views.vapid_public_key, name='vapid_public_key'),
     path('api/push/subscribe/', push_views.push_subscribe, name='push_subscribe'),
     path('api/push/unsubscribe/', push_views.push_unsubscribe, name='push_unsubscribe'),
+
+    # Cron endpoint (called by cron-job.org)
+    path('api/cron/send-exam-reminders/', push_views.cron_send_exam_reminders, name='cron_send_exam_reminders'),
 ]
