@@ -393,6 +393,7 @@ def exam_center_submissions(request, exam_id):
         except Exception:
             student_name = sub.student_user.username
         submission_list.append({
+            'pk': sub.pk,
             'student_name': student_name,
             'file_url': sub.answer_file.url if sub.answer_file else None,
             'submitted_at': sub.submitted_at,
@@ -407,3 +408,22 @@ def exam_center_submissions(request, exam_id):
         'status': exam.computed_status,
     }
     return render(request, 'marks/exam_center_submissions.html', context)
+
+
+@login_required
+def exam_center_download_submission(request, submission_id):
+    """Download an answer submission file (teacher only, via Cloudinary fl_attachment)."""
+    from django.http import Http404
+    from .views import _cloudinary_download_url
+
+    if not is_teacher(request.user):
+        messages.error(request, 'Only teachers can download submissions.')
+        return redirect('exam_center')
+
+    sub = get_object_or_404(AnswerSubmission, pk=submission_id, exam__teacher=request.user)
+
+    if not sub.answer_file:
+        raise Http404("No file attached to this submission.")
+
+    url = sub.answer_file.url if hasattr(sub.answer_file, 'url') else str(sub.answer_file)
+    return redirect(_cloudinary_download_url(url))

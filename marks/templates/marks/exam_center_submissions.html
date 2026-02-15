@@ -33,7 +33,7 @@
                         <th class="px-4 py-3 text-left text-[11px] font-bold text-gray-500 uppercase tracking-wider">Student</th>
                         <th class="px-4 py-3 text-center text-[11px] font-bold text-gray-500 uppercase tracking-wider hidden sm:table-cell">Attempts</th>
                         <th class="px-4 py-3 text-center text-[11px] font-bold text-gray-500 uppercase tracking-wider">Submitted At</th>
-                        <th class="px-4 py-3 text-right text-[11px] font-bold text-gray-500 uppercase tracking-wider">Action</th>
+                        <th class="px-4 py-3 text-right text-[11px] font-bold text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
@@ -50,10 +50,30 @@
                         </td>
                         <td class="px-4 py-3 text-right">
                             {% if item.file_url %}
-                            <a href="{{ item.file_url }}" target="_blank" rel="noopener"
-                               class="inline-flex items-center gap-1 px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg text-xs font-semibold hover:bg-purple-100 transition-colors">
-                                <i class="fa-solid fa-eye"></i> View
-                            </a>
+                            <div class="inline-flex items-center gap-1.5">
+                                <!-- Desktop: labelled buttons -->
+                                <a href="{{ item.file_url }}" target="_blank" rel="noopener"
+                                   class="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg text-xs font-semibold hover:bg-purple-100 transition-colors"
+                                   title="View submission">
+                                    <i class="fa-solid fa-eye"></i> View
+                                </a>
+                                <a href="{% url 'exam_center_download_submission' item.pk %}" rel="noopener"
+                                   class="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-semibold hover:bg-emerald-100 transition-colors"
+                                   title="Download submission">
+                                    <i class="fa-solid fa-download"></i> Download
+                                </a>
+                                <!-- Mobile: icon-only buttons -->
+                                <a href="{{ item.file_url }}" target="_blank" rel="noopener"
+                                   class="sm:hidden inline-flex items-center justify-center w-8 h-8 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors"
+                                   title="View submission">
+                                    <i class="fa-solid fa-eye text-sm"></i>
+                                </a>
+                                <a href="{% url 'exam_center_download_submission' item.pk %}" rel="noopener"
+                                   class="sm:hidden inline-flex items-center justify-center w-8 h-8 bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 transition-colors"
+                                   title="Download submission">
+                                    <i class="fa-solid fa-download text-sm"></i>
+                                </a>
+                            </div>
                             {% else %}
                             <span class="text-xs text-gray-400">No file</span>
                             {% endif %}

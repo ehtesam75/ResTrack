@@ -93,6 +93,7 @@ urlpatterns = [
     path('exam-center/<int:exam_id>/submit/', exam_center_views.exam_center_submit_answer, name='exam_center_submit_answer'),
     path('exam-center/<int:exam_id>/bonus-time/', exam_center_views.exam_center_bonus_time, name='exam_center_bonus_time'),
     path('exam-center/<int:exam_id>/submissions/', exam_center_views.exam_center_submissions, name='exam_center_submissions'),
+    path('exam-center/submissions/<int:submission_id>/download/', exam_center_views.exam_center_download_submission, name='exam_center_download_submission'),
     path('api/exam-center/<int:exam_id>/status/', exam_center_views.exam_center_status_api, name='exam_center_status_api'),
 
     # Push notification endpoints
