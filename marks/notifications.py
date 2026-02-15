@@ -353,3 +353,45 @@ def notify_submission_closing_soon(exam_center_exam):
     }
 
     return _send_to_users(user_ids, payload)
+
+
+def notify_bonus_time_granted(exam_center_exam, minutes, phase):
+    """
+    Notify enrolled students when the teacher grants bonus time.
+
+    Args:
+        exam_center_exam: ExamCenterExam instance.
+        minutes: Number of bonus minutes just added.
+        phase: 'running' or 'submission' — which period the bonus extends.
+    """
+    from .models import StudentProfile
+
+    teacher = exam_center_exam.teacher
+    student_profiles = StudentProfile.objects.filter(
+        created_by=teacher,
+        user__isnull=False,
+    ).select_related('user')
+
+    user_ids = [sp.user_id for sp in student_profiles]
+    if not user_ids:
+        return 0
+
+    if phase == 'submission':
+        body = (
+            f"Exam #{exam_center_exam.exam_display_id} — {exam_center_exam.subject}: "
+            f"+{minutes} min added to the submission window!"
+        )
+    else:
+        body = (
+            f"Exam #{exam_center_exam.exam_display_id} — {exam_center_exam.subject}: "
+            f"+{minutes} min bonus time added!"
+        )
+
+    payload = {
+        "title": "🕐 Bonus Time Added",
+        "body": body,
+        "url": f"/exam-center/{exam_center_exam.pk}/",
+        "tag": f"bonus-time-{exam_center_exam.pk}",
+    }
+
+    return _send_to_users(user_ids, payload)

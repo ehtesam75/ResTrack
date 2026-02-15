@@ -17,7 +17,7 @@ from django.views.decorators.http import require_POST
 from .models import ExamCenterExam, AnswerSubmission
 from .forms import ExamCenterExamForm
 from .views import is_teacher, is_student, get_teacher_for_user
-from .notifications import notify_exam_created, notify_exam_edited
+from .notifications import notify_exam_created, notify_exam_edited, notify_bonus_time_granted
 
 
 # ---------------------------------------------------------------------------
@@ -333,6 +333,12 @@ def exam_center_bonus_time(request, exam_id):
         exam.submission_bonus_minutes += minutes
 
     exam.save(update_fields=['exam_bonus_minutes', 'submission_bonus_minutes', 'updated_at'])
+
+    # Notify enrolled students about the bonus time
+    try:
+        notify_bonus_time_granted(exam, minutes, status)
+    except Exception:
+        pass  # Don't let push failures block bonus time grants
 
     return JsonResponse({
         'success': True,
