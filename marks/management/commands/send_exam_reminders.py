@@ -37,7 +37,28 @@ class Command(BaseCommand):
         # Only consider exams that haven't fully finished yet
         # (plus a small buffer so the final notification can still fire)
         buffer = now - _dt.timedelta(minutes=5)
-        exams = ExamCenterExam.objects.all()
+
+        # --- OPTIMISATION: filter at the DB level instead of loading ALL exams ---
+        # We only need exams whose final_end is in the future (with 5-min buffer).
+        # Since final_end_datetime is computed from exam_date + start_time +
+        # duration + bonus + submission, we apply a conservative lower-bound
+        # filter: only exams with exam_date >= today - 2 days.
+        # This avoids loading old/finished exams from the database entirely.
+        cutoff_date = (now - _dt.timedelta(days=2)).date()
+        exams = (
+            ExamCenterExam.objects
+            .filter(exam_date__gte=cutoff_date)
+            .select_related('teacher')
+        )
+
+        # Pre-fetch all existing notification logs for these exams in one query
+        # instead of hitting the DB per-exam per-notification-type.
+        from marks.models import ExamNotificationLog
+        existing_logs = set(
+            ExamNotificationLog.objects
+            .filter(exam__in=exams)
+            .values_list('exam_id', 'notification_type')
+        )
 
         sent_total = 0
 
@@ -46,77 +67,82 @@ class Command(BaseCommand):
             if exam.final_end_datetime < buffer:
                 continue
 
-            sent_total += self._check_and_send(exam, now)
+            sent_total += self._check_and_send(exam, now, existing_logs)
 
         if sent_total:
             self.stdout.write(self.style.SUCCESS(f'Sent {sent_total} notification(s).'))
         else:
             self.stdout.write('No notifications to send right now.')
 
+        # Close DB connections explicitly after the cron job finishes
+        from django import db
+        db.connections.close_all()
+
     # ------------------------------------------------------------------
 
-    def _already_sent(self, exam, ntype):
-        return ExamNotificationLog.objects.filter(exam=exam, notification_type=ntype).exists()
+    def _already_sent(self, exam, ntype, existing_logs):
+        return (exam.pk, ntype) in existing_logs
 
-    def _mark_sent(self, exam, ntype):
+    def _mark_sent(self, exam, ntype, existing_logs):
         ExamNotificationLog.objects.get_or_create(exam=exam, notification_type=ntype)
+        existing_logs.add((exam.pk, ntype))
 
-    def _check_and_send(self, exam, now):
+    def _check_and_send(self, exam, now, existing_logs):
         """Evaluate all scheduled notification windows for one exam."""
         sent = 0
 
         # 1. 5 minutes before start
         five_before = exam.start_datetime - _dt.timedelta(minutes=5)
         if five_before <= now < exam.start_datetime:
-            if not self._already_sent(exam, 'reminder_5min'):
+            if not self._already_sent(exam, 'reminder_5min', existing_logs):
                 try:
                     notify_exam_reminder_5min(exam)
                 except Exception as e:
                     self.stderr.write(f'Error sending 5-min reminder for exam {exam.pk}: {e}')
-                self._mark_sent(exam, 'reminder_5min')
+                self._mark_sent(exam, 'reminder_5min', existing_logs)
                 sent += 1
 
         # 2. Exam started
         if exam.start_datetime <= now < exam.exam_end_datetime:
-            if not self._already_sent(exam, 'reminder_start'):
+            if not self._already_sent(exam, 'reminder_start', existing_logs):
                 try:
                     notify_exam_started(exam)
                 except Exception as e:
                     self.stderr.write(f'Error sending start notification for exam {exam.pk}: {e}')
-                self._mark_sent(exam, 'reminder_start')
+                self._mark_sent(exam, 'reminder_start', existing_logs)
                 sent += 1
 
         # 3. 3 minutes before exam writing period ends
         three_before_end = exam.exam_end_datetime - _dt.timedelta(minutes=3)
         if three_before_end <= now < exam.exam_end_datetime:
-            if not self._already_sent(exam, 'reminder_3min_end'):
+            if not self._already_sent(exam, 'reminder_3min_end', existing_logs):
                 try:
                     notify_exam_ending_soon(exam)
                 except Exception as e:
                     self.stderr.write(f'Error sending 3-min-end warning for exam {exam.pk}: {e}')
-                self._mark_sent(exam, 'reminder_3min_end')
+                self._mark_sent(exam, 'reminder_3min_end', existing_logs)
                 sent += 1
 
         # 4. Exam ended (+ submission window open for online exams)
         if now >= exam.exam_end_datetime:
-            if not self._already_sent(exam, 'exam_ended'):
+            if not self._already_sent(exam, 'exam_ended', existing_logs):
                 try:
                     notify_exam_ended(exam)
                 except Exception as e:
                     self.stderr.write(f'Error sending exam-ended notification for exam {exam.pk}: {e}')
-                self._mark_sent(exam, 'exam_ended')
+                self._mark_sent(exam, 'exam_ended', existing_logs)
                 sent += 1
 
         # 5. 3 minutes before submission window closes (online exams only)
         if exam.exam_mode == 'online':
             three_before_submission_end = exam.final_end_datetime - _dt.timedelta(minutes=3)
             if three_before_submission_end <= now < exam.final_end_datetime:
-                if not self._already_sent(exam, 'submission_3min'):
+                if not self._already_sent(exam, 'submission_3min', existing_logs):
                     try:
                         notify_submission_closing_soon(exam)
                     except Exception as e:
                         self.stderr.write(f'Error sending submission-closing warning for exam {exam.pk}: {e}')
-                    self._mark_sent(exam, 'submission_3min')
+                    self._mark_sent(exam, 'submission_3min', existing_logs)
                     sent += 1
 
         return sent

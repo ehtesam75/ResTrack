@@ -18,20 +18,20 @@ class StudentProfileAdmin(admin.ModelAdmin):
 
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
-    list_display = ['name', 'first_name', 'last_name', 'roll', 'class_name', 'total_marks', 'total_exams', 'average_percentage']
+    list_display = ['name', 'first_name', 'last_name', 'roll', 'class_name']
     search_fields = ['first_name', 'last_name', 'roll']
     list_filter = ['class_name']
     fields = ['first_name', 'last_name', 'roll', 'class_name']
-    list_display_links = ['total_marks']
+    list_display_links = ['name']
     list_editable = ['first_name', 'last_name', 'roll', 'class_name']
 
 
 @admin.register(Subject)
 class SubjectAdmin(admin.ModelAdmin):
-    list_display = ['name', 'average_marks']
+    list_display = ['name']
     search_fields = ['name']
-    list_display_links = ['average_marks']
     list_editable = ['name']
+    list_display_links = None
 
 
 @admin.register(ExamType)
@@ -58,7 +58,7 @@ class ExamQuestionPaperAdmin(admin.ModelAdmin):
 
 @admin.register(Exam)
 class ExamAdmin(admin.ModelAdmin):
-    list_display = ['exam_id', 'student', 'subject', 'exam_type', 'date', 'chapter', 'mark_obtained', 'total_marks', 'percentage', 'grade', 'class_number', 'has_pdf']
+    list_display = ['exam_id', 'student', 'subject', 'exam_type', 'date', 'chapter', 'mark_obtained', 'total_marks', 'class_number']
     list_filter = ['subject', 'exam_type', 'date', 'student', 'class_number']
     search_fields = ['student__first_name', 'student__last_name', 'subject__name', 'chapter', 'exam_id']
     date_hierarchy = 'date'
@@ -67,17 +67,10 @@ class ExamAdmin(admin.ModelAdmin):
     # Make fields editable in admin
     fields = ['student', 'subject', 'exam_type', 'date', 'chapter', 'class_number', 'total_marks', 'mark_obtained', 'group_id', 'exam_id', 'marked_answer_paper']
     
-    def has_pdf(self, obj):
-        return obj.has_question_pdf
-    has_pdf.boolean = True
-    has_pdf.short_description = 'PDF'
     list_editable = ['chapter', 'mark_obtained', 'total_marks']
-    
-    def percentage(self, obj):
-        return f"{obj.percentage}%"
-    
-    def grade(self, obj):
-        return obj.grade
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('student', 'subject', 'exam_type', 'teacher')
     
     def save_model(self, request, obj, form, change):
         """Override save to recalculate points when exam is edited"""

@@ -126,3 +126,7 @@ def cron_send_exam_reminders(request):
     except Exception as e:
         logger.error("Cron send_exam_reminders failed: %s", e)
         return JsonResponse({"ok": False, "error": str(e)}, status=500)
+    finally:
+        # Explicitly close DB connections after cron job to avoid holding them open
+        from django import db
+        db.connections.close_all()

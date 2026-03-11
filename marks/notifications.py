@@ -50,12 +50,13 @@ def _send_push(subscription, payload):
 
 def _send_to_users(user_ids, payload):
     """Send a push notification to all subscriptions belonging to the given user IDs."""
-    subscriptions = PushSubscription.objects.filter(user_id__in=user_ids)
+    subscriptions = list(PushSubscription.objects.filter(user_id__in=user_ids))
+    total = len(subscriptions)
     sent = 0
     for sub in subscriptions:
         if _send_push(sub, payload):
             sent += 1
-    logger.info("Push sent to %d/%d subscriptions for %d users.", sent, subscriptions.count(), len(user_ids))
+    logger.info("Push sent to %d/%d subscriptions for %d users.", sent, total, len(user_ids))
     return sent
 
 

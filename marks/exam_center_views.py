@@ -25,12 +25,19 @@ from .notifications import notify_exam_created, notify_exam_edited, notify_bonus
 # ---------------------------------------------------------------------------
 
 def _get_ordered_active_exams(teacher):
-    """Return non-finished exams ordered by priority (running first, then latest upcoming)."""
-    all_exams = ExamCenterExam.objects.filter(teacher=teacher)
+    """Return non-finished exams ordered by priority (running first, then latest upcoming).
+    
+    Filters at DB level to only fetch exams from the last 2 days onwards,
+    avoiding loading old finished exams.
+    """
+    import datetime as _dt
+    from django.utils import timezone as _tz
+    cutoff_date = (_tz.now() - _dt.timedelta(days=2)).date()
+    recent_exams = ExamCenterExam.objects.filter(teacher=teacher, exam_date__gte=cutoff_date)
     running = []
     submission = []
     upcoming = []
-    for e in all_exams:
+    for e in recent_exams:
         s = e.computed_status
         if s == 'running':
             running.append(e)
@@ -389,7 +396,16 @@ def exam_center_submissions(request, exam_id):
 
     submissions = AnswerSubmission.objects.filter(
         exam=exam, is_final=True
-    ).select_related('student_user')
+    ).select_related('student_user', 'student_user__student_profile', 'student_user__student_profile__student')
+
+    # Pre-fetch attempt counts in one query instead of N+1
+    from django.db.models import Count
+    attempt_counts = dict(
+        AnswerSubmission.objects.filter(exam=exam)
+        .values_list('student_user')
+        .annotate(count=Count('id'))
+        .values_list('student_user', 'count')
+    )
 
     # Build a list with student info
     submission_list = []
@@ -403,9 +419,7 @@ def exam_center_submissions(request, exam_id):
             'student_name': student_name,
             'file_url': sub.answer_file.url if sub.answer_file else None,
             'submitted_at': sub.submitted_at,
-            'total_attempts': AnswerSubmission.objects.filter(
-                exam=exam, student_user=sub.student_user
-            ).count(),
+            'total_attempts': attempt_counts.get(sub.student_user_id, 0),
         })
 
     context = {

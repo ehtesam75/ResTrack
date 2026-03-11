@@ -1,4 +1,5 @@
 from django.db.models import Sum, Avg, Count, Q
+from django.core.cache import cache
 from .models import Student, Subject, ExamType, Exam, GradeScale
 
 # Default color mapping for grades (from GradeScale table for consistency)
@@ -11,6 +12,21 @@ DEFAULT_GRADE_COLORS = {
     'Superb': '#A7F3D0',
 }
 from collections import Counter
+
+
+def get_grade_color_map():
+    """
+    Return a dict mapping grade_name -> color_code.
+    Cached for 10 minutes to avoid repeated DB hits (only 6 records).
+    Falls back to DEFAULT_GRADE_COLORS for grades not in the DB.
+    """
+    color_map = cache.get('grade_color_map')
+    if color_map is None:
+        color_map = dict(DEFAULT_GRADE_COLORS)  # start with defaults
+        for gs in GradeScale.objects.all():
+            color_map[gs.grade_name] = gs.color_code
+        cache.set('grade_color_map', color_map, 600)  # 10 minutes
+    return color_map
 
 
 def count_unique_exams(queryset):
@@ -221,14 +237,11 @@ class DashboardService:
         grades = [exam.grade for exam in exams]
         distribution = Counter(grades)
 
-        # Get color codes for each grade, fallback to default mapping
+        # Get color codes for each grade using cached lookup
+        color_map = get_grade_color_map()
         grade_data = []
         for grade_name, count in distribution.items():
-            grade_scale = GradeScale.objects.filter(grade_name=grade_name).first()
-            if grade_scale:
-                color = grade_scale.color_code
-            else:
-                color = DEFAULT_GRADE_COLORS.get(grade_name, '#000000')
+            color = color_map.get(grade_name, '#000000')
             grade_data.append({
                 'grade': grade_name,
                 'count': count,
@@ -331,15 +344,11 @@ class ChartDataService:
         labels = list(grade_freq.keys())
         data = list(grade_freq.values())
 
-        # Get colors for each grade, fallback to default mapping
+        # Get colors for each grade using cached lookup
+        color_map = get_grade_color_map()
         colors = []
         for grade_name in labels:
-            grade_scale = GradeScale.objects.filter(grade_name=grade_name).first()
-            if grade_scale:
-                color = grade_scale.color_code
-            else:
-                color = DEFAULT_GRADE_COLORS.get(grade_name, '#000000')
-            colors.append(color)
+            colors.append(color_map.get(grade_name, '#000000'))
         return {'labels': labels, 'data': data, 'colors': colors}
     
     @staticmethod

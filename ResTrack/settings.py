@@ -100,6 +100,10 @@ if not DATABASE_URL:
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 
+# Enable connection health checks so stale connections are detected early
+# (Django 4.1+). This avoids wasted queries on broken connections.
+DATABASES['default']['CONN_HEALTH_CHECKS'] = True
+
 # ======================
 # Password Validation
 # ======================
@@ -155,6 +159,20 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'home'
 
+
+# ======================
+# Caching
+# ======================
+# Use local-memory cache to avoid repeated DB queries for the same data.
+# This dramatically reduces DB load for GradeScale lookups, dashboard stats,
+# leaderboards, and other frequently accessed data.
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'restrack-cache',
+        'TIMEOUT': 300,  # 5 minutes default TTL
+    }
+}
 
 # ======================
 # Misc

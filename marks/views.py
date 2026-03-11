@@ -6,8 +6,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.db.models import Sum, Q
 import json
 from .models import Student, Subject, ExamType, Exam, ExamQuestionPaper, GradeScale, LifetimePoints, PointsSpent, PointTransaction, TeacherProfile, StudentProfile, ExamCenterExam
-from django.db.models import Q
-from .services import LeaderboardService, DashboardService, ChartDataService, count_unique_exams
+from .services import LeaderboardService, DashboardService, ChartDataService, count_unique_exams, get_grade_color_map
 from .forms import TeacherSignupForm, LoginForm, StudentAccountForm
 from .notifications import notify_result_published, notify_result_edited
 
@@ -50,26 +49,30 @@ def home(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
     
-    # Get global stats for home page
-    from django.contrib.auth import get_user_model
-    User = get_user_model()
-    
-    total_teachers = TeacherProfile.objects.count()
-    total_students = Student.objects.count()
-    # Calculate total exams as the sum of unique exams per teacher
-    teacher_users = [tp.user for tp in TeacherProfile.objects.all()]
-    total_exams = 0
-    for teacher in teacher_users:
-        teacher_exams = Exam.objects.filter(teacher=teacher)
-        total_exams += count_unique_exams(teacher_exams)
-    total_points = LifetimePoints.objects.aggregate(total=Sum('points_earned'))['total'] or 0
+    # Cache global stats for 10 minutes to avoid DB hits on every page load
+    from django.core.cache import cache
+    context = cache.get('home_page_stats')
+    if context is None:
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        
+        total_teachers = TeacherProfile.objects.count()
+        total_students = Student.objects.count()
+        # Calculate total exams as the sum of unique exams per teacher
+        teacher_users = list(TeacherProfile.objects.select_related('user').all())
+        total_exams = 0
+        for tp in teacher_users:
+            teacher_exams = Exam.objects.filter(teacher=tp.user)
+            total_exams += count_unique_exams(teacher_exams)
+        total_points = LifetimePoints.objects.aggregate(total=Sum('points_earned'))['total'] or 0
 
-    context = {
-        'total_teachers': total_teachers,
-        'total_students': total_students,
-        'total_exams': total_exams,
-        'total_points': total_points,
-    }
+        context = {
+            'total_teachers': total_teachers,
+            'total_students': total_students,
+            'total_exams': total_exams,
+            'total_points': total_points,
+        }
+        cache.set('home_page_stats', context, 600)  # 10 minutes
 
     return render(request, 'marks/home.html', context)
 
@@ -243,15 +246,11 @@ def dashboard(request):
     grades = [exam.grade for exam in teacher_exams]
     distribution = Counter(grades)
     
-    grade_colors = {
-        'Average': '#FEF08A', 'Fail': '#FECACA', 'Good': '#D1FAE5',
-        'Horrible': '#FCA5A5', 'Poor': '#FDE68A', 'Superb': '#A7F3D0',
-    }
+    grade_color_map = get_grade_color_map()
     
     grade_distribution = []
     for grade_name, count in distribution.items():
-        grade_scale = GradeScale.objects.filter(grade_name=grade_name).first()
-        color = grade_scale.color_code if grade_scale else grade_colors.get(grade_name, '#000000')
+        color = grade_color_map.get(grade_name, '#000000')
         grade_distribution.append({'grade': grade_name, 'count': count, 'color': color})
     
     # Recent exams - filtered by teacher
@@ -270,10 +269,16 @@ def dashboard(request):
     )[:3]
     
     # Points leaderboard - filtered by teacher's students (TOP 3 only)
+    # Use a single query with select_related instead of N individual queries
     from .models import LifetimePoints
+    student_ids = [s.id for s in teacher_students]
+    lp_map = {
+        lp.student_id: lp
+        for lp in LifetimePoints.objects.filter(student_id__in=student_ids).select_related('student')
+    }
     points_leaderboard = []
     for student in teacher_students:
-        lp = LifetimePoints.objects.filter(student=student).first()
+        lp = lp_map.get(student.id)
         if lp:
             points_leaderboard.append({
                 'student': student,
@@ -1261,8 +1266,10 @@ def add_bulk_exam(request):
                     from datetime import datetime
                     group_id = f"bulk_{datetime.now().strftime('%Y%m%d%H%M%S')}_{uuid.uuid4().hex[:8]}"
                     # Create exams for all students
+                    # Skip per-save recalculation during bulk insert — we do it once at the end
                     created_count = 0
                     skipped_students = []
+                    affected_students = set()
                     for i in range(1, student_count + 1):
                         student_id = request.POST.get(f'student_{i}')
                         mark_obtained = request.POST.get(f'marks_{i}')
@@ -1275,7 +1282,7 @@ def add_bulk_exam(request):
                                 skipped_students.append(student.display_name)
                                 continue
                             mark_obtained = int(mark_obtained)
-                            Exam.objects.create(
+                            exam_obj = Exam(
                                 student=student,
                                 subject=subject,
                                 exam_type=exam_type,
@@ -1289,7 +1296,13 @@ def add_bulk_exam(request):
                                 exam_id=exam_id,
                                 marked_answer_paper=marked_answer_paper
                             )
+                            exam_obj._skip_recalculate = True
+                            exam_obj.save()
+                            affected_students.add(student)
                             created_count += 1
+                    # Recalculate points once per affected student (not per exam)
+                    for student in affected_students:
+                        student.recalculate_lifetime_points()
                     # Save question paper to ExamQuestionPaper (one per exam_id)
                     if question_pdf:
                         ExamQuestionPaper.objects.update_or_create(
@@ -1512,17 +1525,33 @@ def all_exams(request):
     unique_exams_count = count_unique_exams(exams)
     total_records_count = exams.count()
     
-    # Calculate statistics
+    # Calculate statistics using DB aggregation instead of Python iteration
+    from django.db.models import Max, Min
     average_percentage = 0
     highest_percentage = 0
     lowest_percentage = 0
     
-    if exams.exists():
-        total_marks_obtained = sum(float(e.mark_obtained) for e in exams)
-        total_possible_marks = sum(float(e.total_marks) for e in exams)
-        average_percentage = (total_marks_obtained * 100 / total_possible_marks) if total_possible_marks > 0 else 0
-        highest_percentage = max(exam.percentage for exam in exams)
-        lowest_percentage = min(exam.percentage for exam in exams)
+    agg = exams.aggregate(
+        total_obtained=Sum('mark_obtained'),
+        total_possible=Sum('total_marks'),
+    )
+    if agg['total_possible'] and agg['total_possible'] > 0:
+        average_percentage = (float(agg['total_obtained']) * 100 / float(agg['total_possible']))
+        # For highest/lowest percentage we still need per-exam computation,
+        # but we can limit it to annotated values
+        from django.db.models import F, FloatField, ExpressionWrapper
+        exams_with_pct = exams.annotate(
+            pct=ExpressionWrapper(
+                F('mark_obtained') * 100.0 / F('total_marks'),
+                output_field=FloatField()
+            )
+        )
+        pct_agg = exams_with_pct.aggregate(
+            highest=Max('pct'),
+            lowest=Min('pct'),
+        )
+        highest_percentage = pct_agg['highest'] or 0
+        lowest_percentage = pct_agg['lowest'] or 0
     
     # Get all options for filters (filtered by teacher)
     students = Student.objects.filter(teacher=teacher).order_by('first_name', 'last_name')
@@ -1776,7 +1805,7 @@ def points(request):
         # For absolute value comparison (both positive and negative)
         min_val = int(min_change)
         points_history = points_history.filter(
-            models.Q(points_change__gte=min_val) | models.Q(points_change__lte=-min_val)
+            Q(points_change__gte=min_val) | Q(points_change__lte=-min_val)
         )
     
     # Calculate statistics for filtered records
@@ -1798,16 +1827,29 @@ def points(request):
         total_spent = abs(sum(change for change in changes if change < 0))
         total_earned = sum(change for change in changes if change > 0)
     
-    # Get student points summary (filtered by teacher)
+    # Get student points summary (filtered by teacher) — single query instead of N get_or_create
+    teacher_students_all = Student.objects.filter(teacher=teacher).order_by('first_name', 'last_name')
+    lp_map = {
+        lp.student_id: lp
+        for lp in LifetimePoints.objects.filter(student__teacher=teacher)
+    }
     student_summary = []
-    for student in Student.objects.filter(teacher=teacher).order_by('first_name', 'last_name'):
-        lifetime_points, created = LifetimePoints.objects.get_or_create(student=student)
-        student_summary.append({
-            'student': student,
-            'points_earned': lifetime_points.points_earned,
-            'points_spent': lifetime_points.points_spent,
-            'points_remaining': lifetime_points.points_remaining
-        })
+    for student in teacher_students_all:
+        lp = lp_map.get(student.id)
+        if lp:
+            student_summary.append({
+                'student': student,
+                'points_earned': lp.points_earned,
+                'points_spent': lp.points_spent,
+                'points_remaining': lp.points_remaining
+            })
+        else:
+            student_summary.append({
+                'student': student,
+                'points_earned': 0,
+                'points_spent': 0,
+                'points_remaining': 0
+            })
     
     # Sort by points earned descending
     student_summary.sort(key=lambda x: x['points_earned'], reverse=True)

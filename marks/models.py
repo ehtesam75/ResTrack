@@ -354,18 +354,19 @@ class Student(models.Model):
             transaction_type__in=['exam_bonus', 'exam_penalty', 'monthly_win']
         ).delete()
 
-        # Calculate points from individual exams and create transactions
+        # Calculate points from individual exams and batch-create transactions
         exam_points = 0
-        for exam in self.exam_set.select_related('exam_type', 'teacher').all():
+        transactions_to_create = []
+        for exam in self.exam_set.select_related('exam_type', 'subject', 'teacher').all():
             points_earned = exam.points_earned
             exam_points += points_earned
 
-            # Create transaction for exam performance
+            # Prepare transaction for exam performance
             if points_earned != 0:
                 transaction_type = 'exam_bonus' if points_earned > 0 else 'exam_penalty'
                 description = f"{exam.exam_type.name} - {exam.subject.name}: {exam.percentage:.1f}% ({exam.grade})"
 
-                PointTransaction.objects.create(
+                transactions_to_create.append(PointTransaction(
                     student=self,
                     teacher=exam.teacher,
                     transaction_type=transaction_type,
@@ -373,7 +374,7 @@ class Student(models.Model):
                     description=description,
                     date=exam.date,
                     exam=exam
-                )
+                ))
 
         # Calculate monthly wins bonus and create individual transactions per winning month
         import calendar
@@ -381,7 +382,7 @@ class Student(models.Model):
         winning_months = self.get_monthly_win_months()
         bonus_points = len(winning_months) * 40
 
-        # Create one transaction per winning month
+        # Prepare one transaction per winning month
         for win_year, win_month in winning_months:
             month_name = calendar.month_name[win_month]
             # Date the transaction on the 1st of the following month
@@ -390,7 +391,7 @@ class Student(models.Model):
             else:
                 transaction_date = date(win_year, win_month + 1, 1)
 
-            PointTransaction.objects.create(
+            transactions_to_create.append(PointTransaction(
                 student=self,
                 teacher=self.teacher,
                 transaction_type='monthly_win',
@@ -398,7 +399,11 @@ class Student(models.Model):
                 description=f"Monthly winner \u2013 {month_name} {win_year}",
                 date=transaction_date,
                 exam=None
-            )
+            ))
+
+        # Bulk-create all transactions in one DB call instead of N individual inserts
+        if transactions_to_create:
+            PointTransaction.objects.bulk_create(transactions_to_create)
 
         # Total points = exam points + monthly wins bonus
         total_points = exam_points + bonus_points
@@ -644,13 +649,18 @@ class Exam(models.Model):
         return None
 
     def get_question_paper(self):
-        """Get the ExamQuestionPaper for this exam's exam_id, if it exists"""
+        """Get the ExamQuestionPaper for this exam's exam_id, if it exists.
+        Cached on the instance to avoid repeated DB hits within the same request."""
+        if hasattr(self, '_cached_question_paper'):
+            return self._cached_question_paper
+        result = None
         if self.exam_id and self.teacher:
             try:
-                return ExamQuestionPaper.objects.get(exam_id=self.exam_id, teacher=self.teacher)
+                result = ExamQuestionPaper.objects.get(exam_id=self.exam_id, teacher=self.teacher)
             except ExamQuestionPaper.DoesNotExist:
                 pass
-        return None
+        self._cached_question_paper = result
+        return result
 
     @property
     def has_question_pdf(self):
@@ -906,61 +916,6 @@ class PointsSpent(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = "Points Spent (Legacy)"
-        verbose_name_plural = "Points Spent (Legacy)"
-        ordering = ['-date', '-created_at']
-
-    def __str__(self):
-        return f"{self.student.name} - {self.points_spent} points on {self.date}"
-
-    def save(self, *args, **kwargs):
-        """Create corresponding PointTransaction entry"""
-        super().save(*args, **kwargs)
-        # Create or update corresponding PointTransaction
-        PointTransaction.objects.update_or_create(
-            student=self.student,
-            teacher=self.teacher,
-            transaction_type='spent',
-            date=self.date,
-            description=self.description,
-            defaults={
-                'points_change': -self.points_spent,  # Negative for spending
-                'exam': None
-            }
-        )
-        # Update student's lifetime points
-        from django.db.models import Sum
-        lifetime_points, created = LifetimePoints.objects.get_or_create(student=self.student)
-        total_spent = PointsSpent.objects.filter(student=self.student).aggregate(
-            total=Sum('points_spent')
-        )['total'] or 0
-        lifetime_points.points_spent = total_spent
-        lifetime_points.save()
-
-    def delete(self, *args, **kwargs):
-        """Remove corresponding PointTransaction entry"""
-        # Find and delete corresponding PointTransaction
-        PointTransaction.objects.filter(
-            student=self.student,
-            teacher=self.teacher,
-            transaction_type='spent',
-            date=self.date,
-            description=self.description
-        ).delete()
-
-        student = self.student
-        super().delete(*args, **kwargs)
-        # Update the student's total points spent after deletion
-        from django.db.models import Sum
-        lifetime_points = LifetimePoints.objects.filter(student=student).first()
-        if lifetime_points:
-            total_spent = PointsSpent.objects.filter(student=student).aggregate(
-                total=Sum('points_spent')
-            )['total'] or 0
-            lifetime_points.points_spent = total_spent
-            lifetime_points.save()
-
-    class Meta:
         verbose_name = "Points Spent"
         verbose_name_plural = "Points Spent"
         ordering = ['-date', '-created_at']
@@ -995,8 +950,16 @@ class PointsSpent(models.Model):
         lifetime_points.save()
 
     def delete(self, *args, **kwargs):
-        """Override delete to update student's lifetime points"""
+        """Override delete to update student's lifetime points and remove transaction"""
         student = self.student
+        # Find and delete corresponding PointTransaction
+        PointTransaction.objects.filter(
+            student=self.student,
+            teacher=self.teacher,
+            transaction_type='spent',
+            date=self.date,
+            description=self.description
+        ).delete()
         super().delete(*args, **kwargs)
         # Update the student's total points spent after deletion
         from django.db.models import Sum
@@ -1251,8 +1214,11 @@ class ExamCenterExam(models.Model):
 
     @classmethod
     def active_exams_for_teacher(cls, teacher):
-        """Return non-finished exams for a teacher (queryset evaluated in Python)."""
-        return [e for e in cls.objects.filter(teacher=teacher) if not e.is_finished]
+        """Return non-finished exams for a teacher (DB-filtered to recent exams only)."""
+        import datetime as _dt
+        from django.utils import timezone as _tz
+        cutoff_date = (_tz.now() - _dt.timedelta(days=2)).date()
+        return [e for e in cls.objects.filter(teacher=teacher, exam_date__gte=cutoff_date) if not e.is_finished]
 
     @classmethod
     def can_create_exam(cls, teacher):

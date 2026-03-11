@@ -6,7 +6,12 @@ from .models import Exam
 
 @receiver(post_save, sender=Exam)
 def recalculate_points_on_save(sender, instance, **kwargs):
-    """Recalculate student's lifetime points after exam save."""
+    """Recalculate student's lifetime points after exam save.
+    
+    Skip if the instance has _skip_recalculate=True (set during bulk operations).
+    """
+    if getattr(instance, '_skip_recalculate', False):
+        return
     if instance.student:
         instance.student.recalculate_lifetime_points()
 
@@ -22,17 +27,19 @@ def assign_exam_id(sender, instance, **kwargs):
             if existing and existing.exam_id:
                 instance.exam_id = existing.exam_id
             else:
-                # Get max exam_id and increment
-                max_id = Exam.objects.aggregate(Max('exam_id'))['exam_id__max']
+                # Get max exam_id for this teacher and increment
+                max_id = Exam.objects.filter(teacher=instance.teacher).aggregate(Max('exam_id'))['exam_id__max']
                 instance.exam_id = (max_id or 0) + 1
         else:
-            # Single entry, get new exam_id
-            max_id = Exam.objects.aggregate(Max('exam_id'))['exam_id__max']
+            # Single entry, get new exam_id for this teacher
+            max_id = Exam.objects.filter(teacher=instance.teacher).aggregate(Max('exam_id'))['exam_id__max']
             instance.exam_id = (max_id or 0) + 1
 
 
 @receiver(post_delete, sender=Exam)
 def recalculate_points_on_delete(sender, instance, **kwargs):
     """Recalculate student's lifetime points after exam deletion"""
+    if getattr(instance, '_skip_recalculate', False):
+        return
     if instance.student:
         instance.student.recalculate_lifetime_points()
