@@ -218,7 +218,7 @@ def notify_result_edited(exam):
 
 def notify_exam_reminder_5min(exam_center_exam):
     """
-    Notify enrolled students 5 minutes before an exam starts.
+    Notify enrolled students 10 minutes before an exam starts.
     """
     from .models import StudentProfile
 
@@ -233,8 +233,8 @@ def notify_exam_reminder_5min(exam_center_exam):
         return 0
 
     payload = {
-        "title": "⏰ Exam in 5 Minutes",
-        "body": f"Exam #{exam_center_exam.exam_display_id} — {exam_center_exam.subject} starts in 5 minutes!",
+        "title": "⏰ Exam in 10 Minutes",
+        "body": f"Exam #{exam_center_exam.exam_display_id} — {exam_center_exam.subject} starts in 10 minutes!",
         "url": f"/exam-center/{exam_center_exam.pk}/",
         "tag": f"exam-reminder-5min-{exam_center_exam.pk}",
     }
@@ -270,7 +270,7 @@ def notify_exam_started(exam_center_exam):
 
 def notify_exam_ending_soon(exam_center_exam):
     """
-    Notify enrolled students 3 minutes before the exam writing period ends.
+    Notify enrolled students 10 minutes before the exam writing period ends.
     """
     from .models import StudentProfile
 
@@ -285,8 +285,8 @@ def notify_exam_ending_soon(exam_center_exam):
         return 0
 
     payload = {
-        "title": "⚠️ 3 Minutes Left",
-        "body": f"Exam #{exam_center_exam.exam_display_id} — {exam_center_exam.subject} ends in 3 minutes!",
+        "title": "⚠️ 10 Minutes Left",
+        "body": f"Exam #{exam_center_exam.exam_display_id} — {exam_center_exam.subject} ends in 10 minutes!",
         "url": f"/exam-center/{exam_center_exam.pk}/",
         "tag": f"exam-ending-soon-{exam_center_exam.pk}",
     }
@@ -348,7 +348,7 @@ def notify_submission_closing_soon(exam_center_exam):
 
     payload = {
         "title": "⏳ Submission Closing Soon",
-        "body": f"Exam #{exam_center_exam.exam_display_id} — {exam_center_exam.subject}: submission closes in 3 minutes!",
+        "body": f"Exam #{exam_center_exam.exam_display_id} \u2014 {exam_center_exam.subject}: submission closes in 3 minutes!",
         "url": f"/exam-center/{exam_center_exam.pk}/",
         "tag": f"submission-closing-{exam_center_exam.pk}",
     }

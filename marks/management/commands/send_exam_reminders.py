@@ -1,13 +1,13 @@
 """
 Management command to send scheduled exam push notifications.
 
-Run this command periodically (e.g. every minute via cron or Render cron job):
+Run this command periodically (e.g. every 10 minutes via cron or Render cron job):
     python manage.py send_exam_reminders
 
 It checks all active ExamCenterExams and sends timed notifications:
-  - 5 minutes before exam starts
+  - 10 minutes before exam starts
   - When exam starts
-  - 3 minutes before exam writing period ends
+  - 10 minutes before exam writing period ends
   - When exam ends (+ submission window open for online exams)
   - 3 minutes before submission window closes (online exams only)
 
@@ -38,8 +38,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         now = timezone.now()
         # Only consider exams that haven't fully finished yet
-        # (plus a small buffer so the final notification can still fire)
-        buffer = now - _dt.timedelta(minutes=5)
+        # (plus a buffer so the final notification can still fire)
+        buffer = now - _dt.timedelta(minutes=10)
 
         # --- OPTIMISATION: filter at the DB level instead of loading ALL exams ---
         # We only need exams whose final_end is in the future (with 5-min buffer).
@@ -104,14 +104,14 @@ class Command(BaseCommand):
         """Evaluate all scheduled notification windows for one exam."""
         sent = 0
 
-        # 1. 5 minutes before start
-        five_before = exam.start_datetime - _dt.timedelta(minutes=5)
-        if five_before <= now < exam.start_datetime:
+        # 1. 10 minutes before start
+        ten_before = exam.start_datetime - _dt.timedelta(minutes=10)
+        if ten_before <= now < exam.start_datetime:
             if not self._already_sent(exam, 'reminder_5min', existing_logs):
                 try:
                     notify_exam_reminder_5min(exam)
                 except Exception as e:
-                    self.stderr.write(f'Error sending 5-min reminder for exam {exam.pk}: {e}')
+                    self.stderr.write(f'Error sending 10-min reminder for exam {exam.pk}: {e}')
                 self._mark_sent(exam, 'reminder_5min', existing_logs)
                 sent += 1
 
@@ -125,14 +125,14 @@ class Command(BaseCommand):
                 self._mark_sent(exam, 'reminder_start', existing_logs)
                 sent += 1
 
-        # 3. 3 minutes before exam writing period ends
-        three_before_end = exam.exam_end_datetime - _dt.timedelta(minutes=3)
-        if three_before_end <= now < exam.exam_end_datetime:
+        # 3. 10 minutes before exam writing period ends
+        ten_before_end = exam.exam_end_datetime - _dt.timedelta(minutes=10)
+        if ten_before_end <= now < exam.exam_end_datetime:
             if not self._already_sent(exam, 'reminder_3min_end', existing_logs):
                 try:
                     notify_exam_ending_soon(exam)
                 except Exception as e:
-                    self.stderr.write(f'Error sending 3-min-end warning for exam {exam.pk}: {e}')
+                    self.stderr.write(f'Error sending 10-min-end warning for exam {exam.pk}: {e}')
                 self._mark_sent(exam, 'reminder_3min_end', existing_logs)
                 sent += 1
 
