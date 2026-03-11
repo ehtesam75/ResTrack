@@ -83,7 +83,15 @@ def push_unsubscribe(request):
 import logging
 import hmac
 
+from django.core.cache import cache
+
 logger = logging.getLogger(__name__)
+
+# Cache key used to skip DB entirely when no exams are active.
+# Set by the cron view when the command reports zero active exams,
+# and cleared by exam_center_views when an exam is created/edited.
+CRON_NO_EXAMS_CACHE_KEY = 'cron_no_active_exams'
+CRON_NO_EXAMS_CACHE_TTL = 600  # 10 minutes
 
 
 @csrf_exempt
@@ -106,6 +114,15 @@ def cron_send_exam_reminders(request):
         logger.warning("Cron endpoint called with invalid token.")
         return JsonResponse({"error": "Forbidden"}, status=403)
 
+    # SHORT-CIRCUIT: if a recent run already confirmed no active exams,
+    # skip the management command entirely — zero DB queries.
+    if cache.get(CRON_NO_EXAMS_CACHE_KEY):
+        return JsonResponse({
+            "ok": True,
+            "message": "Skipped — no active exams (cached).",
+            "skipped": True,
+        })
+
     # Run the management command
     from django.core.management import call_command
     from io import StringIO
@@ -118,6 +135,13 @@ def cron_send_exam_reminders(request):
         output = stdout.getvalue().strip()
         errors = stderr.getvalue().strip()
         logger.info("Cron send_exam_reminders completed: %s", output)
+
+        # If the command reported no active exams at all, cache that fact
+        # so subsequent cron hits skip the DB entirely for a while.
+        from marks.management.commands.send_exam_reminders import Command as _ReminderCmd
+        if output == _ReminderCmd.NO_ACTIVE_EXAMS_MSG:
+            cache.set(CRON_NO_EXAMS_CACHE_KEY, True, CRON_NO_EXAMS_CACHE_TTL)
+
         return JsonResponse({
             "ok": True,
             "message": output or "No notifications to send right now.",

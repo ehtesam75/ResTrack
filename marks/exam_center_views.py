@@ -14,10 +14,13 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
+from django.core.cache import cache
+
 from .models import ExamCenterExam, AnswerSubmission
 from .forms import ExamCenterExamForm
 from .views import is_teacher, is_student, get_teacher_for_user
 from .notifications import notify_exam_created, notify_exam_edited, notify_bonus_time_granted
+from .push_views import CRON_NO_EXAMS_CACHE_KEY
 
 
 # ---------------------------------------------------------------------------
@@ -126,6 +129,9 @@ def exam_center_create(request):
             exam = form.save(commit=False)
             exam.teacher = request.user
             exam.save()
+            # Clear the "no active exams" cron cache so notifications
+            # for this new exam are picked up immediately.
+            cache.delete(CRON_NO_EXAMS_CACHE_KEY)
             # Send push notification to all enrolled students
             try:
                 notify_exam_created(exam)
@@ -161,6 +167,7 @@ def exam_center_edit(request, exam_id):
         form = ExamCenterExamForm(request.POST, request.FILES, instance=exam, teacher=request.user)
         if form.is_valid():
             form.save()
+            cache.delete(CRON_NO_EXAMS_CACHE_KEY)
             # Notify enrolled students about the exam update
             try:
                 notify_exam_edited(exam)

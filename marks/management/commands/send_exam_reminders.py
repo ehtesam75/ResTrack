@@ -32,6 +32,9 @@ from marks.notifications import (
 class Command(BaseCommand):
     help = 'Send scheduled push notifications for upcoming / running exams.'
 
+    # Distinct output prefix so the cron view can detect "no exams at all"
+    NO_ACTIVE_EXAMS_MSG = '[SKIP] No active exams.'
+
     def handle(self, *args, **options):
         now = timezone.now()
         # Only consider exams that haven't fully finished yet
@@ -45,6 +48,16 @@ class Command(BaseCommand):
         # filter: only exams with exam_date >= today - 2 days.
         # This avoids loading old/finished exams from the database entirely.
         cutoff_date = (now - _dt.timedelta(days=2)).date()
+
+        # SHORT-CIRCUIT: lightweight EXISTS check — avoids the heavier
+        # select_related JOIN and notification-log query when there are
+        # simply no exams in the relevant date window.
+        if not ExamCenterExam.objects.filter(exam_date__gte=cutoff_date).exists():
+            self.stdout.write(self.NO_ACTIVE_EXAMS_MSG)
+            from django import db
+            db.connections.close_all()
+            return
+
         exams = (
             ExamCenterExam.objects
             .filter(exam_date__gte=cutoff_date)
