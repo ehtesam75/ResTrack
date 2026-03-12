@@ -9,7 +9,6 @@ It checks all active ExamCenterExams and sends timed notifications:
   - When exam starts
   - 10 minutes before exam writing period ends
   - When exam ends (+ submission window open for online exams)
-  - 3 minutes before submission window closes (online exams only)
 
 Each notification is sent at most once per exam, tracked via ExamNotificationLog.
 """
@@ -25,7 +24,6 @@ from marks.notifications import (
     notify_exam_started,
     notify_exam_ending_soon,
     notify_exam_ended,
-    notify_submission_closing_soon,
 )
 
 
@@ -145,17 +143,5 @@ class Command(BaseCommand):
                     self.stderr.write(f'Error sending exam-ended notification for exam {exam.pk}: {e}')
                 self._mark_sent(exam, 'exam_ended', existing_logs)
                 sent += 1
-
-        # 5. 3 minutes before submission window closes (online exams only)
-        if exam.exam_mode == 'online':
-            three_before_submission_end = exam.final_end_datetime - _dt.timedelta(minutes=3)
-            if three_before_submission_end <= now < exam.final_end_datetime:
-                if not self._already_sent(exam, 'submission_3min', existing_logs):
-                    try:
-                        notify_submission_closing_soon(exam)
-                    except Exception as e:
-                        self.stderr.write(f'Error sending submission-closing warning for exam {exam.pk}: {e}')
-                    self._mark_sent(exam, 'submission_3min', existing_logs)
-                    sent += 1
 
         return sent

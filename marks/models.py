@@ -1311,7 +1311,6 @@ class ExamNotificationLog(models.Model):
         ('reminder_start', 'Exam has started'),
         ('reminder_3min_end', '3-minute warning before exam ends'),
         ('exam_ended', 'Exam has ended / submission open'),
-        ('submission_3min', '3-minute warning before submission closes'),
     ]
 
     exam = models.ForeignKey(
