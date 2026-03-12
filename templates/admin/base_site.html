@@ -2,6 +2,19 @@
 
 {% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}ResTrack Admin{% endblock %}
 
+{% block extrahead %}
+{{ block.super }}
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FEB66R0KWZ"></script>
+<script>
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+
+	gtag('config', 'G-FEB66R0KWZ');
+</script>
+{% endblock %}
+
 {% block branding %}
 <div id="site-name"><a href="{% url 'admin:index' %}">ResTrack Admin</a></div>
 {% endblock %}
