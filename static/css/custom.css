@@ -28,10 +28,18 @@
 
 /* Gradient Text */
 .gradient-text {
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    /* Fallback so text remains visible if gradient text clipping is unavailable */
+    color: #6d28d9;
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    .gradient-text {
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+    }
 }
 
 /* Glass Effect */
