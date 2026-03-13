@@ -5,7 +5,6 @@ from django.views.generic import TemplateView
 from . import views
 from . import exam_center_views
 from . import push_views
-from .forms import EmailExistsPasswordResetForm
 
 urlpatterns = [
     # Authentication URLs
@@ -13,14 +12,13 @@ urlpatterns = [
     path('login/', views.user_login, name='login'),
     path(
         'password-reset/',
-        auth_views.PasswordResetView.as_view(
-            template_name='registration/password_reset_form.html',
-            email_template_name='registration/password_reset_email.txt',
-            subject_template_name='registration/password_reset_subject.txt',
-            form_class=EmailExistsPasswordResetForm,
-            success_url=reverse_lazy('password_reset_done'),
-        ),
+        views.password_reset_request,
         name='password_reset',
+    ),
+    path(
+        'password-reset/select-username/',
+        views.password_reset_select_username,
+        name='password_reset_select_username',
     ),
     path(
         'password-reset/done/',

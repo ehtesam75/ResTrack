@@ -4,14 +4,25 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Sum, Q
 from django.urls import reverse
 import json
 from .models import Student, Subject, ExamType, Exam, ExamQuestionPaper, GradeScale, LifetimePoints, PointsSpent, PointTransaction, TeacherProfile, StudentProfile, ExamCenterExam, GuestTeacherAccount
 from .services import LeaderboardService, DashboardService, ChartDataService, count_unique_exams, get_grade_color_map
-from .forms import TeacherSignupForm, LoginForm, StudentAccountForm, GuestAccountForm
+from .forms import (
+    TeacherSignupForm,
+    LoginForm,
+    StudentAccountForm,
+    GuestAccountForm,
+    UsernamePasswordResetRequestForm,
+    EmailUsernameLookupForm,
+    UsernameSelectionForm,
+    TargetedPasswordResetForm,
+)
 from .notifications import notify_result_published, notify_result_edited
 from .guest_access import start_guest_session, clear_guest_session, is_guest_session, delete_guest_user_account, add_guest_read_only_message, add_guest_session_started_message, add_guest_submission_access_denied_message
 
@@ -157,6 +168,106 @@ def user_login(request):
         form = LoginForm()
     
     return render(request, 'marks/login.html', {'form': form})
+
+
+def _send_targeted_password_reset_email(request, user):
+    """Send Django built-in password reset email for exactly one selected user."""
+    form = TargetedPasswordResetForm(
+        data={'email': user.email},
+        target_user=user,
+    )
+    if not form.is_valid():
+        return False
+
+    form.save(
+        request=request,
+        use_https=request.is_secure(),
+        token_generator=default_token_generator,
+        email_template_name='registration/password_reset_email.txt',
+        subject_template_name='registration/password_reset_subject.txt',
+    )
+    return True
+
+
+def password_reset_request(request):
+    """Password reset entry page with username-first and email-fallback workflow."""
+    username_form = UsernamePasswordResetRequestForm()
+    email_form = EmailUsernameLookupForm()
+    active_tab = 'username'
+
+    if request.method == 'POST':
+        action = request.POST.get('action', 'by_username')
+
+        if action == 'by_email':
+            active_tab = 'email'
+            email_form = EmailUsernameLookupForm(request.POST)
+            if email_form.is_valid():
+                try:
+                    users = list(email_form.get_users())
+                except ValidationError as exc:
+                    email_form.add_error('email', exc)
+                else:
+                    request.session['password_reset_lookup'] = {
+                        'email': email_form.cleaned_data['email'],
+                        'usernames': [u.username for u in users],
+                    }
+                    return redirect('password_reset_select_username')
+        else:
+            active_tab = 'username'
+            username_form = UsernamePasswordResetRequestForm(request.POST)
+            if username_form.is_valid():
+                target_user = username_form.get_user()
+                if target_user and _send_targeted_password_reset_email(request, target_user):
+                    return redirect('password_reset_done')
+                username_form.add_error('username', 'Unable to send reset email for this account.')
+
+    return render(
+        request,
+        'registration/password_reset_form.html',
+        {
+            'username_form': username_form,
+            'email_form': email_form,
+            'active_tab': active_tab,
+        },
+    )
+
+
+def password_reset_select_username(request):
+    """Show usernames found by email and send reset for selected username."""
+    lookup = request.session.get('password_reset_lookup')
+    if not lookup or not lookup.get('email') or not lookup.get('usernames'):
+        return redirect('password_reset')
+
+    username_choices = [(u, u) for u in lookup['usernames']]
+
+    if request.method == 'POST':
+        form = UsernameSelectionForm(request.POST, username_choices=username_choices)
+        if form.is_valid():
+            selected_username = form.cleaned_data['username']
+            user = get_user_model().objects.filter(
+                username=selected_username,
+                email__iexact=lookup['email'],
+                is_active=True,
+                teacher_profile__isnull=False,
+            ).first()
+
+            if user and _send_targeted_password_reset_email(request, user):
+                request.session.pop('password_reset_lookup', None)
+                return redirect('password_reset_done')
+
+            form.add_error('username', 'Selected username is no longer available. Please try again.')
+    else:
+        form = UsernameSelectionForm(username_choices=username_choices)
+
+    return render(
+        request,
+        'registration/password_reset_select_username.html',
+        {
+            'form': form,
+            'lookup_email': lookup['email'],
+            'username_count': len(username_choices),
+        },
+    )
 
 
 def user_logout(request):

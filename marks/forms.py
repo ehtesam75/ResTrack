@@ -118,6 +118,109 @@ class EmailExistsPasswordResetForm(PasswordResetForm):
         return email
 
 
+class UsernamePasswordResetRequestForm(forms.Form):
+    """Request a password reset by unique username (teacher accounts only)."""
+
+    username = forms.CharField(
+        max_length=150,
+        widget=forms.TextInput(attrs={
+            'class': 'w-full px-3.5 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white transition-colors',
+            'placeholder': 'Enter your username',
+            'autocomplete': 'username',
+        })
+    )
+
+    error_messages = {
+        'username_not_found': 'No active teacher account found with this username.',
+        'missing_email': 'This account has no email address for password reset.',
+    }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._user = None
+
+    def clean_username(self):
+        username = self.cleaned_data.get('username', '').strip()
+        user = User.objects.filter(
+            username__iexact=username,
+            is_active=True,
+            teacher_profile__isnull=False,
+        ).first()
+        if not user:
+            raise ValidationError(self.error_messages['username_not_found'])
+        if not user.email:
+            raise ValidationError(self.error_messages['missing_email'])
+        self._user = user
+        return user.username
+
+    def get_user(self):
+        return self._user
+
+
+class EmailUsernameLookupForm(forms.Form):
+    """Look up teacher usernames by email when username is forgotten."""
+
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={
+            'class': 'w-full px-3.5 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white transition-colors',
+            'placeholder': 'Enter your email address',
+            'autocomplete': 'email',
+        })
+    )
+
+    error_messages = {
+        'email_not_found': 'No teacher usernames found for this email address.',
+    }
+
+    def clean_email(self):
+        return self.cleaned_data.get('email', '').strip()
+
+    def get_users(self):
+        email = self.cleaned_data.get('email', '').strip()
+        users = User.objects.filter(
+            email__iexact=email,
+            is_active=True,
+            teacher_profile__isnull=False,
+        ).exclude(email='').order_by('username')
+        if not users.exists():
+            raise ValidationError(self.error_messages['email_not_found'])
+        return users
+
+
+class UsernameSelectionForm(forms.Form):
+    """Choose one username from lookup results before sending reset email."""
+
+    username = forms.ChoiceField(
+        choices=(),
+        widget=forms.RadioSelect,
+    )
+
+    def __init__(self, *args, username_choices=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['username'].choices = username_choices or []
+
+
+class TargetedPasswordResetForm(PasswordResetForm):
+    """Django password reset form constrained to one selected user."""
+
+    def __init__(self, *args, target_user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.target_user = target_user
+
+    def get_users(self, email):
+        if not self.target_user:
+            yield from super().get_users(email)
+            return
+
+        user = self.target_user
+        user_email = (user.email or '').strip()
+        if not user_email:
+            return
+
+        if user.is_active and user.has_usable_password() and user_email.casefold() == email.casefold():
+            yield user
+
+
 class StudentAccountForm(forms.Form):
     """Form for creating student accounts by teachers"""
     # Student personal info
