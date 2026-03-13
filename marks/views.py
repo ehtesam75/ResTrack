@@ -11,7 +11,7 @@ from .models import Student, Subject, ExamType, Exam, ExamQuestionPaper, GradeSc
 from .services import LeaderboardService, DashboardService, ChartDataService, count_unique_exams, get_grade_color_map
 from .forms import TeacherSignupForm, LoginForm, StudentAccountForm, GuestAccountForm
 from .notifications import notify_result_published, notify_result_edited
-from .guest_access import start_guest_session, clear_guest_session, is_guest_session, delete_guest_user_account
+from .guest_access import start_guest_session, clear_guest_session, is_guest_session, delete_guest_user_account, add_guest_read_only_message, add_guest_session_started_message
 
 
 def is_teacher(user):
@@ -121,10 +121,7 @@ def user_login(request):
 
                 login(request, teacher)
                 start_guest_session(request, guest_account)
-                messages.success(
-                    request,
-                    f"Signed in as guest '{user.username}' for {teacher.get_full_name() or teacher.username}. View-only mode is active.",
-                )
+                add_guest_session_started_message(request)
             else:
                 login(request, user)
                 clear_guest_session(request)
@@ -349,7 +346,7 @@ def manage_guest_account(request):
         return redirect('dashboard')
 
     if is_guest_session(request):
-        messages.error(request, 'Guest accounts are view-only and cannot perform this action.')
+        add_guest_read_only_message(request)
         return redirect('dashboard')
 
     teacher = request.user

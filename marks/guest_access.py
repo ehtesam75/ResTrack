@@ -1,4 +1,6 @@
+from django.contrib import messages
 from django.contrib.auth import get_user_model
+from django.contrib.messages.api import MessageFailure
 
 from .models import GuestTeacherAccount
 
@@ -59,3 +61,28 @@ def delete_guest_user_account(guest_account):
     guest_account.delete()
     if guest_user_id:
         User.objects.filter(id=guest_user_id).delete()
+
+
+def add_guest_read_only_message(request):
+    """Show the standard guest read-only notice as a popup-safe message."""
+    try:
+        messages.error(
+            request,
+            'Guest accounts are view-only and cannot perform this action.',
+            extra_tags='guest-popup',
+        )
+    except MessageFailure:
+        # Never break request flow if message storage is unavailable.
+        pass
+
+
+def add_guest_session_started_message(request):
+    """Show the one-time guest sign-in popup."""
+    try:
+        messages.info(
+            request,
+            'View-Only Guest Session: You are logged in as a guest. Modifications are not permitted.',
+            extra_tags='guest-login-popup',
+        )
+    except MessageFailure:
+        pass

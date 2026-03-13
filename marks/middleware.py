@@ -1,8 +1,7 @@
 from django.http import JsonResponse
 from django.shortcuts import redirect
-from django.contrib import messages
 
-from .guest_access import get_guest_account_for_request
+from .guest_access import add_guest_read_only_message, get_guest_account_for_request
 
 
 class GuestReadOnlyMiddleware:
@@ -26,7 +25,7 @@ class GuestReadOnlyMiddleware:
             path = request.path
 
             if path.startswith(self.RESTRICTED_PATH_PREFIXES) or path in self.RESTRICTED_EXACT_PATHS:
-                messages.error(request, 'Guest accounts are view-only and cannot perform this action.')
+                add_guest_read_only_message(request)
                 return redirect('dashboard')
 
             if request.method not in self.SAFE_METHODS and path != '/logout/':
@@ -38,7 +37,7 @@ class GuestReadOnlyMiddleware:
                         },
                         status=403,
                     )
-                messages.error(request, 'Guest accounts are view-only and cannot perform this action.')
+                add_guest_read_only_message(request)
                 return redirect(request.META.get('HTTP_REFERER') or 'dashboard')
 
         return self.get_response(request)

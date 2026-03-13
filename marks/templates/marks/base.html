@@ -483,23 +483,38 @@
 
     <!-- Messages -->
     {% if messages %}
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-3">
+    <div id="messageLayer">
         {% for message in messages %}
-        <div class="{% if message.tags == 'success' %}bg-green-50 border-l-4 border-green-500 text-green-800{% elif message.tags == 'error' %}bg-red-50 border-l-4 border-red-500 text-red-800{% else %}bg-blue-50 border-l-4 border-blue-500 text-blue-800{% endif %} px-3 py-2 rounded-r-lg shadow-sm mb-3 animate-fade-in-up text-sm" role="alert">
-            <span class="block sm:inline font-medium">
-                {% if message.tags == 'success' %}✅{% elif message.tags == 'error' %}❌{% else %}ℹ️{% endif %}
-                {{ message }}
-            </span>
-        </div>
+            {% if 'guest-popup' in message.tags or 'guest-login-popup' in message.tags %}
+            <div data-popup-message class="fixed right-4 left-4 sm:left-auto sm:w-full sm:max-w-sm z-[100] rounded-2xl border border-amber-200 bg-white/95 px-4 py-3 shadow-2xl shadow-amber-200/60 backdrop-blur transition-all duration-300" role="alert">
+                <div class="flex items-start gap-3">
+                    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M10.29 3.86l-7.55 13.09A1 1 0 003.61 18h16.78a1 1 0 00.87-1.5L13.71 3.86a1 1 0 00-1.74 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <p class="text-sm font-semibold text-gray-900">{% if 'guest-login-popup' in message.tags %}View-Only Guest Session{% else %}View-only guest account{% endif %}</p>
+                        <p class="mt-1 text-sm text-gray-700">{{ message }}</p>
+                    </div>
+                    <button type="button" data-popup-dismiss class="shrink-0 rounded-lg p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600" aria-label="Dismiss notification">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            {% else %}
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-3">
+                <div class="{% if 'success' in message.tags %}bg-green-50 border-l-4 border-green-500 text-green-800{% elif 'error' in message.tags %}bg-red-50 border-l-4 border-red-500 text-red-800{% else %}bg-blue-50 border-l-4 border-blue-500 text-blue-800{% endif %} px-3 py-2 rounded-r-lg shadow-sm animate-fade-in-up text-sm" role="alert">
+                    <span class="block sm:inline font-medium">
+                        {% if 'success' in message.tags %}✅{% elif 'error' in message.tags %}❌{% else %}ℹ️{% endif %}
+                        {{ message }}
+                    </span>
+                </div>
+            </div>
+            {% endif %}
         {% endfor %}
-    </div>
-    {% endif %}
-
-    {% if user.is_authenticated and is_guest_session %}
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-3">
-        <div class="bg-amber-50 border-l-4 border-amber-500 text-amber-800 px-3 py-2 rounded-r-lg shadow-sm text-sm" role="alert">
-            <span class="font-medium">View-only guest session:</span> Signed in as {{ guest_session_username }}. Changes are blocked by the server.
-        </div>
     </div>
     {% endif %}
 
@@ -509,6 +524,33 @@
     </main>
 
     {% block extra_js %}{% endblock %}
+
+    <script>
+        (function() {
+            const popupMessages = Array.from(document.querySelectorAll('[data-popup-message]'));
+            if (!popupMessages.length) {
+                return;
+            }
+
+            popupMessages.forEach(function(message, index) {
+                message.style.top = (80 + (index * 96)) + 'px';
+
+                const dismiss = function() {
+                    message.classList.add('opacity-0', 'translate-y-2');
+                    window.setTimeout(function() {
+                        message.remove();
+                    }, 250);
+                };
+
+                const dismissButton = message.querySelector('[data-popup-dismiss]');
+                if (dismissButton) {
+                    dismissButton.addEventListener('click', dismiss);
+                }
+
+                window.setTimeout(dismiss, 3800);
+            });
+        })();
+    </script>
 
     <!-- Service Worker Registration -->
     <script>
