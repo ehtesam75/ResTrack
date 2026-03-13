@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, Http404
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
@@ -85,6 +86,17 @@ def teacher_signup(request):
     """Handle teacher registration"""
     if request.user.is_authenticated:
         return redirect('dashboard')
+
+    teacher_registration_enabled = getattr(settings, 'TEACHER_REGISTRATION_ENABLED', True)
+    registration_disabled_message = getattr(
+        settings,
+        'TEACHER_REGISTRATION_DISABLED_MESSAGE',
+        'New account registration is temporarily disabled due to current system resource limits. Please try again later.'
+    )
+
+    if request.method == 'POST' and not teacher_registration_enabled:
+        messages.error(request, registration_disabled_message)
+        return redirect('signup')
     
     if request.method == 'POST':
         form = TeacherSignupForm(request.POST)
@@ -100,7 +112,15 @@ def teacher_signup(request):
     else:
         form = TeacherSignupForm()
     
-    return render(request, 'marks/signup.html', {'form': form})
+    return render(
+        request,
+        'marks/signup.html',
+        {
+            'form': form,
+            'teacher_registration_enabled': teacher_registration_enabled,
+            'registration_disabled_message': registration_disabled_message,
+        }
+    )
 
 
 def user_login(request):

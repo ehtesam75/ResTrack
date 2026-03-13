@@ -221,3 +221,13 @@ VAPID_ADMIN_EMAIL = os.environ.get("VAPID_ADMIN_EMAIL", "admin@restrack.app")
 # Cron Job Security
 # ======================
 CRON_SECRET_TOKEN = os.environ.get("CRON_SECRET_TOKEN", "")
+
+# ======================
+# Teacher Registration Controls
+# ======================
+# Temporarily disabled by default to protect limited DB resources.
+TEACHER_REGISTRATION_ENABLED = os.environ.get("TEACHER_REGISTRATION_ENABLED", "False").lower() == "true"
+TEACHER_REGISTRATION_DISABLED_MESSAGE = (
+    "New account registration is temporarily disabled due to current system resource limits. "
+    "Please try again later."
+)
