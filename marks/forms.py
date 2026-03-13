@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordResetForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from .models import Student, TeacherProfile, StudentProfile, ExamCenterExam
@@ -102,6 +102,20 @@ class LoginForm(AuthenticationForm):
             'placeholder': 'Enter your password'
         })
     )
+
+
+class EmailExistsPasswordResetForm(PasswordResetForm):
+    """Password reset form that shows a friendly message when email is unknown."""
+
+    error_messages = {
+        'email_not_found': 'No account found with this email.',
+    }
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email', '').strip()
+        if not User.objects.filter(email__iexact=email, is_active=True).exists():
+            raise ValidationError(self.error_messages['email_not_found'])
+        return email
 
 
 class StudentAccountForm(forms.Form):

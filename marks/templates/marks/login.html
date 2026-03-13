@@ -86,6 +86,9 @@
                     {% if field_errors.password %}
                     <p class="text-red-500 text-xs mt-1">{{ field_errors.password }}</p>
                     {% endif %}
+                    <div class="mt-2 text-right">
+                        <a href="{% url 'password_reset' %}" class="text-xs text-purple-600 hover:text-purple-700 font-medium">Forgot Password?</a>
+                    </div>
                 </div>
 
                 <div class="pt-2">
