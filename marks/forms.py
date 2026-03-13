@@ -239,6 +239,41 @@ class EditStudentForm(forms.Form):
     )
 
 
+class GuestAccountForm(forms.Form):
+    """Form for creating/editing a teacher guest account."""
+
+    username = forms.CharField(max_length=150)
+    new_password = forms.CharField(required=False, min_length=6)
+    confirm_password = forms.CharField(required=False, min_length=6)
+
+    def __init__(self, *args, existing_user=None, require_password=False, **kwargs):
+        self.existing_user = existing_user
+        self.require_password = require_password
+        super().__init__(*args, **kwargs)
+
+    def clean_username(self):
+        username = self.cleaned_data.get('username', '').strip()
+        qs = User.objects.filter(username=username)
+        if self.existing_user:
+            qs = qs.exclude(id=self.existing_user.id)
+        if qs.exists():
+            raise ValidationError('This username is already taken. Please choose another.')
+        return username
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get('new_password', '')
+        confirm_password = cleaned_data.get('confirm_password', '')
+
+        if self.require_password and not password:
+            self.add_error('new_password', 'Password is required.')
+
+        if password and password != confirm_password:
+            self.add_error('confirm_password', 'Passwords do not match.')
+
+        return cleaned_data
+
+
 # ---------------------------------------------------------------------------
 # Exam Center forms
 # ---------------------------------------------------------------------------

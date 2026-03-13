@@ -124,7 +124,7 @@
                                 {% else %}
                                     <p class="text-sm font-semibold text-gray-900">{{ user.get_full_name|default:user.username }}</p>
                                 {% endif %}
-                                <p class="text-xs text-gray-500">{% if user.teacher_profile %}Teacher{% else %}Student{% endif %}</p>
+                                <p class="text-xs text-gray-500">{% if user.teacher_profile %}Teacher{% if is_guest_session %} (Guest View){% endif %}{% else %}Student{% endif %}</p>
                             </div>
                             {% if user.teacher_profile %}
                             <a href="{% url 'manage' %}" class="flex items-center gap-2 px-4 py-2 text-sm text-purple-700 hover:bg-purple-50 transition-colors font-semibold">
@@ -135,7 +135,7 @@
                                 Manage
                             </a>
                             {% endif %}
-                            {% if user.teacher_profile %}
+                            {% if user.teacher_profile and not is_guest_session %}
                             <a href="{% url 'delete_account' %}" class="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
@@ -344,7 +344,7 @@
             <!-- Divider -->
             <div class="my-2 mx-3 border-t border-gray-200"></div>
 
-            {% if user.teacher_profile %}
+            {% if user.teacher_profile and not is_guest_session %}
             <a href="{% url 'delete_account' %}" class="text-red-600 hover:bg-red-50 border-l-2 border-transparent flex items-center gap-2.5 px-3 py-2.5 rounded-r-lg font-medium transition-all text-sm">
                 <div class="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center">
                     <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -495,6 +495,14 @@
     </div>
     {% endif %}
 
+    {% if user.is_authenticated and is_guest_session %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-3">
+        <div class="bg-amber-50 border-l-4 border-amber-500 text-amber-800 px-3 py-2 rounded-r-lg shadow-sm text-sm" role="alert">
+            <span class="font-medium">View-only guest session:</span> Signed in as {{ guest_session_username }}. Changes are blocked by the server.
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Main Content -->
     <main class="{% if request.path == '/' or 'login' in request.path or 'signup' in request.path %}w-full{% else %}max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-8{% endif %}">
         {% block content %}{% endblock %}
@@ -563,7 +571,7 @@
         // ---------------------------------------------------------------
         // Push Notification Subscription
         // ---------------------------------------------------------------
-        {% if user.is_authenticated %}
+        {% if user.is_authenticated and not is_guest_session %}
         (function initPushSubscription() {
             if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
                 console.log('Push notifications not supported.');

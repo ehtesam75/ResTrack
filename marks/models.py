@@ -34,6 +34,22 @@ class StudentProfile(models.Model):
         verbose_name_plural = "Student Profiles"
 
 
+class GuestTeacherAccount(models.Model):
+    """One read-only guest login mapped to exactly one teacher."""
+    teacher = models.OneToOneField(User, on_delete=models.CASCADE, related_name='guest_account')
+    guest_user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='guest_teacher_account')
+    raw_password = models.CharField(max_length=128, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Guest({self.guest_user.username}) for {self.teacher.username}"
+
+    class Meta:
+        verbose_name = "Guest Teacher Account"
+        verbose_name_plural = "Guest Teacher Accounts"
+
+
 class Student(models.Model):
     """Model representing a student in the tracking system"""
     first_name = models.CharField(max_length=10, help_text="First name (max 10 characters)")

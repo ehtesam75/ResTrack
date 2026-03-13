@@ -14,6 +14,7 @@ urlpatterns = [
     
     # Teacher management dashboard
     path('manage/', views.manage, name='manage'),
+    path('manage-guest-account/', views.manage_guest_account, name='manage_guest_account'),
     
     # Main dashboard (authenticated)
     path('dashboard/', views.dashboard, name='dashboard'),

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Student, Subject, ExamType, Exam, ExamQuestionPaper, GradeScale, LifetimePoints, PointsSpent, PointTransaction, TeacherProfile, StudentProfile, ExamCenterExam, AnswerSubmission, PushSubscription
+from .models import Student, Subject, ExamType, Exam, ExamQuestionPaper, GradeScale, LifetimePoints, PointsSpent, PointTransaction, TeacherProfile, StudentProfile, ExamCenterExam, AnswerSubmission, PushSubscription, GuestTeacherAccount
 
 
 @admin.register(TeacherProfile)
@@ -14,6 +14,13 @@ class StudentProfileAdmin(admin.ModelAdmin):
     list_display = ['user', 'student', 'created_by', 'created_at']
     search_fields = ['user__username', 'student__first_name', 'student__last_name', 'created_by__username']
     list_filter = ['created_at', 'created_by']
+
+
+@admin.register(GuestTeacherAccount)
+class GuestTeacherAccountAdmin(admin.ModelAdmin):
+    list_display = ['teacher', 'guest_user', 'created_at', 'updated_at']
+    search_fields = ['teacher__username', 'guest_user__username']
+    readonly_fields = ['created_at', 'updated_at']
 
 
 @admin.register(Student)

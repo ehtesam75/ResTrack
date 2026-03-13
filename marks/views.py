@@ -3,12 +3,15 @@ from django.http import JsonResponse, Http404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth import get_user_model
+from django.db import transaction
 from django.db.models import Sum, Q
 import json
-from .models import Student, Subject, ExamType, Exam, ExamQuestionPaper, GradeScale, LifetimePoints, PointsSpent, PointTransaction, TeacherProfile, StudentProfile, ExamCenterExam
+from .models import Student, Subject, ExamType, Exam, ExamQuestionPaper, GradeScale, LifetimePoints, PointsSpent, PointTransaction, TeacherProfile, StudentProfile, ExamCenterExam, GuestTeacherAccount
 from .services import LeaderboardService, DashboardService, ChartDataService, count_unique_exams, get_grade_color_map
-from .forms import TeacherSignupForm, LoginForm, StudentAccountForm
+from .forms import TeacherSignupForm, LoginForm, StudentAccountForm, GuestAccountForm
 from .notifications import notify_result_published, notify_result_edited
+from .guest_access import start_guest_session, clear_guest_session, is_guest_session, delete_guest_user_account
 
 
 def is_teacher(user):
@@ -107,7 +110,24 @@ def user_login(request):
         form = LoginForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
-            login(request, user)
+
+            # Guest credentials log into the owning teacher account in read-only mode.
+            if hasattr(user, 'guest_teacher_account'):
+                guest_account = user.guest_teacher_account
+                teacher = guest_account.teacher
+                if not hasattr(teacher, 'teacher_profile'):
+                    messages.error(request, 'Invalid guest account configuration.')
+                    return redirect('login')
+
+                login(request, teacher)
+                start_guest_session(request, guest_account)
+                messages.success(
+                    request,
+                    f"Signed in as guest '{user.username}' for {teacher.get_full_name() or teacher.username}. View-only mode is active.",
+                )
+            else:
+                login(request, user)
+                clear_guest_session(request)
             
             next_url = request.GET.get('next', 'dashboard')
             return redirect(next_url)
@@ -121,6 +141,7 @@ def user_login(request):
 
 def user_logout(request):
     """Handle user logout"""
+    clear_guest_session(request)
     logout(request)
     return redirect('home')
 
@@ -135,6 +156,7 @@ def manage(request):
     teacher_subjects = Subject.objects.filter(teacher=teacher)
     teacher_exams = Exam.objects.filter(teacher=teacher)
     teacher_exam_types = ExamType.objects.filter(teacher=teacher)
+    guest_account_exists = GuestTeacherAccount.objects.filter(teacher=teacher).exists()
     
     from .models import LifetimePoints
     # Get all student IDs under this teacher
@@ -151,6 +173,7 @@ def manage(request):
         'teacher_students_lifetime_points': teacher_students_lifetime_points,
         'recent_students': teacher_students.order_by('-created_at')[:5],
         'recent_exams': teacher_exams.order_by('-date', '-id')[:100],
+        'guest_account_exists': guest_account_exists,
     }
     return render(request, 'marks/manage.html', context)
 
@@ -316,6 +339,111 @@ def dashboard(request):
     }
     
     return render(request, 'marks/dashboard.html', context)
+
+
+@login_required(login_url='login')
+def manage_guest_account(request):
+    """Create, edit, or delete one guest account for the current teacher."""
+    if not is_teacher(request.user):
+        messages.error(request, 'Only teachers can manage guest accounts.')
+        return redirect('dashboard')
+
+    if is_guest_session(request):
+        messages.error(request, 'Guest accounts are view-only and cannot perform this action.')
+        return redirect('dashboard')
+
+    teacher = request.user
+    guest_account = GuestTeacherAccount.objects.select_related('guest_user').filter(teacher=teacher).first()
+
+    if request.method == 'POST':
+        action = request.POST.get('action', '').strip()
+
+        if action == 'delete':
+            if not guest_account:
+                messages.error(request, 'No guest account exists for deletion.')
+                return redirect('manage_guest_account')
+
+            delete_guest_user_account(guest_account)
+            messages.success(request, 'Guest account deleted successfully.')
+            return redirect('manage_guest_account')
+
+        if action == 'create':
+            if guest_account:
+                messages.error(request, 'You can only keep one guest account at a time.')
+                return redirect('manage_guest_account')
+
+            form = GuestAccountForm(request.POST, require_password=True)
+            if form.is_valid():
+                username = form.cleaned_data['username']
+                new_password = form.cleaned_data['new_password']
+
+                with transaction.atomic():
+                    User = get_user_model()
+                    guest_user = User.objects.create_user(username=username, password=new_password)
+                    GuestTeacherAccount.objects.create(
+                        teacher=teacher,
+                        guest_user=guest_user,
+                        raw_password=new_password,
+                    )
+                messages.success(request, f"Guest account '{username}' created successfully.")
+                return redirect('manage_guest_account')
+        elif action == 'edit':
+            if not guest_account:
+                messages.error(request, 'No guest account exists to edit.')
+                return redirect('manage_guest_account')
+
+            form = GuestAccountForm(
+                request.POST,
+                existing_user=guest_account.guest_user,
+                require_password=False,
+            )
+            if form.is_valid():
+                username = form.cleaned_data['username']
+                new_password = form.cleaned_data.get('new_password')
+
+                guest_user = guest_account.guest_user
+                changed = False
+
+                if guest_user.username != username:
+                    guest_user.username = username
+                    changed = True
+
+                if new_password:
+                    guest_user.set_password(new_password)
+                    guest_account.raw_password = new_password
+                    changed = True
+
+                if changed:
+                    with transaction.atomic():
+                        guest_user.save()
+                        guest_account.save()
+                    messages.success(request, 'Guest account updated successfully.')
+                else:
+                    messages.info(request, 'No changes detected for guest account.')
+
+                return redirect('manage_guest_account')
+        else:
+            messages.error(request, 'Invalid action.')
+            return redirect('manage_guest_account')
+    else:
+        if guest_account:
+            form = GuestAccountForm(
+                initial={'username': guest_account.guest_user.username},
+                existing_user=guest_account.guest_user,
+                require_password=False,
+            )
+        else:
+            form = GuestAccountForm(require_password=True)
+
+    return render(
+        request,
+        'marks/manage_guest_account.html',
+        {
+            'guest_account': guest_account,
+            'form': form,
+            'guest_raw_password': guest_account.raw_password if guest_account else '',
+        },
+    )
 
 
 @login_required(login_url='login')
@@ -2948,6 +3076,11 @@ def delete_teacher_account(teacher):
     User = get_user_model()
 
     with transaction.atomic():
+        # Delete linked guest account (if present) before deleting teacher.
+        guest_account = GuestTeacherAccount.objects.filter(teacher=teacher).select_related('guest_user').first()
+        if guest_account:
+            delete_guest_user_account(guest_account)
+
         # Step 0: Delete Cloudinary PDF files uploaded by this teacher
         cloudinary_files_deleted = 0
         try:
