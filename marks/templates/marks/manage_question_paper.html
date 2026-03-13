@@ -13,19 +13,6 @@
             </div>
         </div>
 
-        <!-- Messages (errors only) -->
-        {% if messages %}
-        <div class="mb-4 space-y-2">
-            {% for message in messages %}
-            {% if message.tags == 'error' %}
-            <div class="px-4 py-3 rounded-lg text-sm bg-red-50 border border-red-200 text-red-700">
-                ❌ {{ message }}
-            </div>
-            {% endif %}
-            {% endfor %}
-        </div>
-        {% endif %}
-
         <!-- Upload / Replace Section -->
         <div class="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-xl p-4 sm:p-6 mb-6">
             <div class="flex items-center gap-2 mb-4">

@@ -90,6 +90,7 @@ def teacher_signup(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
+            messages.success(request, f"Welcome, {user.first_name or user.username}.")
             return redirect('dashboard')
         else:
             for field, errors in form.errors.items():
@@ -125,6 +126,7 @@ def user_login(request):
             else:
                 login(request, user)
                 clear_guest_session(request)
+                messages.success(request, f"Welcome, {user.first_name or user.username}.")
             
             next_url = request.GET.get('next', 'dashboard')
             return redirect(next_url)
@@ -139,6 +141,7 @@ def user_login(request):
 def user_logout(request):
     """Handle user logout"""
     clear_guest_session(request)
+    messages.success(request, 'You have been logged out successfully.')
     logout(request)
     return redirect('home')
 
@@ -384,6 +387,9 @@ def manage_guest_account(request):
                     )
                 messages.success(request, f"Guest account '{username}' created successfully.")
                 return redirect('manage_guest_account')
+            for _, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{error}')
         elif action == 'edit':
             if not guest_account:
                 messages.error(request, 'No guest account exists to edit.')
@@ -419,6 +425,9 @@ def manage_guest_account(request):
                     messages.info(request, 'No changes detected for guest account.')
 
                 return redirect('manage_guest_account')
+            for _, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{error}')
         else:
             messages.error(request, 'Invalid action.')
             return redirect('manage_guest_account')
@@ -1074,9 +1083,9 @@ def add_student(request):
         if not all([first_name, roll, class_number, username, password, confirm_password]):
             messages.error(request, 'All required fields must be filled!')
         elif password != confirm_password:
-            messages.error(request, 'Passwords do not match!')
+            messages.error(request, 'Passwords do not match.')
         elif len(password) < 6:
-            messages.error(request, 'Password must be at least 6 characters!')
+            messages.error(request, 'Password must be at least 6 characters.')
         elif User.objects.filter(username=username).exists():
             messages.error(request, 'This username is already taken. Please choose another.')
         else:
@@ -1103,6 +1112,7 @@ def add_student(request):
                     created_by=request.user,
                     raw_password=password
                 )
+                messages.success(request, f'Student {student.name} created successfully.')
                 
                 return redirect('student_detail', student_id=student.id)
             except Exception as e:
@@ -1154,7 +1164,7 @@ def edit_student(request, student_id):
                     # Update username if changed
                     if username and username != student_user.username:
                         if User.objects.filter(username=username).exclude(id=student_user.id).exists():
-                            messages.error(request, 'This username is already taken.')
+                            messages.error(request, 'This username is already taken. Please choose another.')
                             return redirect('edit_student', student_id=student_id)
                         student_user.username = username
                         student_user.save()
@@ -1162,10 +1172,10 @@ def edit_student(request, student_id):
                     # Update password if provided
                     if new_password:
                         if new_password != confirm_password:
-                            messages.error(request, 'Passwords do not match!')
+                            messages.error(request, 'Passwords do not match.')
                             return redirect('edit_student', student_id=student_id)
                         if len(new_password) < 6:
-                            messages.error(request, 'Password must be at least 6 characters!')
+                            messages.error(request, 'Password must be at least 6 characters.')
                             return redirect('edit_student', student_id=student_id)
                         student_user.set_password(new_password)
                         student_user.save()
@@ -1173,6 +1183,8 @@ def edit_student(request, student_id):
                         if hasattr(student, 'user_profile'):
                             student.user_profile.raw_password = new_password
                             student.user_profile.save()
+
+                messages.success(request, f'Student {student.name} updated successfully.')
                 
                 return redirect('student_detail', student_id=student.id)
             except Exception as e:
@@ -1207,6 +1219,7 @@ def add_subject(request):
         short_name = request.POST.get('short_name')
         if name and short_name:
             subject = Subject.objects.create(name=name, short_name=short_name, teacher=request.user)
+            messages.success(request, f'Subject {subject.name} added successfully.')
             return redirect('subject_list')
         else:
             messages.error(request, 'Both subject name and short name are required!')
@@ -1239,6 +1252,7 @@ def edit_subject(request):
             subject.name = name
             subject.short_name = short_name
             subject.save()
+            messages.success(request, f'Subject {subject.name} updated successfully.')
 
             return redirect('add_subject')
         except Subject.DoesNotExist:
@@ -1319,6 +1333,7 @@ def add_exam(request):
                     notify_result_published(exam_id, [student.id], teacher)
                 except Exception:
                     pass  # Don't let push failures block result publishing
+                messages.success(request, f'Result added successfully for {student.name}.')
                 return redirect('student_detail', student_id=student.id)
             except Exception as e:
                 messages.error(request, f'Error adding exam: {str(e)}')
@@ -1450,6 +1465,7 @@ def add_bulk_exam(request):
                             notify_result_published(exam_id, participating_student_ids, teacher)
                         except Exception:
                             pass  # Don't let push failures block result publishing
+                    messages.success(request, f'{created_count} results added successfully.')
                     return redirect('all_exams')
                 except Exception as e:
                     messages.error(request, f'Error adding exams: {str(e)}')
@@ -1539,6 +1555,7 @@ def edit_exam(request, exam_id):
                     notify_result_edited(exam)
                 except Exception:
                     pass  # Don't let push failures block result editing
+                messages.success(request, 'Exam result updated successfully.')
                 
                 return redirect('all_exams')
             except Exception as e:
@@ -2031,6 +2048,7 @@ def add_points_spent(request):
                     description=description[:15],  # Enforce max 15 characters
                     date=date
                 )
+                messages.success(request, f'Points deduction recorded for {student.name}.')
                 return redirect('points')
         except Student.DoesNotExist:
             messages.error(request, 'Student not found.')
@@ -2478,6 +2496,7 @@ def manage_question_paper(request):
                     teacher=teacher,
                     defaults={'question_pdf': question_pdf}
                 )
+                messages.success(request, f'Question paper updated for Exam ID #{exam_id}.')
                 return redirect('manage_question_paper')
             except (ValueError, Exception) as e:
                 messages.error(request, f'Error uploading question paper: {str(e)}')
@@ -2540,6 +2559,7 @@ def manage_answer_paper(request):
                 exam_record = Exam.objects.get(id=int(exam_record_id), teacher=teacher)
                 exam_record.marked_answer_paper = marked_answer_paper
                 exam_record.save()
+                messages.success(request, f'Answer paper updated for {exam_record.student.name}.')
                 return redirect('manage_answer_paper')
             except (ValueError, Exam.DoesNotExist) as e:
                 messages.error(request, f'Error uploading answer paper: {str(e)}')

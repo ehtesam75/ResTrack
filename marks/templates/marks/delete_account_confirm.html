@@ -35,13 +35,6 @@
                 </div>
             </div>
 
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="mb-3 p-2 rounded-lg {% if message.tags == 'error' %}bg-red-50 border border-red-200 text-red-700{% else %}bg-blue-50 border border-blue-200 text-blue-700{% endif %} text-sm">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
         </div>
 
         {% if step == 1 %}

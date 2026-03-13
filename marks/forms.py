@@ -9,7 +9,7 @@ class TeacherSignupForm(UserCreationForm):
     """Form for teacher registration"""
     error_messages = {
         **UserCreationForm.error_messages,
-        'password_mismatch': "Passwords don't match",
+        'password_mismatch': 'Passwords do not match.',
     }
     email = forms.EmailField(
         required=True,
@@ -61,7 +61,7 @@ class TeacherSignupForm(UserCreationForm):
             'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all',
             'placeholder': 'Confirm your password'
         })
-        self.fields['username'].error_messages['unique'] = 'Username already taken'
+        self.fields['username'].error_messages['unique'] = 'This username is already taken. Please choose another.'
 
     def _post_clean(self):
         """Attach password validation errors to password1 instead of password2"""
