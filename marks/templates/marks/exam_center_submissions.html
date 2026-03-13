@@ -52,23 +52,23 @@
                             {% if item.file_url %}
                             <div class="inline-flex items-center gap-1.5">
                                 <!-- Desktop: labelled buttons -->
-                                <a href="{{ item.file_url }}" target="_blank" rel="noopener"
+                                <a href="{{ item.view_url }}" rel="noopener"
                                    class="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg text-xs font-semibold hover:bg-purple-100 transition-colors"
                                    title="View submission">
                                     <i class="fa-solid fa-eye"></i> View
                                 </a>
-                                <a href="{% url 'exam_center_download_submission' item.pk %}" rel="noopener"
+                                <a href="{{ item.download_url }}" rel="noopener"
                                    class="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-semibold hover:bg-emerald-100 transition-colors"
                                    title="Download submission">
                                     <i class="fa-solid fa-download"></i> Download
                                 </a>
                                 <!-- Mobile: icon-only buttons -->
-                                <a href="{{ item.file_url }}" target="_blank" rel="noopener"
+                                <a href="{{ item.view_url }}" rel="noopener"
                                    class="sm:hidden inline-flex items-center justify-center w-8 h-8 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors"
                                    title="View submission">
                                     <i class="fa-solid fa-eye text-sm"></i>
                                 </a>
-                                <a href="{% url 'exam_center_download_submission' item.pk %}" rel="noopener"
+                                <a href="{{ item.download_url }}" rel="noopener"
                                    class="sm:hidden inline-flex items-center justify-center w-8 h-8 bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 transition-colors"
                                    title="Download submission">
                                     <i class="fa-solid fa-download text-sm"></i>

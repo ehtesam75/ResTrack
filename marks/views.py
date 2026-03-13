@@ -6,12 +6,13 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import Sum, Q
+from django.urls import reverse
 import json
 from .models import Student, Subject, ExamType, Exam, ExamQuestionPaper, GradeScale, LifetimePoints, PointsSpent, PointTransaction, TeacherProfile, StudentProfile, ExamCenterExam, GuestTeacherAccount
 from .services import LeaderboardService, DashboardService, ChartDataService, count_unique_exams, get_grade_color_map
 from .forms import TeacherSignupForm, LoginForm, StudentAccountForm, GuestAccountForm
 from .notifications import notify_result_published, notify_result_edited
-from .guest_access import start_guest_session, clear_guest_session, is_guest_session, delete_guest_user_account, add_guest_read_only_message, add_guest_session_started_message
+from .guest_access import start_guest_session, clear_guest_session, is_guest_session, delete_guest_user_account, add_guest_read_only_message, add_guest_session_started_message, add_guest_submission_access_denied_message
 
 
 def is_teacher(user):
@@ -350,6 +351,12 @@ def manage_guest_account(request):
 
     if is_guest_session(request):
         add_guest_read_only_message(request)
+        next_url = request.GET.get('next')
+        if next_url:
+            return redirect(next_url)
+        referer = request.META.get('HTTP_REFERER')
+        if referer:
+            return redirect(referer)
         return redirect('dashboard')
 
     teacher = request.user
@@ -1814,12 +1821,13 @@ def exam_detail(request, exam_id):
             question_paper_url = first.question_pdf.url if hasattr(first.question_pdf, 'url') else str(first.question_pdf)
 
     # Build per-participant marked answer paper info
+    detail_next_url = reverse('exam_detail', args=[exam_id])
     for p in participants:
         exam_record = next((e for e in exam_records if e.student_id == p['student'].id), None)
         p['has_answer_paper'] = bool(exam_record and exam_record.marked_answer_paper)
         p['answer_paper_exam_pk'] = exam_record.pk if exam_record else None
         if exam_record and exam_record.marked_answer_paper:
-            p['answer_paper_url'] = exam_record.marked_answer_paper.url if hasattr(exam_record.marked_answer_paper, 'url') else str(exam_record.marked_answer_paper)
+            p['answer_paper_url'] = f"{reverse('exam_view_answer', args=[exam_record.pk])}?next={detail_next_url}"
         else:
             p['answer_paper_url'] = None
 
@@ -1904,11 +1912,47 @@ def exam_download_question(request, exam_id):
 
 
 @login_required(login_url='login')
+def exam_view_answer(request, exam_pk):
+    """Open marked answer paper for a specific exam record."""
+    from django.http import Http404
+
+    teacher = get_teacher_for_user(request.user)
+    exam = get_object_or_404(Exam, pk=exam_pk, teacher=teacher)
+
+    if is_guest_session(request):
+        add_guest_submission_access_denied_message(request)
+        next_url = request.GET.get('next')
+        if next_url:
+            return redirect(next_url)
+        referer = request.META.get('HTTP_REFERER')
+        if referer:
+            return redirect(referer)
+        return redirect('exam_detail', exam_id=exam.exam_id)
+
+    if not exam.marked_answer_paper:
+        raise Http404("Answer paper not found")
+
+    url = exam.marked_answer_paper.url if hasattr(exam.marked_answer_paper, 'url') else str(exam.marked_answer_paper)
+    return redirect(url)
+
+
+@login_required(login_url='login')
 def exam_download_answer(request, exam_pk):
     """Download marked answer paper for a specific exam record."""
     from django.http import Http404
+
     teacher = get_teacher_for_user(request.user)
     exam = get_object_or_404(Exam, pk=exam_pk, teacher=teacher)
+
+    if is_guest_session(request):
+        add_guest_submission_access_denied_message(request)
+        next_url = request.GET.get('next')
+        if next_url:
+            return redirect(next_url)
+        referer = request.META.get('HTTP_REFERER')
+        if referer:
+            return redirect(referer)
+        return redirect('exam_detail', exam_id=exam.exam_id)
 
     if not exam.marked_answer_paper:
         raise Http404("Answer paper not found")
@@ -2547,7 +2591,7 @@ def manage_answer_paper(request):
     if not is_teacher(request.user):
         messages.error(request, 'Only teachers can manage answer papers.')
         return redirect('dashboard')
-    
+
     teacher = request.user
     
     if request.method == 'POST':
@@ -2608,7 +2652,7 @@ def answer_paper_info_api(request):
     """API endpoint for fetching student records by exam_id for the answer paper management page"""
     if not is_teacher(request.user):
         return JsonResponse({'success': False, 'error': 'Not authorized'})
-    
+
     teacher = request.user
     exam_id = request.GET.get('exam_id', '').strip()
     
@@ -2626,6 +2670,7 @@ def answer_paper_info_api(request):
         return JsonResponse({'success': False, 'error': f'No exam found with ID #{exam_id}'})
     
     first_exam = exams.first()
+    next_url = reverse('manage_answer_paper')
     
     students = []
     for exam in exams:
@@ -2640,6 +2685,8 @@ def answer_paper_info_api(request):
             'grade': exam.grade,
             'has_paper': has_paper,
             'paper_url': paper_url,
+            'paper_view_url': f"{reverse('exam_view_answer', args=[exam.id])}?next={next_url}" if has_paper else None,
+            'paper_download_url': f"{reverse('exam_download_answer', args=[exam.id])}?next={next_url}" if has_paper else None,
         })
     
     return JsonResponse({
@@ -2855,6 +2902,7 @@ def exam_lookup_api(request):
     
     # Get current teacher
     teacher = get_teacher_for_user(request.user)
+    next_url = reverse('exam_lookup')
     # Find exam(s) with the given exam_id, filtered by teacher
     exams = Exam.objects.filter(exam_id=exam_id, teacher=teacher).select_related('subject', 'exam_type', 'student')
     
@@ -2908,6 +2956,8 @@ def exam_lookup_api(request):
             student_total = student_exam.total_marks
             student_percentage = round(student_exam.percentage, 1)
             marked_answer_url = student_exam.marked_answer_paper.url if student_exam.marked_answer_paper else None
+            marked_answer_view_url = reverse('exam_view_answer', args=[student_exam.pk]) if student_exam.marked_answer_paper else None
+            marked_answer_download_url = reverse('exam_download_answer', args=[student_exam.pk]) if student_exam.marked_answer_paper else None
 
             student_data = {
                 'student_name': student_exam.student.name,
@@ -2916,6 +2966,8 @@ def exam_lookup_api(request):
                 'percentage': student_percentage,
                 'has_marked_answer': marked_answer_url is not None,
                 'marked_answer_url': marked_answer_url,
+                'marked_answer_view_url': f"{marked_answer_view_url}?next={next_url}" if marked_answer_view_url else None,
+                'marked_answer_download_url': f"{marked_answer_download_url}?next={next_url}" if marked_answer_download_url else None,
             }
     else:
         # Teacher view - all students' data
@@ -2928,6 +2980,8 @@ def exam_lookup_api(request):
                 'percentage': round(exam.percentage, 1),
                 'has_marked_answer': marked_answer_url is not None,
                 'marked_answer_url': marked_answer_url,
+                'marked_answer_view_url': f"{reverse('exam_view_answer', args=[exam.pk])}?next={next_url}" if marked_answer_url else None,
+                'marked_answer_download_url': f"{reverse('exam_download_answer', args=[exam.pk])}?next={next_url}" if marked_answer_url else None,
             })
 
     # For backward compatibility, keep the old fields for student view
@@ -2935,6 +2989,8 @@ def exam_lookup_api(request):
     student_total = student_data['total_marks'] if student_data else None
     student_percentage = student_data['percentage'] if student_data else None
     marked_answer_url = student_data['marked_answer_url'] if student_data else None
+    marked_answer_view_url = student_data['marked_answer_view_url'] if student_data else None
+    marked_answer_download_url = student_data['marked_answer_download_url'] if student_data else None
 
     # Compute class average and lowest score for desktop stats
     total_participants = exams.count()
@@ -2968,6 +3024,8 @@ def exam_lookup_api(request):
             'pdf_url': pdf_url,
             'has_marked_answer': marked_answer_url is not None,
             'marked_answer_url': marked_answer_url,
+            'marked_answer_view_url': marked_answer_view_url,
+            'marked_answer_download_url': marked_answer_download_url,
             'student_marks': student_marks,
             'student_total': student_total,
             'student_percentage': student_percentage,

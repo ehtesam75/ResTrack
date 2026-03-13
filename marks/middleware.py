@@ -26,6 +26,12 @@ class GuestReadOnlyMiddleware:
 
             if path.startswith(self.RESTRICTED_PATH_PREFIXES) or path in self.RESTRICTED_EXACT_PATHS:
                 add_guest_read_only_message(request)
+                next_url = request.GET.get('next')
+                if next_url:
+                    return redirect(next_url)
+                referer = request.META.get('HTTP_REFERER')
+                if referer:
+                    return redirect(referer)
                 return redirect('dashboard')
 
             if request.method not in self.SAFE_METHODS and path != '/logout/':

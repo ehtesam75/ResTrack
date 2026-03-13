@@ -205,7 +205,7 @@
                                 {{ user.first_name|default:user.username }}
                             {% endif %}
                         </h2>
-                        <p class="text-purple-200 text-[10px] mt-0.5">{% if user.teacher_profile %}Teacher Account{% else %}Student Account{% endif %}</p>
+                        <p class="text-purple-200 text-[10px] mt-0.5">{% if user.teacher_profile %}Teacher{% if is_guest_session %} (Guest View){% endif %}{% else %}Student{% endif %}</p>
                     {% else %}
                         <h2 class="text-lg font-bold text-white">ResTrack</h2>
                         <p class="text-purple-200 text-[10px] mt-0.5">Result Tracking System</p>

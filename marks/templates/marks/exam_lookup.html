@@ -707,18 +707,18 @@
         card.appendChild(header);
         card.appendChild(score);
 
-        if (studentData.has_marked_answer && studentData.marked_answer_url) {
+        if (studentData.has_marked_answer && (studentData.marked_answer_view_url || studentData.marked_answer_url)) {
             const actions = document.createElement('div');
             actions.className = 'space-y-2';
             actions.innerHTML = `
-                <a href="${studentData.marked_answer_url}" target="_blank" class="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-medium py-2 px-3 rounded-lg transition-colors text-sm">
+                <a href="${studentData.marked_answer_view_url || studentData.marked_answer_url}" class="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-medium py-2 px-3 rounded-lg transition-colors text-sm">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                     </svg>
                     View Answer Paper
                 </a>
-                <a href="${toDownloadUrl(studentData.marked_answer_url)}" class="flex items-center justify-center gap-2 w-full bg-green-50 border border-green-200 text-green-600 hover:bg-green-100 font-medium py-2 px-3 rounded-lg transition-colors text-sm">
+                <a href="${studentData.marked_answer_download_url || toDownloadUrl(studentData.marked_answer_url)}" class="flex items-center justify-center gap-2 w-full bg-green-50 border border-green-200 text-green-600 hover:bg-green-100 font-medium py-2 px-3 rounded-lg transition-colors text-sm">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                     </svg>
@@ -810,10 +810,10 @@
                     document.getElementById('studentScore').textContent =
                         `${exam.student_marks}/${exam.student_total} (${exam.student_percentage}%)`;
                 }
-                if (exam.has_marked_answer && exam.marked_answer_url) {
+                if (exam.has_marked_answer && (exam.marked_answer_view_url || exam.marked_answer_url)) {
                     markedAnswerAvailable.classList.remove('hidden');
-                    document.getElementById('viewMarkedAnswerBtn').href = exam.marked_answer_url;
-                    document.getElementById('downloadMarkedAnswerBtn').href = toDownloadUrl(exam.marked_answer_url);
+                    document.getElementById('viewMarkedAnswerBtn').href = exam.marked_answer_view_url || exam.marked_answer_url;
+                    document.getElementById('downloadMarkedAnswerBtn').href = exam.marked_answer_download_url || toDownloadUrl(exam.marked_answer_url);
                 } else {
                     markedAnswerNotAvailable.classList.remove('hidden');
                 }
@@ -930,16 +930,16 @@
                     }
 
                     let answerCell;
-                    if (s.has_marked_answer && s.marked_answer_url) {
+                    if (s.has_marked_answer && (s.marked_answer_view_url || s.marked_answer_url)) {
                         answerCell = `<div class="inline-flex items-center gap-1.5">
-                            <a href="${s.marked_answer_url}" target="_blank" rel="noopener noreferrer" title="View"
+                            <a href="${s.marked_answer_view_url || s.marked_answer_url}" rel="noopener noreferrer" title="View"
                                 class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-green-50 text-green-600 hover:bg-green-100 transition-colors">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                                 </svg>
                             </a>
-                            <a href="${toDownloadUrl(s.marked_answer_url)}" title="Download"
+                            <a href="${s.marked_answer_download_url || toDownloadUrl(s.marked_answer_url)}" title="Download"
                                 class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-blue-50 text-blue-500 hover:bg-blue-100 transition-colors">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
@@ -985,10 +985,10 @@
                     document.getElementById('dStudentScore').textContent =
                         `${exam.student_marks}/${exam.student_total} (${exam.student_percentage}%)`;
                 }
-                if (exam.has_marked_answer && exam.marked_answer_url) {
+                if (exam.has_marked_answer && (exam.marked_answer_view_url || exam.marked_answer_url)) {
                     dMarkedAvail.classList.remove('hidden');
-                    document.getElementById('dViewMarkedAnswerBtn').href = exam.marked_answer_url;
-                    document.getElementById('dDownloadMarkedAnswerBtn').href = toDownloadUrl(exam.marked_answer_url);
+                    document.getElementById('dViewMarkedAnswerBtn').href = exam.marked_answer_view_url || exam.marked_answer_url;
+                    document.getElementById('dDownloadMarkedAnswerBtn').href = exam.marked_answer_download_url || toDownloadUrl(exam.marked_answer_url);
                 } else {
                     dMarkedNotAvail.classList.remove('hidden');
                 }

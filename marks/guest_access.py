@@ -86,3 +86,15 @@ def add_guest_session_started_message(request):
         )
     except MessageFailure:
         pass
+
+
+def add_guest_submission_access_denied_message(request):
+    """Show a popup when guest tries to access student submission files."""
+    try:
+        messages.error(
+            request,
+            'Guest accounts are view-only and cannot access student submission files.',
+            extra_tags='guest-popup',
+        )
+    except MessageFailure:
+        pass

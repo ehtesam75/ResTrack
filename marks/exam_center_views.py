@@ -13,12 +13,14 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from django.urls import reverse
 
 from django.core.cache import cache
 
 from .models import ExamCenterExam, AnswerSubmission
 from .forms import ExamCenterExamForm
 from .views import is_teacher, is_student, get_teacher_for_user
+from .guest_access import is_guest_session, add_guest_submission_access_denied_message
 from .notifications import notify_exam_created, notify_exam_edited, notify_bonus_time_granted
 from .push_views import CRON_NO_EXAMS_CACHE_KEY
 
@@ -129,6 +131,7 @@ def exam_center_create(request):
             exam = form.save(commit=False)
             exam.teacher = request.user
             exam.save()
+            messages.success(request, f'Exam {exam.exam_display_id} created successfully.')
             # Clear the "no active exams" cron cache so notifications
             # for this new exam are picked up immediately.
             cache.delete(CRON_NO_EXAMS_CACHE_KEY)
@@ -167,6 +170,7 @@ def exam_center_edit(request, exam_id):
         form = ExamCenterExamForm(request.POST, request.FILES, instance=exam, teacher=request.user)
         if form.is_valid():
             form.save()
+            messages.success(request, f'Exam {exam.exam_display_id} updated successfully.')
             cache.delete(CRON_NO_EXAMS_CACHE_KEY)
             # Notify enrolled students about the exam update
             try:
@@ -194,7 +198,9 @@ def exam_center_delete(request, exam_id):
     if not is_teacher(request.user):
         return JsonResponse({'error': 'Forbidden'}, status=403)
 
+    exam_display_id = exam.exam_display_id
     exam.delete()
+    messages.success(request, f'Exam {exam_display_id} deleted successfully.')
     return redirect('exam_center')
 
 
@@ -416,6 +422,7 @@ def exam_center_submissions(request, exam_id):
 
     # Build a list with student info
     submission_list = []
+    next_url = reverse('exam_center_submissions', args=[exam.pk])
     for sub in submissions:
         try:
             student_name = sub.student_user.student_profile.student.name
@@ -425,6 +432,8 @@ def exam_center_submissions(request, exam_id):
             'pk': sub.pk,
             'student_name': student_name,
             'file_url': sub.answer_file.url if sub.answer_file else None,
+            'view_url': f"{reverse('exam_center_view_submission', args=[sub.pk])}?next={next_url}" if sub.answer_file else None,
+            'download_url': f"{reverse('exam_center_download_submission', args=[sub.pk])}?next={next_url}" if sub.answer_file else None,
             'submitted_at': sub.submitted_at,
             'total_attempts': attempt_counts.get(sub.student_user_id, 0),
         })
@@ -438,6 +447,34 @@ def exam_center_submissions(request, exam_id):
 
 
 @login_required
+def exam_center_view_submission(request, submission_id):
+    """Open an answer submission file (teacher only)."""
+    from django.http import Http404
+
+    if not is_teacher(request.user):
+        messages.error(request, 'Only teachers can view submissions.')
+        return redirect('exam_center')
+
+    sub = get_object_or_404(AnswerSubmission, pk=submission_id, exam__teacher=request.user)
+
+    if is_guest_session(request):
+        add_guest_submission_access_denied_message(request)
+        next_url = request.GET.get('next')
+        if next_url:
+            return redirect(next_url)
+        referer = request.META.get('HTTP_REFERER')
+        if referer:
+            return redirect(referer)
+        return redirect('exam_center_submissions', exam_id=sub.exam.pk)
+
+    if not sub.answer_file:
+        raise Http404("No file attached to this submission.")
+
+    url = sub.answer_file.url if hasattr(sub.answer_file, 'url') else str(sub.answer_file)
+    return redirect(url)
+
+
+@login_required
 def exam_center_download_submission(request, submission_id):
     """Download an answer submission file (teacher only, via Cloudinary fl_attachment)."""
     from django.http import Http404
@@ -448,6 +485,16 @@ def exam_center_download_submission(request, submission_id):
         return redirect('exam_center')
 
     sub = get_object_or_404(AnswerSubmission, pk=submission_id, exam__teacher=request.user)
+
+    if is_guest_session(request):
+        add_guest_submission_access_denied_message(request)
+        next_url = request.GET.get('next')
+        if next_url:
+            return redirect(next_url)
+        referer = request.META.get('HTTP_REFERER')
+        if referer:
+            return redirect(referer)
+        return redirect('exam_center_submissions', exam_id=sub.exam.pk)
 
     if not sub.answer_file:
         raise Http404("No file attached to this submission.")

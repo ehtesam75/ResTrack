@@ -272,7 +272,7 @@ function lookupExam() {
                     </div>
                     <div class="flex items-center gap-2 flex-shrink-0">
                         ${stu.has_paper ? `
-                            <a href="${stu.paper_url}" target="_blank" rel="noopener noreferrer"
+                            <a href="${stu.paper_view_url || stu.paper_url}" rel="noopener noreferrer"
                                 class="inline-flex items-center gap-1 text-xs font-medium text-green-600 hover:text-green-800 transition-colors px-2 py-1 rounded-md bg-green-100 hover:bg-green-200">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>

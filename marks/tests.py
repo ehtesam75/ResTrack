@@ -1,9 +1,11 @@
+from datetime import date, time
+
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 
 from .guest_access import GUEST_ACCOUNT_SESSION_KEY, GUEST_USERNAME_SESSION_KEY
-from .models import GuestTeacherAccount, TeacherProfile
+from .models import AnswerSubmission, Exam, ExamCenterExam, ExamType, GuestTeacherAccount, Student, Subject, TeacherProfile
 
 
 class GuestReadOnlyAccessTests(TestCase):
@@ -57,3 +59,105 @@ class GuestReadOnlyAccessTests(TestCase):
 		self.assertEqual(response.status_code, 200)
 		self.assertNotContains(response, 'View-only guest session:')
 		self.assertNotContains(response, 'Signed in as guest1. Changes are blocked by the server.')
+
+	def test_guest_cannot_download_marked_answer_paper(self):
+		student = Student.objects.create(first_name='A', roll='1', class_name='7', teacher=self.teacher)
+		subject = Subject.objects.create(name='Math', short_name='MTH', teacher=self.teacher)
+		exam_type = ExamType.objects.create(name='CQ', teacher=self.teacher)
+		exam = Exam.objects.create(
+			student=student,
+			subject=subject,
+			exam_type=exam_type,
+			teacher=self.teacher,
+			date=date.today(),
+			chapter='1',
+			class_number=7,
+			total_marks=100,
+			mark_obtained=80,
+			exam_id=1,
+		)
+
+		response = self.client.get(reverse('exam_download_answer', args=[exam.pk]), follow=True)
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, 'Guest accounts are view-only and cannot access student submission files.')
+
+	def test_guest_cannot_open_manage_answer_paper_page(self):
+		response = self.client.get(reverse('manage_answer_paper'), follow=True)
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, 'Manage Answer Paper')
+
+	def test_guest_cannot_open_exam_center_submissions_page(self):
+		exam = ExamCenterExam.objects.create(
+			teacher=self.teacher,
+			exam_display_id='101',
+			class_number=7,
+			subject='Math',
+			chapter='1',
+			exam_mode='online',
+			exam_type='cq',
+			total_marks=100,
+			exam_date=date.today(),
+			start_time=time(9, 0),
+			duration_minutes=30,
+			submission_duration_minutes=10,
+		)
+
+		response = self.client.get(reverse('exam_center_submissions', args=[exam.pk]), follow=True)
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, 'Answer Submissions')
+
+	def test_guest_clicking_view_answer_action_is_blocked_with_popup(self):
+		student = Student.objects.create(first_name='B', roll='2', class_name='7', teacher=self.teacher)
+		subject = Subject.objects.create(name='English', short_name='ENG', teacher=self.teacher)
+		exam_type = ExamType.objects.create(name='CQ', teacher=self.teacher)
+		exam = Exam.objects.create(
+			student=student,
+			subject=subject,
+			exam_type=exam_type,
+			teacher=self.teacher,
+			date=date.today(),
+			chapter='2',
+			class_number=7,
+			total_marks=100,
+			mark_obtained=70,
+			exam_id=2,
+		)
+
+		response = self.client.get(reverse('exam_view_answer', args=[exam.pk]), follow=True)
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, 'Guest accounts are view-only and cannot access student submission files.')
+
+	def test_guest_clicking_exam_center_submission_actions_is_blocked_with_popup(self):
+		exam = ExamCenterExam.objects.create(
+			teacher=self.teacher,
+			exam_display_id='303',
+			class_number=7,
+			subject='Science',
+			chapter='3',
+			exam_mode='online',
+			exam_type='cq',
+			total_marks=100,
+			exam_date=date.today(),
+			start_time=time(9, 0),
+			duration_minutes=30,
+			submission_duration_minutes=10,
+		)
+		student_user = User.objects.create_user(username='student_u2', password='student-pass')
+		sub = AnswerSubmission.objects.create(
+			exam=exam,
+			student_user=student_user,
+			answer_file='https://res.cloudinary.com/demo/raw/upload/sample.pdf',
+			is_final=True,
+		)
+
+		view_response = self.client.get(reverse('exam_center_view_submission', args=[sub.pk]), follow=True)
+		download_response = self.client.get(reverse('exam_center_download_submission', args=[sub.pk]), follow=True)
+
+		self.assertEqual(view_response.status_code, 200)
+		self.assertContains(view_response, 'Guest accounts are view-only and cannot access student submission files.')
+		self.assertEqual(download_response.status_code, 200)
+		self.assertContains(download_response, 'Guest accounts are view-only and cannot access student submission files.')
