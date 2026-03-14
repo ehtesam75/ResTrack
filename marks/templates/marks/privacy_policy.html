@@ -245,28 +245,16 @@
                 <p class="text-[11px] text-gray-600 leading-relaxed mb-2">
                     For questions or concerns regarding this Privacy Policy, contact:
                 </p>
-                <a href="mailto:ehtesamzunnuryn@gmail.com" class="inline-flex items-center gap-2 bg-green-100 hover:bg-green-200 rounded-lg px-3 py-2 transition-colors border border-green-200">
+                <a href="mailto:support.restrack@gmail.com" class="inline-flex items-center gap-2 bg-green-100 hover:bg-green-200 rounded-lg px-3 py-2 transition-colors border border-green-200">
                     <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                     </svg>
-                    <span class="text-[10px] text-green-700 font-medium">ehtesamzunnuryn@gmail.com</span>
+                    <span class="text-[10px] text-green-700 font-medium">support.restrack@gmail.com</span>
                 </a>
             </div>
         </div>
     </div>
 
-    {# Quick Links card #}
-    <div class="glass-effect rounded-xl border border-gray-200 shadow-lg p-3 mb-3 animate-fade-in-up" style="animation-delay: 0.2s;">
-        <h3 class="text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1.5"><span>🔗</span> Quick Links</h3>
-        <div class="grid grid-cols-2 gap-2">
-            <a href="{% url 'guide' %}" class="flex items-center gap-2 bg-purple-50 hover:bg-purple-100 rounded-lg p-2.5 transition-colors"><div class="w-7 h-7 bg-purple-100 rounded-lg flex items-center justify-center"><span class="text-sm">📚</span></div><span class="text-xs font-medium text-purple-700">User Guide</span></a>
-            <a href="{% url 'about' %}" class="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 rounded-lg p-2.5 transition-colors"><div class="w-7 h-7 bg-blue-100 rounded-lg flex items-center justify-center"><span class="text-sm">ℹ️</span></div><span class="text-xs font-medium text-blue-700">About</span></a>
-            <a href="{% if user.is_authenticated %}dashboard{% else %}home{% endif %}" class="flex items-center gap-2 bg-green-50 hover:bg-green-100 rounded-lg p-2.5 transition-colors"><div class="w-7 h-7 bg-green-100 rounded-lg flex items-center justify-center"><span class="text-sm">📊</span></div><span class="text-xs font-medium text-green-700">{% if user.is_authenticated %}Dashboard{% else %}Home{% endif %}</span></a>
-            {% if user.is_authenticated %}
-            <a href="{% url 'leaderboard' %}" class="flex items-center gap-2 bg-orange-50 hover:bg-orange-100 rounded-lg p-2.5 transition-colors"><div class="w-7 h-7 bg-orange-100 rounded-lg flex items-center justify-center"><span class="text-sm">🏆</span></div><span class="text-xs font-medium text-orange-700">Leaderboard</span></a>
-            {% endif %}
-        </div>
-    </div>
 </div>
 
 
@@ -619,11 +607,11 @@
                 <p class="text-sm text-gray-600 leading-relaxed mb-4">
                     For questions or concerns regarding this Privacy Policy, contact:
                 </p>
-                <a href="mailto:ehtesamzunnuryn@gmail.com" class="inline-flex items-center gap-3 bg-green-100 hover:bg-green-200 rounded-lg px-4 py-3 transition-colors border border-green-200">
+                <a href="mailto:support.restrack@gmail.com" class="inline-flex items-center gap-3 bg-green-100 hover:bg-green-200 rounded-lg px-4 py-3 transition-colors border border-green-200">
                     <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                     </svg>
-                    <span class="text-sm text-green-700 font-medium">ehtesamzunnuryn@gmail.com</span>
+                    <span class="text-sm text-green-700 font-medium">support.restrack@gmail.com</span>
                 </a>
             </div>
         </div>
