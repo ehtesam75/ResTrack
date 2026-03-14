@@ -61,7 +61,11 @@
                     <div class="flex-shrink-0 flex items-center">
                         <a href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}" class="text-xl font-bold gradient-text hover:opacity-80 transition-opacity">ResTrack</a>
                     </div>
+                    {% if not user.is_authenticated %}
                     <div class="hidden lg:ml-8 lg:flex lg:space-x-6">
+                        <a href="{% url 'home' %}" class="{% if request.path == '/' %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors nav-link">
+                            Home
+                        </a>
                         <a href="{% url 'about' %}" class="{% if 'about' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors nav-link">
                             About
                         </a>
@@ -69,9 +73,10 @@
                             Guide
                         </a>
                         <a href="{% url 'privacy_policy' %}" class="{% if 'privacy-policy' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors nav-link">
-                            Privacy Policy
+                            Privacy
                         </a>
                     </div>
+                    {% endif %}
                     {% if user.is_authenticated %}
                     <div class="hidden lg:ml-8 lg:flex lg:space-x-6">
                         <a href="{% url 'dashboard' %}" class="{% if request.path == '/dashboard/' %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors nav-link">
@@ -97,6 +102,9 @@
                         </a>
                         <a href="{% url 'leaderboard' %}" class="{% if 'leaderboard' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors nav-link">
                             Leaderboard
+                        </a>
+                        <a href="{% url 'guide' %}" class="{% if 'guide' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors nav-link">
+                            Guide
                         </a>
                     </div>
                     {% endif %}
@@ -336,7 +344,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                     </svg>
                 </div>
-                <span>Privacy Policy</span>
+                <span>Privacy</span>
             </a>
             
             {% if user.is_authenticated %}
@@ -386,7 +394,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                     </svg>
                 </div>
-                <span>Privacy Policy</span>
+                <span>Privacy</span>
             </a>
             <a href="{% url 'guide' %}" class="{% if 'guide' in request.path %}bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 border-l-2 border-purple-500{% else %}text-gray-600 hover:bg-gray-50 border-l-2 border-transparent{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-r-lg font-medium transition-all text-sm">
                 <div class="w-8 h-8 rounded-lg {% if 'guide' in request.path %}bg-purple-100{% else %}bg-gray-100{% endif %} flex items-center justify-center">
