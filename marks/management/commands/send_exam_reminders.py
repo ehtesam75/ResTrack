@@ -9,6 +9,9 @@ It checks all active ExamCenterExams and sends timed notifications:
   - When exam starts
   - 10 minutes before exam writing period ends
   - When exam ends (+ submission window open for online exams)
+    - Teacher alert when exam starts
+    - Teacher alert when exam ends
+    - Teacher alert when submission window ends (online exams)
 
 Each notification is sent at most once per exam, tracked via ExamNotificationLog.
 """
@@ -24,6 +27,9 @@ from marks.notifications import (
     notify_exam_started,
     notify_exam_ending_soon,
     notify_exam_ended,
+    notify_teacher_exam_started,
+    notify_teacher_exam_ended,
+    notify_teacher_submission_ended,
 )
 
 
@@ -123,6 +129,14 @@ class Command(BaseCommand):
                 self._mark_sent(exam, 'reminder_start', existing_logs)
                 sent += 1
 
+            if not self._already_sent(exam, 'teacher_exam_started', existing_logs):
+                try:
+                    notify_teacher_exam_started(exam)
+                except Exception as e:
+                    self.stderr.write(f'Error sending teacher start notification for exam {exam.pk}: {e}')
+                self._mark_sent(exam, 'teacher_exam_started', existing_logs)
+                sent += 1
+
         # 3. 10 minutes before exam writing period ends
         ten_before_end = exam.exam_end_datetime - _dt.timedelta(minutes=10)
         if ten_before_end <= now < exam.exam_end_datetime:
@@ -142,6 +156,24 @@ class Command(BaseCommand):
                 except Exception as e:
                     self.stderr.write(f'Error sending exam-ended notification for exam {exam.pk}: {e}')
                 self._mark_sent(exam, 'exam_ended', existing_logs)
+                sent += 1
+
+            if not self._already_sent(exam, 'teacher_exam_ended', existing_logs):
+                try:
+                    notify_teacher_exam_ended(exam)
+                except Exception as e:
+                    self.stderr.write(f'Error sending teacher exam-ended notification for exam {exam.pk}: {e}')
+                self._mark_sent(exam, 'teacher_exam_ended', existing_logs)
+                sent += 1
+
+        # 5. Online submission window ended (final close)
+        if exam.exam_mode == 'online' and now >= exam.final_end_datetime:
+            if not self._already_sent(exam, 'teacher_submission_ended', existing_logs):
+                try:
+                    notify_teacher_submission_ended(exam)
+                except Exception as e:
+                    self.stderr.write(f'Error sending teacher submission-ended notification for exam {exam.pk}: {e}')
+                self._mark_sent(exam, 'teacher_submission_ended', existing_logs)
                 sent += 1
 
         return sent

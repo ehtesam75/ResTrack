@@ -2,7 +2,9 @@
 from django.db.models.signals import pre_save, post_delete, post_save
 from django.dispatch import receiver
 from django.db.models import Max
+from django.contrib.auth.models import User
 from .models import Exam
+from .notifications import notify_teacher_password_changed
 
 @receiver(post_save, sender=Exam)
 def recalculate_points_on_save(sender, instance, **kwargs):
@@ -43,3 +45,33 @@ def recalculate_points_on_delete(sender, instance, **kwargs):
         return
     if instance.student:
         instance.student.recalculate_lifetime_points()
+
+
+@receiver(pre_save, sender=User)
+def track_user_password_change(sender, instance, **kwargs):
+    """Mark whether a user's password hash changed before saving."""
+    instance._password_changed_for_push = False
+
+    if not instance.pk:
+        return
+
+    old = sender.objects.filter(pk=instance.pk).values('password').first()
+    if not old:
+        return
+
+    instance._password_changed_for_push = old['password'] != instance.password
+
+
+@receiver(post_save, sender=User)
+def notify_teacher_on_password_change(sender, instance, created, **kwargs):
+    """Send a push alert when an existing teacher account password is changed."""
+    if created:
+        return
+
+    if not getattr(instance, '_password_changed_for_push', False):
+        return
+
+    if not hasattr(instance, 'teacher_profile'):
+        return
+
+    notify_teacher_password_changed(instance)

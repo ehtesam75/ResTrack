@@ -64,6 +64,78 @@ def _send_to_users(user_ids, payload):
 # Public helpers called from views
 # ------------------------------------------------------------------
 
+def notify_teacher_password_changed(user):
+    """
+    Notify a teacher when their account password has been changed.
+
+    Args:
+        user: Django User instance for the teacher account.
+    """
+    if not user or not user.is_active:
+        return 0
+
+    payload = {
+        "title": "🔐 Password Changed",
+        "body": "Your ResTrack account password was changed. If this was not you, reset it immediately.",
+        "url": "/login/",
+        "tag": f"password-changed-{user.id}",
+    }
+
+    return _send_to_users([user.id], payload)
+
+
+def notify_teacher_exam_started(exam_center_exam):
+    """Notify the exam creator teacher when their exam starts."""
+    teacher = exam_center_exam.teacher
+    if not teacher or not teacher.is_active:
+        return 0
+
+    payload = {
+        "title": "🚀 Your Exam Started",
+        "body": f"Exam #{exam_center_exam.exam_display_id} — {exam_center_exam.subject} is now running.",
+        "url": f"/exam-center/{exam_center_exam.pk}/",
+        "tag": f"teacher-exam-started-{exam_center_exam.pk}",
+    }
+    return _send_to_users([teacher.id], payload)
+
+
+def notify_teacher_exam_ended(exam_center_exam):
+    """Notify the exam creator teacher when the writing window ends."""
+    teacher = exam_center_exam.teacher
+    if not teacher or not teacher.is_active:
+        return 0
+
+    if exam_center_exam.exam_mode == 'online':
+        body = (
+            f"Exam #{exam_center_exam.exam_display_id} — {exam_center_exam.subject} writing time ended. "
+            f"Submission window is now open."
+        )
+    else:
+        body = f"Exam #{exam_center_exam.exam_display_id} — {exam_center_exam.subject} has ended."
+
+    payload = {
+        "title": "🏁 Your Exam Ended",
+        "body": body,
+        "url": f"/exam-center/{exam_center_exam.pk}/",
+        "tag": f"teacher-exam-ended-{exam_center_exam.pk}",
+    }
+    return _send_to_users([teacher.id], payload)
+
+
+def notify_teacher_submission_ended(exam_center_exam):
+    """Notify the exam creator teacher when online submission window fully ends."""
+    teacher = exam_center_exam.teacher
+    if not teacher or not teacher.is_active:
+        return 0
+
+    payload = {
+        "title": "✅ Submission Window Ended",
+        "body": f"Exam #{exam_center_exam.exam_display_id} — {exam_center_exam.subject} submission has closed.",
+        "url": f"/exam-center/{exam_center_exam.pk}/",
+        "tag": f"teacher-submission-ended-{exam_center_exam.pk}",
+    }
+    return _send_to_users([teacher.id], payload)
+
 def notify_exam_created(exam_center_exam):
     """
     Notify all enrolled students of a teacher when a new Exam Center exam
