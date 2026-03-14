@@ -1308,6 +1308,7 @@ def edit_student(request, student_id):
     
     teacher = request.user
     student = get_object_or_404(Student, id=student_id, teacher=teacher)
+    guest_session = is_guest_session(request)
     
     # Get the student's user account if it exists
     student_user = None
@@ -1315,66 +1316,70 @@ def edit_student(request, student_id):
         student_user = student.user_profile.user
     
     if request.method == 'POST':
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
-        roll = request.POST.get('roll')
-        class_number = request.POST.get('class_number')
-        username = request.POST.get('username')
-        new_password = request.POST.get('new_password')
-        confirm_password = request.POST.get('confirm_password')
-
-        # Validate required fields
-        if not all([first_name, roll, class_number]):
-            messages.error(request, 'First name, roll, and class are required!')
+        if guest_session:
+            add_guest_read_only_message(request)
         else:
-            try:
-                # Update student info
-                student.first_name = first_name
-                student.last_name = last_name or None
-                student.roll = roll
-                student.class_name = str(class_number)
-                student.save()
-                
-                # Update user credentials if provided
-                if student_user:
-                    # Update username if changed
-                    if username and username != student_user.username:
-                        if User.objects.filter(username=username).exclude(id=student_user.id).exists():
-                            messages.error(request, 'This username is already taken. Please choose another.')
-                            return redirect('edit_student', student_id=student_id)
-                        student_user.username = username
-                        student_user.save()
-                    
-                    # Update password if provided
-                    if new_password:
-                        if new_password != confirm_password:
-                            messages.error(request, 'Passwords do not match.')
-                            return redirect('edit_student', student_id=student_id)
-                        if len(new_password) < 6:
-                            messages.error(request, 'Password must be at least 6 characters.')
-                            return redirect('edit_student', student_id=student_id)
-                        student_user.set_password(new_password)
-                        student_user.save()
-                        # Save raw password for teacher reference
-                        if hasattr(student, 'user_profile'):
-                            student.user_profile.raw_password = new_password
-                            student.user_profile.save()
+            first_name = request.POST.get('first_name')
+            last_name = request.POST.get('last_name')
+            roll = request.POST.get('roll')
+            class_number = request.POST.get('class_number')
+            username = request.POST.get('username')
+            new_password = request.POST.get('new_password')
+            confirm_password = request.POST.get('confirm_password')
 
-                messages.success(request, f'Student {student.name} updated successfully.')
-                
-                return redirect('student_detail', student_id=student.id)
-            except Exception as e:
-                messages.error(request, f'Error updating student: {str(e)}')
+            # Validate required fields
+            if not all([first_name, roll, class_number]):
+                messages.error(request, 'First name, roll, and class are required!')
+            else:
+                try:
+                    # Update student info
+                    student.first_name = first_name
+                    student.last_name = last_name or None
+                    student.roll = roll
+                    student.class_name = str(class_number)
+                    student.save()
+                    
+                    # Update user credentials if provided
+                    if student_user:
+                        # Update username if changed
+                        if username and username != student_user.username:
+                            if User.objects.filter(username=username).exclude(id=student_user.id).exists():
+                                messages.error(request, 'This username is already taken. Please choose another.')
+                                return redirect('edit_student', student_id=student_id)
+                            student_user.username = username
+                            student_user.save()
+                        
+                        # Update password if provided
+                        if new_password:
+                            if new_password != confirm_password:
+                                messages.error(request, 'Passwords do not match.')
+                                return redirect('edit_student', student_id=student_id)
+                            if len(new_password) < 6:
+                                messages.error(request, 'Password must be at least 6 characters.')
+                                return redirect('edit_student', student_id=student_id)
+                            student_user.set_password(new_password)
+                            student_user.save()
+                            # Save raw password for teacher reference
+                            if hasattr(student, 'user_profile'):
+                                student.user_profile.raw_password = new_password
+                                student.user_profile.save()
+
+                    messages.success(request, f'Student {student.name} updated successfully.')
+                    
+                    return redirect('student_detail', student_id=student.id)
+                except Exception as e:
+                    messages.error(request, f'Error updating student: {str(e)}')
     
     # Get stored raw password for display
     student_raw_password = ''
-    if student_user and hasattr(student, 'user_profile') and student.user_profile.raw_password:
+    if not guest_session and student_user and hasattr(student, 'user_profile') and student.user_profile.raw_password:
         student_raw_password = student.user_profile.raw_password
 
     context = {
         'student': student,
         'student_user': student_user,
         'student_raw_password': student_raw_password,
+        'is_guest_session': guest_session,
         'is_teacher': True,
     }
     return render(request, 'marks/edit_student.html', context)
