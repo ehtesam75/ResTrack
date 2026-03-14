@@ -561,7 +561,7 @@
         })();
 
         (function() {
-            function createPopup(messageText, level) {
+            function createPopup(messageText, level, titleOverride) {
                 const layer = document.getElementById('messageLayer') || document.body;
 
                 const styleMap = {
@@ -592,6 +592,7 @@
                 };
 
                 const cfg = styleMap[level] || styleMap.info;
+                const titleText = titleOverride || cfg.title;
                 const popup = document.createElement('div');
                 popup.setAttribute('data-popup-message', 'dynamic');
                 popup.className = 'fixed right-4 left-4 sm:left-auto sm:w-full sm:max-w-sm z-[100] rounded-2xl border bg-white/95 px-4 py-3 shadow-2xl backdrop-blur transition-all duration-300 ' + cfg.border;
@@ -602,7 +603,7 @@
                             '<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">' + cfg.icon + '</svg>' +
                         '</div>' +
                         '<div class="min-w-0 flex-1">' +
-                            '<p class="text-sm font-semibold text-gray-900">' + cfg.title + '</p>' +
+                            '<p class="text-sm font-semibold text-gray-900">' + titleText + '</p>' +
                             '<p class="mt-1 text-sm text-gray-700"></p>' +
                         '</div>' +
                         '<button type="button" data-popup-dismiss class="shrink-0 rounded-lg p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600" aria-label="Dismiss notification">' +

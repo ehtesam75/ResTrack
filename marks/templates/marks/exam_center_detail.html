@@ -172,7 +172,7 @@
         {% endif %}
     </div>
 
-    {% if is_teacher and exam.question_pdf %}
+    {% if is_teacher and not is_guest_session and exam.question_pdf %}
     <details class="bg-white rounded-2xl shadow-md overflow-hidden mt-5">
         <summary class="px-5 py-3 bg-gray-50 border-b border-gray-100 cursor-pointer text-sm font-bold text-gray-700 select-none flex items-center justify-between">
             <span><i class="fa-solid fa-file-pdf text-red-500 mr-2"></i>Question Paper</span>
@@ -191,6 +191,14 @@
             </div>
         </div>
     </details>
+    {% endif %}
+
+    {% if is_guest_session and exam.question_pdf %}
+    <div class="bg-white rounded-2xl shadow-md p-4 mt-5 border border-amber-200">
+        <p class="text-xs text-amber-700 font-medium">
+            Question paper will be available after the exam starts.
+        </p>
+    </div>
     {% endif %}
     {% endif %}
 
@@ -410,6 +418,27 @@
         </a>
         {% endif %}
     </div>
+
+    {% if is_guest_session and exam.question_pdf %}
+    <details class="bg-white rounded-2xl shadow-md overflow-hidden mt-5">
+        <summary class="px-5 py-3 bg-gray-50 border-b border-gray-100 cursor-pointer text-sm font-bold text-gray-700 select-none flex items-center justify-between">
+            <span><i class="fa-solid fa-file-pdf text-red-500 mr-2"></i>Question Paper</span>
+            <span class="text-xs text-gray-400 font-normal details-toggle-text">Click to expand</span>
+        </summary>
+        <div class="p-3 sm:p-4">
+            <div class="pdfjs-viewer" data-pdf-url="{{ exam.question_pdf.url }}" style="height:60vh;min-height:350px">
+                <div class="pdf-toolbar">
+                    <button type="button" class="pdf-prev" title="Previous page" disabled><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></button>
+                    <span class="pdf-page-info"><span class="pdf-current">&ndash;</span> / <span class="pdf-total">&ndash;</span></span>
+                    <button type="button" class="pdf-next" title="Next page" disabled><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button>
+                    <a href="{{ exam.question_pdf.url }}" target="_blank" rel="noopener" class="pdf-newtab">Open in new tab &#8599;</a>
+                </div>
+                <div class="pdf-canvas-wrap"><canvas></canvas></div>
+                <div class="pdf-loading"><div class="pdf-spinner"></div><span>Loading PDF&hellip;</span></div>
+            </div>
+        </div>
+    </details>
+    {% endif %}
     {% endif %}
 
     <!-- Teacher: all submissions preview (for running/submission status) -->
@@ -525,7 +554,17 @@
             .then(r=>r.json())
             .then(data=>{
                 if(data.success) location.reload();
-                else alert(data.error||'Failed to grant bonus time.');
+                else {
+                    if(data.title && data.message){
+                        if(window.showResTrackPopup){
+                            window.showResTrackPopup(data.message, 'error', data.title);
+                        } else {
+                            alert(`${data.title}\n\n${data.message}`);
+                        }
+                    } else {
+                        alert(data.error||'Failed to grant bonus time.');
+                    }
+                }
             }).catch(()=>alert('Network error.'));
         });
     }
