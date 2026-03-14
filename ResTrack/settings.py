@@ -222,6 +222,11 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False,
         },
+        'marks.views': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
     },
 }
 

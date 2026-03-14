@@ -183,7 +183,30 @@ def _send_targeted_password_reset_email(request, user):
         target_user=user,
     )
     if not form.is_valid():
+        logger.warning('Password reset form invalid for user_id=%s username=%s', user.pk, user.username)
         return False
+
+    eligible_users = list(form.get_users(user.email or ''))
+    if not eligible_users:
+        logger.warning(
+            'Password reset email skipped (no eligible recipients) for user_id=%s username=%s has_usable_password=%s email_present=%s',
+            user.pk,
+            user.username,
+            user.has_usable_password(),
+            bool((user.email or '').strip()),
+        )
+        return False
+
+    logger.info(
+        'Attempting password reset email send for user_id=%s username=%s recipient=%s host=%s port=%s tls=%s timeout=%s',
+        user.pk,
+        user.username,
+        user.email,
+        settings.EMAIL_HOST,
+        settings.EMAIL_PORT,
+        settings.EMAIL_USE_TLS,
+        getattr(settings, 'EMAIL_TIMEOUT', None),
+    )
 
     try:
         form.save(
@@ -200,6 +223,7 @@ def _send_targeted_password_reset_email(request, user):
             user.username,
         )
         return False
+    logger.info('Password reset email handed off to backend for user_id=%s username=%s', user.pk, user.username)
     return True
 
 
