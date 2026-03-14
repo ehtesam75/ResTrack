@@ -344,8 +344,9 @@
         {% if exam.question_pdf %}
             {% if is_student %}
             <details class="bg-white rounded-2xl shadow-md overflow-hidden">
-                <summary class="px-5 py-3 bg-gray-50 border-b border-gray-100 cursor-pointer text-sm font-bold text-gray-700 select-none">
-                    <i class="fa-solid fa-file-pdf text-red-500 mr-2"></i>Question Paper
+                <summary class="px-5 py-3 bg-gray-50 border-b border-gray-100 cursor-pointer text-sm font-bold text-gray-700 select-none flex items-center justify-between">
+                    <span><i class="fa-solid fa-file-pdf text-red-500 mr-2"></i>Question Paper</span>
+                    <span class="text-xs text-gray-400 font-normal details-toggle-text">Click to expand</span>
                 </summary>
                 <div class="p-3 sm:p-4">
                     <div class="pdfjs-viewer" data-pdf-url="{{ exam.question_pdf.url }}" style="height:60vh;min-height:350px">
@@ -419,7 +420,8 @@
         {% endif %}
     </div>
 
-    {% if is_guest_session and exam.question_pdf %}
+    {% if exam.question_pdf %}
+    {% if is_teacher or is_student %}
     <details class="bg-white rounded-2xl shadow-md overflow-hidden mt-5">
         <summary class="px-5 py-3 bg-gray-50 border-b border-gray-100 cursor-pointer text-sm font-bold text-gray-700 select-none flex items-center justify-between">
             <span><i class="fa-solid fa-file-pdf text-red-500 mr-2"></i>Question Paper</span>
@@ -438,6 +440,7 @@
             </div>
         </div>
     </details>
+    {% endif %}
     {% endif %}
     {% endif %}
 
