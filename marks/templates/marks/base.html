@@ -61,6 +61,17 @@
                     <div class="flex-shrink-0 flex items-center">
                         <a href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}" class="text-xl font-bold gradient-text hover:opacity-80 transition-opacity">ResTrack</a>
                     </div>
+                    <div class="hidden lg:ml-8 lg:flex lg:space-x-6">
+                        <a href="{% url 'about' %}" class="{% if 'about' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors nav-link">
+                            About
+                        </a>
+                        <a href="{% url 'guide' %}" class="{% if 'guide' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors nav-link">
+                            Guide
+                        </a>
+                        <a href="{% url 'privacy_policy' %}" class="{% if 'privacy-policy' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors nav-link">
+                            Privacy Policy
+                        </a>
+                    </div>
                     {% if user.is_authenticated %}
                     <div class="hidden lg:ml-8 lg:flex lg:space-x-6">
                         <a href="{% url 'dashboard' %}" class="{% if request.path == '/dashboard/' %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors nav-link">
@@ -86,9 +97,6 @@
                         </a>
                         <a href="{% url 'leaderboard' %}" class="{% if 'leaderboard' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors nav-link">
                             Leaderboard
-                        </a>
-                        <a href="{% url 'guide' %}" class="{% if 'guide' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors nav-link">
-                            Guide
                         </a>
                     </div>
                     {% endif %}
@@ -157,15 +165,6 @@
                         <!-- Home link only visible on mobile -->
                         <a href="{% url 'home' %}" class="lg:hidden {% if request.path == '/' %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-3 py-2 text-sm font-medium transition-colors">
                             Home
-                        </a>
-                        <a href="{% url 'about' %}" class="{% if 'about' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-3 py-2 text-sm font-medium transition-colors">
-                            About
-                        </a>
-                        <a href="{% url 'guide' %}" class="{% if 'guide' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-3 py-2 text-sm font-medium transition-colors">
-                            Guide
-                        </a>
-                        <a href="{% url 'privacy_policy' %}" class="{% if 'privacy-policy' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-3 py-2 text-sm font-medium transition-colors">
-                            Privacy Policy
                         </a>
                         <a href="{% url 'login' %}" class="text-gray-700 hover:text-purple-600 px-3 py-2 text-sm font-medium transition-colors">
                             Log In
