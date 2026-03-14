@@ -10,6 +10,9 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Sum, Q
 from django.urls import reverse
+from smtplib import SMTPException
+import logging
+import socket
 import json
 from .models import Student, Subject, ExamType, Exam, ExamQuestionPaper, GradeScale, LifetimePoints, PointsSpent, PointTransaction, TeacherProfile, StudentProfile, ExamCenterExam, GuestTeacherAccount
 from .services import LeaderboardService, DashboardService, ChartDataService, count_unique_exams, get_grade_color_map
@@ -25,6 +28,9 @@ from .forms import (
 )
 from .notifications import notify_result_published, notify_result_edited
 from .guest_access import start_guest_session, clear_guest_session, is_guest_session, delete_guest_user_account, add_guest_read_only_message, add_guest_session_started_message, add_guest_submission_access_denied_message
+
+
+logger = logging.getLogger(__name__)
 
 
 def is_teacher(user):
@@ -179,13 +185,21 @@ def _send_targeted_password_reset_email(request, user):
     if not form.is_valid():
         return False
 
-    form.save(
-        request=request,
-        use_https=request.is_secure(),
-        token_generator=default_token_generator,
-        email_template_name='registration/password_reset_email.txt',
-        subject_template_name='registration/password_reset_subject.txt',
-    )
+    try:
+        form.save(
+            request=request,
+            use_https=request.is_secure(),
+            token_generator=default_token_generator,
+            email_template_name='registration/password_reset_email.txt',
+            subject_template_name='registration/password_reset_subject.txt',
+        )
+    except (SMTPException, OSError, socket.timeout):
+        logger.exception(
+            'Failed to send password reset email for user_id=%s username=%s',
+            user.pk,
+            user.username,
+        )
+        return False
     return True
 
 
@@ -255,7 +269,7 @@ def password_reset_select_username(request):
                 request.session.pop('password_reset_lookup', None)
                 return redirect('password_reset_done')
 
-            form.add_error('username', 'Selected username is no longer available. Please try again.')
+            form.add_error('username', 'Unable to send reset email for this account right now. Please try again later.')
     else:
         form = UsernameSelectionForm(username_choices=username_choices)
 
