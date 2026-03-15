@@ -56,27 +56,11 @@
     <!-- Navigation -->
     <nav class="glass-effect shadow-lg sticky top-0 z-50 border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
+            <div class="flex justify-between h-16 relative">
                 <div class="flex">
                     <div class="flex-shrink-0 flex items-center">
                         <a href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}" class="text-xl font-bold gradient-text hover:opacity-80 transition-opacity">ResTrack</a>
                     </div>
-                    {% if not user.is_authenticated %}
-                    <div class="hidden lg:ml-8 lg:flex lg:space-x-6">
-                        <a href="{% url 'home' %}" class="{% if request.path == '/' %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors nav-link">
-                            Home
-                        </a>
-                        <a href="{% url 'about' %}" class="{% if 'about' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors nav-link">
-                            About
-                        </a>
-                        <a href="{% url 'guide' %}" class="{% if 'guide' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors nav-link">
-                            Guide
-                        </a>
-                        <a href="{% url 'privacy_policy' %}" class="{% if 'privacy-policy' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors nav-link">
-                            Privacy
-                        </a>
-                    </div>
-                    {% endif %}
                     {% if user.is_authenticated %}
                     <div class="hidden lg:ml-8 lg:flex lg:space-x-6">
                         <a href="{% url 'dashboard' %}" class="{% if request.path == '/dashboard/' %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors nav-link">
@@ -109,6 +93,22 @@
                     </div>
                     {% endif %}
                 </div>
+                {% if not user.is_authenticated %}
+                <div class="hidden lg:flex lg:absolute lg:inset-y-0 lg:left-1/2 lg:-translate-x-1/2 lg:items-center lg:space-x-6">
+                    <a href="{% url 'home' %}" class="{% if request.path == '/' %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex h-full items-center px-1 text-sm font-medium transition-colors nav-link">
+                        Home
+                    </a>
+                    <a href="{% url 'about' %}" class="{% if 'about' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex h-full items-center px-1 text-sm font-medium transition-colors nav-link">
+                        About
+                    </a>
+                    <a href="{% url 'guide' %}" class="{% if 'guide' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex h-full items-center px-1 text-sm font-medium transition-colors nav-link">
+                        Guide
+                    </a>
+                    <a href="{% url 'privacy_policy' %}" class="{% if 'privacy-policy' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex h-full items-center px-1 text-sm font-medium transition-colors nav-link">
+                        Privacy
+                    </a>
+                </div>
+                {% endif %}
                 <div class="flex items-center gap-3">
                     {% if user.is_authenticated %}
                     <!-- Remove Manage button from top bar -->
