@@ -202,7 +202,7 @@
         <div class="glass-effect rounded-xl p-3 sm:p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col">
             <h2 class="text-sm sm:text-base font-bold gradient-text mb-2 sm:mb-3">📈 Subject Performance Chart</h2>
             <div class="flex-1 overflow-x-auto" style="min-height: 250px; position: relative;">
-                <div style="min-width: 400px; height: 100%;">
+                <div id="subjectPerformanceChartInner" style="min-width: 400px; width: 100%; height: 100%;">
                     <canvas id="subjectPerformanceChart"></canvas>
                 </div>
             </div>
@@ -394,19 +394,56 @@
 
     if (subjectData.length > 0) {
         const isMobileView = window.matchMedia('(max-width: 640px)').matches;
-        const mobileLabelMaxLength = 6;
-        const desktopLabelMaxLength = 8;
-        const subjectLabels = subjectData.map(item => {
-            const fullName = item.subject.name || '';
-            const shortName = item.subject.short_name;
-            const sourceLabel = shortName || fullName;
-            const maxLength = isMobileView ? mobileLabelMaxLength : desktopLabelMaxLength;
-            return sourceLabel.length > maxLength
-                ? sourceLabel.substring(0, maxLength) + '.'
-                : sourceLabel;
-        });
+        const subjectLabels = subjectData.map(item => item.subject.short_name || item.subject.name || '');
         const subjectFullLabels = subjectData.map(item => item.subject.name);
         const subjectValues = subjectData.map(item => parseFloat(item.average_percentage));
+        const chartInner = document.getElementById('subjectPerformanceChartInner');
+
+        if (chartInner) {
+            if (isMobileView) {
+                // Keep full plot width visible and expand only when many subjects exist.
+                const minWidthPerSubject = 95;
+                const basePaddingWidth = 80;
+                const targetWidth = (subjectLabels.length * minWidthPerSubject) + basePaddingWidth;
+                const containerWidth = chartInner.parentElement ? chartInner.parentElement.clientWidth : 0;
+                const finalWidth = Math.max(targetWidth, containerWidth);
+                chartInner.style.width = `${finalWidth}px`;
+                chartInner.style.minWidth = `${finalWidth}px`;
+            } else {
+                chartInner.style.width = '100%';
+                chartInner.style.minWidth = '400px';
+            }
+        }
+
+        function wrapAxisLabel(label) {
+            if (!isMobileView || !label || label.length <= 12) {
+                return label;
+            }
+
+            const words = label.split(' ');
+            if (words.length === 1) {
+                return [label.slice(0, 12), label.slice(12)];
+            }
+
+            const lines = [];
+            let currentLine = '';
+            words.forEach(word => {
+                const nextLine = currentLine ? `${currentLine} ${word}` : word;
+                if (nextLine.length <= 12) {
+                    currentLine = nextLine;
+                } else {
+                    if (currentLine) {
+                        lines.push(currentLine);
+                    }
+                    currentLine = word;
+                }
+            });
+            if (currentLine) {
+                lines.push(currentLine);
+            }
+
+            return lines;
+        }
         
         const ctx2 = document.getElementById('subjectPerformanceChart').getContext('2d');
         new Chart(ctx2, {
@@ -442,8 +479,10 @@
                             padding: 5,
                             maxRotation: isMobileView ? 0 : 45,
                             minRotation: 0,
-                            autoSkip: isMobileView,
-                            maxTicksLimit: isMobileView ? 6 : undefined
+                            autoSkip: false,
+                            callback: function(value, index) {
+                                return wrapAxisLabel(subjectLabels[index]);
+                            }
                         }
                     }
                 },
