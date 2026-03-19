@@ -535,7 +535,7 @@
     {% endif %}
 
     <!-- Main Content -->
-    <main class="{% if request.path == '/' or 'login' in request.path or 'signup' in request.path %}w-full{% else %}max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-8{% endif %}">
+    <main class="{% if request.path == '/' or 'login' in request.path or 'signup' in request.path %}w-full{% else %}max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-5 pb-8{% endif %}">
         {% block content %}{% endblock %}
     </main>
 
