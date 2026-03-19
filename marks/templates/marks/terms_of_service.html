@@ -3,8 +3,8 @@
 {% block title %}Terms of Service - ResTrack{% endblock %}
 
 {% block content %}
-<div class="max-w-3xl mx-auto mt-6 mb-8 px-2 sm:px-0">
-    <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 sm:p-7">
+<div class="max-w-3xl mx-auto mt-6 mb-8 px-2 sm:px-0 animate-fade-in-up">
+    <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 sm:p-7 animate-fade-in-up" style="animation-delay: 0.1s;">
         <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Terms of Service</h1>
         <p class="text-xs sm:text-sm text-gray-500 mt-1">Effective date: March 19, 2026</p>
 
@@ -40,7 +40,7 @@
         </div>
 
         <p class="mt-6 text-sm text-gray-700">
-            Please also review our
+            Please take a moment to review the
             <a href="{% url 'privacy_policy' %}" class="text-purple-600 hover:text-purple-700 underline">Privacy Policy</a>.
         </p>
     </section>
