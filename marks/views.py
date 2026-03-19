@@ -198,13 +198,11 @@ def _send_targeted_password_reset_email(request, user):
         return False
 
     logger.info(
-        'Attempting password reset email send for user_id=%s username=%s recipient=%s host=%s port=%s tls=%s timeout=%s',
+        'Attempting password reset email send for user_id=%s username=%s recipient=%s backend=%s timeout=%s',
         user.pk,
         user.username,
         user.email,
-        settings.EMAIL_HOST,
-        settings.EMAIL_PORT,
-        settings.EMAIL_USE_TLS,
+        settings.EMAIL_BACKEND,
         getattr(settings, 'EMAIL_TIMEOUT', None),
     )
 
@@ -216,7 +214,7 @@ def _send_targeted_password_reset_email(request, user):
             email_template_name='registration/password_reset_email.txt',
             subject_template_name='registration/password_reset_subject.txt',
         )
-    except (SMTPException, OSError, socket.timeout):
+    except (SMTPException, OSError, socket.timeout, Exception):
         logger.exception(
             'Failed to send password reset email for user_id=%s username=%s',
             user.pk,

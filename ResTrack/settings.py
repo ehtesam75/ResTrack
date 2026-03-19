@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'anymail',
     'marks',
     'cloudinary_storage',
     'cloudinary',
@@ -167,16 +168,14 @@ LOGOUT_REDIRECT_URL = 'home'
 # Default: 24 hours
 PASSWORD_RESET_TIMEOUT = int(os.environ.get('PASSWORD_RESET_TIMEOUT', str(60 * 60 * 24)))
 
-# Email (Gmail SMTP) for password reset and transactional emails.
-EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
-EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
-EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
-EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').lower() == 'true'
-EMAIL_TIMEOUT = int(os.environ.get('EMAIL_TIMEOUT', '10'))
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'restrack.notifications@gmail.com')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
-DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
+# Email via Brevo HTTP API (Render-friendly: no SMTP port dependency).
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'anymail.backends.brevo.EmailBackend')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'ResTrack <noreply@example.com>')
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
+
+ANYMAIL = {
+    'BREVO_API_KEY': os.environ.get('BREVO_API_KEY', ''),
+}
 
 
 # ======================
