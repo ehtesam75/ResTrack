@@ -98,11 +98,11 @@
                     <a href="{% url 'home' %}" class="{% if request.path == '/' %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex h-full items-center px-1 text-sm font-medium transition-colors nav-link">
                         Home
                     </a>
-                    <a href="{% url 'about' %}" class="{% if 'about' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex h-full items-center px-1 text-sm font-medium transition-colors nav-link">
-                        About
-                    </a>
                     <a href="{% url 'guide' %}" class="{% if 'guide' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex h-full items-center px-1 text-sm font-medium transition-colors nav-link">
                         Guide
+                    </a>
+                    <a href="{% url 'about' %}" class="{% if 'about' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex h-full items-center px-1 text-sm font-medium transition-colors nav-link">
+                        About
                     </a>
                     <a href="{% url 'privacy_policy' %}" class="{% if 'privacy-policy' in request.path %}text-purple-600 font-semibold{% else %}text-gray-700 hover:text-purple-600{% endif %} inline-flex h-full items-center px-1 text-sm font-medium transition-colors nav-link">
                         Privacy
@@ -380,6 +380,14 @@
                 </div>
                 <span>Home</span>
             </a>
+            <a href="{% url 'guide' %}" class="{% if 'guide' in request.path %}bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 border-l-2 border-purple-500{% else %}text-gray-600 hover:bg-gray-50 border-l-2 border-transparent{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-r-lg font-medium transition-all text-sm">
+                <div class="w-8 h-8 rounded-lg {% if 'guide' in request.path %}bg-purple-100{% else %}bg-gray-100{% endif %} flex items-center justify-center">
+                    <svg class="w-4 h-4 {% if 'guide' in request.path %}text-purple-600{% else %}text-gray-500{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    </svg>
+                </div>
+                <span>Guide</span>
+            </a>
             <a href="{% url 'about' %}" class="{% if 'about' in request.path %}bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 border-l-2 border-purple-500{% else %}text-gray-600 hover:bg-gray-50 border-l-2 border-transparent{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-r-lg font-medium transition-all text-sm">
                 <div class="w-8 h-8 rounded-lg {% if 'about' in request.path %}bg-purple-100{% else %}bg-gray-100{% endif %} flex items-center justify-center">
                     <svg class="w-4 h-4 {% if 'about' in request.path %}text-purple-600{% else %}text-gray-500{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -395,14 +403,6 @@
                     </svg>
                 </div>
                 <span>Privacy</span>
-            </a>
-            <a href="{% url 'guide' %}" class="{% if 'guide' in request.path %}bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 border-l-2 border-purple-500{% else %}text-gray-600 hover:bg-gray-50 border-l-2 border-transparent{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-r-lg font-medium transition-all text-sm">
-                <div class="w-8 h-8 rounded-lg {% if 'guide' in request.path %}bg-purple-100{% else %}bg-gray-100{% endif %} flex items-center justify-center">
-                    <svg class="w-4 h-4 {% if 'guide' in request.path %}text-purple-600{% else %}text-gray-500{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                    </svg>
-                </div>
-                <span>Guide</span>
             </a>
 
             <!-- Divider -->
