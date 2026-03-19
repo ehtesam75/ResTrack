@@ -393,7 +393,18 @@
     const subjectData = {{ subject_performance_json|safe }};
 
     if (subjectData.length > 0) {
-        const subjectLabels = subjectData.map(item => item.subject.short_name || item.subject.name.substring(0, 8) + (item.subject.name.length > 8 ? '.' : ''));
+        const isMobileView = window.matchMedia('(max-width: 640px)').matches;
+        const mobileLabelMaxLength = 6;
+        const desktopLabelMaxLength = 8;
+        const subjectLabels = subjectData.map(item => {
+            const fullName = item.subject.name || '';
+            const shortName = item.subject.short_name;
+            const sourceLabel = shortName || fullName;
+            const maxLength = isMobileView ? mobileLabelMaxLength : desktopLabelMaxLength;
+            return sourceLabel.length > maxLength
+                ? sourceLabel.substring(0, maxLength) + '.'
+                : sourceLabel;
+        });
         const subjectFullLabels = subjectData.map(item => item.subject.name);
         const subjectValues = subjectData.map(item => parseFloat(item.average_percentage));
         
@@ -429,9 +440,10 @@
                         },
                         ticks: {
                             padding: 5,
-                            maxRotation: 45,
+                            maxRotation: isMobileView ? 0 : 45,
                             minRotation: 0,
-                            autoSkip: false
+                            autoSkip: isMobileView,
+                            maxTicksLimit: isMobileView ? 6 : undefined
                         }
                     }
                 },
