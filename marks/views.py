@@ -2683,6 +2683,11 @@ def about(request):
     return render(request, 'marks/about.html')
 
 
+def terms_of_service(request):
+    """Terms of Service page"""
+    return render(request, 'marks/terms_of_service.html')
+
+
 def privacy_policy(request):
     """Privacy Policy page"""
     return render(request, 'marks/privacy_policy.html')

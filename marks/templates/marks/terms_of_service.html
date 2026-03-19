@@ -1,0 +1,48 @@
+{% extends 'marks/base.html' %}
+
+{% block title %}Terms of Service - ResTrack{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto mt-6 mb-8 px-2 sm:px-0">
+    <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 sm:p-7">
+        <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Terms of Service</h1>
+        <p class="text-xs sm:text-sm text-gray-500 mt-1">Effective date: March 19, 2026</p>
+
+        <div class="mt-5 space-y-4 text-sm text-gray-700 leading-relaxed">
+            <p>
+                By creating an account or using ResTrack, you agree to these Terms of Service.
+            </p>
+
+            <div>
+                <h2 class="font-semibold text-gray-900">1. Purpose of the Service</h2>
+                <p>ResTrack is provided for educational result tracking and related classroom activities.</p>
+            </div>
+
+            <div>
+                <h2 class="font-semibold text-gray-900">2. Account Responsibility</h2>
+                <p>You are responsible for keeping your account credentials secure and for activity under your account.</p>
+            </div>
+
+            <div>
+                <h2 class="font-semibold text-gray-900">3. Acceptable Use</h2>
+                <p>You must not misuse the platform, attempt unauthorized access, or upload harmful content.</p>
+            </div>
+
+            <div>
+                <h2 class="font-semibold text-gray-900">4. Data and Deletion</h2>
+                <p>When an account is deleted, related data may be permanently removed and may not be recoverable.</p>
+            </div>
+
+            <div>
+                <h2 class="font-semibold text-gray-900">5. Changes to These Terms</h2>
+                <p>These terms may be updated from time to time. Continued use means you accept the latest version.</p>
+            </div>
+        </div>
+
+        <p class="mt-6 text-sm text-gray-700">
+            Please also review our
+            <a href="{% url 'privacy_policy' %}" class="text-purple-600 hover:text-purple-700 underline">Privacy Policy</a>.
+        </p>
+    </section>
+</div>
+{% endblock %}

@@ -184,6 +184,29 @@
                     </div>
                 </div>
 
+                <div>
+                    <label for="accept_legal" class="flex items-start gap-2.5 text-xs sm:text-sm text-gray-700">
+                        <input
+                            type="checkbox"
+                            id="accept_legal"
+                            name="accept_legal"
+                            value="true"
+                            {% if form.accept_legal.value %}checked{% endif %}
+                            required
+                            class="mt-0.5 h-4 w-4 rounded border {% if field_errors.accept_legal %}border-red-400{% else %}border-gray-300{% endif %} text-purple-600 focus:ring-purple-500"
+                        >
+                        <span>
+                            I accept the
+                            <a href="{% url 'terms_of_service' %}" class="text-purple-600 font-medium hover:text-purple-700 underline">Terms of Service</a>
+                            and
+                            <a href="{% url 'privacy_policy' %}" class="text-purple-600 font-medium hover:text-purple-700 underline">Privacy Policy</a>.
+                        </span>
+                    </label>
+                    {% if field_errors.accept_legal %}
+                    <p class="text-red-500 text-xs mt-1">{{ field_errors.accept_legal }}</p>
+                    {% endif %}
+                </div>
+
                 <div class="pt-2">
                     <button
                         type="submit"

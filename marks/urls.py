@@ -88,10 +88,8 @@ urlpatterns = [
     # About page
     path('about/', views.about, name='about'),
 
-    # Privacy Policy page
-    path('privacy-policy/', TemplateView.as_view(template_name='marks/privacy_policy.html'), name='privacy_policy'),
-
-    # Privacy Policy page
+    # Legal pages
+    path('terms-of-service/', views.terms_of_service, name='terms_of_service'),
     path('privacy-policy/', views.privacy_policy, name='privacy_policy'),
 
     # Exam lookup page (mobile)

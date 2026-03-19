@@ -42,6 +42,12 @@ class TeacherSignupForm(UserCreationForm):
             'placeholder': 'School/Institution name (optional)'
         })
     )
+    accept_legal = forms.BooleanField(
+        required=True,
+        error_messages={
+            'required': 'You must accept the Terms of Service and Privacy Policy to create an account.'
+        }
+    )
 
     class Meta:
         model = User
