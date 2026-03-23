@@ -105,10 +105,11 @@ WSGI_APPLICATION = 'ResTrack.wsgi.application'
 # ======================
 
 DATABASE_URL = os.getenv("DATABASE_URL")
+DB_CONN_MAX_AGE = int(os.getenv("DB_CONN_MAX_AGE", "60"))
 DATABASES = {
-    # conn_max_age=0: close DB connection after every request so Neon can
-    # sleep between cron hits instead of being kept awake by lingering conns.
-    'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=0)
+    # Keep DB connections alive briefly to reduce connect overhead per request.
+    # Tune with DB_CONN_MAX_AGE (seconds). Use 0 if you prefer aggressive sleep.
+    'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=DB_CONN_MAX_AGE)
 }
 if not DATABASE_URL:
     DATABASES['default'] = {
