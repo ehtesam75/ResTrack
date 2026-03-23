@@ -12,6 +12,7 @@ from django.http import JsonResponse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 from django.urls import reverse
 
@@ -460,10 +461,10 @@ def exam_center_view_submission(request, submission_id):
     if is_guest_session(request):
         add_guest_submission_access_denied_message(request)
         next_url = request.GET.get('next')
-        if next_url:
+        if _is_safe_redirect_target(request, next_url):
             return redirect(next_url)
         referer = request.META.get('HTTP_REFERER')
-        if referer:
+        if _is_safe_redirect_target(request, referer):
             return redirect(referer)
         return redirect('exam_center_submissions', exam_id=sub.exam.pk)
 
@@ -489,10 +490,10 @@ def exam_center_download_submission(request, submission_id):
     if is_guest_session(request):
         add_guest_submission_access_denied_message(request)
         next_url = request.GET.get('next')
-        if next_url:
+        if _is_safe_redirect_target(request, next_url):
             return redirect(next_url)
         referer = request.META.get('HTTP_REFERER')
-        if referer:
+        if _is_safe_redirect_target(request, referer):
             return redirect(referer)
         return redirect('exam_center_submissions', exam_id=sub.exam.pk)
 
@@ -501,3 +502,13 @@ def exam_center_download_submission(request, submission_id):
 
     url = sub.answer_file.url if hasattr(sub.answer_file, 'url') else str(sub.answer_file)
     return redirect(_cloudinary_download_url(url))
+
+
+def _is_safe_redirect_target(request, target_url):
+    if not target_url:
+        return False
+    return url_has_allowed_host_and_scheme(
+        url=target_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    )

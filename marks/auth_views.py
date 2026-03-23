@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.utils.http import url_has_allowed_host_and_scheme
 from .forms import TeacherSignupForm, LoginForm, StudentAccountForm
 from .models import TeacherProfile, StudentProfile
 
@@ -59,7 +60,13 @@ def user_login(request):
             
             # Redirect to next URL if provided, otherwise dashboard
             next_url = request.GET.get('next', 'dashboard')
-            return redirect(next_url)
+            if next_url and url_has_allowed_host_and_scheme(
+                url=next_url,
+                allowed_hosts={request.get_host()},
+                require_https=request.is_secure(),
+            ):
+                return redirect(next_url)
+            return redirect('dashboard')
         else:
             if form.non_field_errors():
                 field_errors['password'] = 'Invalid username or password'

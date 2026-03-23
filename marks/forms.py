@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordResetForm
 from django.contrib.auth.models import User
+from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from .models import Student, TeacherProfile, StudentProfile, ExamCenterExam
 
@@ -393,6 +394,13 @@ class GuestAccountForm(forms.Form):
 
         if password and password != confirm_password:
             self.add_error('confirm_password', 'Passwords do not match.')
+
+        if password:
+            validate_for_user = self.existing_user if self.existing_user else None
+            try:
+                validate_password(password, validate_for_user)
+            except ValidationError as error:
+                self.add_error('new_password', error)
 
         return cleaned_data
 

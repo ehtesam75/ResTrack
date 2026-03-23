@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+import sys
 import dj_database_url
 import cloudinary
 from dotenv import load_dotenv
@@ -24,10 +25,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ======================
 # Core Security Settings
 # ======================
-SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key")
 DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
-ALLOWED_HOSTS = ['restrack-system.onrender.com', 'restrack-app.onrender.com', 'restrack-web.vercel.app', 'localhost', '127.0.0.1']
+if not SECRET_KEY:
+    # Allow local developer commands to run without provisioning a secret key.
+    # This is restricted to local/dev setups where DATABASE_URL is not configured.
+    has_database_url = bool(os.getenv("DATABASE_URL"))
+    is_local_dev_command = any(cmd in sys.argv for cmd in ("runserver", "shell", "check", "test", "makemigrations", "migrate"))
+    if DEBUG or (is_local_dev_command and not has_database_url):
+        SECRET_KEY = "dev-only-insecure-secret-key-change-me"
+    else:
+        raise RuntimeError("SECRET_KEY environment variable must be set when DEBUG=False")
+
+ALLOWED_HOSTS = ['restrack-system.onrender.com', 'restrack-app.onrender.com', 'localhost', '127.0.0.1']
 
 # ======================
 # Applications

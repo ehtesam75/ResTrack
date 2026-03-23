@@ -5,11 +5,13 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Sum, Q
 from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 from smtplib import SMTPException
 import logging
 import socket
@@ -31,6 +33,25 @@ from .guest_access import start_guest_session, clear_guest_session, is_guest_ses
 
 
 logger = logging.getLogger(__name__)
+
+
+def _get_safe_redirect_target(request, target_url, fallback_name='dashboard'):
+    """Return a safe local redirect target or a fallback route name."""
+    if target_url and url_has_allowed_host_and_scheme(
+        url=target_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return target_url
+    return fallback_name
+
+
+def _is_safe_redirect_target(request, target_url):
+    return bool(target_url) and url_has_allowed_host_and_scheme(
+        url=target_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    )
 
 
 def is_teacher(user):
@@ -167,7 +188,7 @@ def user_login(request):
                 messages.success(request, f"Welcome, {user.first_name or user.username}.")
             
             next_url = request.GET.get('next', 'dashboard')
-            return redirect(next_url)
+            return redirect(_get_safe_redirect_target(request, next_url, 'dashboard'))
         else:
             messages.error(request, 'Invalid username or password.')
     else:
@@ -519,10 +540,10 @@ def manage_guest_account(request):
     if is_guest_session(request):
         add_guest_read_only_message(request)
         next_url = request.GET.get('next')
-        if next_url:
+        if _is_safe_redirect_target(request, next_url):
             return redirect(next_url)
         referer = request.META.get('HTTP_REFERER')
-        if referer:
+        if _is_safe_redirect_target(request, referer):
             return redirect(referer)
         return redirect('dashboard')
 
@@ -1258,12 +1279,11 @@ def add_student(request):
             messages.error(request, 'All required fields must be filled!')
         elif password != confirm_password:
             messages.error(request, 'Passwords do not match.')
-        elif len(password) < 6:
-            messages.error(request, 'Password must be at least 6 characters.')
         elif User.objects.filter(username=username).exists():
             messages.error(request, 'This username is already taken. Please choose another.')
         else:
             try:
+                validate_password(password)
                 # Create user account
                 user = User.objects.create_user(
                     username=username,
@@ -1289,6 +1309,8 @@ def add_student(request):
                 messages.success(request, f'Student {student.name} created successfully.')
                 
                 return redirect('student_detail', student_id=student.id)
+            except ValidationError as e:
+                messages.error(request, ' '.join(e.messages))
             except Exception as e:
                 messages.error(request, f'Error creating student: {str(e)}')
     
@@ -1352,8 +1374,10 @@ def edit_student(request, student_id):
                             if new_password != confirm_password:
                                 messages.error(request, 'Passwords do not match.')
                                 return redirect('edit_student', student_id=student_id)
-                            if len(new_password) < 6:
-                                messages.error(request, 'Password must be at least 6 characters.')
+                            try:
+                                validate_password(new_password, student_user)
+                            except ValidationError as e:
+                                messages.error(request, ' '.join(e.messages))
                                 return redirect('edit_student', student_id=student_id)
                             student_user.set_password(new_password)
                             student_user.save()
@@ -1766,28 +1790,64 @@ def edit_exam(request, exam_id):
 @login_required(login_url='login')
 def api_marks_over_time(request, student_id):
     """API endpoint for marks over time chart data"""
-    data = ChartDataService.marks_over_time(student_id)
+    teacher = get_teacher_for_user(request.user)
+    if not teacher:
+        return JsonResponse({'error': 'Not authorized'}, status=403)
+
+    if is_student(request.user):
+        own_student_id = request.user.student_profile.student.id
+        if student_id != own_student_id:
+            return JsonResponse({'error': 'Forbidden'}, status=403)
+
+    student = get_object_or_404(Student, id=student_id, teacher=teacher)
+    data = ChartDataService.marks_over_time(student.id)
     return JsonResponse(data)
 
 
 @login_required(login_url='login')
 def api_subject_performance(request, student_id):
     """API endpoint for subject performance chart data"""
-    data = ChartDataService.subject_performance_chart(student_id)
+    teacher = get_teacher_for_user(request.user)
+    if not teacher:
+        return JsonResponse({'error': 'Not authorized'}, status=403)
+
+    if is_student(request.user):
+        own_student_id = request.user.student_profile.student.id
+        if student_id != own_student_id:
+            return JsonResponse({'error': 'Forbidden'}, status=403)
+
+    student = get_object_or_404(Student, id=student_id, teacher=teacher)
+    data = ChartDataService.subject_performance_chart(student.id)
     return JsonResponse(data)
 
 
 @login_required(login_url='login')
 def api_grade_distribution(request, student_id):
     """API endpoint for grade distribution chart data"""
-    data = ChartDataService.grade_distribution_chart(student_id)
+    teacher = get_teacher_for_user(request.user)
+    if not teacher:
+        return JsonResponse({'error': 'Not authorized'}, status=403)
+
+    if is_student(request.user):
+        own_student_id = request.user.student_profile.student.id
+        if student_id != own_student_id:
+            return JsonResponse({'error': 'Forbidden'}, status=403)
+
+    student = get_object_or_404(Student, id=student_id, teacher=teacher)
+    data = ChartDataService.grade_distribution_chart(student.id)
     return JsonResponse(data)
 
 
 @login_required(login_url='login')
 def api_student_comparison(request, subject_id):
     """API endpoint for student comparison chart data"""
-    data = ChartDataService.student_comparison_chart(subject_id)
+    if not is_teacher(request.user):
+        return JsonResponse({'error': 'Not authorized'}, status=403)
+
+    teacher = get_teacher_for_user(request.user)
+    subject = get_object_or_404(Subject, id=subject_id, teacher=teacher)
+
+    data = ChartDataService.student_comparison_chart(subject.id)
     return JsonResponse(data)
 
 
@@ -2094,10 +2154,10 @@ def exam_view_answer(request, exam_pk):
     if is_guest_session(request):
         add_guest_submission_access_denied_message(request)
         next_url = request.GET.get('next')
-        if next_url:
+        if _is_safe_redirect_target(request, next_url):
             return redirect(next_url)
         referer = request.META.get('HTTP_REFERER')
-        if referer:
+        if _is_safe_redirect_target(request, referer):
             return redirect(referer)
         return redirect('exam_detail', exam_id=exam.exam_id)
 
@@ -2119,10 +2179,10 @@ def exam_download_answer(request, exam_pk):
     if is_guest_session(request):
         add_guest_submission_access_denied_message(request)
         next_url = request.GET.get('next')
-        if next_url:
+        if _is_safe_redirect_target(request, next_url):
             return redirect(next_url)
         referer = request.META.get('HTTP_REFERER')
-        if referer:
+        if _is_safe_redirect_target(request, referer):
             return redirect(referer)
         return redirect('exam_detail', exam_id=exam.exam_id)
 

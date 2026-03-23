@@ -95,14 +95,21 @@ CRON_NO_EXAMS_CACHE_TTL = 600  # 10 minutes
 
 
 @csrf_exempt
-@require_GET
+@require_POST
 def cron_send_exam_reminders(request):
     """
     External cron endpoint that triggers the send_exam_reminders command.
-    Secured with a secret token passed as ?token=<CRON_SECRET_TOKEN>.
+    Secured with a secret token in Authorization: Bearer <CRON_SECRET_TOKEN>
+    or X-Cron-Token header.
     """
     expected_token = getattr(settings, "CRON_SECRET_TOKEN", "")
-    provided_token = request.GET.get("token", "")
+    auth_header = request.headers.get("Authorization", "")
+    provided_token = ""
+
+    if auth_header.lower().startswith("bearer "):
+        provided_token = auth_header.split(" ", 1)[1].strip()
+    if not provided_token:
+        provided_token = request.headers.get("X-Cron-Token", "").strip()
 
     # Reject if no token is configured on the server
     if not expected_token:

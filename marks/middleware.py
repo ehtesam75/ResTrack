@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 from django.shortcuts import redirect
+from django.utils.http import url_has_allowed_host_and_scheme
 
 from .guest_access import add_guest_read_only_message, get_guest_account_for_request
 
@@ -40,10 +41,10 @@ class GuestReadOnlyMiddleware:
                     )
                 add_guest_read_only_message(request)
                 next_url = request.GET.get('next')
-                if next_url:
+                if self._is_safe_redirect_target(request, next_url):
                     return redirect(next_url)
                 referer = request.META.get('HTTP_REFERER')
-                if referer:
+                if self._is_safe_redirect_target(request, referer):
                     return redirect(referer)
                 return redirect('dashboard')
 
@@ -60,7 +61,10 @@ class GuestReadOnlyMiddleware:
                         status=403,
                     )
                 add_guest_read_only_message(request)
-                return redirect(request.META.get('HTTP_REFERER') or 'dashboard')
+                referer = request.META.get('HTTP_REFERER')
+                if self._is_safe_redirect_target(request, referer):
+                    return redirect(referer)
+                return redirect('dashboard')
 
         return self.get_response(request)
 
@@ -83,3 +87,13 @@ class GuestReadOnlyMiddleware:
             return True
 
         return False
+
+    @staticmethod
+    def _is_safe_redirect_target(request, target_url):
+        if not target_url:
+            return False
+        return url_has_allowed_host_and_scheme(
+            url=target_url,
+            allowed_hosts={request.get_host()},
+            require_https=request.is_secure(),
+        )
