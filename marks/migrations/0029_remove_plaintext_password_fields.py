@@ -1,4 +1,5 @@
 from django.db import migrations
+from django.contrib.auth.hashers import make_password
 
 
 def force_rotate_exposed_passwords(apps, schema_editor):
@@ -17,9 +18,8 @@ def force_rotate_exposed_passwords(apps, schema_editor):
         .values_list('guest_user_id', flat=True)
     )
 
-    for user in User.objects.filter(id__in=impacted_user_ids):
-        user.set_unusable_password()
-        user.save(update_fields=['password'])
+    unusable_password_hash = make_password(None)
+    User.objects.filter(id__in=impacted_user_ids).update(password=unusable_password_hash)
 
 
 def noop_reverse(apps, schema_editor):
