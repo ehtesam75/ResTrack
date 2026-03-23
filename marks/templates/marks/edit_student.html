@@ -130,7 +130,6 @@ const isGuestSession = {{ is_guest_session|yesno:'true,false' }};
 // Toggle password visibility
 function togglePassword(fieldId) {
     if (isGuestSession) {
-        alert('Guest accounts are view-only and cannot view student passwords.');
         return;
     }
     const field = document.getElementById(fieldId);
@@ -206,10 +205,18 @@ classInput.addEventListener('input', validateStudentForm);
 
 if (isGuestSession) {
     const guestPasswordFields = document.querySelectorAll('[data-guest-password="true"]');
+    const guestPasswordToggles = document.querySelectorAll('.password-toggle');
     const blockGuestPasswordAction = (event) => {
         event.preventDefault();
         alert('Guest accounts are view-only and cannot view or copy student passwords.');
     };
+
+    guestPasswordToggles.forEach((button) => {
+        button.disabled = true;
+        button.classList.add('opacity-50', 'cursor-not-allowed');
+        button.setAttribute('aria-disabled', 'true');
+        button.setAttribute('title', 'Guest account cannot reveal password fields.');
+    });
 
     guestPasswordFields.forEach((field) => {
         field.addEventListener('copy', blockGuestPasswordAction);

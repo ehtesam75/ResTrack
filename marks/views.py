@@ -613,7 +613,7 @@ def manage_guest_account(request):
                 if changed:
                     with transaction.atomic():
                         guest_user.save()
-                    messages.success(request, 'Guest account updated successfully.')
+                    messages.success(request, 'Guest account updated successfully.', extra_tags='success-popup')
                 else:
                     messages.info(request, 'No changes detected for guest account.')
 
@@ -1378,7 +1378,7 @@ def edit_student(request, student_id):
                             student_user.set_password(new_password)
                             student_user.save()
 
-                    messages.success(request, f'Student {student.name} updated successfully.')
+                    messages.success(request, f'Student {student.name} updated successfully.', extra_tags='success-popup')
                     
                     return redirect('student_detail', student_id=student.id)
                 except Exception as e:
