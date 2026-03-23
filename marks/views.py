@@ -506,6 +506,7 @@ def dashboard(request):
             'subject': {
                 'name': item['subject'].name,
                 'short_name': item['subject'].short_name,
+                'chart_label': item['subject'].short_name or ChartDataService.shorten_subject_name(item['subject'].name),
                 'id': item['subject'].id
             },
             'average_percentage': item['average_percentage'],

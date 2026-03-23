@@ -393,7 +393,7 @@
     const subjectData = {{ subject_performance_json|safe }};
 
     if (subjectData.length > 0) {
-        const subjectLabels = subjectData.map(item => item.subject.short_name || item.subject.name || '');
+        const subjectLabels = subjectData.map(item => item.subject.chart_label || item.subject.short_name || item.subject.name || '');
         const subjectFullLabels = subjectData.map(item => item.subject.name);
         const subjectValues = subjectData.map(item => parseFloat(item.average_percentage));
         const chartInner = document.getElementById('subjectPerformanceChartInner');
@@ -429,7 +429,7 @@
                         beginAtZero: true,
                         max: 100,
                         ticks: {
-                            padding: 5
+                            stepSize: 20
                         }
                     },
                     x: {
@@ -437,7 +437,6 @@
                             display: false
                         },
                         ticks: {
-                            padding: 5,
                             maxRotation: 0,
                             minRotation: 0,
                             autoSkip: false,
@@ -461,14 +460,6 @@
                                 return 'Average Score: ' + context.parsed.y.toFixed(1) + '%';
                             }
                         }
-                    }
-                },
-                layout: {
-                    padding: {
-                        left: 20,
-                        right: 20,
-                        top: 10,
-                        bottom: 10
                     }
                 }
             }
