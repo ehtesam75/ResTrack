@@ -23,7 +23,6 @@ class StudentProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_profile')
     student = models.OneToOneField('Student', on_delete=models.CASCADE, related_name='user_profile')
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_students')
-    raw_password = models.CharField(max_length=128, blank=True, null=True, help_text="Plain-text password for teacher reference")
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -38,7 +37,6 @@ class GuestTeacherAccount(models.Model):
     """One read-only guest login mapped to exactly one teacher."""
     teacher = models.OneToOneField(User, on_delete=models.CASCADE, related_name='guest_account')
     guest_user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='guest_teacher_account')
-    raw_password = models.CharField(max_length=128, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

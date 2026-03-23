@@ -17,7 +17,6 @@ class GuestReadOnlyAccessTests(TestCase):
 		self.guest_account = GuestTeacherAccount.objects.create(
 			teacher=self.teacher,
 			guest_user=self.guest_user,
-			raw_password='guest-pass',
 		)
 
 		self.client.force_login(self.teacher)

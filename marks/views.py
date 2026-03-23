@@ -578,7 +578,6 @@ def manage_guest_account(request):
                     GuestTeacherAccount.objects.create(
                         teacher=teacher,
                         guest_user=guest_user,
-                        raw_password=new_password,
                     )
                 messages.success(request, f"Guest account '{username}' created successfully.")
                 return redirect('manage_guest_account')
@@ -608,13 +607,11 @@ def manage_guest_account(request):
 
                 if new_password:
                     guest_user.set_password(new_password)
-                    guest_account.raw_password = new_password
                     changed = True
 
                 if changed:
                     with transaction.atomic():
                         guest_user.save()
-                        guest_account.save()
                     messages.success(request, 'Guest account updated successfully.')
                 else:
                     messages.info(request, 'No changes detected for guest account.')
@@ -642,7 +639,6 @@ def manage_guest_account(request):
         {
             'guest_account': guest_account,
             'form': form,
-            'guest_raw_password': guest_account.raw_password if guest_account else '',
         },
     )
 
@@ -1304,7 +1300,6 @@ def add_student(request):
                     user=user,
                     student=student,
                     created_by=request.user,
-                    raw_password=password
                 )
                 messages.success(request, f'Student {student.name} created successfully.')
                 
@@ -1381,26 +1376,16 @@ def edit_student(request, student_id):
                                 return redirect('edit_student', student_id=student_id)
                             student_user.set_password(new_password)
                             student_user.save()
-                            # Save raw password for teacher reference
-                            if hasattr(student, 'user_profile'):
-                                student.user_profile.raw_password = new_password
-                                student.user_profile.save()
 
                     messages.success(request, f'Student {student.name} updated successfully.')
                     
                     return redirect('student_detail', student_id=student.id)
                 except Exception as e:
                     messages.error(request, f'Error updating student: {str(e)}')
-    
-    # Get stored raw password for display
-    student_raw_password = ''
-    if not guest_session and student_user and hasattr(student, 'user_profile') and student.user_profile.raw_password:
-        student_raw_password = student.user_profile.raw_password
 
     context = {
         'student': student,
         'student_user': student_user,
-        'student_raw_password': student_raw_password,
         'is_guest_session': guest_session,
         'is_teacher': True,
     }
