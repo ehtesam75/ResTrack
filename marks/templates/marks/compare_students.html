@@ -169,7 +169,7 @@
                     <span class="text-xs font-bold gradient-text">{{ subject1.average_percentage|floatformat:1 }}%</span>
                 </div>
                 <div class="p-2 text-center bg-gray-50 border-x border-gray-100">
-                    <span class="text-xs text-gray-600">{{ subject1.subject.name }}</span>
+                    <span class="text-xs text-gray-600">{{ subject1.subject.short_name|default:subject1.subject.name }}</span>
                 </div>
                 <div class="p-2 text-center">
                     {% for subject2 in student2_stats.subject_summary %}
