@@ -1780,11 +1780,6 @@ def api_marks_over_time(request, student_id):
     if not teacher:
         return JsonResponse({'error': 'Not authorized'}, status=403)
 
-    if is_student(request.user):
-        own_student_id = request.user.student_profile.student.id
-        if student_id != own_student_id:
-            return JsonResponse({'error': 'Forbidden'}, status=403)
-
     student = get_object_or_404(Student, id=student_id, teacher=teacher)
     data = ChartDataService.marks_over_time(student.id)
     return JsonResponse(data)
@@ -1797,11 +1792,6 @@ def api_subject_performance(request, student_id):
     if not teacher:
         return JsonResponse({'error': 'Not authorized'}, status=403)
 
-    if is_student(request.user):
-        own_student_id = request.user.student_profile.student.id
-        if student_id != own_student_id:
-            return JsonResponse({'error': 'Forbidden'}, status=403)
-
     student = get_object_or_404(Student, id=student_id, teacher=teacher)
     data = ChartDataService.subject_performance_chart(student.id)
     return JsonResponse(data)
@@ -1813,11 +1803,6 @@ def api_grade_distribution(request, student_id):
     teacher = get_teacher_for_user(request.user)
     if not teacher:
         return JsonResponse({'error': 'Not authorized'}, status=403)
-
-    if is_student(request.user):
-        own_student_id = request.user.student_profile.student.id
-        if student_id != own_student_id:
-            return JsonResponse({'error': 'Forbidden'}, status=403)
 
     student = get_object_or_404(Student, id=student_id, teacher=teacher)
     data = ChartDataService.grade_distribution_chart(student.id)

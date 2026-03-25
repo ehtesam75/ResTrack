@@ -5,7 +5,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from .guest_access import GUEST_ACCOUNT_SESSION_KEY, GUEST_USERNAME_SESSION_KEY
-from .models import AnswerSubmission, Exam, ExamCenterExam, ExamType, GuestTeacherAccount, Student, Subject, TeacherProfile
+from .models import AnswerSubmission, Exam, ExamCenterExam, ExamType, GuestTeacherAccount, Student, StudentProfile, Subject, TeacherProfile
 
 
 class GuestReadOnlyAccessTests(TestCase):
@@ -160,3 +160,42 @@ class GuestReadOnlyAccessTests(TestCase):
 		self.assertContains(view_response, 'Guest accounts are view-only and cannot access student submission files.')
 		self.assertEqual(download_response.status_code, 200)
 		self.assertContains(download_response, 'Guest accounts are view-only and cannot access student submission files.')
+
+
+class StudentChartApiAccessTests(TestCase):
+	def setUp(self):
+		self.teacher = User.objects.create_user(username='teacher_api', password='teacher-pass')
+		TeacherProfile.objects.create(user=self.teacher, institution='Test School')
+
+		self.viewer_student = Student.objects.create(
+			first_name='Viewer',
+			roll='1',
+			class_name='7',
+			teacher=self.teacher,
+		)
+		self.target_student = Student.objects.create(
+			first_name='Target',
+			roll='2',
+			class_name='7',
+			teacher=self.teacher,
+		)
+
+		self.viewer_user = User.objects.create_user(username='viewer_student', password='student-pass')
+		StudentProfile.objects.create(
+			user=self.viewer_user,
+			student=self.viewer_student,
+			created_by=self.teacher,
+		)
+
+		self.client.force_login(self.viewer_user)
+
+	def test_student_can_access_chart_apis_for_other_students_in_same_teacher_scope(self):
+		chart_urls = [
+			reverse('api_marks_over_time', args=[self.target_student.id]),
+			reverse('api_subject_performance', args=[self.target_student.id]),
+			reverse('api_grade_distribution', args=[self.target_student.id]),
+		]
+
+		for url in chart_urls:
+			response = self.client.get(url)
+			self.assertEqual(response.status_code, 200)
