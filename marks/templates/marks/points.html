@@ -87,7 +87,8 @@
         {% if user.teacher_profile %}
         <a 
             href="{% url 'add_points_spent' %}" 
-            class="hide-mobile bg-purple-100 text-purple-700 px-6 py-2.5 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-purple-200 transition-all"
+            class="hide-mobile animate-fade-in-up bg-purple-100 text-purple-700 px-6 py-2.5 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-purple-200 transition-all"
+            style="animation-delay: 0.1s;"
         >
             Record Points Spent
         </a>
