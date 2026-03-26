@@ -218,28 +218,41 @@ def notify_result_published(exam_id, student_ids, teacher):
         user__isnull=False,
     ).select_related('user')
 
-    user_ids = [sp.user_id for sp in student_profiles]
+    student_user_ids = [sp.user_id for sp in student_profiles]
 
     # Include this teacher's guest account only for result-published alerts.
     guest_account = GuestTeacherAccount.objects.filter(teacher=teacher).only('guest_user_id').first()
-    if guest_account and guest_account.guest_user_id:
-        user_ids.append(guest_account.guest_user_id)
+    guest_user_id = guest_account.guest_user_id if guest_account and guest_account.guest_user_id else None
 
-    if not user_ids:
+    if not student_user_ids and not guest_user_id:
         return 0
 
     # Get exam metadata for the notification body
     exam_record = Exam.objects.filter(exam_id=exam_id, teacher=teacher).first()
     subject_name = exam_record.subject.name if exam_record else "Exam"
 
-    payload = {
+    student_payload = {
         "title": "📊 Results Published",
         "body": f"Exam #{exam_id} — {subject_name} results are out! Check your score.",
         "url": f"/exams/detail/{exam_id}/",
         "tag": f"result-published-{exam_id}",
     }
 
-    return _send_to_users(user_ids, payload, allow_guest=True)
+    sent = 0
+
+    if student_user_ids:
+        sent += _send_to_users(student_user_ids, student_payload)
+
+    if guest_user_id:
+        guest_payload = {
+            "title": "📊 Results Published",
+            "body": f"Exam #{exam_id} — {subject_name} results are out! View the marks of participating students.",
+            "url": f"/exams/detail/{exam_id}/",
+            "tag": f"result-published-{exam_id}-guest",
+        }
+        sent += _send_to_users([guest_user_id], guest_payload, allow_guest=True)
+
+    return sent
 
 
 def notify_exam_edited(exam_center_exam):
