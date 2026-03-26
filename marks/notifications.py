@@ -13,6 +13,9 @@ from .models import PushSubscription
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_NOTIFICATION_ICON = '/static/icons/ResTrack-192x192.png'
+DEFAULT_NOTIFICATION_BADGE = '/static/icons/ResTrack-monochrome-192x192.png'
+
 
 def _send_push(subscription, payload):
     """
@@ -48,15 +51,36 @@ def _send_push(subscription, payload):
         return False
 
 
-def _send_to_users(user_ids, payload):
+def _send_to_users(user_ids, payload, allow_guest=False):
     """Send a push notification to all subscriptions belonging to the given user IDs."""
-    subscriptions = list(PushSubscription.objects.filter(user_id__in=user_ids))
+    unique_user_ids = list(dict.fromkeys(user_ids))
+    if not unique_user_ids:
+        return 0
+
+    if not allow_guest:
+        from .models import GuestTeacherAccount
+
+        guest_user_ids = set(
+            GuestTeacherAccount.objects.filter(guest_user_id__in=unique_user_ids)
+            .values_list('guest_user_id', flat=True)
+        )
+        unique_user_ids = [uid for uid in unique_user_ids if uid not in guest_user_ids]
+        if not unique_user_ids:
+            return 0
+
+    payload_with_icons = {
+        "icon": DEFAULT_NOTIFICATION_ICON,
+        "badge": DEFAULT_NOTIFICATION_BADGE,
+        **payload,
+    }
+
+    subscriptions = list(PushSubscription.objects.filter(user_id__in=unique_user_ids))
     total = len(subscriptions)
     sent = 0
     for sub in subscriptions:
-        if _send_push(sub, payload):
+        if _send_push(sub, payload_with_icons):
             sent += 1
-    logger.info("Push sent to %d/%d subscriptions for %d users.", sent, total, len(user_ids))
+    logger.info("Push sent to %d/%d subscriptions for %d users.", sent, total, len(unique_user_ids))
     return sent
 
 
@@ -186,7 +210,7 @@ def notify_result_published(exam_id, student_ids, teacher):
         student_ids: List of Student model IDs who got results.
         teacher: The teacher User who published the results.
     """
-    from .models import StudentProfile, Exam
+    from .models import StudentProfile, Exam, GuestTeacherAccount
 
     # Get User IDs for the participating students
     student_profiles = StudentProfile.objects.filter(
@@ -195,6 +219,12 @@ def notify_result_published(exam_id, student_ids, teacher):
     ).select_related('user')
 
     user_ids = [sp.user_id for sp in student_profiles]
+
+    # Include this teacher's guest account only for result-published alerts.
+    guest_account = GuestTeacherAccount.objects.filter(teacher=teacher).only('guest_user_id').first()
+    if guest_account and guest_account.guest_user_id:
+        user_ids.append(guest_account.guest_user_id)
+
     if not user_ids:
         return 0
 
@@ -209,7 +239,7 @@ def notify_result_published(exam_id, student_ids, teacher):
         "tag": f"result-published-{exam_id}",
     }
 
-    return _send_to_users(user_ids, payload)
+    return _send_to_users(user_ids, payload, allow_guest=True)
 
 
 def notify_exam_edited(exam_center_exam):

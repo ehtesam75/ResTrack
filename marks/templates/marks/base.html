@@ -669,7 +669,7 @@
                 });
 
                 console.log('Attempting to register service worker...');
-                navigator.serviceWorker.register('/sw.js')
+                navigator.serviceWorker.register('/sw.js?v=2.1.0')
                     .then(function(registration) {
                         console.log('Service Worker registered successfully:', registration.scope);
                         console.log('Service worker state:', registration.active ? 'active' : 'inactive');
@@ -854,7 +854,7 @@
                     } else {
                         console.log('Service worker not active');
                         // Try to register it first
-                        navigator.serviceWorker.register('/sw.js').then(reg => {
+                        navigator.serviceWorker.register('/sw.js?v=2.1.0').then(reg => {
                             console.log('Service worker registered for cache clearing');
                             setTimeout(() => {
                                 window.location.reload();

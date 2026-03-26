@@ -1,6 +1,6 @@
 // Service Worker for ResTrack PWA
-const CACHE_NAME = 'restrack-v2.0.0';
-const STATIC_CACHE_NAME = 'restrack-static-v2.0.0';
+const CACHE_NAME = 'restrack-v2.1.0';
+const STATIC_CACHE_NAME = 'restrack-static-v2.1.0';
 
 // Static assets to cache - same-origin ONLY, no CDN/external URLs
 const STATIC_ASSETS = [
@@ -147,10 +147,18 @@ self.addEventListener('push', event => {
   }
 
   const origin = self.location.origin;
+  const defaultIcon = origin + '/static/icons/ResTrack-192x192.png';
+  const defaultBadge = origin + '/static/icons/ResTrack-monochrome-192x192.png';
+  const icon = data.icon
+    ? (data.icon.startsWith('http') ? data.icon : origin + data.icon)
+    : defaultIcon;
+  const badge = data.badge
+    ? (data.badge.startsWith('http') ? data.badge : origin + data.badge)
+    : defaultBadge;
   const options = {
     body: data.body || '',
-    icon: origin + '/static/icons/ResTrack-192x192.png',
-    badge: origin + '/static/icons/ResTrack-monochrome-192x192.png',
+    icon: icon,
+    badge: badge,
     tag: data.tag || 'restrack-notification',
     renotify: true,
     requireInteraction: true,
