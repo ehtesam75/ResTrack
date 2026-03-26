@@ -714,7 +714,7 @@
         // ---------------------------------------------------------------
         // Push Notification Subscription
         // ---------------------------------------------------------------
-        {% if user.is_authenticated and not is_guest_session %}
+        {% if user.is_authenticated %}
         (function initPushSubscription() {
             if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
                 console.log('Push notifications not supported.');
