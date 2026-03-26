@@ -740,7 +740,7 @@
                     'border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.25);display:flex;align-items:center;' +
                     'gap:12px;font-size:14px;max-width:400px;width:calc(100% - 32px);">' +
                     '<span style="font-size:20px;">🔔</span>' +
-                    '<span style="flex:1;">Enable notifications to get exam & result alerts</span>' +
+                    '<span style="flex:1;">{% if is_guest_session %}Enable notifications to get result alerts{% else %}Enable notifications to get exam & result alerts{% endif %}</span>' +
                     '<button id="push-prompt-allow" style="background:#fff;color:#7c3aed;border:none;' +
                     'padding:6px 14px;border-radius:8px;font-weight:600;cursor:pointer;white-space:nowrap;">Enable</button>' +
                     '<button id="push-prompt-dismiss" style="background:transparent;color:rgba(255,255,255,0.7);' +
