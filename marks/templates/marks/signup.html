@@ -31,13 +31,26 @@
             <p class="text-xs sm:text-sm text-gray-600 mt-1">Only teachers can sign up directly</p>
         </div>
 
+        <!-- Info Box -->
+        <div class="mb-4 sm:mb-5 bg-blue-50 border border-blue-100 rounded-xl p-3 animate-fade-in-up" style="animation-delay: 0.2s;">
+            <div class="flex gap-2">
+                <svg class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div class="text-xs text-blue-800">
+                    <p class="font-semibold">For Students</p>
+                    <p class="mt-1 text-blue-700">Student accounts are created by teachers. Please use the username and password your teacher shares with you to log in.</p>
+                </div>
+            </div>
+        </div>
+
         {% if not teacher_registration_enabled %}
         <div class="mb-4 sm:mb-5 bg-red-50 border border-red-200 rounded-xl p-3 sm:p-4 animate-fade-in-up" style="animation-delay: 0.25s;">
             <p class="text-xs sm:text-sm text-red-800 font-medium">{{ registration_disabled_message }}</p>
         </div>
         {% endif %}
 
-            <form method="post" class="space-y-4 sm:space-y-5">
+            <form id="signup-form" method="post" class="space-y-4 sm:space-y-5">
                 {% csrf_token %}
                 
                 <!-- Name Row -->
@@ -209,9 +222,10 @@
 
                 <div class="pt-2">
                     <button
+                        id="create-account-btn"
                         type="submit"
-                        {% if not teacher_registration_enabled %}disabled{% endif %}
-                        class="w-full font-medium py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm shadow-sm transition-all {% if teacher_registration_enabled %}bg-purple-100 text-purple-700 hover:shadow-md hover:bg-purple-200{% else %}bg-gray-200 text-gray-500 cursor-not-allowed opacity-80{% endif %}"
+                        disabled
+                        class="w-full font-medium py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm shadow-sm transition-all {% if teacher_registration_enabled %}bg-purple-100 text-purple-700 hover:shadow-md hover:bg-purple-200 disabled:bg-gray-200 disabled:text-gray-500 disabled:cursor-not-allowed disabled:opacity-80{% else %}bg-gray-200 text-gray-500 cursor-not-allowed opacity-80{% endif %}"
                     >
                         Create Account
                     </button>
@@ -262,6 +276,50 @@ function checkPasswordMatch() {
         matchDiv.textContent = 'Passwords do not match';
         matchDiv.className = 'text-xs mt-1 text-red-600';
     }
+
+    updateCreateAccountState();
 }
+
+function updateCreateAccountState() {
+    const createAccountBtn = document.getElementById('create-account-btn');
+    const teacherRegistrationEnabled = {{ teacher_registration_enabled|yesno:"true,false" }};
+
+    if (!teacherRegistrationEnabled) {
+        createAccountBtn.disabled = true;
+        return;
+    }
+
+    const requiredTextFieldIds = ['first_name', 'last_name', 'email', 'username', 'password1', 'password2'];
+    const allRequiredTextFilled = requiredTextFieldIds.every((fieldId) => {
+        const field = document.getElementById(fieldId);
+        return field && field.value.trim() !== '';
+    });
+
+    const password = document.getElementById('password1').value;
+    const confirmPassword = document.getElementById('password2').value;
+    const passwordsMatch = password !== '' && password === confirmPassword;
+
+    const acceptLegal = document.getElementById('accept_legal');
+    const legalAccepted = acceptLegal && acceptLegal.checked;
+
+    createAccountBtn.disabled = !(allRequiredTextFilled && passwordsMatch && legalAccepted);
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const watchedFieldIds = ['first_name', 'last_name', 'email', 'username', 'password1', 'password2', 'accept_legal'];
+
+    watchedFieldIds.forEach((fieldId) => {
+        const field = document.getElementById(fieldId);
+        if (!field) {
+            return;
+        }
+
+        field.addEventListener('input', updateCreateAccountState);
+        field.addEventListener('change', updateCreateAccountState);
+    });
+
+    checkPasswordMatch();
+    updateCreateAccountState();
+});
 </script>
 {% endblock %}

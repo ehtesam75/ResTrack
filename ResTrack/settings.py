@@ -256,8 +256,8 @@ CRON_SECRET_TOKEN = os.environ.get("CRON_SECRET_TOKEN", "")
 # ======================
 # Teacher Registration Controls
 # ======================
-# Temporarily disabled by default to protect limited DB resources.
-TEACHER_REGISTRATION_ENABLED = os.environ.get("TEACHER_REGISTRATION_ENABLED", "False").lower() == "true"
+# Enabled by default; can be turned off explicitly via env var.
+TEACHER_REGISTRATION_ENABLED = os.environ.get("TEACHER_REGISTRATION_ENABLED", "True").lower() == "true"
 TEACHER_REGISTRATION_DISABLED_MESSAGE = (
     "New account registration is temporarily disabled due to current system resource limits. "
     "Please try again later."
