@@ -1332,8 +1332,25 @@ def edit_student(request, student_id):
         student_user = student.user_profile.user
     
     if request.method == 'POST':
+        action = request.POST.get('action', 'save')
+
         if guest_session:
             add_guest_read_only_message(request)
+        elif action == 'delete':
+            try:
+                student_name = student.name
+                student_user_id = student_user.id if student_user else None
+
+                with transaction.atomic():
+                    student.delete()
+                    if student_user_id:
+                        User.objects.filter(id=student_user_id).delete()
+
+                messages.success(request, f'Student {student_name} deleted successfully.', extra_tags='success-popup')
+                return redirect('student_list')
+            except Exception as e:
+                messages.error(request, f'Error deleting student: {str(e)}')
+                return redirect('edit_student', student_id=student_id)
         else:
             first_name = request.POST.get('first_name')
             last_name = request.POST.get('last_name')
@@ -1404,14 +1421,18 @@ def add_subject(request):
     subjects = Subject.objects.filter(teacher=request.user).order_by('-created_at')
 
     if request.method == 'POST':
-        name = request.POST.get('name')
-        short_name = request.POST.get('short_name')
-        if name and short_name:
+        name = (request.POST.get('name') or '').strip()
+        short_name = (request.POST.get('short_name') or '').strip()
+        if not name or not short_name:
+            messages.error(request, 'Both subject name and short name are required!')
+        elif len(name) > 25:
+            messages.error(request, 'Subject name cannot exceed 25 characters.')
+        elif len(short_name) > 10:
+            messages.error(request, 'Short name cannot exceed 10 characters.')
+        else:
             subject = Subject.objects.create(name=name, short_name=short_name, teacher=request.user)
             messages.success(request, f'Subject {subject.name} added successfully.')
             return redirect('subject_list')
-        else:
-            messages.error(request, 'Both subject name and short name are required!')
 
     # Check if running on production (non-localhost)
     host = request.get_host().lower()
@@ -1433,8 +1454,18 @@ def edit_subject(request):
 
     if request.method == 'POST':
         subject_id = request.POST.get('subject_id')
-        name = request.POST.get('name')
-        short_name = request.POST.get('short_name')
+        name = (request.POST.get('name') or '').strip()
+        short_name = (request.POST.get('short_name') or '').strip()
+
+        if not name or not short_name:
+            messages.error(request, 'Both subject name and short name are required.')
+            return redirect('add_subject')
+        if len(name) > 25:
+            messages.error(request, 'Subject name cannot exceed 25 characters.')
+            return redirect('add_subject')
+        if len(short_name) > 10:
+            messages.error(request, 'Short name cannot exceed 10 characters.')
+            return redirect('add_subject')
 
         try:
             subject = Subject.objects.get(id=subject_id, teacher=request.user)

@@ -121,11 +121,31 @@
                 </a>
             </div>
         </form>
+
+        <form method="POST" class="pt-3" onsubmit="return confirmDeleteStudent();">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="delete">
+            <button
+                type="submit"
+                {% if is_guest_session %}disabled{% endif %}
+                class="w-full bg-red-100 text-red-700 font-medium py-2.5 rounded-lg text-sm shadow-sm hover:shadow-md hover:bg-red-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+                <i class="fas fa-trash-alt mr-2"></i>
+                Delete Student
+            </button>
+        </form>
     </div>
 </div>
 
 <script>
 const isGuestSession = {{ is_guest_session|yesno:'true,false' }};
+
+function confirmDeleteStudent() {
+    if (isGuestSession) {
+        return false;
+    }
+    return confirm('Delete this student and all related records? This action cannot be undone.');
+}
 
 // Toggle password visibility
 function togglePassword(fieldId) {
