@@ -30,7 +30,7 @@
                             Rank #{{ item.rank }}
                         </span>
                     </div>
-                    {% if item.student.class_number or item.student.roll %}
+                    {% if item.student.class_name or item.student.roll %}
                     <p class="text-[10px] text-gray-500">
                         {% if item.student.class_name %}Class {{ item.student.class_name }}{% endif %}
                         {% if item.student.class_name and item.student.roll %} · {% endif %}
@@ -70,7 +70,7 @@
             <div class="flex items-start justify-between mb-3">
                 <div>
                     <h3 class="text-lg font-bold gradient-text">{{ item.student.name }}</h3>
-                    {% if item.student.class_number or item.student.roll %}
+                    {% if item.student.class_name or item.student.roll %}
                     <p class="text-xs text-gray-500 mt-0.5">
                         {% if item.student.class_name %}Class: {{ item.student.class_name }}{% endif %}
                         {% if item.student.class_name and item.student.roll %}&nbsp;&nbsp;{% endif %}

@@ -9,7 +9,7 @@
         <div class="flex justify-between items-start gap-2">
             <div class="flex-1 min-w-0">
                 <h1 class="text-lg sm:text-2xl font-bold gradient-text truncate">{{ student.name }}</h1>
-                {% if student.class_number or student.roll %}
+                {% if student.class_name or student.roll %}
                 <p class="text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1">
                     {% if student.class_name %}Class: <span class="font-semibold">{{ student.class_name }}</span>{% endif %}
                     {% if student.class_name and student.roll %} · {% endif %}

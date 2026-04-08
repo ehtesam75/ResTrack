@@ -34,6 +34,12 @@ from .guest_access import start_guest_session, clear_guest_session, is_guest_ses
 
 logger = logging.getLogger(__name__)
 
+CLASS_GROUP_MAX_LENGTH = 10
+
+
+def _class_group_too_long(value):
+    return len((value or '').strip()) > CLASS_GROUP_MAX_LENGTH
+
 
 def _get_safe_redirect_target(request, target_url, fallback_name='dashboard'):
     """Return a safe local redirect target or a fallback route name."""
@@ -1266,7 +1272,7 @@ def add_student(request):
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
         roll = request.POST.get('roll')
-        class_number = request.POST.get('class_number')
+        class_number = (request.POST.get('class_number') or '').strip()
         username = request.POST.get('username')
         password = request.POST.get('password')
         confirm_password = request.POST.get('confirm_password')
@@ -1274,6 +1280,8 @@ def add_student(request):
         # Validate all required fields
         if not all([first_name, roll, class_number, username, password, confirm_password]):
             messages.error(request, 'All required fields must be filled!')
+        elif _class_group_too_long(class_number):
+            messages.error(request, 'Class cannot exceed 10 characters.')
         elif password != confirm_password:
             messages.error(request, 'Passwords do not match.')
         elif User.objects.filter(username=username).exists():
@@ -1292,7 +1300,7 @@ def add_student(request):
                     first_name=first_name,
                     last_name=last_name if last_name else "",
                     roll=roll,
-                    class_name=str(class_number),
+                    class_name=class_number,
                     teacher=request.user
                 )
                 
@@ -1355,7 +1363,7 @@ def edit_student(request, student_id):
             first_name = request.POST.get('first_name')
             last_name = request.POST.get('last_name')
             roll = request.POST.get('roll')
-            class_number = request.POST.get('class_number')
+            class_number = (request.POST.get('class_number') or '').strip()
             username = request.POST.get('username')
             new_password = request.POST.get('new_password')
             confirm_password = request.POST.get('confirm_password')
@@ -1363,13 +1371,15 @@ def edit_student(request, student_id):
             # Validate required fields
             if not all([first_name, roll, class_number]):
                 messages.error(request, 'First name, roll, and class are required!')
+            elif _class_group_too_long(class_number):
+                messages.error(request, 'Class cannot exceed 10 characters.')
             else:
                 try:
                     # Update student info
                     student.first_name = first_name
                     student.last_name = last_name or None
                     student.roll = roll
-                    student.class_name = str(class_number)
+                    student.class_name = class_number
                     student.save()
                     
                     # Update user credentials if provided
@@ -1500,7 +1510,7 @@ def add_exam(request):
         exam_type_name = request.POST.get('exam_type')  # Now it's CQ or MCQ string
         date = request.POST.get('date')
         chapter = request.POST.get('chapter')
-        class_number = request.POST.get('class_number')
+        class_number = (request.POST.get('class_number') or '').strip()
         total_marks = request.POST.get('total_marks')
         mark_obtained = request.POST.get('mark_obtained')
         question_pdf = request.FILES.get('question_pdf')
@@ -1508,14 +1518,16 @@ def add_exam(request):
         
         exam_id = request.POST.get('exam_id')
         if all([student_id, subject_id, exam_type_name, date, chapter, class_number, total_marks, mark_obtained, exam_id]):
+            if _class_group_too_long(class_number):
+                messages.error(request, 'Class cannot exceed 10 characters.')
+                return redirect('add_exam')
             try:
                 # Ensure student belongs to this teacher
                 student = Student.objects.get(id=student_id, teacher=teacher)
                 subject = Subject.objects.get(id=subject_id, teacher=teacher)
                 # Get or create exam type (CQ or MCQ) for this teacher
                 exam_type, created = ExamType.objects.get_or_create(name=exam_type_name, teacher=teacher)
-                # Convert to integers
-                class_number = int(class_number)
+                # Convert numeric fields
                 total_marks = int(total_marks)
                 mark_obtained = int(mark_obtained)
                 exam_id = int(exam_id)
@@ -1602,18 +1614,20 @@ def add_bulk_exam(request):
             exam_type_name = request.POST.get('exam_type')  # Now it's CQ or MCQ string
             date = request.POST.get('date')
             chapter = request.POST.get('chapter')
-            class_number = request.POST.get('class_number')
+            class_number = (request.POST.get('class_number') or '').strip()
             total_marks = request.POST.get('total_marks')
             question_pdf = request.FILES.get('question_pdf')
             
             exam_id = request.POST.get('exam_id')
             if all([subject_id, exam_type_name, date, chapter, class_number, total_marks, exam_id]):
+                if _class_group_too_long(class_number):
+                    messages.error(request, 'Class cannot exceed 10 characters.')
+                    return redirect('add_bulk_exams')
                 try:
                     # Ensure subject belongs to this teacher
                     subject = Subject.objects.get(id=subject_id, teacher=teacher)
                     # Get or create exam type (CQ or MCQ) for this teacher
                     exam_type, created = ExamType.objects.get_or_create(name=exam_type_name, teacher=teacher)
-                    class_number = int(class_number)
                     total_marks = int(total_marks)
                     exam_id = int(exam_id)
                     # Validate exam_id range
@@ -1738,13 +1752,16 @@ def edit_exam(request, exam_id):
         exam_type_name = request.POST.get('exam_type')
         date = request.POST.get('date')
         chapter = request.POST.get('chapter')
-        class_number = request.POST.get('class_number')
+        class_number = (request.POST.get('class_number') or '').strip()
         total_marks = request.POST.get('total_marks')
         mark_obtained = request.POST.get('mark_obtained')
         exam_id_new = request.POST.get('exam_id')
         marked_answer_paper = request.FILES.get('marked_answer_paper')
         
         if all([student_id, subject_id, exam_type_name, date, chapter, class_number, total_marks, mark_obtained, exam_id_new]):
+            if _class_group_too_long(class_number):
+                messages.error(request, 'Class cannot exceed 10 characters.')
+                return redirect('edit_exam', exam_id=exam.id)
             try:
                 # Ensure student and subject belong to this teacher
                 student = Student.objects.get(id=student_id, teacher=teacher)
@@ -1757,7 +1774,7 @@ def edit_exam(request, exam_id):
                 exam.exam_type = exam_type
                 exam.date = date
                 exam.chapter = chapter
-                exam.class_number = int(class_number)
+                exam.class_number = class_number
                 exam.total_marks = int(total_marks)
                 exam.mark_obtained = int(mark_obtained)
                 exam.exam_id = int(exam_id_new)
@@ -1871,7 +1888,7 @@ def all_exams(request):
     student_filter = request.GET.get('student')
     subject_filter = request.GET.get('subject')
     exam_type_filter = request.GET.get('exam_type')
-    class_filter = request.GET.get('class_number')
+    class_filter = (request.GET.get('class_number') or '').strip()
     month_filter = request.GET.get('month')
     chapter_filter = request.GET.get('chapter')
     exam_id_from = request.GET.get('exam_id_from')
@@ -2352,7 +2369,7 @@ def leaderboard(request):
     teacher = get_teacher_for_user(request.user)
     
     # Get class filter from request (default to 'all')
-    class_filter = request.GET.get('class_number', 'all')
+    class_filter = (request.GET.get('class_number', 'all') or 'all').strip()
     
     # Get available class numbers (only classes with actual exam records, filtered by teacher)
     try:
@@ -2364,7 +2381,7 @@ def leaderboard(request):
             .order_by('class_number')
         )
         # Filter out any None or empty values
-        available_classes = [c for c in available_classes if c is not None]
+        available_classes = [c for c in available_classes if c is not None and str(c).strip()]
     except (ValueError, TypeError):
         available_classes = []
     
@@ -2375,7 +2392,7 @@ def leaderboard(request):
     for student in students:
         # Filter exams by class if specified
         if class_filter != 'all':
-            exams = student.exam_set.filter(class_number=int(class_filter))
+            exams = student.exam_set.filter(class_number=class_filter)
             if not exams.exists():
                 continue
 
@@ -2505,7 +2522,7 @@ def leaderboard(request):
             students_in_subject = Student.objects.filter(
                 teacher=teacher,
                 exam__subject=subject,
-                exam__class_number=int(class_filter)
+                exam__class_number=class_filter
             ).distinct()
         else:
             students_in_subject = Student.objects.filter(teacher=teacher, exam__subject=subject).distinct()
@@ -2513,7 +2530,7 @@ def leaderboard(request):
         for student in students_in_subject:
             # Filter exams by class
             if class_filter != 'all':
-                exams = student.exam_set.filter(subject=subject, class_number=int(class_filter))
+                exams = student.exam_set.filter(subject=subject, class_number=class_filter)
             else:
                 exams = student.exam_set.filter(subject=subject)
                 
@@ -2567,7 +2584,7 @@ def leaderboard(request):
     
     # Filter exam dates by class and teacher
     if class_filter != 'all':
-        exam_dates = Exam.objects.filter(teacher=teacher, class_number=int(class_filter)).values_list('date', flat=True).distinct()
+        exam_dates = Exam.objects.filter(teacher=teacher, class_number=class_filter).values_list('date', flat=True).distinct()
     else:
         exam_dates = Exam.objects.filter(teacher=teacher).values_list('date', flat=True).distinct()
     
@@ -2592,7 +2609,7 @@ def leaderboard(request):
                 teacher=teacher,
                 exam__date__year=year,
                 exam__date__month=month,
-                exam__class_number=int(class_filter)
+                exam__class_number=class_filter
             ).distinct()
         else:
             students_in_month = Student.objects.filter(
@@ -2607,7 +2624,7 @@ def leaderboard(request):
                 exams = student.exam_set.filter(
                     date__year=year,
                     date__month=month,
-                    class_number=int(class_filter)
+                    class_number=class_filter
                 )
             else:
                 exams = student.exam_set.filter(date__year=year, date__month=month)
@@ -2665,7 +2682,7 @@ def leaderboard(request):
             teacher=teacher,
             exam__date__year=current_year,
             exam__date__month=current_month,
-            exam__class_number=int(class_filter)
+            exam__class_number=class_filter
         ).distinct()
     else:
         students_current_month = Student.objects.filter(
@@ -2680,7 +2697,7 @@ def leaderboard(request):
             exams = student.exam_set.filter(
                 date__year=current_year,
                 date__month=current_month,
-                class_number=int(class_filter)
+                class_number=class_filter
             )
         else:
             exams = student.exam_set.filter(date__year=current_year, date__month=current_month)

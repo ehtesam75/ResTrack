@@ -11,7 +11,7 @@
             <select id="class-filter-mobile" onchange="filterByClass(this)" class="px-2.5 py-1.5 bg-purple-50 border border-purple-200 rounded-lg text-xs font-medium text-purple-700 focus:ring-2 focus:ring-purple-500 focus:border-transparent shadow-sm">
                 <option value="all" {% if selected_class == 'all' %}selected{% endif %}>All Classes</option>
                 {% for class_num in available_classes %}
-                <option value="{{ class_num }}" {% if selected_class == class_num|stringformat:"s" %}selected{% endif %}>Class {{ class_num }}</option>
+                <option value="{{ class_num }}" {% if selected_class == class_num|stringformat:"s" %}selected{% endif %}>{{ class_num }}</option>
                 {% endfor %}
             </select>
         </div>
@@ -31,7 +31,7 @@
             <select id="class-filter" onchange="filterByClass(this)" class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent">
                 <option value="all" {% if selected_class == 'all' %}selected{% endif %}>Overall</option>
                 {% for class_num in available_classes %}
-                <option value="{{ class_num }}" {% if selected_class == class_num|stringformat:"s" %}selected{% endif %}>Class {{ class_num }}</option>
+                <option value="{{ class_num }}" {% if selected_class == class_num|stringformat:"s" %}selected{% endif %}>{{ class_num }}</option>
                 {% endfor %}
             </select>
         </div>

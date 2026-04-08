@@ -6,6 +6,9 @@ from django.core.exceptions import ValidationError
 from .models import Student, TeacherProfile, StudentProfile, ExamCenterExam
 
 
+CLASS_GROUP_MAX_LENGTH = 10
+
+
 class TeacherSignupForm(UserCreationForm):
     """Form for teacher registration"""
     error_messages = {
@@ -246,12 +249,11 @@ class StudentAccountForm(forms.Form):
             'placeholder': 'Last name (max 10 chars, optional)'
         })
     )
-    class_number = forms.IntegerField(
-        min_value=1,
-        max_value=12,
-        widget=forms.NumberInput(attrs={
+    class_number = forms.CharField(
+        max_length=CLASS_GROUP_MAX_LENGTH,
+        widget=forms.TextInput(attrs={
             'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all',
-            'placeholder': 'Class (1-12)'
+            'placeholder': 'Class (max 10 chars)'
         })
     )
     roll = forms.CharField(
@@ -295,6 +297,14 @@ class StudentAccountForm(forms.Form):
             raise ValidationError('This username is already taken. Please choose another.')
         return username
 
+    def clean_class_number(self):
+        class_number = (self.cleaned_data.get('class_number') or '').strip()
+        if not class_number:
+            raise ValidationError('Class is required.')
+        if len(class_number) > CLASS_GROUP_MAX_LENGTH:
+            raise ValidationError('Class cannot exceed 10 characters.')
+        return class_number
+
     def clean(self):
         cleaned_data = super().clean()
         password = cleaned_data.get('password')
@@ -317,7 +327,7 @@ class StudentAccountForm(forms.Form):
         student = Student.objects.create(
             first_name=self.cleaned_data['first_name'],
             last_name=self.cleaned_data.get('last_name') or None,
-            class_name=str(self.cleaned_data['class_number']),
+            class_name=self.cleaned_data['class_number'].strip(),
             roll=self.cleaned_data['roll']
         )
         
@@ -348,10 +358,9 @@ class EditStudentForm(forms.Form):
             'placeholder': 'Last name (max 10 chars, optional)'
         })
     )
-    class_number = forms.IntegerField(
-        min_value=1,
-        max_value=12,
-        widget=forms.NumberInput(attrs={
+    class_number = forms.CharField(
+        max_length=CLASS_GROUP_MAX_LENGTH,
+        widget=forms.TextInput(attrs={
             'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all'
         })
     )
@@ -361,6 +370,14 @@ class EditStudentForm(forms.Form):
             'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all'
         })
     )
+
+    def clean_class_number(self):
+        class_number = (self.cleaned_data.get('class_number') or '').strip()
+        if not class_number:
+            raise ValidationError('Class is required.')
+        if len(class_number) > CLASS_GROUP_MAX_LENGTH:
+            raise ValidationError('Class cannot exceed 10 characters.')
+        return class_number
 
 
 class GuestAccountForm(forms.Form):
@@ -425,7 +442,7 @@ class ExamCenterExamForm(forms.ModelForm):
         ]
         widgets = {
             'exam_display_id': forms.TextInput(attrs={'class': _INPUT_CLS, 'placeholder': 'e.g. EX-101'}),
-            'class_number': forms.NumberInput(attrs={'class': _INPUT_CLS, 'min': 1, 'max': 12, 'placeholder': '1–12'}),
+            'class_number': forms.TextInput(attrs={'class': _INPUT_CLS, 'placeholder': 'Class (max 10 chars)', 'maxlength': '10'}),
             'subject': forms.Select(attrs={'class': _SELECT_CLS}),
             'chapter': forms.TextInput(attrs={'class': _INPUT_CLS, 'placeholder': 'e.g. 5 or Tense', 'maxlength': '10'}),
             'exam_mode': forms.Select(attrs={'class': _SELECT_CLS}),
@@ -471,9 +488,11 @@ class ExamCenterExamForm(forms.ModelForm):
             self.fields['subject'].initial = existing_subject
 
     def clean_class_number(self):
-        val = self.cleaned_data.get('class_number')
-        if val is not None and (val < 1 or val > 12):
-            raise ValidationError('Class must be between 1 and 12.')
+        val = (self.cleaned_data.get('class_number') or '').strip()
+        if not val:
+            raise ValidationError('Class is required.')
+        if len(val) > CLASS_GROUP_MAX_LENGTH:
+            raise ValidationError('Class cannot exceed 10 characters.')
         return val
 
     def clean_duration_minutes(self):

@@ -607,7 +607,7 @@ class Exam(models.Model):
     )
     date = models.DateField()
     chapter = models.CharField(max_length=200, blank=True, null=True)
-    class_number = models.IntegerField(default=1)
+    class_number = models.CharField(max_length=50, default='1', help_text="Class name")
     total_marks = models.IntegerField()
     mark_obtained = models.IntegerField()
     group_id = models.CharField(
@@ -1083,8 +1083,9 @@ class ExamCenterExam(models.Model):
         max_length=50,
         help_text="Exam identifier displayed to students"
     )
-    class_number = models.IntegerField(
-        help_text="Class number (1-12)"
+    class_number = models.CharField(
+        max_length=50,
+        help_text="Class name"
     )
     subject = models.CharField(
         max_length=200,
