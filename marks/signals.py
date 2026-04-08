@@ -1,10 +1,32 @@
 
-from django.db.models.signals import pre_save, post_delete, post_save
+from django.db.models.signals import pre_save, post_delete, post_save, pre_delete
 from django.dispatch import receiver
 from django.db.models import Max
 from django.contrib.auth.models import User
-from .models import Exam
+from .models import Exam, Student
 from .notifications import notify_teacher_password_changed
+import threading
+
+
+_delete_ctx = threading.local()
+
+
+def _get_deleting_student_ids():
+    ids = getattr(_delete_ctx, 'student_ids', None)
+    if ids is None:
+        ids = set()
+        _delete_ctx.student_ids = ids
+    return ids
+
+
+@receiver(pre_delete, sender=Student)
+def mark_student_being_deleted(sender, instance, **kwargs):
+    _get_deleting_student_ids().add(instance.pk)
+
+
+@receiver(post_delete, sender=Student)
+def unmark_student_being_deleted(sender, instance, **kwargs):
+    _get_deleting_student_ids().discard(instance.pk)
 
 @receiver(post_save, sender=Exam)
 def recalculate_points_on_save(sender, instance, **kwargs):
@@ -43,7 +65,11 @@ def recalculate_points_on_delete(sender, instance, **kwargs):
     """Recalculate student's lifetime points after exam deletion"""
     if getattr(instance, '_skip_recalculate', False):
         return
-    if instance.student:
+    # During Student cascade delete, related Exam rows are deleted too.
+    # Skip recalculation to avoid recreating point rows for a deleting student.
+    if instance.student_id in _get_deleting_student_ids():
+        return
+    if instance.student_id and Student.objects.filter(pk=instance.student_id).exists():
         instance.student.recalculate_lifetime_points()
 
 

@@ -1350,9 +1350,9 @@ def edit_student(request, student_id):
                 student_user_id = student_user.id if student_user else None
 
                 with transaction.atomic():
-                    student.delete()
                     if student_user_id:
                         User.objects.filter(id=student_user_id).delete()
+                    student.delete()
 
                 messages.success(request, f'Student {student_name} deleted successfully.', extra_tags='success-popup')
                 return redirect('student_list')
