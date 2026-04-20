@@ -1350,9 +1350,9 @@ def edit_student(request, student_id):
                 student_user_id = student_user.id if student_user else None
 
                 with transaction.atomic():
+                    student.delete()
                     if student_user_id:
                         User.objects.filter(id=student_user_id).delete()
-                    student.delete()
 
                 messages.success(request, f'Student {student_name} deleted successfully.', extra_tags='success-popup')
                 return redirect('student_list')
@@ -1489,6 +1489,37 @@ def edit_subject(request):
             messages.error(request, 'Subject not found or you do not have permission to edit it.')
         except Exception as e:
             messages.error(request, f'Error updating subject: {str(e)}')
+
+    return redirect('add_subject')
+
+
+@login_required(login_url='login')
+def delete_subject(request, subject_id):
+    """Delete a subject owned by the current teacher (and cascaded exam results)."""
+    if not is_teacher(request.user):
+        messages.error(request, 'Only teachers can delete subjects.')
+        return redirect('dashboard')
+
+    if request.method != 'POST':
+        messages.error(request, 'Invalid request method for subject deletion.')
+        return redirect('add_subject')
+
+    if is_guest_session(request):
+        add_guest_read_only_message(request)
+        return redirect('add_subject')
+
+    subject = get_object_or_404(Subject, id=subject_id, teacher=request.user)
+
+    try:
+        related_exam_count = Exam.objects.filter(subject=subject, teacher=request.user).count()
+        subject_name = subject.name
+        subject.delete()
+        messages.success(
+            request,
+            f'Subject {subject_name} deleted successfully. Removed {related_exam_count} related exam result(s).'
+        )
+    except Exception as e:
+        messages.error(request, f'Error deleting subject: {str(e)}')
 
     return redirect('add_subject')
 

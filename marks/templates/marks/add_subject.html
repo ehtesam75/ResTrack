@@ -144,9 +144,24 @@
             {% for subject in subjects %}
             <div class="bg-white/80 border border-gray-200 rounded-lg shadow-sm p-3 flex flex-col justify-between hover:shadow-md transition-all">
                 <div>
-                    <div class="flex items-center gap-1 mb-0.5">
-                        <span class="inline-block w-2 h-2 rounded-full bg-purple-400"></span>
-                        <span class="font-medium text-gray-800 text-sm">{{ subject.name }}</span>
+                    <div class="flex items-center justify-between mb-0.5">
+                        <div class="flex items-center gap-1 min-w-0">
+                            <span class="inline-block w-2 h-2 rounded-full bg-purple-400"></span>
+                            <span class="font-medium text-gray-800 text-sm truncate">{{ subject.name }}</span>
+                        </div>
+                        <form method="post" action="{% url 'delete_subject' subject.id %}" onsubmit="return confirm('Delete this subject and all related exam results? This action cannot be undone.');" class="ml-2 flex-shrink-0">
+                            {% csrf_token %}
+                            <button
+                                type="submit"
+                                class="w-7 h-7 rounded-md bg-red-50 text-red-600 hover:bg-red-100 transition-colors flex items-center justify-center"
+                                title="Delete subject"
+                                aria-label="Delete subject"
+                            >
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                        </form>
                     </div>
                     <div class="text-xs text-purple-600 font-medium mb-1">{{ subject.short_name }}</div>
                     <div class="text-[11px] text-gray-500">Added on {{ subject.created_at|date:'M d, Y' }}</div>
