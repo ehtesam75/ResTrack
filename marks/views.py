@@ -2674,6 +2674,7 @@ def leaderboard(request):
                     'student': student,
                     'exams_count': exams_count,
                     'total_marks': total_marks,  # Add for tie-breaking
+                    'total_possible': total_possible,
                     'average_percentage': avg_percentage,
                     'points_earned': points_earned,
                 })
@@ -2746,6 +2747,7 @@ def leaderboard(request):
                 'student': student,
                 'exams_count': exams_count,
                 'total_marks': total_marks,
+                'total_possible': total_possible,
                 'average_percentage': avg_percentage,
                 'points_earned': points_earned,
             })
