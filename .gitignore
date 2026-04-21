@@ -7,3 +7,48 @@ favicon_test.html
 generate_icons.py
 icon_cache_test.html
 mobile_pwa_debug.html
+
+# Environment and secrets
+.env.*
+!.env.example
+
+# Python caches/compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Local database files
+*.sqlite3
+*.sqlite3-journal
+
+# Django collected static output (generated)
+staticfiles/
+
+# Local uploads and teacher file dumps
+ResTrack/ehtesam/
+
+# Test/coverage/tool caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Logs and local runtime files
+*.log
+
+# Local dumps/backups
+*.sql
+dumpdata*.json
+
+# Common key/cert files
+*.pem
+*.key
+*.p12
