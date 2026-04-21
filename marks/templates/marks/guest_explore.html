@@ -22,7 +22,12 @@
                 >
                     <option value="">Select a teacher</option>
                     {% for guest_account in public_guest_accounts %}
-                    <option value="{{ guest_account.id }}" {% if selected_guest_account_id == guest_account.id|stringformat:'s' %}selected{% endif %}>
+                    <option
+                        value="{{ guest_account.id }}"
+                        data-teacher-name="{{ guest_account.teacher.get_full_name|default:guest_account.teacher.username }}"
+                        data-institution="{{ guest_account.teacher.teacher_profile.institution|default:'' }}"
+                        {% if selected_guest_account_id == guest_account.id|stringformat:'s' %}selected{% endif %}
+                    >
                         {{ guest_account.teacher.get_full_name|default:guest_account.teacher.username }}
                     </option>
                     {% endfor %}
@@ -66,4 +71,28 @@
         </form>
     </div>
 </div>
+
+<script>
+function updateGuestDropdownLabels() {
+    const select = document.getElementById('guest_account_id');
+    if (!select) {
+        return;
+    }
+
+    const showInstitution = window.matchMedia('(min-width: 640px)').matches;
+    Array.from(select.options).forEach((option) => {
+        if (!option.dataset.teacherName) {
+            return;
+        }
+        const teacherName = option.dataset.teacherName;
+        const institution = option.dataset.institution;
+        option.textContent = (showInstitution && institution)
+            ? `${teacherName} - ${institution}`
+            : teacherName;
+    });
+}
+
+window.addEventListener('resize', updateGuestDropdownLabels);
+updateGuestDropdownLabels();
+</script>
 {% endblock %}
