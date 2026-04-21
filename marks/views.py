@@ -203,6 +203,47 @@ def user_login(request):
     return render(request, 'marks/login.html', {'form': form})
 
 
+def guest_explore(request):
+    """Allow visitors to start a view-only session for a public guest account."""
+    public_guest_accounts = list(
+        GuestTeacherAccount.objects.select_related('teacher', 'teacher__teacher_profile', 'guest_user')
+        .filter(is_publicly_accessible=True, teacher__teacher_profile__isnull=False)
+        .order_by('teacher__first_name', 'teacher__last_name', 'teacher__username')
+    )
+
+    if request.method == 'POST':
+        selected_id = (request.POST.get('guest_account_id') or '').strip()
+        selected_account = None
+
+        if selected_id.isdigit():
+            selected_account = next(
+                (account for account in public_guest_accounts if account.id == int(selected_id)),
+                None,
+            )
+
+        if not selected_account:
+            messages.error(request, 'Please select an available teacher to continue.')
+            return render(
+                request,
+                'marks/guest_explore.html',
+                {
+                    'public_guest_accounts': public_guest_accounts,
+                    'selected_guest_account_id': selected_id,
+                },
+            )
+
+        login(request, selected_account.teacher)
+        start_guest_session(request, selected_account)
+        add_guest_session_started_message(request)
+        return redirect('dashboard')
+
+    return render(
+        request,
+        'marks/guest_explore.html',
+        {'public_guest_accounts': public_guest_accounts},
+    )
+
+
 def _send_targeted_password_reset_email(request, user):
     """Send Django built-in password reset email for exactly one selected user."""
     form = TargetedPasswordResetForm(
@@ -578,6 +619,7 @@ def manage_guest_account(request):
             if form.is_valid():
                 username = form.cleaned_data['username']
                 new_password = form.cleaned_data['new_password']
+                is_publicly_accessible = form.cleaned_data.get('is_publicly_accessible', False)
 
                 with transaction.atomic():
                     User = get_user_model()
@@ -585,8 +627,14 @@ def manage_guest_account(request):
                     GuestTeacherAccount.objects.create(
                         teacher=teacher,
                         guest_user=guest_user,
+                        is_publicly_accessible=is_publicly_accessible,
                     )
                 messages.success(request, f"Guest account '{username}' created successfully.")
+                if is_publicly_accessible:
+                    messages.info(
+                        request,
+                        'This guest account is publicly accessible in view-only mode. Anyone can open your data using Guest Explore.',
+                    )
                 return redirect('manage_guest_account')
             for _, errors in form.errors.items():
                 for error in errors:
@@ -604,22 +652,35 @@ def manage_guest_account(request):
             if form.is_valid():
                 username = form.cleaned_data['username']
                 new_password = form.cleaned_data.get('new_password')
+                is_publicly_accessible = form.cleaned_data.get('is_publicly_accessible', False)
 
                 guest_user = guest_account.guest_user
-                changed = False
+                credential_changed = False
+                visibility_changed = guest_account.is_publicly_accessible != is_publicly_accessible
 
                 if guest_user.username != username:
                     guest_user.username = username
-                    changed = True
+                    credential_changed = True
 
                 if new_password:
                     guest_user.set_password(new_password)
-                    changed = True
+                    credential_changed = True
 
-                if changed:
+                if visibility_changed:
+                    guest_account.is_publicly_accessible = is_publicly_accessible
+
+                if credential_changed or visibility_changed:
                     with transaction.atomic():
-                        guest_user.save()
+                        if credential_changed:
+                            guest_user.save()
+                        if visibility_changed:
+                            guest_account.save(update_fields=['is_publicly_accessible', 'updated_at'])
                     messages.success(request, 'Guest account updated successfully.', extra_tags='success-popup')
+                    if is_publicly_accessible:
+                        messages.info(
+                            request,
+                            'This guest account is publicly accessible in view-only mode. Anyone can open your data using Guest Explore.',
+                        )
                 else:
                     messages.info(request, 'No changes detected for guest account.')
 
@@ -633,7 +694,10 @@ def manage_guest_account(request):
     else:
         if guest_account:
             form = GuestAccountForm(
-                initial={'username': guest_account.guest_user.username},
+                initial={
+                    'username': guest_account.guest_user.username,
+                    'is_publicly_accessible': guest_account.is_publicly_accessible,
+                },
                 existing_user=guest_account.guest_user,
                 require_password=False,
             )

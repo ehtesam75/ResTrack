@@ -162,6 +162,60 @@ class GuestReadOnlyAccessTests(TestCase):
 		self.assertContains(download_response, 'Guest accounts are view-only and cannot access student submission files.')
 
 
+class GuestExploreFlowTests(TestCase):
+	def setUp(self):
+		self.public_teacher = User.objects.create_user(username='public_teacher', password='teacher-pass')
+		TeacherProfile.objects.create(user=self.public_teacher, institution='Public School')
+		self.public_guest_user = User.objects.create_user(username='public_guest', password='guest-pass')
+		self.public_guest_account = GuestTeacherAccount.objects.create(
+			teacher=self.public_teacher,
+			guest_user=self.public_guest_user,
+			is_publicly_accessible=True,
+		)
+
+		self.private_teacher = User.objects.create_user(username='private_teacher', password='teacher-pass')
+		TeacherProfile.objects.create(user=self.private_teacher, institution='Private School')
+		self.private_guest_user = User.objects.create_user(username='private_guest', password='guest-pass')
+		GuestTeacherAccount.objects.create(
+			teacher=self.private_teacher,
+			guest_user=self.private_guest_user,
+			is_publicly_accessible=False,
+		)
+
+	def test_guest_explore_page_lists_only_public_accounts(self):
+		response = self.client.get(reverse('guest_explore'))
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, self.public_teacher.username)
+		self.assertNotContains(response, self.private_teacher.username)
+
+	def test_guest_explore_can_start_read_only_session_for_selected_teacher(self):
+		response = self.client.post(
+			reverse('guest_explore'),
+			data={'guest_account_id': str(self.public_guest_account.id)},
+		)
+
+		self.assertEqual(response.status_code, 302)
+		self.assertEqual(response.url, reverse('dashboard'))
+
+		session = self.client.session
+		self.assertEqual(session.get(GUEST_ACCOUNT_SESSION_KEY), self.public_guest_account.id)
+		self.assertEqual(session.get(GUEST_USERNAME_SESSION_KEY), self.public_guest_user.username)
+
+		response = self.client.get(reverse('dashboard'))
+		self.assertEqual(response.status_code, 200)
+
+	def test_guest_explore_rejects_private_or_invalid_selection(self):
+		response = self.client.post(
+			reverse('guest_explore'),
+			data={'guest_account_id': '999999'},
+			follow=True,
+		)
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, 'Please select an available teacher to continue.')
+
+
 class StudentChartApiAccessTests(TestCase):
 	def setUp(self):
 		self.teacher = User.objects.create_user(username='teacher_api', password='teacher-pass')

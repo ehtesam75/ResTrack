@@ -386,6 +386,7 @@ class GuestAccountForm(forms.Form):
     username = forms.CharField(max_length=150)
     new_password = forms.CharField(required=False, min_length=6)
     confirm_password = forms.CharField(required=False, min_length=6)
+    is_publicly_accessible = forms.BooleanField(required=False)
 
     def __init__(self, *args, existing_user=None, require_password=False, **kwargs):
         self.existing_user = existing_user

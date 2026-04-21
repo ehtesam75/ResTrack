@@ -18,8 +18,9 @@ class StudentProfileAdmin(admin.ModelAdmin):
 
 @admin.register(GuestTeacherAccount)
 class GuestTeacherAccountAdmin(admin.ModelAdmin):
-    list_display = ['teacher', 'guest_user', 'created_at', 'updated_at']
+    list_display = ['teacher', 'guest_user', 'is_publicly_accessible', 'created_at', 'updated_at']
     search_fields = ['teacher__username', 'guest_user__username']
+    list_filter = ['is_publicly_accessible', 'created_at']
     readonly_fields = ['created_at', 'updated_at']
 
 

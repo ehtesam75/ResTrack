@@ -37,6 +37,7 @@ class GuestTeacherAccount(models.Model):
     """One read-only guest login mapped to exactly one teacher."""
     teacher = models.OneToOneField(User, on_delete=models.CASCADE, related_name='guest_account')
     guest_user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='guest_teacher_account')
+    is_publicly_accessible = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
