@@ -6,18 +6,22 @@
 <div class="space-y-4 sm:space-y-4">
     <!-- Header -->
     <div class="animate-fade-in-up">
-        <div class="flex justify-between items-start gap-2">
-            <div class="flex-1 min-w-0">
-                <h1 class="text-lg sm:text-2xl font-bold gradient-text truncate">{{ subject.name }}</h1>
+        <div class="space-y-0.5 sm:space-y-1">
+            <div class="flex justify-between items-center gap-2">
+                <div class="flex-1 min-w-0">
+                    <h1 class="text-lg sm:text-2xl font-bold gradient-text truncate">{{ subject.name }}</h1>
+                </div>
+                {% if not is_student %}
+                <div class="hide-mobile flex-shrink-0">
+                    <a href="{% url 'add_exam' %}" class="bg-purple-100 text-purple-700 px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-purple-200 transition-all duration-200">
+                        Add Exam
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            <div>
                 <p class="text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1">Subject Performance Dashboard</p>
             </div>
-            {% if not is_student %}
-            <div class="hide-mobile flex-shrink-0">
-                <a href="{% url 'add_exam' %}" class="bg-purple-100 text-purple-700 px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-purple-200 transition-all duration-200">
-                    Add Exam
-                </a>
-            </div>
-            {% endif %}
         </div>
     </div>
 

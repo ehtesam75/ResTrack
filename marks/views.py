@@ -2070,6 +2070,8 @@ def all_exams(request):
     """Display all exam entries in detail - filtered by teacher"""
     teacher = get_teacher_for_user(request.user)
     exams = Exam.objects.filter(teacher=teacher).select_related('student', 'subject', 'exam_type').order_by('-date', '-exam_id')
+    student_user = is_student(request.user)
+    student_profile = request.user.student_profile if student_user else None
     
     # Get filter parameters
     student_filter = request.GET.get('student')
@@ -2083,6 +2085,11 @@ def all_exams(request):
     date_from = request.GET.get('date_from')
     date_to = request.GET.get('date_to')
     
+    if student_user:
+        # Students can only access their own results, regardless of query parameters.
+        student_filter = str(student_profile.student_id)
+        exams = exams.filter(student_id=student_profile.student_id)
+
     # Apply filters
     if student_filter:
         exams = exams.filter(student_id=student_filter)
@@ -2141,7 +2148,10 @@ def all_exams(request):
         lowest_percentage = pct_agg['lowest'] or 0
     
     # Get all options for filters (filtered by teacher)
-    students = Student.objects.filter(teacher=teacher).order_by('first_name', 'last_name')
+    if student_user:
+        students = Student.objects.filter(id=student_profile.student_id, teacher=teacher).order_by('first_name', 'last_name')
+    else:
+        students = Student.objects.filter(teacher=teacher).order_by('first_name', 'last_name')
     subjects = Subject.objects.filter(teacher=teacher).order_by('name')
     exam_types = ExamType.objects.filter(teacher=teacher).order_by('name')
     
@@ -2176,7 +2186,8 @@ def all_exams(request):
         'average_percentage': average_percentage,
         'highest_percentage': highest_percentage,
         'lowest_percentage': lowest_percentage,
-        'is_student': is_student(request.user),
+        'is_student': student_user,
+        'student_filter': student_filter,
     }
     
     return render(request, 'marks/all_exams.html', context)
