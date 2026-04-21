@@ -23,7 +23,7 @@
                     <option value="">Select a teacher</option>
                     {% for guest_account in public_guest_accounts %}
                     <option value="{{ guest_account.id }}" {% if selected_guest_account_id == guest_account.id|stringformat:'s' %}selected{% endif %}>
-                        {{ guest_account.teacher.get_full_name|default:guest_account.teacher.username }}{% if guest_account.teacher.teacher_profile.institution %} - {{ guest_account.teacher.teacher_profile.institution }}{% endif %}
+                        {{ guest_account.teacher.get_full_name|default:guest_account.teacher.username }}
                     </option>
                     {% endfor %}
                 </select>
