@@ -253,3 +253,76 @@ class StudentChartApiAccessTests(TestCase):
 		for url in chart_urls:
 			response = self.client.get(url)
 			self.assertEqual(response.status_code, 200)
+
+
+class StudentDashboardPersonalizationTests(TestCase):
+	def setUp(self):
+		self.teacher = User.objects.create_user(username='teacher_dash', password='teacher-pass')
+		TeacherProfile.objects.create(user=self.teacher, institution='Dash School')
+
+		self.viewer_student = Student.objects.create(
+			first_name='Viewer',
+			roll='1',
+			class_name='7',
+			teacher=self.teacher,
+		)
+		self.other_student = Student.objects.create(
+			first_name='Other',
+			roll='2',
+			class_name='7',
+			teacher=self.teacher,
+		)
+
+		self.viewer_user = User.objects.create_user(username='viewer_dash', password='student-pass')
+		StudentProfile.objects.create(
+			user=self.viewer_user,
+			student=self.viewer_student,
+			created_by=self.teacher,
+		)
+
+		subject = Subject.objects.create(name='Mathematics', short_name='MTH', teacher=self.teacher)
+		exam_type = ExamType.objects.create(name='CQ', teacher=self.teacher)
+
+		Exam.objects.create(
+			student=self.viewer_student,
+			subject=subject,
+			exam_type=exam_type,
+			teacher=self.teacher,
+			date=date(2026, 4, 1),
+			chapter='1',
+			class_number='7',
+			total_marks=100,
+			mark_obtained=90,
+			exam_id=101,
+		)
+
+		Exam.objects.create(
+			student=self.other_student,
+			subject=subject,
+			exam_type=exam_type,
+			teacher=self.teacher,
+			date=date(2026, 4, 2),
+			chapter='1',
+			class_number='7',
+			total_marks=100,
+			mark_obtained=10,
+			exam_id=102,
+		)
+
+		self.client.force_login(self.viewer_user)
+
+	def test_student_dashboard_shows_only_logged_in_student_data(self):
+		response = self.client.get(reverse('dashboard'))
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, 'My Dashboard')
+		self.assertContains(response, 'Viewer')
+		self.assertNotContains(response, 'Other')
+
+	def test_overall_grade_distribution_api_is_student_specific_for_student_login(self):
+		response = self.client.get(reverse('api_overall_grade_distribution'))
+
+		self.assertEqual(response.status_code, 200)
+		payload = response.json()
+		self.assertIn('Superb', payload['labels'])
+		self.assertNotIn('Horrible', payload['labels'])

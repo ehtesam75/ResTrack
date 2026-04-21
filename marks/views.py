@@ -416,137 +416,219 @@ def manage(request):
 
 @login_required(login_url='login')
 def dashboard(request):
-    """Main dashboard view with analytics - filtered by teacher"""
+    """Main dashboard view with analytics.
+
+    Teachers see class-level analytics. Students see only their personal analytics.
+    """
     from collections import Counter
-    
+
     teacher = get_teacher_for_user(request.user)
-    
-    # Filter all data by teacher
-    teacher_students = Student.objects.filter(teacher=teacher)
-    teacher_subjects = Subject.objects.filter(teacher=teacher)
-    teacher_exams = Exam.objects.filter(teacher=teacher)
-    teacher_exam_types = ExamType.objects.filter(teacher=teacher)
-    
-    # Dashboard summary
-    total_exams = count_unique_exams(teacher_exams)
-    total_subjects = teacher_subjects.count()
-    total_students = teacher_students.count()
-    
-    # Get highest performers among teacher's students
-    best_student = None
-    highest_marks_student = None
-    highest_avg_student = None
-    
-    if teacher_students.exists():
-        students_with_exams = [s for s in teacher_students if s.total_exams > 0]
-        if students_with_exams:
-            highest_marks_student = max(teacher_students, key=lambda s: s.total_marks)
-            highest_avg_student = max(students_with_exams, key=lambda s: s.average_percentage)
-            best_student = highest_avg_student
-    
-    summary = {
-        'total_exams': total_exams,
-        'total_subjects': total_subjects,
-        'total_students': total_students,
-        'highest_marks_student': highest_marks_student,
-        'highest_avg_student': highest_avg_student,
-        'best_student': best_student
-    }
-    
-    # Subject performance - filtered by teacher
-    subject_performance = []
-    for subject in teacher_subjects:
-        exams = teacher_exams.filter(subject=subject)
-        if exams.exists():
-            total_marks_obtained = sum(float(e.mark_obtained) for e in exams)
-            total_possible_marks = sum(float(e.total_marks) for e in exams)
-            avg_percentage = (total_marks_obtained * 100 / total_possible_marks) if total_possible_marks > 0 else 0
-            
-            # Best student in this subject (among teacher's students)
-            best_in_subject = None
-            best_avg = 0
-            for student in teacher_students:
-                student_exams = exams.filter(student=student)
-                if student_exams.exists():
-                    s_total = sum(float(e.mark_obtained) for e in student_exams)
-                    s_possible = sum(float(e.total_marks) for e in student_exams)
-                    s_avg = (s_total * 100 / s_possible) if s_possible > 0 else 0
-                    if s_avg > best_avg:
-                        best_avg = s_avg
-                        best_in_subject = student
-            
-            subject_performance.append({
-                'subject': subject,
-                'average_percentage': round(avg_percentage, 2),
-                'total_exams': count_unique_exams(exams),
-                'best_student': best_in_subject
-            })
-    
-    subject_performance = sorted(subject_performance, key=lambda x: x['average_percentage'], reverse=True)
-    
-    # Exam type performance - filtered by teacher
-    exam_type_performance = []
-    for exam_type in teacher_exam_types:
-        exams = teacher_exams.filter(exam_type=exam_type)
-        if exams.exists():
-            total_marks_obtained = sum(float(e.mark_obtained) for e in exams)
-            total_possible_marks = sum(float(e.total_marks) for e in exams)
-            avg_percentage = (total_marks_obtained * 100 / total_possible_marks) if total_possible_marks > 0 else 0
-            
-            exam_type_performance.append({
-                'exam_type': exam_type,
-                'average_percentage': round(avg_percentage, 2),
-                'total_exams': count_unique_exams(exams)
-            })
-    
-    exam_type_performance = sorted(exam_type_performance, key=lambda x: x['average_percentage'], reverse=True)
-    
-    # Grade distribution - filtered by teacher
-    grades = [exam.grade for exam in teacher_exams]
-    distribution = Counter(grades)
-    
+    is_student_dashboard = is_student(request.user)
+    dashboard_student = None
+
+    if is_student_dashboard:
+        dashboard_student = get_object_or_404(
+            Student,
+            id=request.user.student_profile.student_id,
+            teacher=teacher,
+        )
+        student_exams = Exam.objects.filter(teacher=teacher, student=dashboard_student)
+
+        summary = {
+            'total_exams': dashboard_student.total_exams,
+            'total_subjects': len(dashboard_student.subject_wise_summary()),
+            'total_students': 1,
+            'highest_marks_student': dashboard_student,
+            'highest_avg_student': dashboard_student,
+            'best_student': dashboard_student,
+            'rank': dashboard_student.rank,
+            'average_percentage': round(dashboard_student.average_percentage, 2),
+        }
+
+        subject_performance = sorted(
+            [
+                {
+                    'subject': item['subject'],
+                    'average_percentage': round(item['average_percentage'], 2),
+                    'total_exams': item['exam_count'],
+                    'best_student': None,
+                }
+                for item in dashboard_student.subject_wise_summary()
+            ],
+            key=lambda x: x['average_percentage'],
+            reverse=True,
+        )
+
+        exam_type_performance = sorted(
+            [
+                {
+                    'exam_type': item['exam_type'],
+                    'average_percentage': round(item['average_percentage'], 2),
+                    'total_exams': item['exam_count'],
+                }
+                for item in dashboard_student.exam_type_summary()
+            ],
+            key=lambda x: x['average_percentage'],
+            reverse=True,
+        )
+
+        distribution = Counter(dashboard_student.grade_frequency())
+        recent_exams = student_exams.order_by('-date', '-exam_id')[:10]
+        total_marks_leaderboard = [
+            {
+                'student': dashboard_student,
+                'total_marks': dashboard_student.total_marks,
+                'total_exams': dashboard_student.total_exams,
+            }
+        ]
+        average_leaderboard = []
+        if dashboard_student.total_exams > 0:
+            average_leaderboard = [
+                {
+                    'student': dashboard_student,
+                    'average': dashboard_student.average_percentage,
+                    'total_exams': dashboard_student.total_exams,
+                }
+            ]
+        student_points = LifetimePoints.objects.filter(student=dashboard_student).first()
+        points_leaderboard = []
+        if student_points:
+            points_leaderboard = [
+                {
+                    'student': dashboard_student,
+                    'total_points': student_points.total_points,
+                    'points_earned': student_points.points_earned,
+                    'points_spent': student_points.points_spent,
+                }
+            ]
+    else:
+        # Filter all data by teacher
+        teacher_students = Student.objects.filter(teacher=teacher)
+        teacher_subjects = Subject.objects.filter(teacher=teacher)
+        teacher_exams = Exam.objects.filter(teacher=teacher)
+        teacher_exam_types = ExamType.objects.filter(teacher=teacher)
+
+        # Dashboard summary
+        total_exams = count_unique_exams(teacher_exams)
+        total_subjects = teacher_subjects.count()
+        total_students = teacher_students.count()
+
+        # Get highest performers among teacher's students
+        best_student = None
+        highest_marks_student = None
+        highest_avg_student = None
+
+        if teacher_students.exists():
+            students_with_exams = [s for s in teacher_students if s.total_exams > 0]
+            if students_with_exams:
+                highest_marks_student = max(teacher_students, key=lambda s: s.total_marks)
+                highest_avg_student = max(students_with_exams, key=lambda s: s.average_percentage)
+                best_student = highest_avg_student
+
+        summary = {
+            'total_exams': total_exams,
+            'total_subjects': total_subjects,
+            'total_students': total_students,
+            'highest_marks_student': highest_marks_student,
+            'highest_avg_student': highest_avg_student,
+            'best_student': best_student,
+            'rank': None,
+            'average_percentage': None,
+        }
+
+        # Subject performance - filtered by teacher
+        subject_performance = []
+        for subject in teacher_subjects:
+            exams = teacher_exams.filter(subject=subject)
+            if exams.exists():
+                total_marks_obtained = sum(float(e.mark_obtained) for e in exams)
+                total_possible_marks = sum(float(e.total_marks) for e in exams)
+                avg_percentage = (total_marks_obtained * 100 / total_possible_marks) if total_possible_marks > 0 else 0
+
+                # Best student in this subject (among teacher's students)
+                best_in_subject = None
+                best_avg = 0
+                for student in teacher_students:
+                    student_exams = exams.filter(student=student)
+                    if student_exams.exists():
+                        s_total = sum(float(e.mark_obtained) for e in student_exams)
+                        s_possible = sum(float(e.total_marks) for e in student_exams)
+                        s_avg = (s_total * 100 / s_possible) if s_possible > 0 else 0
+                        if s_avg > best_avg:
+                            best_avg = s_avg
+                            best_in_subject = student
+
+                subject_performance.append({
+                    'subject': subject,
+                    'average_percentage': round(avg_percentage, 2),
+                    'total_exams': count_unique_exams(exams),
+                    'best_student': best_in_subject
+                })
+
+        subject_performance = sorted(subject_performance, key=lambda x: x['average_percentage'], reverse=True)
+
+        # Exam type performance - filtered by teacher
+        exam_type_performance = []
+        for exam_type in teacher_exam_types:
+            exams = teacher_exams.filter(exam_type=exam_type)
+            if exams.exists():
+                total_marks_obtained = sum(float(e.mark_obtained) for e in exams)
+                total_possible_marks = sum(float(e.total_marks) for e in exams)
+                avg_percentage = (total_marks_obtained * 100 / total_possible_marks) if total_possible_marks > 0 else 0
+
+                exam_type_performance.append({
+                    'exam_type': exam_type,
+                    'average_percentage': round(avg_percentage, 2),
+                    'total_exams': count_unique_exams(exams)
+                })
+
+        exam_type_performance = sorted(exam_type_performance, key=lambda x: x['average_percentage'], reverse=True)
+
+        # Grade distribution - filtered by teacher
+        grades = [exam.grade for exam in teacher_exams]
+        distribution = Counter(grades)
+
+        # Recent exams - filtered by teacher
+        recent_exams = teacher_exams.order_by('-date', '-exam_id')[:10]
+
+        # Leaderboards - filtered by teacher's students (TOP 3 only)
+        total_marks_leaderboard = sorted(
+            [{'student': s, 'total_marks': s.total_marks, 'total_exams': s.total_exams} for s in teacher_students],
+            key=lambda x: x['total_marks'], reverse=True
+        )[:3]
+
+        average_leaderboard = sorted(
+            [{'student': s, 'average': s.average_percentage, 'total_exams': s.total_exams}
+             for s in teacher_students if s.total_exams > 0],
+            key=lambda x: x['average'], reverse=True
+        )[:3]
+
+        # Points leaderboard - filtered by teacher's students (TOP 3 only)
+        # Use a single query with select_related instead of N individual queries
+        student_ids = [s.id for s in teacher_students]
+        lp_map = {
+            lp.student_id: lp
+            for lp in LifetimePoints.objects.filter(student_id__in=student_ids).select_related('student')
+        }
+        points_leaderboard = []
+        for student in teacher_students:
+            lp = lp_map.get(student.id)
+            if lp:
+                points_leaderboard.append({
+                    'student': student,
+                    'total_points': lp.total_points,
+                    'points_earned': lp.points_earned,
+                    'points_spent': lp.points_spent
+                })
+        points_leaderboard = sorted(points_leaderboard, key=lambda x: x['total_points'], reverse=True)[:3]
+
     grade_color_map = get_grade_color_map()
-    
+
     grade_distribution = []
     for grade_name, count in distribution.items():
         color = grade_color_map.get(grade_name, '#000000')
         grade_distribution.append({'grade': grade_name, 'count': count, 'color': color})
-    
-    # Recent exams - filtered by teacher
-    recent_exams = teacher_exams.order_by('-date', '-exam_id')[:10]
-    
-    # Leaderboards - filtered by teacher's students (TOP 3 only)
-    total_marks_leaderboard = sorted(
-        [{'student': s, 'total_marks': s.total_marks, 'total_exams': s.total_exams} for s in teacher_students],
-        key=lambda x: x['total_marks'], reverse=True
-    )[:3]
-    
-    average_leaderboard = sorted(
-        [{'student': s, 'average': s.average_percentage, 'total_exams': s.total_exams} 
-         for s in teacher_students if s.total_exams > 0],
-        key=lambda x: x['average'], reverse=True
-    )[:3]
-    
-    # Points leaderboard - filtered by teacher's students (TOP 3 only)
-    # Use a single query with select_related instead of N individual queries
-    from .models import LifetimePoints
-    student_ids = [s.id for s in teacher_students]
-    lp_map = {
-        lp.student_id: lp
-        for lp in LifetimePoints.objects.filter(student_id__in=student_ids).select_related('student')
-    }
-    points_leaderboard = []
-    for student in teacher_students:
-        lp = lp_map.get(student.id)
-        if lp:
-            points_leaderboard.append({
-                'student': student,
-                'total_points': lp.total_points,
-                'points_earned': lp.points_earned,
-                'points_spent': lp.points_spent
-            })
-    points_leaderboard = sorted(points_leaderboard, key=lambda x: x['total_points'], reverse=True)[:3]
-    
+
     # Serialize subject_performance for JavaScript
     subject_performance_json = json.dumps([
         {
@@ -564,6 +646,8 @@ def dashboard(request):
     ])
     
     context = {
+        'is_student_dashboard': is_student_dashboard,
+        'dashboard_student': dashboard_student,
         'summary': summary,
         'subject_performance': subject_performance,
         'subject_performance_json': subject_performance_json,
@@ -1969,7 +2053,15 @@ def api_student_comparison(request, subject_id):
 def api_overall_grade_distribution(request):
     """API endpoint for overall grade distribution chart data"""
     teacher = get_teacher_for_user(request.user)
-    data = ChartDataService.overall_grade_distribution(teacher=teacher)
+    if is_student(request.user):
+        student = get_object_or_404(
+            Student,
+            id=request.user.student_profile.student_id,
+            teacher=teacher,
+        )
+        data = ChartDataService.grade_distribution_chart(student.id)
+    else:
+        data = ChartDataService.overall_grade_distribution(teacher=teacher)
     return JsonResponse(data)
 
 

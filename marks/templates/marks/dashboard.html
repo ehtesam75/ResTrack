@@ -7,8 +7,12 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3 animate-fade-in-up">
         <div>
-            <h1 class="text-xl sm:text-2xl font-bold gradient-text">Analytics Dashboard</h1>
-            <p class="text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1">Track performance and insights</p>
+            <h1 class="text-xl sm:text-2xl font-bold gradient-text">
+                {% if is_student_dashboard %}My Dashboard{% else %}Analytics Dashboard{% endif %}
+            </h1>
+            <p class="text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1">
+                {% if is_student_dashboard %}Your personal performance and progress{% else %}Track performance and insights{% endif %}
+            </p>
         </div>
         {% if user.teacher_profile %}
         <div class="hide-mobile flex flex-wrap gap-2">
@@ -46,8 +50,16 @@
         <div class="stat-card p-3 sm:p-4" style="border-left: 3px solid #BAE6FD;">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-600 text-[10px] sm:text-xs font-medium uppercase tracking-wide">Total Students</p>
-                    <p class="text-xl sm:text-2xl font-bold text-gray-900 mt-0.5 sm:mt-1">{{ summary.total_students }}</p>
+                    <p class="text-gray-600 text-[10px] sm:text-xs font-medium uppercase tracking-wide">
+                        {% if is_student_dashboard %}Class Rank{% else %}Total Students{% endif %}
+                    </p>
+                    <p class="text-xl sm:text-2xl font-bold text-gray-900 mt-0.5 sm:mt-1">
+                        {% if is_student_dashboard %}
+                            {% if summary.rank %}{{ summary.rank }}{% else %}N/A{% endif %}
+                        {% else %}
+                            {{ summary.total_students }}
+                        {% endif %}
+                    </p>
                 </div>
                 <div class="hidden sm:block rounded-lg p-2.5 shadow-md" style="background: #E0F2FE;">
                     <span class="text-2xl">🎓</span>
@@ -58,14 +70,20 @@
         <div class="stat-card p-3 sm:p-4" style="border-left: 3px solid #FED7AA;">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-600 text-[10px] sm:text-xs font-medium uppercase tracking-wide">Best Student</p>
+                    <p class="text-gray-600 text-[10px] sm:text-xs font-medium uppercase tracking-wide">
+                        {% if is_student_dashboard %}Average Score{% else %}Best Student{% endif %}
+                    </p>
                     <p class="text-sm sm:text-base font-bold text-gray-900 mt-0.5 sm:mt-1">
-                        {% if summary.best_student %}
-                            <a href="{% url 'student_detail' summary.best_student.id %}" class="gradient-text hover:opacity-80 transition-opacity">
-                                {{ summary.best_student.name }}
-                            </a>
+                        {% if is_student_dashboard %}
+                            {{ summary.average_percentage|default:0|floatformat:1 }}%
                         {% else %}
-                            N/A
+                            {% if summary.best_student %}
+                                <a href="{% url 'student_detail' summary.best_student.id %}" class="gradient-text hover:opacity-80 transition-opacity">
+                                    {{ summary.best_student.name }}
+                                </a>
+                            {% else %}
+                                N/A
+                            {% endif %}
                         {% endif %}
                     </p>
                 </div>
@@ -77,6 +95,7 @@
     </div>
 
     <!-- Leaderboards Section -->
+    {% if not is_student_dashboard %}
     <div class="animate-fade-in-up" style="animation-delay: 0.2s;">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
             <!-- Top Performers by Total Marks -->
@@ -140,6 +159,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
 
     <!-- Charts Section -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 animate-fade-in-up" style="animation-delay: 0.3s;">
@@ -150,10 +170,14 @@
             <!-- Mobile: Card Layout -->
             <div class="sm:hidden space-y-2">
                 {% for item in subject_performance %}
-                <a href="{% url 'subject_detail' item.subject.id %}" class="block bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-3 border border-purple-100/50 shadow-sm hover:shadow-md transition-all">
+                <div class="block bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-3 border border-purple-100/50 shadow-sm hover:shadow-md transition-all">
                     <div class="flex items-center justify-between">
                         <div class="flex-1 min-w-0">
+                            {% if is_student_dashboard %}
                             <span class="text-sm font-semibold text-gray-900 block truncate">{{ item.subject.name }}</span>
+                            {% else %}
+                            <a href="{% url 'subject_detail' item.subject.id %}" class="text-sm font-semibold text-gray-900 hover:text-purple-600 block truncate transition-colors">{{ item.subject.name }}</a>
+                            {% endif %}
                             <p class="text-[10px] text-gray-500 mt-0.5">{{ item.total_exams }} exam{% if item.total_exams != 1 %}s{% endif %}</p>
                         </div>
                         <div class="text-right flex-shrink-0 ml-2">
@@ -161,7 +185,7 @@
                             <p class="text-[10px] text-gray-400">avg</p>
                         </div>
                     </div>
-                </a>
+                </div>
                 {% empty %}
                 <div class="text-center text-gray-500 text-xs py-4">No subjects available</div>
                 {% endfor %}
@@ -181,9 +205,13 @@
                         {% for item in subject_performance %}
                         <tr class="hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 transition-all duration-200">
                             <td class="px-3 py-2">
+                                {% if is_student_dashboard %}
+                                <span class="text-sm font-medium">{{ item.subject.name }}</span>
+                                {% else %}
                                 <a href="{% url 'subject_detail' item.subject.id %}" class="text-sm font-medium hover:text-purple-600 transition-colors">
                                     {{ item.subject.name }}
                                 </a>
+                                {% endif %}
                             </td>
                             <td class="px-3 py-2 font-bold gradient-text text-sm text-center">{{ item.average_percentage|floatformat:1 }}%</td>
                             <td class="px-3 py-2 text-gray-600 text-sm text-center">{{ item.total_exams }}</td>
@@ -275,7 +303,9 @@
     <div class="glass-effect rounded-xl p-3 sm:p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in-up" style="animation-delay: 0.5s;">
         <div class="flex items-center justify-between mb-2 sm:mb-3">
             <h2 class="text-sm sm:text-base font-bold gradient-text">🕒 Recent Exam Results</h2>
+            {% if not is_student_dashboard %}
             <a href="{% url 'all_exams' %}" class="text-purple-600 hover:text-purple-800 text-xs font-semibold transition-colors">View All →</a>
+            {% endif %}
         </div>
         
         <!-- Mobile: Card Layout -->
@@ -291,7 +321,11 @@
                 </div>
                 <div class="flex items-center justify-between">
                     <div class="flex-1 min-w-0">
+                        {% if is_student_dashboard %}
+                        <span class="font-semibold text-sm text-gray-900 truncate inline-block max-w-full">{{ exam.student.name }}</span>
+                        {% else %}
                         <a href="{% url 'student_detail' exam.student.id %}" class="font-semibold text-sm text-gray-900 hover:text-purple-600 truncate inline-block max-w-full" onclick="event.stopPropagation()">{{ exam.student.name }}</a>
+                        {% endif %}
                         <p class="text-[10px] text-gray-500">{{ exam.subject.short_name|default:exam.subject.name }} · {{ exam.exam_type.name }} · Ch {{ exam.chapter|default:"—" }}</p>
                     </div>
                     <div class="text-right flex-shrink-0 ml-3">
@@ -327,7 +361,11 @@
                         <td class="px-4 py-2 text-xs text-center font-semibold text-purple-600">{% if exam.exam_id %}<a href="{% url 'exam_detail' exam.exam_id %}" class="hover:text-purple-800 hover:underline transition-colors">{{ exam.exam_id }}</a>{% else %}N/A{% endif %}</td>
                         <td class="px-4 py-2 text-xs text-gray-600">{{ exam.date|date:"M d, Y" }}</td>
                         <td class="px-4 py-2">
+                            {% if is_student_dashboard %}
+                            <span class="text-sm font-medium text-gray-900">{{ exam.student.name }}</span>
+                            {% else %}
                             <a href="{% url 'student_detail' exam.student.id %}" class="text-sm font-medium hover:text-purple-600 transition-colors">{{ exam.student.name }}</a>
+                            {% endif %}
                         </td>
                         <td class="px-4 py-2 font-medium text-sm">{{ exam.subject.name }}</td>
                         <td class="px-4 py-2 text-xs text-gray-600">{{ exam.exam_type.name }}</td>
