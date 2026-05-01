@@ -49,6 +49,8 @@ class GuestReadOnlyMiddleware:
                 return redirect('dashboard')
 
             if request.method not in self.SAFE_METHODS and path != '/logout/':
+                if self._is_bulk_exam_count_only(request):
+                    return self.get_response(request)
                 if self._wants_json_response(request):
                     return JsonResponse(
                         {
@@ -67,6 +69,20 @@ class GuestReadOnlyMiddleware:
                 return redirect('dashboard')
 
         return self.get_response(request)
+
+    @staticmethod
+    def _is_bulk_exam_count_only(request):
+        """Allow guest to proceed to bulk exam step 2 without saving."""
+        if request.method != 'POST':
+            return False
+        if request.path != '/exams/add-bulk/':
+            return False
+        if request.POST.get('submit_exams'):
+            return False
+        if request.FILES:
+            return False
+        student_count = (request.POST.get('student_count') or '').strip()
+        return student_count.isdigit()
 
     @staticmethod
     def _wants_json_response(request):

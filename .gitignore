@@ -7,6 +7,7 @@ favicon_test.html
 generate_icons.py
 icon_cache_test.html
 mobile_pwa_debug.html
+.vscode/
 
 # Environment and secrets
 .env.*

@@ -1787,6 +1787,9 @@ def add_bulk_exam(request):
     if request.method == 'POST':
         # Check if this is step 1 (getting student count) or step 2 (submitting exams)
         if request.POST.get('submit_exams'):
+            if is_guest_session(request):
+                add_guest_read_only_message(request)
+                return redirect('add_bulk_exams')
             # Step 2: Process and save all exams
             student_count = int(request.POST.get('student_count'))
             subject_id = request.POST.get('subject')

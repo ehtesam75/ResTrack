@@ -54,7 +54,7 @@
             {% csrf_token %}
             <input type="hidden" name="student_count" value="{{ student_count }}">
             <input type="hidden" name="submit_exams" value="true">
-            
+           
             <!-- Common exam details -->
             <div class="bg-gradient-to-r from-purple-50 to-blue-50 border-l-4 border-purple-400 p-3 sm:p-4 rounded-lg">
                 <h2 class="text-sm sm:text-base font-bold gradient-text mb-2 sm:mb-3">📋 Exam Details (Common for all students)</h2>
@@ -266,7 +266,7 @@
                 <button
                     type="submit"
                     id="submitBulkBtn"
-                    {% if is_production %}disabled{% endif %}
+                    {% if is_production or is_guest_session %}disabled{% endif %}
                     class="bg-green-100 text-green-700 px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium shadow-sm hover:shadow-md hover:bg-green-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     ✓ Save All Exams
