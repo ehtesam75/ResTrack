@@ -11,11 +11,11 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
-[Features](#-key-features) • [Usage Guide](#-usage-guide) • [Grading System](#-grading-system) • [Points & Rewards](#-points--rewards) • [Screenshots](#-screenshots)
-
+[Features](#-key-features) • [Usage Guide](#-usage-guide) • [Grading System](#-grading-system) • [Points & Rewards](#-points--rewards)
 </div>
 
----
+<br>
+
 
 ## 🎯 Overview
 
@@ -31,7 +31,9 @@
 - **Responsive Design**: Fully optimized for desktop and mobile devices
 - **Teacher & Student Roles**: Separate interfaces with appropriate permissions
 
----
+
+
+<br>
 
 ## ✨ Key Features
 
@@ -80,7 +82,9 @@
 -  **Responsive Design** - Optimized for desktop and mobile screen size
 -  **PWA Support** - Install as a Progressive Web App
 
----
+
+
+<br>
 
 ## 🛠️ Technology Stack
 
@@ -104,7 +108,8 @@
 - **Media Storage**: Cloudinary
 - **Environment**: Python-dotenv
 
----
+
+<br>
 
 ## 📖 Usage Guide
 
@@ -228,7 +233,9 @@
 - Check remaining balance
 - See monthly bonus points from #1 ranks
 
----
+
+
+<br>
 
 ## 📊 Grading System
 
@@ -256,7 +263,9 @@
 
 > **Note**: MCQ has higher thresholds due to typically higher scoring potential.
 
----
+
+
+<br>
 
 ## 💰 Points & Rewards
 
@@ -275,20 +284,15 @@
    - **1 Point = 1 BDT** (Bangladeshi Taka)
    - Points can be spent on rewards
    - Teachers track and approve withdrawals
-
-4. **Point Calculation**
-   ```
-   Lifetime Points = Exam Points + Bonus Points
-   Remaining Points = Lifetime Points - Points Spent
-   ```
-
+     
 ### Excellence Rate
 
 - **CQ**: % of exams with ≥80% score
 - **MCQ**: % of exams with ≥85% score
 - Measures consistency in high-level performance
 
----
+
+<br>
 
 ## 🏆 Rankings & Leaderboards
 
@@ -313,43 +317,8 @@
 - Based on **weighted average** considering exam type
 - Displayed on dashboard and leaderboard page
 
----
 
-## 📸 Screenshots
-
-### Desktop Views
-
-<details>
-<summary>Click to expand screenshots</summary>
-
-**Dashboard**
-![Dashboard](docs/screenshots/dashboard.png)
-
-**Student Detail**
-![Student Detail](docs/screenshots/student-detail.png)
-
-**Leaderboard**
-![Leaderboard](docs/screenshots/leaderboard.png)
-
-**Add Exam**
-![Add Exam](docs/screenshots/add-exam.png)
-
-</details>
-
-### Mobile Views
-
-<details>
-<summary>Click to expand mobile screenshots</summary>
-
-**Mobile Dashboard**
-![Mobile Dashboard](docs/screenshots/mobile-dashboard.png)
-
-**Mobile Leaderboard**
-![Mobile Leaderboard](docs/screenshots/mobile-leaderboard.png)
-
-</details>
-
----
+<br>
 
 ## 📝 License
 
