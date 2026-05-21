@@ -9,6 +9,7 @@ from . import push_views
 urlpatterns = [
     # Authentication URLs
     path('', views.home, name='home'),
+    path('health/', views.health, name='health'),
     path('login/', views.user_login, name='login'),
     path('guest-explore/', views.guest_explore, name='guest_explore'),
     path(

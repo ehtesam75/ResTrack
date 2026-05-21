@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse, Http404
+from django.http import JsonResponse, Http404, HttpResponse
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -3705,3 +3705,7 @@ def delete_teacher_account(teacher):
               f"{student_users_deleted} student accounts, {subjects_deleted} subjects, {exams_deleted} exams, "
               f"{points_spent_deleted} points records, {exam_types_deleted} exam types, "
               f"{teacher_profile_deleted} profile, {user_deleted} user account.")
+        
+
+def health(request):
+    return HttpResponse("OK", content_type="text/plain")
