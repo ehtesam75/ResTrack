@@ -394,7 +394,14 @@
         <!-- Mobile: Card Layout -->
         <div class="sm:hidden space-y-2">
             {% for record in points_history %}
-            <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-3 border border-blue-100/50 shadow-sm">
+            <div
+                class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-3 border border-blue-100/50 shadow-sm {% if record.exam and record.transaction_type == 'exam_bonus' or record.exam and record.transaction_type == 'exam_penalty' %}cursor-pointer hover:shadow-md transition-shadow{% endif %}"
+                {% if record.exam and record.transaction_type == 'exam_bonus' or record.exam and record.transaction_type == 'exam_penalty' %}
+                role="link"
+                tabindex="0"
+                data-exam-url="{% url 'exam_detail' record.exam.exam_id %}"
+                {% endif %}
+            >
                 <div class="flex flex-col">
                     <!-- Transaction Type at top -->
                     <p class="text-[10px] text-gray-500">{{ record.get_transaction_type_display }}</p>
@@ -436,7 +443,14 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     {% for record in points_history %}
-                    <tr class="hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 transition-all duration-200">
+                    <tr
+                        class="{% if record.exam and record.transaction_type == 'exam_bonus' or record.exam and record.transaction_type == 'exam_penalty' %}hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 transition-all duration-200 cursor-pointer{% else %}hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 transition-all duration-200{% endif %}"
+                        {% if record.exam and record.transaction_type == 'exam_bonus' or record.exam and record.transaction_type == 'exam_penalty' %}
+                        role="link"
+                        tabindex="0"
+                        data-exam-url="{% url 'exam_detail' record.exam.exam_id %}"
+                        {% endif %}
+                    >
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             {{ record.date|date:"M d, Y" }}
                         </td>
@@ -479,6 +493,30 @@
 </div>
 
 <script>
+    // Make exam bonus/penalty rows open the related exam detail page.
+    document.querySelectorAll('[data-exam-url]').forEach((row) => {
+        const openExamDetails = () => {
+            const examUrl = row.getAttribute('data-exam-url');
+            if (examUrl) {
+                window.location.href = examUrl;
+            }
+        };
+
+        row.addEventListener('click', (event) => {
+            if (event.target.closest('a, button, input, select, textarea, label')) {
+                return;
+            }
+            openExamDetails();
+        });
+
+        row.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                openExamDetails();
+            }
+        });
+    });
+
     // Points filter slide-in panel for mobile
     const pointsFilterToggle = document.getElementById('points-filter-toggle');
     const pointsFilterClose = document.getElementById('points-filter-close');

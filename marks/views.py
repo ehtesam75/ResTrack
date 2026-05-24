@@ -2422,7 +2422,7 @@ def points(request):
     students = Student.objects.filter(teacher=teacher).order_by('first_name', 'last_name')
     
     # Get points transaction history with filters (filtered by teacher)
-    points_history = PointTransaction.objects.filter(teacher=teacher).select_related('student')
+    points_history = PointTransaction.objects.filter(teacher=teacher).select_related('student', 'exam')
 
     # Apply filters from GET parameters
     student_filter = request.GET.get('student')
