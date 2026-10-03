@@ -1,4 +1,5 @@
 {% extends 'marks/base.html' %}
+{% load static %}
 
 {% block title %}ResTrack - Student Result Tracking System{% endblock %}
 
@@ -1067,7 +1068,7 @@
                 <!-- Company Info -->
                 <div class="md:col-span-2">
                     <div class="flex items-center gap-3 mb-2">
-                        <img src="/static/icons/ResTrack-128x128.png" alt="ResTrack Logo" class="w-8 h-8 rounded-lg">
+                        <img src="{% static 'icons/ResTrack-128x128.png' %}" alt="ResTrack Logo" class="w-8 h-8 rounded-lg">
                         <span class="footer-logo text-white font-bold text-lg">ResTrack</span>
                     </div>
                     <p class="footer-description text-slate-400 leading-relaxed max-w-sm mb-3 text-sm">

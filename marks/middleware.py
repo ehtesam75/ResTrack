@@ -1,9 +1,29 @@
 from django.conf import settings
 from django.http import JsonResponse
 from django.shortcuts import redirect
+from django.utils.cache import patch_cache_control
 from django.utils.http import url_has_allowed_host_and_scheme
 
 from .guest_access import add_guest_read_only_message, get_guest_account_for_request
+
+
+class PageCacheControlMiddleware:
+    """Revalidate page HTML so each navigation sees the current asset URLs.
+
+    Keep browser storage/conditional requests available, while preventing shared
+    caches from reusing personalized pages. WhiteNoise serves static assets
+    before this middleware, and API/file responses retain their own policies.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        content_type = response.get('Content-Type', '').split(';', 1)[0].lower()
+        if not response.streaming and content_type in ('text/html', 'application/xhtml+xml'):
+            patch_cache_control(response, private=True, no_cache=True)
+        return response
 
 
 class DevNoCacheMiddleware:

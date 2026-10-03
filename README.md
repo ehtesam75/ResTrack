@@ -113,6 +113,34 @@
 
 ## 📖 Usage Guide
 
+### Deployments and browser caching
+
+Run `build.sh` for each deployment, or run `python manage.py collectstatic --no-input`
+after installing dependencies and before starting the new application process.
+Django's `STORAGES` configuration uses WhiteNoise's compressed manifest backend:
+changed CSS, JavaScript, and template-linked images receive new content-hashed
+URLs, while unchanged assets keep their long-lived immutable caching.
+
+HTML is private and revalidated on navigation. Mutable static URLs revalidate as
+well; the service worker uses their cached copies only when offline. `/sw.js`
+includes the collected manifest hash, so asset changes automatically update the
+worker and retire older ResTrack caches. No manual version bump or browser cache
+clear is needed. Worker activation preserves open forms and exams; new page
+navigations load the deployed version.
+
+Local `python manage.py runserver` defaults to development mode when `DEBUG` is
+unset, serving source assets without a collected manifest. An explicit `DEBUG`
+value is respected; production server processes continue to default to
+`DEBUG=False`. When testing production locally with `DEBUG=False`, collect static
+files first and restart the server after rebuilding them.
+
+Cache regression checks: `python manage.py test marks.test_caching` and
+`node --test tests/service_worker.test.cjs`. For real-browser navigation checks,
+install Playwright and Chromium (`pip install playwright` and
+`python -m playwright install chromium`), then run
+`python manage.py test browser_navigation_ui`. The deployment/migration browser
+check runs with `python browser_cache_ui.py` against a temporary local server.
+
 ### For Teachers
 
 #### 1. Getting Started

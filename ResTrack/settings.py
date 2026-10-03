@@ -25,7 +25,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ======================
 # Core Security Settings
 # ======================
-DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
+# A plain local runserver should serve source assets without collectstatic.
+# Explicit DEBUG values still win; deployed WSGI/ASGI processes default to False.
+DEBUG = os.environ.get("DEBUG", str('runserver' in sys.argv)).lower() == "true"
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
 if not SECRET_KEY:
@@ -62,6 +64,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'marks.middleware.PageCacheControlMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -155,12 +158,21 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STORAGES = {
+    'default': {
+        'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
+# Mutable URLs (manifest icons, legacy asset links) must revalidate. WhiteNoise
+# still gives content-hashed files its long-lived public, immutable headers.
+WHITENOISE_MAX_AGE = 0
 
 # ======================
 # Media Files
 # ======================
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage' 
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
     'API_KEY': os.getenv('CLOUDINARY_API_KEY'),

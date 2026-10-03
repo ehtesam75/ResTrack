@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -18,15 +19,15 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="ResTrack">
     <!-- Favicon -->
-    <link rel="icon" href="/static/icons/favicon.ico" type="image/x-icon">
-    <link rel="shortcut icon" href="/static/icons/favicon.ico" type="image/x-icon">
-    <link rel="icon" href="/static/icons/ResTrack-32x32.png" type="image/png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/static/icons/ResTrack-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/static/icons/ResTrack-16x16.png">
+    <link rel="icon" href="{% static 'icons/favicon.ico' %}" type="image/x-icon">
+    <link rel="shortcut icon" href="{% static 'icons/favicon.ico' %}" type="image/x-icon">
+    <link rel="icon" href="{% static 'icons/ResTrack-32x32.png' %}" type="image/png">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'icons/ResTrack-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'icons/ResTrack-16x16.png' %}">
 
     <!-- Apple Touch Icon & PWA -->
-    <link rel="apple-touch-icon" href="/static/icons/ResTrack-maskable-192x192.png?v=1.8.0">
-    <link rel="manifest" href="/static/manifest.json?v=1.8.0">
+    <link rel="apple-touch-icon" href="{% static 'icons/ResTrack-maskable-192x192.png' %}">
+    <link rel="manifest" href="{% static 'manifest.json' %}">
 
     <title>{% block title %}ResTrack{% endblock %}</title>
     
@@ -40,7 +41,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <!-- Custom CSS -->
-    {% load static %}
     {% load user_extras %}
     <link rel="stylesheet" href="{% static 'css/custom.css' %}">
     
@@ -228,7 +228,7 @@
                     </div>
                     {% endif %}
                     <!-- Mobile menu button -->
-                    <button type="button" class="lg:hidden mobile-menu-btn ml-2 inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-purple-600 hover:bg-gray-100 focus:outline-none transition-colors" id="mobile-menu-button">
+                    <button type="button" class="lg:hidden mobile-menu-btn ml-2 inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-purple-600 hover:bg-gray-100 focus:outline-none transition-colors" id="mobile-menu-button" aria-controls="mobile-menu" aria-expanded="false">
                         <span class="sr-only">Open main menu</span>
                         <!-- Hamburger icon -->
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -244,11 +244,11 @@
     <div class="mobile-menu-overlay hidden" id="mobile-menu-overlay"></div>
     
     <!-- Mobile menu slide-in panel -->
-    <div class="mobile-menu-panel" id="mobile-menu">
+    <div class="mobile-menu-panel" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Main navigation" aria-hidden="true" inert>
         <!-- Header with gradient -->
-        <div class="gradient-primary p-4 flex-shrink-0">
+        <div class="mobile-menu-header gradient-primary p-4 flex-shrink-0" id="mobile-menu-header">
             <div class="flex justify-between items-center">
-                <div>
+                <div class="min-w-0 break-words">
                     {% if user.is_authenticated %}
                         <h2 class="text-lg font-bold text-white">
                             {% if user.student_profile %}
@@ -263,7 +263,7 @@
                         <p class="text-purple-200 text-[10px] mt-0.5">Result Tracking System</p>
                     {% endif %}
                 </div>
-                <button type="button" class="w-8 h-8 rounded-lg bg-white/20 text-white hover:bg-white/30 transition-colors flex items-center justify-center" id="mobile-menu-close">
+                <button type="button" class="w-8 h-8 shrink-0 rounded-lg bg-white/20 text-white hover:bg-white/30 transition-colors flex items-center justify-center" id="mobile-menu-close" aria-label="Close main menu">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -272,7 +272,7 @@
         </div>
 
         <!-- Navigation Links - Scrollable Content -->
-        <div class="overflow-y-auto overscroll-contain" style="height: calc(100vh - 80px); max-height: calc(100vh - 80px);">
+        <div class="mobile-menu-content overflow-y-auto overscroll-contain">
             {% if show_workspace_chip %}
             <div class="px-3 pt-3 pb-1">
                 <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Workspace</p>
@@ -527,27 +527,78 @@
         const menuClose = document.getElementById('mobile-menu-close');
         const menu = document.getElementById('mobile-menu');
         const overlay = document.getElementById('mobile-menu-overlay');
+        const mobileViewport = window.matchMedia('(max-width: 1023px)');
+        let menuScrollPosition = 0;
+        let bodyStyleBeforeMenu = null;
+        let menuPreviousFocus = null;
         
         function openMenu() {
+            if (!mobileViewport.matches || menu.classList.contains('open')) return;
+            menuScrollPosition = window.scrollY;
+            menuPreviousFocus = document.activeElement;
+            bodyStyleBeforeMenu = {
+                overflow: document.body.style.overflow,
+                position: document.body.style.position,
+                top: document.body.style.top,
+                width: document.body.style.width,
+            };
+            menu.inert = false;
+            menu.setAttribute('aria-hidden', 'false');
+            menuButton.setAttribute('aria-expanded', 'true');
             menu.classList.add('open');
             overlay.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
             // Prevent body scrolling on iOS when menu is open
             document.body.style.position = 'fixed';
+            document.body.style.top = `-${menuScrollPosition}px`;
             document.body.style.width = '100%';
+            menuClose.focus({ preventScroll: true });
         }
 
-        function closeMenu() {
+        function closeMenu(restoreFocus = true) {
+            if (!menu.classList.contains('open')) return;
             menu.classList.remove('open');
             overlay.classList.add('hidden');
-            document.body.style.overflow = '';
-            document.body.style.position = '';
-            document.body.style.width = '';
+            menuButton.setAttribute('aria-expanded', 'false');
+            Object.assign(document.body.style, bodyStyleBeforeMenu);
+            window.scrollTo({ top: menuScrollPosition, behavior: 'instant' });
+            if (restoreFocus && menuPreviousFocus && menuPreviousFocus.getClientRects().length) {
+                menuPreviousFocus.focus({ preventScroll: true });
+            } else if (menu.contains(document.activeElement)) {
+                document.activeElement.blur();
+            }
+            menu.inert = true;
+            menu.setAttribute('aria-hidden', 'true');
         }
         
         menuButton.addEventListener('click', openMenu);
-        menuClose.addEventListener('click', closeMenu);
-        overlay.addEventListener('click', closeMenu);
+        menuClose.addEventListener('click', () => closeMenu());
+        overlay.addEventListener('click', () => closeMenu());
+        mobileViewport.addEventListener('change', function(event) {
+            if (!event.matches) closeMenu(false);
+        });
+        // Restore a usable page if it returns from the browser's back/forward cache.
+        window.addEventListener('pageshow', () => closeMenu(false));
+
+        document.addEventListener('keydown', function(event) {
+            if (!menu.classList.contains('open')) return;
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                closeMenu();
+            } else if (event.key === 'Tab') {
+                const controls = Array.from(menu.querySelectorAll('a[href], button, input, select, textarea, [tabindex="0"]'))
+                    .filter(control => !control.disabled && control.getClientRects().length);
+                const first = controls[0];
+                const last = controls[controls.length - 1];
+                if (event.shiftKey && document.activeElement === first) {
+                    event.preventDefault();
+                    last.focus();
+                } else if (!event.shiftKey && document.activeElement === last) {
+                    event.preventDefault();
+                    first.focus();
+                }
+            }
+        });
 
         // Prevent touch events on menu from affecting body scroll
         menu.addEventListener('touchstart', function(e) {
@@ -797,35 +848,28 @@
         // Register service worker for PWA functionality
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
-                // Clean up old service worker registrations with /static/ scope
+                // Retire the old ResTrack worker whose scope covered only assets.
                 navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                    registrations.forEach(function(reg) {
-                        if (reg.scope && reg.scope.endsWith('/static/')) {
-                            console.log('Unregistering old SW with scope:', reg.scope);
-                            reg.unregister();
+                    return Promise.all(registrations.map(function(reg) {
+                        const worker = reg.active || reg.waiting || reg.installing;
+                        if (reg.scope === new URL('/static/', location.origin).href &&
+                            worker && new URL(worker.scriptURL).pathname === '/static/sw.js') {
+                            return reg.unregister();
                         }
-                    });
+                    }));
+                }).catch(function(error) {
+                    console.warn('Legacy service worker cleanup failed:', error);
                 });
 
-                console.log('Attempting to register service worker...');
-                navigator.serviceWorker.register('/sw.js?v=2.1.0')
+                // Stable URL; always check worker bytes against the deployment.
+                navigator.serviceWorker.register('/sw.js', { scope: '/', updateViaCache: 'none' })
                     .then(function(registration) {
-                        console.log('Service Worker registered successfully:', registration.scope);
-                        console.log('Service worker state:', registration.active ? 'active' : 'inactive');
-
-                        // Check for updates
-                        registration.addEventListener('updatefound', function() {
-                            console.log('Service worker update found');
-                            const newWorker = registration.installing;
-                            if (newWorker) {
-                                newWorker.addEventListener('statechange', function() {
-                                    console.log('Service worker state changed to:', newWorker.state);
-                                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                        // New version available
-                                        if (confirm('A new version of ResTrack is available. Reload to update?')) {
-                                            window.location.reload();
-                                        }
-                                    }
+                        // Returning to an open tab also checks for a deployment.
+                        // Activation never reloads an in-progress exam or form.
+                        document.addEventListener('visibilitychange', function() {
+                            if (document.visibilityState === 'visible') {
+                                registration.update().catch(function(error) {
+                                    console.warn('Service worker update check failed:', error);
                                 });
                             }
                         });
@@ -993,7 +1037,7 @@
                     } else {
                         console.log('Service worker not active');
                         // Try to register it first
-                        navigator.serviceWorker.register('/sw.js?v=2.1.0').then(reg => {
+                        navigator.serviceWorker.register('/sw.js', { scope: '/', updateViaCache: 'none' }).then(reg => {
                             console.log('Service worker registered for cache clearing');
                             setTimeout(() => {
                                 window.location.reload();

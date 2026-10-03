@@ -1,21 +1,16 @@
 // Service Worker for ResTrack PWA
-const CACHE_NAME = 'restrack-v2.1.0';
-const STATIC_CACHE_NAME = 'restrack-static-v2.1.0';
+// /sw.js receives the collected static manifest's version from Django. A new
+// build therefore installs a new worker and retires this app's previous cache.
+const STATIC_CACHE_NAME = `restrack-static-v3-${self.RESTRACK_ASSET_VERSION || 'dev'}`;
+const OWNED_CACHE_PREFIX = 'restrack-';
+const HASHED_ASSET = /\.[a-f0-9]{12}\.[^/]+$/i;
 
 // ---------------------------------------------------------------------------
 // Local development mode
 // ---------------------------------------------------------------------------
-// In production, /static/ URLs are content-hashed by WhiteNoise's
-// ManifestStaticFilesStorage (e.g. custom.a1b2c3.css), so a cache-first
-// strategy is safe: changing a file changes its URL, which misses the cache.
-//
-// During local development there are no hashes — it is always
-// /static/css/custom.css — so cache-first pins the very first copy the browser
-// ever saw and no amount of refreshing will replace it. That is what makes
-// edits appear to "not show up" on localhost.
-//
-// So on localhost we disable caching entirely and let the browser talk to the
-// dev server directly. Production behaviour is completely unchanged.
+// Local development bypasses the worker cache entirely. Production still has
+// some mutable URLs (manifest icons, for example); only content-hashed URLs
+// can safely use cache-first, regardless of the hostname.
 const DEV_HOSTNAMES = ['localhost', '127.0.0.1', '[::1]', '::1', '0.0.0.0'];
 const IS_DEV = DEV_HOSTNAMES.includes(self.location.hostname);
 
@@ -40,134 +35,119 @@ const STATIC_ASSETS = [
   '/static/icons/ResTrack-monochrome-192x192.png',
 ];
 
-// Install event - cache static assets
+function cacheable(response) {
+  return response.status === 200 &&
+    !/\bno-store\b/i.test(response.headers.get('Cache-Control') || '');
+}
+
+// Install event - best-effort offline copies of mutable assets. Revalidate
+// against the server so installation cannot seed a new cache with old HTTP data.
 self.addEventListener('install', event => {
-  console.log('Service Worker installing.');
-
-  if (IS_DEV) {
-    // Don't pre-cache anything locally, and activate immediately so a stale
-    // worker from an earlier session is replaced on the very next load.
-    console.log('[dev] Skipping static asset pre-cache.');
-    event.waitUntil(self.skipWaiting());
-    return;
-  }
-
-  event.waitUntil(
-    caches.open(STATIC_CACHE_NAME)
-      .then(async cache => {
-        console.log('Caching static assets...');
-
-        const results = await Promise.allSettled(
-          STATIC_ASSETS.map(asset => cache.add(asset))
-        );
-        const failed = results.filter(r => r.status === 'rejected');
-        if (failed.length) {
-          console.warn(`Failed to cache ${failed.length} asset(s):`, failed.map(r => r.reason));
-        }
-      })
-      .then(() => {
-        console.log('Service Worker installed.');
-        return self.skipWaiting();
-      })
-  );
+  event.waitUntil((async () => {
+    if (!IS_DEV) {
+      try {
+        const cache = await caches.open(STATIC_CACHE_NAME);
+        await Promise.allSettled(STATIC_ASSETS.map(async asset => {
+          const response = await fetch(asset, { cache: 'no-cache' });
+          if (cacheable(response)) await cache.put(asset, response);
+        }));
+      } catch (error) {
+        // Storage may be unavailable or full; that must not block updates.
+        console.warn('Static asset precache unavailable:', error);
+      }
+    }
+    await self.skipWaiting();
+  })());
 });
 
 // Activate event - clean up old caches and take control
 self.addEventListener('activate', event => {
-  console.log('Service Worker activating.');
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
-        cacheNames.map(cacheName => {
-          // Locally, drop every cache — including the current one, which may
-          // hold stale entries written by a previous (pre-fix) worker.
-          if (IS_DEV) {
-            console.log('[dev] Deleting cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-          // Delete all old caches to ensure fresh icons and manifest
-          if (cacheName !== STATIC_CACHE_NAME) {
-
-            console.log('Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
+        cacheNames
+          .filter(name => name.startsWith(OWNED_CACHE_PREFIX) &&
+            (IS_DEV || name !== STATIC_CACHE_NAME))
+          .map(name => caches.delete(name))
       );
-    }).then(() => {
-      console.log('Service Worker activated and old caches cleaned up.');
-      // Force refresh all clients to get updated icons
-      return self.clients.matchAll().then(clients => {
-        clients.forEach(client => client.navigate(client.url));
-      }).then(() => self.clients.claim());
-    })
+    }).catch(error => {
+      // Storage can be disabled or temporarily unavailable. Still replace the
+      // previous worker: asset lookups only use this build's cache namespace.
+      console.warn('Could not clean up old static asset caches:', error);
+    // Claim without reloading tabs: deployments must not interrupt exams or
+    // discard unsaved forms. New navigations receive the latest HTML/assets.
+    }).then(() => self.clients.claim())
   );
 });
+
+async function staticResponse(request, immutable) {
+  // Cache Storage is an optimization; a storage failure must not break assets.
+  let cache;
+  try {
+    cache = await caches.open(STATIC_CACHE_NAME);
+    if (immutable) {
+      const cachedResponse = await cache.match(request);
+      if (cachedResponse) return cachedResponse;
+    }
+  } catch (error) {
+    console.warn('Static asset cache unavailable:', error);
+  }
+
+  let response;
+  try {
+    response = await fetch(request, immutable ? undefined : { cache: 'no-cache' });
+  } catch (error) {
+    // Mutable URLs are only served from Cache Storage when the network is
+    // unavailable. Online responses, including 404s, are never hidden by it.
+    if (cache && !immutable) {
+      const cachedResponse = await cache.match(request);
+      if (cachedResponse) return cachedResponse;
+    }
+    throw error;
+  }
+
+  if (cache) {
+    try {
+      if (cacheable(response)) {
+        await cache.put(request, response.clone());
+      } else {
+        await cache.delete(request);
+      }
+    } catch (error) {
+      console.warn('Could not update static asset cache:', error);
+    }
+  }
+  return response;
+}
 
 // Fetch event - only handle same-origin /static/ assets
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  // Cross-origin requests (CDN, Cloudinary, PDF.js worker, etc.) — don't intercept at all
-  // Let the browser handle them natively with proper CORS headers
-  if (url.origin !== self.location.origin) {
+  // Let navigation, API, POST, CDN and local-development requests pass through
+  // untouched. Only same-origin GET requests for static assets belong here.
+  if (IS_DEV || event.request.method !== 'GET' ||
+      url.origin !== self.location.origin || !url.pathname.startsWith('/static/')) {
     return;
   }
-
-  // Locally, never serve anything from the cache. Going straight to the
-  // network means an edited CSS/JS/icon shows up on a plain refresh.
-  if (IS_DEV) {
-    return;
-  }
-
-  // Only cache same-origin assets under /static/ — nothing else
-  // Avoids catching PDF.js blob workers, inline scripts, or dynamic API routes
-  if (url.pathname.startsWith('/static/')) {
-
-    event.respondWith(
-      caches.match(event.request)
-        .then(cachedResponse => {
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-          return fetch(event.request)
-            .then(response => {
-              if (response.status === 200) {
-                const responseClone = response.clone();
-                caches.open(STATIC_CACHE_NAME)
-                  .then(cache => cache.put(event.request, responseClone));
-              }
-              return response;
-            })
-            .catch(() => {
-              console.log('Failed to fetch static asset:', event.request.url);
-              return new Response('', { status: 404 });
-            });
-        })
-    );
-    return;
-  }
-
-  // All other same-origin requests (navigation, API calls, etc.) — network only
-  event.respondWith(fetch(event.request));
+  const response = staticResponse(event.request, HASHED_ASSET.test(url.pathname));
+  event.respondWith(response);
+  // Keep the worker alive through cache writes, including on slow devices.
+  event.waitUntil(response.then(() => undefined, () => undefined));
 });
 
 // Message event - handle updates from the main thread
 self.addEventListener('message', event => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
+    event.waitUntil(self.skipWaiting());
   }
   if (event.data && event.data.type === 'CLEAR_ICON_CACHE') {
-    // Clear all caches and force refresh
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => caches.delete(cacheName))
-      );
-    }).then(() => {
-      console.log('Icon cache cleared, refreshing clients...');
-      return self.clients.matchAll();
-    }).then(clients => {
-      clients.forEach(client => client.navigate(client.url));
-    });
+    // Compatibility with existing clients, without deleting other apps' data
+    // or forcibly navigating a page that may contain unsaved work.
+    event.waitUntil(caches.keys().then(cacheNames => Promise.all(
+      cacheNames.filter(name => name.startsWith(OWNED_CACHE_PREFIX))
+        .map(name => caches.delete(name))
+    )));
   }
 });
 
