@@ -1,0 +1,51 @@
+{% comment %}
+Empty-state partial for the dashboard.
+
+Included when the active workspace has no students, no subjects, and no exams.
+Shown only to teachers (not students, not guests) so they have an obvious
+onboarding path inside a brand-new workspace.
+
+Variables expected in context (set by the dashboard view):
+  - empty_state: bool — show this partial?
+  - workspace:   the active Workspace instance (or None)
+
+All other context (urls, user, etc.) comes from the parent template.
+{% endcomment %}
+{% if empty_state %}
+    <div class="glass-effect rounded-xl border border-purple-200 p-6 sm:p-8 text-center bg-gradient-to-br from-purple-50/60 to-blue-50/60 animate-fade-in-up">
+        <div class="w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
+            <svg class="w-7 h-7 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+            </svg>
+        </div>
+        <h2 class="text-lg sm:text-xl font-bold text-gray-900">
+            {% if workspace %}“{{ workspace.name }}” is empty{% else %}This workspace is empty{% endif %}
+        </h2>
+        <p class="text-sm text-gray-600 mt-1 max-w-md mx-auto">
+            Get started by adding students, subjects, and exam types. Each workspace is isolated — data here won't appear in your other workspaces.
+        </p>
+        <div class="flex flex-wrap items-center justify-center gap-2 mt-4">
+            <a href="{% url 'add_student' %}"
+               class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl font-medium text-white text-xs sm:text-sm bg-gradient-to-r from-purple-600 to-blue-500 shadow-md hover:shadow-lg transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                </svg>
+                Add your first student
+            </a>
+            <a href="{% url 'add_subject' %}"
+               class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl font-medium text-blue-700 text-xs sm:text-sm bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                </svg>
+                Add a subject
+            </a>
+            <a href="{% url 'workspace_list' %}"
+               class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl font-medium text-gray-700 text-xs sm:text-sm bg-gray-100 hover:bg-gray-200 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                </svg>
+                Manage workspaces
+            </a>
+        </div>
+    </div>
+{% endif %}

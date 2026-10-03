@@ -42,21 +42,39 @@ def recalculate_points_on_save(sender, instance, **kwargs):
 
 @receiver(pre_save, sender=Exam)
 def assign_exam_id(sender, instance, **kwargs):
-    """Automatically assign exam_id before saving"""
+    """Automatically assign exam_id before saving.
+
+    Exam IDs are scoped per-workspace so two workspaces can each have their
+    own ``exam_id=1``. If ``workspace`` is unset (legacy row, backfill in
+    progress), we fall back to teacher-scoped numbering so behaviour is
+    deterministic during the migration window.
+    """
     # Only assign exam_id if not provided manually
     if instance.exam_id is None:
+        # Scope by workspace when available; otherwise fall back to teacher.
+        if instance.workspace_id:
+            scope_filter = {'workspace_id': instance.workspace_id}
+        elif instance.teacher_id:
+            scope_filter = {'teacher_id': instance.teacher_id}
+        else:
+            return  # Nothing to scope by; leave exam_id alone.
+
         if instance.group_id:
-            # Check if other exams with same group_id exist
-            existing = Exam.objects.filter(group_id=instance.group_id).exclude(pk=instance.pk).first()
+            # Check if other exams with same group_id exist in this workspace
+            existing = (
+                Exam.objects
+                .filter(group_id=instance.group_id, **scope_filter)
+                .exclude(pk=instance.pk)
+                .first()
+            )
             if existing and existing.exam_id:
                 instance.exam_id = existing.exam_id
             else:
-                # Get max exam_id for this teacher and increment
-                max_id = Exam.objects.filter(teacher=instance.teacher).aggregate(Max('exam_id'))['exam_id__max']
+                max_id = Exam.objects.filter(**scope_filter).aggregate(Max('exam_id'))['exam_id__max']
                 instance.exam_id = (max_id or 0) + 1
         else:
-            # Single entry, get new exam_id for this teacher
-            max_id = Exam.objects.filter(teacher=instance.teacher).aggregate(Max('exam_id'))['exam_id__max']
+            # Single entry, get new exam_id for this workspace
+            max_id = Exam.objects.filter(**scope_filter).aggregate(Max('exam_id'))['exam_id__max']
             instance.exam_id = (max_id or 0) + 1
 
 

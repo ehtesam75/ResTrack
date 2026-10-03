@@ -1,8 +1,48 @@
+from django.conf import settings
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.utils.http import url_has_allowed_host_and_scheme
 
 from .guest_access import add_guest_read_only_message, get_guest_account_for_request
+
+
+class DevNoCacheMiddleware:
+    """Stop the browser caching anything while developing locally.
+
+    Django sends no Cache-Control header on normal HTML responses, which leaves
+    the decision to browser heuristics. A browser is then free to reuse a page
+    it fetched earlier, so template edits can appear not to have taken effect —
+    the classic "it works in a different browser" symptom, because the other
+    browser simply had nothing cached.
+
+    In production this middleware does nothing at all: it is a no-op unless
+    DEBUG is on, so real caching (and WhiteNoise's long-lived hashed static
+    assets) is untouched.
+    """
+
+    # Long-lived hashed assets don't exist in dev, so nothing here needs to
+    # survive a reload.
+    NO_STORE = 'no-store, no-cache, must-revalidate, max-age=0'
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+
+        if not settings.DEBUG:
+            return response
+
+        # Leave streaming/file responses alone; rewriting their headers can
+        # interfere with range requests (e.g. serving PDFs).
+        if getattr(response, 'streaming', False):
+            return response
+
+        response['Cache-Control'] = self.NO_STORE
+        response['Pragma'] = 'no-cache'
+        response['Expires'] = '0'
+        return response
+
 
 
 class GuestReadOnlyMiddleware:

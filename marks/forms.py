@@ -456,17 +456,24 @@ class ExamCenterExamForm(forms.ModelForm):
             'question_pdf': forms.ClearableFileInput(attrs={'class': _INPUT_CLS, 'accept': '.pdf'}),
         }
 
-    def __init__(self, *args, teacher=None, **kwargs):
+    def __init__(self, *args, teacher=None, workspace=None, **kwargs):
         self.teacher = teacher
+        self.workspace = workspace
         super().__init__(*args, **kwargs)
         self.fields['submission_duration_minutes'].required = False
         self.fields['chapter'].required = True
 
-        # Build subject choices from teacher's subjects
+        # Build subject choices scoped to the active workspace (falls back to teacher-scoped
+        # when no workspace is supplied — only used when callers haven't migrated yet).
         from .models import Subject
         subject_choices = [('', 'Select Subject')]
-        if teacher:
+        if workspace is not None:
+            subjects = Subject.objects.filter(workspace=workspace).order_by('name')
+        elif teacher is not None:
             subjects = Subject.objects.filter(teacher=teacher).order_by('name')
+        else:
+            subjects = Subject.objects.none()
+        if teacher or workspace is not None:
             subject_choices += [(s.name, s.name) for s in subjects]
         self.fields['subject'] = forms.ChoiceField(
             choices=subject_choices,

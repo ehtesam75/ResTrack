@@ -113,7 +113,7 @@
                     {% if user.is_authenticated %}
                     <!-- Remove Manage button from top bar -->
                     <!-- User dropdown -->
-                    <div class="hidden lg:flex lg:items-center relative" x-data="{ open: false }">
+                    <div class="hidden lg:flex lg:items-center relative">
                         <button onclick="toggleUserMenu()" class="flex items-center gap-2 text-gray-700 hover:text-purple-600 px-3 py-2 rounded-lg hover:bg-gray-100 transition-all text-sm font-medium">
                             <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white text-xs font-semibold">
                                 {% if user.student_profile %}
@@ -142,6 +142,51 @@
                                 {% endif %}
                                 <p class="text-xs text-gray-500">{% if user.teacher_profile %}Teacher{% if is_guest_session %} (Guest View){% endif %}{% else %}Student{% endif %}</p>
                             </div>
+                            {% if show_workspace_chip %}
+                            <div class="px-4 py-2 border-b border-gray-100">
+                                <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Workspace</p>
+                                <div data-ws-switcher class="relative">
+                                    <button type="button" data-ws-switcher-toggle
+                                            class="w-full flex items-center justify-between gap-1 text-xs px-2 py-1.5 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors font-medium">
+                                        <span class="truncate flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                                            </svg>
+                                            {{ active_workspace.name|default:'(no workspace)' }}
+                                        </span>
+                                        {% if show_workspace_switcher %}
+                                        <svg data-ws-switcher-chevron class="w-3 h-3 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                        </svg>
+                                        {% endif %}
+                                    </button>
+                                    {% if show_workspace_switcher %}
+                                    <div data-ws-switcher-menu class="hidden absolute left-0 right-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                                        {% for ws in active_workspaces %}
+                                            {% if not active_workspace or ws.id != active_workspace.id %}
+                                            <form method="post" action="{% url 'workspace_switch' ws.pk %}" class="block">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="next" value="{{ request.get_full_path }}" />
+                                                <button type="submit"
+                                                        class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors flex items-center gap-1.5">
+                                                    <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                                                    </svg>
+                                                    {{ ws.name }}
+                                                    <span class="ml-auto text-[10px] text-gray-400">#{{ ws.slug_number }}</span>
+                                                </button>
+                                            </form>
+                                            {% endif %}
+                                        {% endfor %}
+                                        <a href="{% url 'workspace_list' %}"
+                                           class="block px-3 py-1.5 text-xs text-purple-700 hover:bg-purple-50 transition-colors border-t border-gray-100 mt-1">
+                                            Manage workspaces →
+                                        </a>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
                             {% if user.teacher_profile %}
                             <a href="{% url 'manage' %}" class="flex items-center gap-2 px-4 py-2 text-sm text-purple-700 hover:bg-purple-50 transition-colors font-semibold">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -228,6 +273,51 @@
 
         <!-- Navigation Links - Scrollable Content -->
         <div class="overflow-y-auto overscroll-contain" style="height: calc(100vh - 80px); max-height: calc(100vh - 80px);">
+            {% if show_workspace_chip %}
+            <div class="px-3 pt-3 pb-1">
+                <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Workspace</p>
+                {% if show_workspace_switcher %}
+                <div data-ws-mobile-switcher>
+                    <button type="button" data-ws-mobile-toggle
+                            class="w-full flex items-center justify-between gap-2 text-sm px-3 py-2 rounded-lg bg-purple-50 text-purple-700 font-medium">
+                        <span class="flex items-center gap-2 truncate">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                            </svg>
+                            {{ active_workspace.name|default:'(no workspace)' }}
+                        </span>
+                        <svg data-ws-mobile-chevron class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div data-ws-mobile-menu class="hidden mt-1 bg-white rounded-lg border border-gray-200">
+                        {% for ws in active_workspaces %}
+                            {% if not active_workspace or ws.id != active_workspace.id %}
+                            <form method="post" action="{% url 'workspace_switch' ws.pk %}" class="block">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ request.get_full_path }}" />
+                                <button type="submit" class="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors flex items-center justify-between gap-1">
+                                    <span class="truncate">{{ ws.name }}</span>
+                                    <span class="text-[10px] text-gray-400">#{{ ws.slug_number }}</span>
+                                </button>
+                            </form>
+                            {% endif %}
+                        {% endfor %}
+                        <a href="{% url 'workspace_list' %}" class="block px-3 py-2 text-xs text-purple-700 hover:bg-purple-50 transition-colors border-t border-gray-100">
+                            Manage workspaces →
+                        </a>
+                    </div>
+                </div>
+                {% else %}
+                <div class="flex items-center gap-2 text-sm px-3 py-2 rounded-lg bg-purple-50 text-purple-700 font-medium">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                    </svg>
+                    {{ active_workspace.name|default:'(no workspace)' }}
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
             {% if user.is_authenticated %}
             <p class="px-3 py-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Main Menu</p>
             {% else %}
@@ -477,7 +567,7 @@
                 userMenu.classList.toggle('hidden');
             }
         }
-        
+
         // Close user menu when clicking outside
         document.addEventListener('click', function(e) {
             const userMenu = document.getElementById('userMenu');
@@ -486,6 +576,55 @@
                 userMenu.classList.add('hidden');
             }
         });
+
+        // ---------------------------------------------------------------
+        // Workspace switcher (desktop + mobile) — manual JS, no Alpine.
+        // Each switcher is a [data-ws-switcher] (desktop) or [data-ws-mobile-switcher]
+        // (mobile) container with a toggle button and a hidden menu.
+        // ---------------------------------------------------------------
+        function bindSwitcher(root, toggleSel, menuSel, chevronSel) {
+            if (!root) return;
+            const toggle = root.querySelector(toggleSel);
+            const menu = root.querySelector(menuSel);
+            const chevron = chevronSel ? root.querySelector(chevronSel) : null;
+            if (!toggle || !menu) return;
+            const open = () => {
+                menu.classList.remove('hidden');
+                if (chevron) chevron.classList.add('rotate-180');
+            };
+            const close = () => {
+                menu.classList.add('hidden');
+                if (chevron) chevron.classList.remove('rotate-180');
+            };
+            const isOpen = () => !menu.classList.contains('hidden');
+            toggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (isOpen()) { close(); } else { open(); }
+            });
+            // Close when clicking anywhere outside this switcher.
+            document.addEventListener('click', function(e) {
+                if (!isOpen()) return;
+                if (root.contains(e.target)) return;
+                close();
+            });
+            // Close on Escape.
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && isOpen()) { close(); toggle.focus(); }
+            });
+        }
+
+        bindSwitcher(
+            document.querySelector('[data-ws-switcher]'),
+            '[data-ws-switcher-toggle]',
+            '[data-ws-switcher-menu]',
+            '[data-ws-switcher-chevron]'
+        );
+        bindSwitcher(
+            document.querySelector('[data-ws-mobile-switcher]'),
+            '[data-ws-mobile-toggle]',
+            '[data-ws-mobile-menu]',
+            '[data-ws-mobile-chevron]'
+        );
     </script>
 
     <!-- Messages -->

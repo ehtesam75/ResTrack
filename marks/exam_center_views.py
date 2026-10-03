@@ -39,7 +39,7 @@ def _get_ordered_active_exams(teacher):
     import datetime as _dt
     from django.utils import timezone as _tz
     cutoff_date = (_tz.now() - _dt.timedelta(days=2)).date()
-    recent_exams = ExamCenterExam.objects.filter(teacher=teacher, exam_date__gte=cutoff_date)
+    recent_exams = ExamCenterExam.objects.filter(workspace=request.workspace, exam_date__gte=cutoff_date)
     running = []
     submission = []
     upcoming = []
@@ -58,7 +58,7 @@ def _get_ordered_active_exams(teacher):
 
 def _get_finished_exams(teacher):
     """Return finished exams, newest first."""
-    all_exams = ExamCenterExam.objects.filter(teacher=teacher)
+    all_exams = ExamCenterExam.objects.filter(workspace=request.workspace)
     finished = [e for e in all_exams if e.is_finished]
     finished.sort(key=lambda e: e.final_end_datetime, reverse=True)
     return finished
@@ -111,15 +111,15 @@ def exam_center_create(request):
         messages.error(request, 'Only teachers can create exams.')
         return redirect('exam_center')
 
-    if not ExamCenterExam.can_create_exam(request.user):
+    if not ExamCenterExam.can_create_exam(request.workspace):
         messages.warning(request, 'You already have 3 active exams. Wait until one finishes.')
         return redirect('exam_center')
 
     # Compute next sequential exam ID across all sources
     from .models import Exam
-    max_exam_id = Exam.objects.filter(teacher=request.user).values_list('exam_id', flat=True).order_by('-exam_id').first() or 0
+    max_exam_id = Exam.objects.filter(workspace=request.workspace).values_list('exam_id', flat=True).order_by('-exam_id').first() or 0
     # Also check ExamCenterExam display IDs (numeric ones)
-    for eid_str in ExamCenterExam.objects.filter(teacher=request.user).values_list('exam_display_id', flat=True):
+    for eid_str in ExamCenterExam.objects.filter(workspace=request.workspace).values_list('exam_display_id', flat=True):
         try:
             max_exam_id = max(max_exam_id, int(eid_str))
         except (ValueError, TypeError):
@@ -127,10 +127,11 @@ def exam_center_create(request):
     next_exam_id = max_exam_id + 1
 
     if request.method == 'POST':
-        form = ExamCenterExamForm(request.POST, request.FILES, teacher=request.user)
+        form = ExamCenterExamForm(request.POST, request.FILES, teacher=request.user, workspace=request.workspace)
         if form.is_valid():
             exam = form.save(commit=False)
             exam.teacher = request.user
+            exam.workspace = request.workspace
             exam.save()
             messages.success(request, f'Exam {exam.exam_display_id} created successfully.')
             # Clear the "no active exams" cron cache so notifications
@@ -143,12 +144,12 @@ def exam_center_create(request):
                 pass  # Don't let push failures block exam creation
             return redirect('exam_center')
     else:
-        form = ExamCenterExamForm(teacher=request.user, initial={'exam_display_id': str(next_exam_id)})
+        form = ExamCenterExamForm(teacher=request.user, workspace=request.workspace, initial={'exam_display_id': str(next_exam_id)})
 
     context = {
         'form': form,
         'editing': False,
-        'can_create': ExamCenterExam.can_create_exam(request.user),
+        'can_create': ExamCenterExam.can_create_exam(request.workspace),
         'next_exam_id': next_exam_id,
     }
     return render(request, 'marks/exam_center_create.html', context)
@@ -157,7 +158,7 @@ def exam_center_create(request):
 @login_required
 def exam_center_edit(request, exam_id):
     """Edit an upcoming exam (teacher only, before it starts)."""
-    exam = get_object_or_404(ExamCenterExam, pk=exam_id, teacher=request.user)
+    exam = get_object_or_404(ExamCenterExam, pk=exam_id, workspace=request.workspace)
 
     if not is_teacher(request.user):
         messages.error(request, 'Only teachers can edit exams.')
@@ -168,7 +169,7 @@ def exam_center_edit(request, exam_id):
         return redirect('exam_center_detail', exam_id=exam.pk)
 
     if request.method == 'POST':
-        form = ExamCenterExamForm(request.POST, request.FILES, instance=exam, teacher=request.user)
+        form = ExamCenterExamForm(request.POST, request.FILES, instance=exam, teacher=request.user, workspace=request.workspace)
         if form.is_valid():
             form.save()
             messages.success(request, f'Exam {exam.exam_display_id} updated successfully.')
@@ -180,7 +181,7 @@ def exam_center_edit(request, exam_id):
                 pass  # Don't let push failures block exam editing
             return redirect('exam_center')
     else:
-        form = ExamCenterExamForm(instance=exam, teacher=request.user)
+        form = ExamCenterExamForm(instance=exam, teacher=request.user, workspace=request.workspace)
 
     context = {
         'form': form,
@@ -194,7 +195,7 @@ def exam_center_edit(request, exam_id):
 @require_POST
 def exam_center_delete(request, exam_id):
     """Delete an exam – upcoming, running, or finished (teacher only)."""
-    exam = get_object_or_404(ExamCenterExam, pk=exam_id, teacher=request.user)
+    exam = get_object_or_404(ExamCenterExam, pk=exam_id, workspace=request.workspace)
 
     if not is_teacher(request.user):
         return JsonResponse({'error': 'Forbidden'}, status=403)
@@ -217,7 +218,7 @@ def exam_center_detail(request, exam_id):
         messages.error(request, 'Access denied.')
         return redirect('dashboard')
 
-    exam = get_object_or_404(ExamCenterExam, pk=exam_id, teacher=teacher)
+    exam = get_object_or_404(ExamCenterExam, pk=exam_id, workspace=request.workspace)
     status = exam.computed_status
     now = timezone.now()
 
@@ -263,7 +264,7 @@ def exam_center_detail(request, exam_id):
 def exam_center_submit_answer(request, exam_id):
     """Handle answer-sheet upload during submission period."""
     teacher = get_teacher_for_user(request.user)
-    exam = get_object_or_404(ExamCenterExam, pk=exam_id, teacher=teacher)
+    exam = get_object_or_404(ExamCenterExam, pk=exam_id, workspace=request.workspace)
 
     if not is_student(request.user):
         messages.error(request, 'Only students can submit answers.')
@@ -322,7 +323,7 @@ def exam_center_submit_answer(request, exam_id):
 @require_POST
 def exam_center_bonus_time(request, exam_id):
     """Grant bonus time to an exam (teacher only)."""
-    exam = get_object_or_404(ExamCenterExam, pk=exam_id, teacher=request.user)
+    exam = get_object_or_404(ExamCenterExam, pk=exam_id, workspace=request.workspace)
 
     if not is_teacher(request.user):
         return JsonResponse({'error': 'Forbidden'}, status=403)
@@ -376,7 +377,7 @@ def exam_center_status_api(request, exam_id):
     if not teacher:
         return JsonResponse({'error': 'Forbidden'}, status=403)
 
-    exam = get_object_or_404(ExamCenterExam, pk=exam_id, teacher=teacher)
+    exam = get_object_or_404(ExamCenterExam, pk=exam_id, workspace=request.workspace)
 
     return JsonResponse({
         'status': exam.computed_status,
@@ -402,7 +403,7 @@ def exam_center_submissions(request, exam_id):
         messages.error(request, 'Only teachers can view submissions.')
         return redirect('exam_center')
 
-    exam = get_object_or_404(ExamCenterExam, pk=exam_id, teacher=request.user)
+    exam = get_object_or_404(ExamCenterExam, pk=exam_id, workspace=request.workspace)
 
     if exam.exam_mode != 'online':
         messages.info(request, 'Offline exams do not have answer submissions.')
@@ -456,7 +457,7 @@ def exam_center_view_submission(request, submission_id):
         messages.error(request, 'Only teachers can view submissions.')
         return redirect('exam_center')
 
-    sub = get_object_or_404(AnswerSubmission, pk=submission_id, exam__teacher=request.user)
+    sub = get_object_or_404(AnswerSubmission, pk=submission_id, exam__workspace=request.workspace)
 
     if is_guest_session(request):
         add_guest_submission_access_denied_message(request)
@@ -485,7 +486,7 @@ def exam_center_download_submission(request, submission_id):
         messages.error(request, 'Only teachers can download submissions.')
         return redirect('exam_center')
 
-    sub = get_object_or_404(AnswerSubmission, pk=submission_id, exam__teacher=request.user)
+    sub = get_object_or_404(AnswerSubmission, pk=submission_id, exam__workspace=request.workspace)
 
     if is_guest_session(request):
         add_guest_submission_access_denied_message(request)

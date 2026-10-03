@@ -388,10 +388,10 @@ def manage(request):
     teacher = get_teacher_for_user(request.user)
     
     # Filter all data by teacher
-    teacher_students = Student.objects.filter(teacher=teacher)
-    teacher_subjects = Subject.objects.filter(teacher=teacher)
-    teacher_exams = Exam.objects.filter(teacher=teacher)
-    teacher_exam_types = ExamType.objects.filter(teacher=teacher)
+    teacher_students = Student.objects.filter(workspace=request.workspace)
+    teacher_subjects = Subject.objects.filter(workspace=request.workspace)
+    teacher_exams = Exam.objects.filter(workspace=request.workspace)
+    teacher_exam_types = ExamType.objects.filter(workspace=request.workspace)
     guest_account_exists = GuestTeacherAccount.objects.filter(teacher=teacher).exists()
     
     from .models import LifetimePoints
@@ -430,9 +430,9 @@ def dashboard(request):
         dashboard_student = get_object_or_404(
             Student,
             id=request.user.student_profile.student_id,
-            teacher=teacher,
+            workspace=request.workspace,
         )
-        student_exams = Exam.objects.filter(teacher=teacher, student=dashboard_student)
+        student_exams = Exam.objects.filter(workspace=request.workspace, student=dashboard_student)
 
         summary = {
             'total_exams': dashboard_student.total_exams,
@@ -503,10 +503,10 @@ def dashboard(request):
             ]
     else:
         # Filter all data by teacher
-        teacher_students = Student.objects.filter(teacher=teacher)
-        teacher_subjects = Subject.objects.filter(teacher=teacher)
-        teacher_exams = Exam.objects.filter(teacher=teacher)
-        teacher_exam_types = ExamType.objects.filter(teacher=teacher)
+        teacher_students = Student.objects.filter(workspace=request.workspace)
+        teacher_subjects = Subject.objects.filter(workspace=request.workspace)
+        teacher_exams = Exam.objects.filter(workspace=request.workspace)
+        teacher_exam_types = ExamType.objects.filter(workspace=request.workspace)
 
         # Dashboard summary
         total_exams = count_unique_exams(teacher_exams)
@@ -709,7 +709,7 @@ def manage_guest_account(request):
                     User = get_user_model()
                     guest_user = User.objects.create_user(username=username, password=new_password)
                     GuestTeacherAccount.objects.create(
-                        teacher=teacher,
+                        workspace=request.workspace,
                         guest_user=guest_user,
                         is_publicly_accessible=is_publicly_accessible,
                     )
@@ -802,7 +802,7 @@ def manage_guest_account(request):
 def student_list(request):
     """List all students - filtered by teacher"""
     teacher = get_teacher_for_user(request.user)
-    students = Student.objects.filter(teacher=teacher).order_by('first_name', 'last_name')
+    students = Student.objects.filter(workspace=request.workspace).order_by('first_name', 'last_name')
     
     # Add computed properties for sorting/display
     student_data = [
@@ -826,7 +826,7 @@ def student_detail(request, student_id):
     from django.db.models import Avg, Sum
     
     teacher = get_teacher_for_user(request.user)
-    student = get_object_or_404(Student, id=student_id, teacher=teacher)
+    student = get_object_or_404(Student, id=student_id, workspace=request.workspace)
     
     # Get student statistics
     subject_summary = student.subject_wise_summary()
@@ -865,7 +865,7 @@ def student_detail(request, student_id):
     
     monthly_winner_count = 0
     # Only look at teacher's exams
-    exam_dates = Exam.objects.filter(teacher=teacher).values_list('date', flat=True).distinct()
+    exam_dates = Exam.objects.filter(workspace=request.workspace).values_list('date', flat=True).distinct()
     months_set = set()
     
     for exam_date in exam_dates:
@@ -877,14 +877,14 @@ def student_detail(request, student_id):
     for year, month in months_set:
         # Get total unique exams conducted in this month (teacher-scoped)
         total_month_exams = Exam.objects.filter(
-            teacher=teacher,
+            workspace=request.workspace,
             date__year=year,
             date__month=month
         ).values('exam_id').distinct().count()
         
         # Get all students who had exams in this month (teacher-scoped)
         students_in_month = Student.objects.filter(
-            teacher=teacher,
+            workspace=request.workspace,
             exam__date__year=year,
             exam__date__month=month
         ).distinct()
@@ -928,10 +928,10 @@ def student_detail(request, student_id):
     
     # Calculate Subject Champion Count (how many subjects they've topped) - within same teacher
     subject_champion_count = 0
-    subjects = Subject.objects.filter(teacher=teacher)
+    subjects = Subject.objects.filter(workspace=request.workspace)
     
     for subject in subjects:
-        students_in_subject = Student.objects.filter(teacher=teacher, exam__subject=subject).distinct()
+        students_in_subject = Student.objects.filter(workspace=request.workspace, exam__subject=subject).distinct()
         subject_rankings = []
         
         for s in students_in_subject:
@@ -1001,7 +1001,7 @@ def student_detail(request, student_id):
     best_5_months = monthly_performance[:5]
     
     # Get all other students for comparison dropdown (teacher-scoped)
-    all_students = Student.objects.filter(teacher=teacher).exclude(id=student_id).order_by('first_name', 'last_name')
+    all_students = Student.objects.filter(workspace=request.workspace).exclude(id=student_id).order_by('first_name', 'last_name')
     
     context = {
         'student': student,
@@ -1027,18 +1027,18 @@ def compare_students(request, student1_id, student2_id):
     
     teacher = get_teacher_for_user(request.user)
     
-    student1 = get_object_or_404(Student, id=student1_id, teacher=teacher)
+    student1 = get_object_or_404(Student, id=student1_id, workspace=request.workspace)
     student2 = None
     if student2_id != 0:
-        student2 = get_object_or_404(Student, id=student2_id, teacher=teacher)
+        student2 = get_object_or_404(Student, id=student2_id, workspace=request.workspace)
     
     # Get all other students for the dropdown (filtered by teacher)
-    all_students = Student.objects.filter(teacher=teacher).exclude(id=student1_id).order_by('first_name', 'last_name')
+    all_students = Student.objects.filter(workspace=request.workspace).exclude(id=student1_id).order_by('first_name', 'last_name')
     
     # Get teacher-scoped querysets for calculations
-    teacher_exams = Exam.objects.filter(teacher=teacher)
-    teacher_students = Student.objects.filter(teacher=teacher)
-    teacher_subjects = Subject.objects.filter(teacher=teacher)
+    teacher_exams = Exam.objects.filter(workspace=request.workspace)
+    teacher_students = Student.objects.filter(workspace=request.workspace)
+    teacher_subjects = Subject.objects.filter(workspace=request.workspace)
     
     def get_student_stats(student):
         """Get comprehensive stats for a student"""
@@ -1236,11 +1236,11 @@ def compare_students(request, student1_id, student2_id):
 def subject_list(request):
     """List all subjects - filtered by teacher"""
     teacher = get_teacher_for_user(request.user)
-    subjects = Subject.objects.filter(teacher=teacher).order_by('name')
+    subjects = Subject.objects.filter(workspace=request.workspace).order_by('name')
     
     subject_data = []
     for subject in subjects:
-        exams = Exam.objects.filter(subject=subject, teacher=teacher)
+        exams = Exam.objects.filter(subject=subject, workspace=request.workspace)
         # Calculate average marks for teacher's students
         avg_marks = 0
         if exams.exists():
@@ -1262,13 +1262,13 @@ def subject_list(request):
 def subject_detail(request, subject_id):
     """Subject dashboard - filtered by teacher"""
     teacher = get_teacher_for_user(request.user)
-    subject = get_object_or_404(Subject, id=subject_id, teacher=teacher)
+    subject = get_object_or_404(Subject, id=subject_id, workspace=request.workspace)
     
     # Get subject statistics (filtered by teacher)
-    exams = Exam.objects.filter(subject=subject, teacher=teacher)
+    exams = Exam.objects.filter(subject=subject, workspace=request.workspace)
     
     # Get best student among teacher's students
-    teacher_students = Student.objects.filter(teacher=teacher)
+    teacher_students = Student.objects.filter(workspace=request.workspace)
     best_student = None
     best_avg = 0
     for student in teacher_students:
@@ -1449,7 +1449,7 @@ def add_student(request):
                     last_name=last_name if last_name else "",
                     roll=roll,
                     class_name=class_number,
-                    teacher=request.user
+                    workspace=request.workspace
                 )
                 
                 # Create student profile linking user to student
@@ -1479,7 +1479,7 @@ def edit_student(request, student_id):
         return redirect('dashboard')
     
     teacher = request.user
-    student = get_object_or_404(Student, id=student_id, teacher=teacher)
+    student = get_object_or_404(Student, id=student_id, workspace=request.workspace)
     guest_session = is_guest_session(request)
     
     # Get the student's user account if it exists
@@ -1576,7 +1576,7 @@ def add_subject(request):
         return redirect('dashboard')
 
     # Get all subjects for the current teacher
-    subjects = Subject.objects.filter(teacher=request.user).order_by('-created_at')
+    subjects = Subject.objects.filter(workspace=request.workspace).order_by('-created_at')
 
     if request.method == 'POST':
         name = (request.POST.get('name') or '').strip()
@@ -1588,7 +1588,7 @@ def add_subject(request):
         elif len(short_name) > 10:
             messages.error(request, 'Short name cannot exceed 10 characters.')
         else:
-            subject = Subject.objects.create(name=name, short_name=short_name, teacher=request.user)
+            subject = Subject.objects.create(name=name, short_name=short_name, workspace=request.workspace)
             messages.success(request, f'Subject {subject.name} added successfully.')
             return redirect('subject_list')
 
@@ -1626,7 +1626,7 @@ def edit_subject(request):
             return redirect('add_subject')
 
         try:
-            subject = Subject.objects.get(id=subject_id, teacher=request.user)
+            subject = Subject.objects.get(id=subject_id, workspace=request.workspace)
             subject.name = name
             subject.short_name = short_name
             subject.save()
@@ -1656,10 +1656,10 @@ def delete_subject(request, subject_id):
         add_guest_read_only_message(request)
         return redirect('add_subject')
 
-    subject = get_object_or_404(Subject, id=subject_id, teacher=request.user)
+    subject = get_object_or_404(Subject, id=subject_id, workspace=request.workspace)
 
     try:
-        related_exam_count = Exam.objects.filter(subject=subject, teacher=request.user).count()
+        related_exam_count = Exam.objects.filter(subject=subject, workspace=request.workspace).count()
         subject_name = subject.name
         subject.delete()
         messages.success(
@@ -1702,28 +1702,28 @@ def add_exam(request):
                 return redirect('add_exam')
             try:
                 # Ensure student belongs to this teacher
-                student = Student.objects.get(id=student_id, teacher=teacher)
-                subject = Subject.objects.get(id=subject_id, teacher=teacher)
+                student = Student.objects.get(id=student_id, workspace=request.workspace)
+                subject = Subject.objects.get(id=subject_id, workspace=request.workspace)
                 # Get or create exam type (CQ or MCQ) for this teacher
-                exam_type, created = ExamType.objects.get_or_create(name=exam_type_name, teacher=teacher)
+                exam_type, created = ExamType.objects.get_or_create(name=exam_type_name, workspace=request.workspace)
                 # Convert numeric fields
                 total_marks = int(total_marks)
                 mark_obtained = int(mark_obtained)
                 exam_id = int(exam_id)
                 # Validate exam_id range
-                max_existing = Exam.objects.filter(teacher=teacher).values_list('exam_id', flat=True).order_by('-exam_id').first() or 0
+                max_existing = Exam.objects.filter(workspace=request.workspace).values_list('exam_id', flat=True).order_by('-exam_id').first() or 0
                 if exam_id < 1 or exam_id > max_existing + 1:
                     messages.error(request, f'Exam ID must be between 1 and {max_existing + 1}.')
                     return redirect('add_exam')
                 # Prevent duplicate: same student + same exam_id for this teacher
-                if Exam.objects.filter(exam_id=exam_id, student=student, teacher=teacher).exists():
+                if Exam.objects.filter(exam_id=exam_id, student=student, workspace=request.workspace).exists():
                     messages.error(request, f'A result for {student.display_name} already exists for Exam ID {exam_id}.')
                     return redirect('add_exam')
                 exam = Exam.objects.create(
                     student=student,
                     subject=subject,
                     exam_type=exam_type,
-                    teacher=teacher,
+                    workspace=request.workspace,
                     date=date,
                     chapter=chapter,
                     class_number=class_number,
@@ -1736,12 +1736,12 @@ def add_exam(request):
                 if question_pdf:
                     ExamQuestionPaper.objects.update_or_create(
                         exam_id=exam_id,
-                        teacher=teacher,
+                        workspace=request.workspace,
                         defaults={'question_pdf': question_pdf}
                     )
                 # Notify the student about published results
                 try:
-                    notify_result_published(exam_id, [student.id], teacher)
+                    notify_result_published(exam_id, [student.id], request.workspace)
                 except Exception:
                     pass  # Don't let push failures block result publishing
                 messages.success(request, f'Result added successfully for {student.name}.')
@@ -1752,12 +1752,12 @@ def add_exam(request):
             messages.error(request, 'All required fields must be filled!')
     
     # Filter students and subjects by teacher
-    students = Student.objects.filter(teacher=teacher).order_by('first_name', 'last_name')
-    subjects = Subject.objects.filter(teacher=teacher).order_by('name')
-    exam_types = ExamType.objects.filter(teacher=teacher).order_by('name')
+    students = Student.objects.filter(workspace=request.workspace).order_by('first_name', 'last_name')
+    subjects = Subject.objects.filter(workspace=request.workspace).order_by('name')
+    exam_types = ExamType.objects.filter(workspace=request.workspace).order_by('name')
     
     # Get max exam ID for validation
-    max_exam_id = Exam.objects.filter(teacher=teacher).values_list('exam_id', flat=True).order_by('-exam_id').first() or 0
+    max_exam_id = Exam.objects.filter(workspace=request.workspace).values_list('exam_id', flat=True).order_by('-exam_id').first() or 0
     
     # Check if running on production (non-localhost)
     host = request.get_host().lower()
@@ -1807,13 +1807,13 @@ def add_bulk_exam(request):
                     return redirect('add_bulk_exams')
                 try:
                     # Ensure subject belongs to this teacher
-                    subject = Subject.objects.get(id=subject_id, teacher=teacher)
+                    subject = Subject.objects.get(id=subject_id, workspace=request.workspace)
                     # Get or create exam type (CQ or MCQ) for this teacher
-                    exam_type, created = ExamType.objects.get_or_create(name=exam_type_name, teacher=teacher)
+                    exam_type, created = ExamType.objects.get_or_create(name=exam_type_name, workspace=request.workspace)
                     total_marks = int(total_marks)
                     exam_id = int(exam_id)
                     # Validate exam_id range
-                    max_existing = Exam.objects.filter(teacher=teacher).values_list('exam_id', flat=True).order_by('-exam_id').first() or 0
+                    max_existing = Exam.objects.filter(workspace=request.workspace).values_list('exam_id', flat=True).order_by('-exam_id').first() or 0
                     if exam_id < 1 or exam_id > max_existing + 1:
                         messages.error(request, f'Exam ID must be between 1 and {max_existing + 1}.')
                         return redirect('add_bulk_exams')
@@ -1832,9 +1832,9 @@ def add_bulk_exam(request):
                         marked_answer_paper = request.FILES.get(f'marked_answer_{i}')
                         if student_id and mark_obtained:
                             # Ensure student belongs to this teacher
-                            student = Student.objects.get(id=student_id, teacher=teacher)
+                            student = Student.objects.get(id=student_id, workspace=request.workspace)
                             # Prevent duplicate: same student + same exam_id
-                            if Exam.objects.filter(exam_id=exam_id, student=student, teacher=teacher).exists():
+                            if Exam.objects.filter(exam_id=exam_id, student=student, workspace=request.workspace).exists():
                                 skipped_students.append(student.display_name)
                                 continue
                             mark_obtained = int(mark_obtained)
@@ -1842,7 +1842,7 @@ def add_bulk_exam(request):
                                 student=student,
                                 subject=subject,
                                 exam_type=exam_type,
-                                teacher=teacher,
+                                workspace=request.workspace,
                                 date=date,
                                 chapter=chapter,
                                 class_number=class_number,
@@ -1863,7 +1863,7 @@ def add_bulk_exam(request):
                     if question_pdf:
                         ExamQuestionPaper.objects.update_or_create(
                             exam_id=exam_id,
-                            teacher=teacher,
+                            workspace=request.workspace,
                             defaults={'question_pdf': question_pdf}
                         )
                     # Warn about skipped duplicates
@@ -1878,7 +1878,7 @@ def add_bulk_exam(request):
                             participating_student_ids.append(int(sid))
                     if participating_student_ids:
                         try:
-                            notify_result_published(exam_id, participating_student_ids, teacher)
+                            notify_result_published(exam_id, participating_student_ids, request.workspace)
                         except Exception:
                             pass  # Don't let push failures block result publishing
                     messages.success(request, f'{created_count} results added successfully.')
@@ -1894,12 +1894,12 @@ def add_bulk_exam(request):
                 student_count = int(student_count_str)
     
     # Filter students and subjects by teacher
-    students = Student.objects.filter(teacher=teacher).order_by('first_name', 'last_name')
-    subjects = Subject.objects.filter(teacher=teacher).order_by('name')
-    exam_types = ExamType.objects.filter(teacher=teacher).order_by('name')
+    students = Student.objects.filter(workspace=request.workspace).order_by('first_name', 'last_name')
+    subjects = Subject.objects.filter(workspace=request.workspace).order_by('name')
+    exam_types = ExamType.objects.filter(workspace=request.workspace).order_by('name')
     
     # Get max exam ID for validation
-    max_exam_id = Exam.objects.filter(teacher=teacher).values_list('exam_id', flat=True).order_by('-exam_id').first() or 0
+    max_exam_id = Exam.objects.filter(workspace=request.workspace).values_list('exam_id', flat=True).order_by('-exam_id').first() or 0
     
     # Check if running on production (non-localhost)
     host = request.get_host().lower()
@@ -1926,7 +1926,7 @@ def edit_exam(request, exam_id):
         return redirect('dashboard')
     
     teacher = request.user
-    exam = get_object_or_404(Exam, id=exam_id, teacher=teacher)
+    exam = get_object_or_404(Exam, id=exam_id, workspace=request.workspace)
     
     if request.method == 'POST':
         student_id = request.POST.get('student')
@@ -1946,9 +1946,9 @@ def edit_exam(request, exam_id):
                 return redirect('edit_exam', exam_id=exam.id)
             try:
                 # Ensure student and subject belong to this teacher
-                student = Student.objects.get(id=student_id, teacher=teacher)
-                subject = Subject.objects.get(id=subject_id, teacher=teacher)
-                exam_type, created = ExamType.objects.get_or_create(name=exam_type_name, teacher=teacher)
+                student = Student.objects.get(id=student_id, workspace=request.workspace)
+                subject = Subject.objects.get(id=subject_id, workspace=request.workspace)
+                exam_type, created = ExamType.objects.get_or_create(name=exam_type_name, workspace=request.workspace)
                 
                 # Update exam
                 exam.student = student
@@ -1983,9 +1983,9 @@ def edit_exam(request, exam_id):
             messages.error(request, 'All required fields must be filled!')
     
     # Get teacher's students and subjects for dropdowns
-    students = Student.objects.filter(teacher=teacher).order_by('first_name', 'last_name')
-    subjects = Subject.objects.filter(teacher=teacher).order_by('name')
-    exam_types = ExamType.objects.filter(teacher=teacher).order_by('name')
+    students = Student.objects.filter(workspace=request.workspace).order_by('first_name', 'last_name')
+    subjects = Subject.objects.filter(workspace=request.workspace).order_by('name')
+    exam_types = ExamType.objects.filter(workspace=request.workspace).order_by('name')
     
     # Check if running on production
     host = request.get_host().lower()
@@ -2010,8 +2010,8 @@ def api_marks_over_time(request, student_id):
     if not teacher:
         return JsonResponse({'error': 'Not authorized'}, status=403)
 
-    student = get_object_or_404(Student, id=student_id, teacher=teacher)
-    data = ChartDataService.marks_over_time(student.id)
+    student = get_object_or_404(Student, id=student_id, workspace=request.workspace)
+    data = ChartDataService.marks_over_time(workspace=request.workspace, student_id=student.id)
     return JsonResponse(data)
 
 
@@ -2022,8 +2022,8 @@ def api_subject_performance(request, student_id):
     if not teacher:
         return JsonResponse({'error': 'Not authorized'}, status=403)
 
-    student = get_object_or_404(Student, id=student_id, teacher=teacher)
-    data = ChartDataService.subject_performance_chart(student.id)
+    student = get_object_or_404(Student, id=student_id, workspace=request.workspace)
+    data = ChartDataService.subject_performance_chart(workspace=request.workspace, student_id=student.id)
     return JsonResponse(data)
 
 
@@ -2034,8 +2034,8 @@ def api_grade_distribution(request, student_id):
     if not teacher:
         return JsonResponse({'error': 'Not authorized'}, status=403)
 
-    student = get_object_or_404(Student, id=student_id, teacher=teacher)
-    data = ChartDataService.grade_distribution_chart(student.id)
+    student = get_object_or_404(Student, id=student_id, workspace=request.workspace)
+    data = ChartDataService.grade_distribution_chart(workspace=request.workspace, student_id=student.id)
     return JsonResponse(data)
 
 
@@ -2046,7 +2046,7 @@ def api_student_comparison(request, subject_id):
         return JsonResponse({'error': 'Not authorized'}, status=403)
 
     teacher = get_teacher_for_user(request.user)
-    subject = get_object_or_404(Subject, id=subject_id, teacher=teacher)
+    subject = get_object_or_404(Subject, id=subject_id, workspace=request.workspace)
 
     data = ChartDataService.student_comparison_chart(subject.id)
     return JsonResponse(data)
@@ -2060,11 +2060,11 @@ def api_overall_grade_distribution(request):
         student = get_object_or_404(
             Student,
             id=request.user.student_profile.student_id,
-            teacher=teacher,
+            workspace=request.workspace,
         )
-        data = ChartDataService.grade_distribution_chart(student.id)
+        data = ChartDataService.grade_distribution_chart(workspace=request.workspace, student_id=student.id)
     else:
-        data = ChartDataService.overall_grade_distribution(teacher=teacher)
+        data = ChartDataService.overall_grade_distribution(workspace=request.workspace)
     return JsonResponse(data)
 
 
@@ -2072,7 +2072,7 @@ def api_overall_grade_distribution(request):
 def all_exams(request):
     """Display all exam entries in detail - filtered by teacher"""
     teacher = get_teacher_for_user(request.user)
-    exams = Exam.objects.filter(teacher=teacher).select_related('student', 'subject', 'exam_type').order_by('-date', '-exam_id')
+    exams = Exam.objects.filter(workspace=request.workspace).select_related('student', 'subject', 'exam_type').order_by('-date', '-exam_id')
     student_user = is_student(request.user)
     student_profile = request.user.student_profile if student_user else None
     
@@ -2152,15 +2152,15 @@ def all_exams(request):
     
     # Get all options for filters (filtered by teacher)
     if student_user:
-        students = Student.objects.filter(id=student_profile.student_id, teacher=teacher).order_by('first_name', 'last_name')
+        students = Student.objects.filter(id=student_profile.student_id, workspace=request.workspace).order_by('first_name', 'last_name')
     else:
-        students = Student.objects.filter(teacher=teacher).order_by('first_name', 'last_name')
-    subjects = Subject.objects.filter(teacher=teacher).order_by('name')
-    exam_types = ExamType.objects.filter(teacher=teacher).order_by('name')
+        students = Student.objects.filter(workspace=request.workspace).order_by('first_name', 'last_name')
+    subjects = Subject.objects.filter(workspace=request.workspace).order_by('name')
+    exam_types = ExamType.objects.filter(workspace=request.workspace).order_by('name')
     
     # Generate available months from teacher's exam dates
     from datetime import datetime
-    teacher_exam_dates = Exam.objects.filter(teacher=teacher).values_list('date', flat=True).distinct()
+    teacher_exam_dates = Exam.objects.filter(workspace=request.workspace).values_list('date', flat=True).distinct()
     months_set = set()
     for exam_date in teacher_exam_dates:
         if exam_date:
@@ -2203,7 +2203,7 @@ def exam_detail(request, exam_id):
 
     # Get all exam records sharing this exam_id for this teacher
     exam_records = Exam.objects.filter(
-        teacher=teacher, exam_id=exam_id
+        workspace=request.workspace, exam_id=exam_id
     ).select_related('student', 'subject', 'exam_type').order_by('-mark_obtained')
 
     if not exam_records.exists():
@@ -2264,7 +2264,7 @@ def exam_detail(request, exam_id):
     question_paper_url = None
     # Check ExamQuestionPaper model first, then legacy field
     try:
-        qp = ExamQuestionPaper.objects.get(exam_id=exam_id, teacher=teacher)
+        qp = ExamQuestionPaper.objects.get(exam_id=exam_id, workspace=request.workspace)
         if qp.question_pdf:
             question_paper_url = qp.question_pdf.url if hasattr(qp.question_pdf, 'url') else str(qp.question_pdf)
     except ExamQuestionPaper.DoesNotExist:
@@ -2337,7 +2337,7 @@ def exam_download_question(request, exam_id):
     if is_student(request.user):
         try:
             student = request.user.student_profile.student
-            if not Exam.objects.filter(exam_id=exam_id, teacher=teacher, student=student).exists():
+            if not Exam.objects.filter(exam_id=exam_id, workspace=request.workspace, student=student).exists():
                 return HttpResponseForbidden("You did not participate in this exam.")
         except Exception:
             return HttpResponseForbidden("You did not participate in this exam.")
@@ -2345,7 +2345,7 @@ def exam_download_question(request, exam_id):
     # Try ExamQuestionPaper model first
     url = None
     try:
-        qp = ExamQuestionPaper.objects.get(exam_id=exam_id, teacher=teacher)
+        qp = ExamQuestionPaper.objects.get(exam_id=exam_id, workspace=request.workspace)
         if qp.question_pdf:
             url = qp.question_pdf.url if hasattr(qp.question_pdf, 'url') else str(qp.question_pdf)
     except ExamQuestionPaper.DoesNotExist:
@@ -2353,7 +2353,7 @@ def exam_download_question(request, exam_id):
 
     # Fallback to legacy field
     if not url:
-        exam_record = Exam.objects.filter(exam_id=exam_id, teacher=teacher).first()
+        exam_record = Exam.objects.filter(exam_id=exam_id, workspace=request.workspace).first()
         if exam_record and exam_record.question_pdf:
             url = exam_record.question_pdf.url if hasattr(exam_record.question_pdf, 'url') else str(exam_record.question_pdf)
 
@@ -2369,7 +2369,7 @@ def exam_view_answer(request, exam_pk):
     from django.http import Http404
 
     teacher = get_teacher_for_user(request.user)
-    exam = get_object_or_404(Exam, pk=exam_pk, teacher=teacher)
+    exam = get_object_or_404(Exam, pk=exam_pk, workspace=request.workspace)
 
     if is_guest_session(request):
         add_guest_submission_access_denied_message(request)
@@ -2394,7 +2394,7 @@ def exam_download_answer(request, exam_pk):
     from django.http import Http404
 
     teacher = get_teacher_for_user(request.user)
-    exam = get_object_or_404(Exam, pk=exam_pk, teacher=teacher)
+    exam = get_object_or_404(Exam, pk=exam_pk, workspace=request.workspace)
 
     if is_guest_session(request):
         add_guest_submission_access_denied_message(request)
@@ -2419,10 +2419,10 @@ def points(request):
     teacher = get_teacher_for_user(request.user)
     
     # Get all students for filters (filtered by teacher)
-    students = Student.objects.filter(teacher=teacher).order_by('first_name', 'last_name')
+    students = Student.objects.filter(workspace=request.workspace).order_by('first_name', 'last_name')
     
     # Get points transaction history with filters (filtered by teacher)
-    points_history = PointTransaction.objects.filter(teacher=teacher).select_related('student', 'exam')
+    points_history = PointTransaction.objects.filter(workspace=request.workspace).select_related('student', 'exam')
 
     # Apply filters from GET parameters
     student_filter = request.GET.get('student')
@@ -2466,7 +2466,7 @@ def points(request):
         total_earned = sum(change for change in changes if change > 0)
     
     # Get student points summary (filtered by teacher) — single query instead of N get_or_create
-    teacher_students_all = Student.objects.filter(teacher=teacher).order_by('first_name', 'last_name')
+    teacher_students_all = Student.objects.filter(workspace=request.workspace).order_by('first_name', 'last_name')
     lp_map = {
         lp.student_id: lp
         for lp in LifetimePoints.objects.filter(student__teacher=teacher)
@@ -2524,7 +2524,7 @@ def add_points_spent(request):
         
         try:
             # Ensure student belongs to this teacher
-            student = Student.objects.get(id=student_id, teacher=teacher)
+            student = Student.objects.get(id=student_id, workspace=request.workspace)
             points_spent = int(points_spent)
             
             # Get or create lifetime points for validation
@@ -2539,7 +2539,7 @@ def add_points_spent(request):
                 # Create the points spent record with teacher
                 PointsSpent.objects.create(
                     student=student,
-                    teacher=teacher,
+                    workspace=request.workspace,
                     points_spent=points_spent,
                     description=description[:15],  # Enforce max 15 characters
                     date=date
@@ -2552,7 +2552,7 @@ def add_points_spent(request):
             messages.error(request, 'Invalid points value.')
     
     # Get all students for the form (filtered by teacher)
-    students = Student.objects.filter(teacher=teacher).order_by('first_name', 'last_name')
+    students = Student.objects.filter(workspace=request.workspace).order_by('first_name', 'last_name')
     
     context = {
         'students': students,
@@ -2575,7 +2575,7 @@ def leaderboard(request):
     # Get available class numbers (only classes with actual exam records, filtered by teacher)
     try:
         available_classes = list(
-            Exam.objects.filter(teacher=teacher)
+            Exam.objects.filter(workspace=request.workspace)
             .exclude(class_number__isnull=True)
             .values_list('class_number', flat=True)
             .distinct()
@@ -2588,7 +2588,7 @@ def leaderboard(request):
     
     # Overall Rankings (filtered by teacher)
     overall_rankings = []
-    students = Student.objects.filter(teacher=teacher)
+    students = Student.objects.filter(workspace=request.workspace)
     
     for student in students:
         # Filter exams by class if specified
@@ -2627,7 +2627,7 @@ def leaderboard(request):
                     month_exams = exams.filter(date__year=year, date__month=month)
                     if not month_exams.exists():
                         continue
-                    students_in_month = Student.objects.filter(teacher=teacher, exam__class_number=exams.first().class_number, exam__date__year=year, exam__date__month=month).distinct()
+                    students_in_month = Student.objects.filter(workspace=request.workspace, exam__class_number=exams.first().class_number, exam__date__year=year, exam__date__month=month).distinct()
                     month_rankings = []
                     for s in students_in_month:
                         s_month_exams = s.exam_set.filter(class_number=exams.first().class_number, date__year=year, date__month=month)
@@ -2713,7 +2713,7 @@ def leaderboard(request):
     
     # Subject-wise Leaders (filtered by teacher)
     subject_leaders = []
-    subjects = Subject.objects.filter(teacher=teacher)
+    subjects = Subject.objects.filter(workspace=request.workspace)
     
     for subject in subjects:
         leaders = []
@@ -2721,12 +2721,12 @@ def leaderboard(request):
         # Filter by class if specified (teacher-scoped)
         if class_filter != 'all':
             students_in_subject = Student.objects.filter(
-                teacher=teacher,
+                workspace=request.workspace,
                 exam__subject=subject,
                 exam__class_number=class_filter
             ).distinct()
         else:
-            students_in_subject = Student.objects.filter(teacher=teacher, exam__subject=subject).distinct()
+            students_in_subject = Student.objects.filter(workspace=request.workspace, exam__subject=subject).distinct()
         
         for student in students_in_subject:
             # Filter exams by class
@@ -2785,9 +2785,9 @@ def leaderboard(request):
     
     # Filter exam dates by class and teacher
     if class_filter != 'all':
-        exam_dates = Exam.objects.filter(teacher=teacher, class_number=class_filter).values_list('date', flat=True).distinct()
+        exam_dates = Exam.objects.filter(workspace=request.workspace, class_number=class_filter).values_list('date', flat=True).distinct()
     else:
-        exam_dates = Exam.objects.filter(teacher=teacher).values_list('date', flat=True).distinct()
+        exam_dates = Exam.objects.filter(workspace=request.workspace).values_list('date', flat=True).distinct()
     
     months_set = set()
     
@@ -2807,14 +2807,14 @@ def leaderboard(request):
         # Get all students who had exams in this month (with class filter, teacher-scoped)
         if class_filter != 'all':
             students_in_month = Student.objects.filter(
-                teacher=teacher,
+                workspace=request.workspace,
                 exam__date__year=year,
                 exam__date__month=month,
                 exam__class_number=class_filter
             ).distinct()
         else:
             students_in_month = Student.objects.filter(
-                teacher=teacher,
+                workspace=request.workspace,
                 exam__date__year=year,
                 exam__date__month=month
             ).distinct()
@@ -2881,14 +2881,14 @@ def leaderboard(request):
     # Get all students who have exams in the current month (with class filter, teacher-scoped)
     if class_filter != 'all':
         students_current_month = Student.objects.filter(
-            teacher=teacher,
+            workspace=request.workspace,
             exam__date__year=current_year,
             exam__date__month=current_month,
             exam__class_number=class_filter
         ).distinct()
     else:
         students_current_month = Student.objects.filter(
-            teacher=teacher,
+            workspace=request.workspace,
             exam__date__year=current_year,
             exam__date__month=current_month
         ).distinct()
@@ -2990,13 +2990,13 @@ def manage_question_paper(request):
             try:
                 exam_id = int(exam_id)
                 # Verify this exam_id belongs to this teacher
-                if not Exam.objects.filter(exam_id=exam_id, teacher=teacher).exists():
+                if not Exam.objects.filter(exam_id=exam_id, workspace=request.workspace).exists():
                     messages.error(request, f'No exam found with ID #{exam_id}.')
                     return redirect('manage_question_paper')
                 
                 ExamQuestionPaper.objects.update_or_create(
                     exam_id=exam_id,
-                    teacher=teacher,
+                    workspace=request.workspace,
                     defaults={'question_pdf': question_pdf}
                 )
                 messages.success(request, f'Question paper updated for Exam ID #{exam_id}.')
@@ -3007,7 +3007,7 @@ def manage_question_paper(request):
             messages.error(request, 'Please select an Exam ID and upload a PDF file.')
     
     # Get all distinct exam IDs for this teacher
-    exam_ids = (Exam.objects.filter(teacher=teacher)
+    exam_ids = (Exam.objects.filter(workspace=request.workspace)
                 .values('exam_id')
                 .distinct()
                 .order_by('-exam_id'))
@@ -3018,8 +3018,8 @@ def manage_question_paper(request):
         eid = item['exam_id']
         if eid is None:
             continue
-        first_exam = Exam.objects.filter(exam_id=eid, teacher=teacher).select_related('subject', 'exam_type').first()
-        qp = ExamQuestionPaper.objects.filter(exam_id=eid, teacher=teacher).first()
+        first_exam = Exam.objects.filter(exam_id=eid, workspace=request.workspace).select_related('subject', 'exam_type').first()
+        qp = ExamQuestionPaper.objects.filter(exam_id=eid, workspace=request.workspace).first()
         exam_list.append({
             'exam_id': eid,
             'subject': first_exam.subject.name if first_exam else 'N/A',
@@ -3027,7 +3027,7 @@ def manage_question_paper(request):
             'date': first_exam.date if first_exam else None,
             'chapter': first_exam.chapter or 'N/A',
             'total_marks': first_exam.total_marks if first_exam else 'N/A',
-            'student_count': Exam.objects.filter(exam_id=eid, teacher=teacher).count(),
+            'student_count': Exam.objects.filter(exam_id=eid, workspace=request.workspace).count(),
             'has_pdf': bool(qp and qp.question_pdf) or bool(first_exam and first_exam.question_pdf),
             'pdf_url': (qp.question_pdf.url if qp and qp.question_pdf else 
                        (first_exam.question_pdf.url if first_exam and first_exam.question_pdf else None)),
@@ -3059,7 +3059,7 @@ def manage_answer_paper(request):
         
         if exam_record_id and marked_answer_paper:
             try:
-                exam_record = Exam.objects.get(id=int(exam_record_id), teacher=teacher)
+                exam_record = Exam.objects.get(id=int(exam_record_id), workspace=request.workspace)
                 exam_record.marked_answer_paper = marked_answer_paper
                 exam_record.save()
                 messages.success(request, f'Answer paper updated for {exam_record.student.name}.')
@@ -3070,7 +3070,7 @@ def manage_answer_paper(request):
             messages.error(request, 'Please select a student record and upload a file.')
     
     # Get all distinct exam IDs for this teacher
-    exam_ids = (Exam.objects.filter(teacher=teacher)
+    exam_ids = (Exam.objects.filter(workspace=request.workspace)
                 .values('exam_id')
                 .distinct()
                 .order_by('-exam_id'))
@@ -3080,7 +3080,7 @@ def manage_answer_paper(request):
         eid = item['exam_id']
         if eid is None:
             continue
-        records = Exam.objects.filter(exam_id=eid, teacher=teacher).select_related('subject', 'exam_type', 'student')
+        records = Exam.objects.filter(exam_id=eid, workspace=request.workspace).select_related('subject', 'exam_type', 'student')
         first_exam = records.first()
         total_students = records.count()
         students_with_paper = records.exclude(marked_answer_paper='').exclude(marked_answer_paper__isnull=True).count()
@@ -3123,7 +3123,7 @@ def answer_paper_info_api(request):
     except ValueError:
         return JsonResponse({'success': False, 'error': 'Invalid exam ID'})
     
-    exams = Exam.objects.filter(exam_id=exam_id, teacher=teacher).select_related('subject', 'exam_type', 'student')
+    exams = Exam.objects.filter(exam_id=exam_id, workspace=request.workspace).select_related('subject', 'exam_type', 'student')
     
     if not exams.exists():
         return JsonResponse({'success': False, 'error': f'No exam found with ID #{exam_id}'})
@@ -3173,7 +3173,7 @@ def exam_id_lookup_api(request):
     exam_id = request.GET.get('exam_id', '').strip()
     
     # Always return max_exam_id
-    max_id = Exam.objects.filter(teacher=teacher).values_list('exam_id', flat=True).order_by('-exam_id').first() or 0
+    max_id = Exam.objects.filter(workspace=request.workspace).values_list('exam_id', flat=True).order_by('-exam_id').first() or 0
     
     if not exam_id:
         return JsonResponse({'found': False, 'max_exam_id': max_id})
@@ -3185,18 +3185,18 @@ def exam_id_lookup_api(request):
     
     # Find students who already have results for this exam_id (to exclude from dropdown)
     existing_student_ids = list(
-        Exam.objects.filter(exam_id=exam_id, teacher=teacher)
+        Exam.objects.filter(exam_id=exam_id, workspace=request.workspace)
         .values_list('student_id', flat=True)
     )
     
     # Build list of available students (all teacher's students minus those already recorded)
-    all_students = Student.objects.filter(teacher=teacher).order_by('first_name', 'last_name')
+    all_students = Student.objects.filter(workspace=request.workspace).order_by('first_name', 'last_name')
     available_students = [
         {'id': s.id, 'display_name': s.display_name}
         for s in all_students if s.id not in existing_student_ids
     ]
     
-    exams = Exam.objects.filter(exam_id=exam_id, teacher=teacher).select_related('subject', 'exam_type')
+    exams = Exam.objects.filter(exam_id=exam_id, workspace=request.workspace).select_related('subject', 'exam_type')
     
     if exams.exists():
         first_exam = exams.first()
@@ -3217,12 +3217,12 @@ def exam_id_lookup_api(request):
 
     # Also search ExamCenterExam (upcoming/finished exams) by exam_display_id
     ec_exam = ExamCenterExam.objects.filter(
-        exam_display_id=str(exam_id), teacher=teacher
+        exam_display_id=str(exam_id), workspace=request.workspace
     ).first()
 
     if ec_exam:
         # Map ExamCenterExam subject (string) to Subject FK id
-        subject_match = Subject.objects.filter(name__iexact=ec_exam.subject, teacher=teacher).first()
+        subject_match = Subject.objects.filter(name__iexact=ec_exam.subject, workspace=request.workspace).first()
         subject_id = subject_match.id if subject_match else ''
 
         return JsonResponse({
@@ -3267,13 +3267,13 @@ def exam_info_api(request):
     except ValueError:
         return JsonResponse({'success': False, 'error': 'Invalid exam ID'})
     
-    exams = Exam.objects.filter(exam_id=exam_id, teacher=teacher).select_related('subject', 'exam_type')
+    exams = Exam.objects.filter(exam_id=exam_id, workspace=request.workspace).select_related('subject', 'exam_type')
     
     if not exams.exists():
         return JsonResponse({'success': False, 'error': f'No exam found with ID #{exam_id}'})
     
     first_exam = exams.first()
-    qp = ExamQuestionPaper.objects.filter(exam_id=exam_id, teacher=teacher).first()
+    qp = ExamQuestionPaper.objects.filter(exam_id=exam_id, workspace=request.workspace).first()
     
     # Check legacy field too
     has_pdf = bool(qp and qp.question_pdf) or bool(first_exam.question_pdf)
@@ -3306,12 +3306,12 @@ def exam_lookup(request):
     teacher = get_teacher_for_user(request.user)
     
     # Get exam stats for this teacher
-    qs = Exam.objects.filter(teacher=teacher)
+    qs = Exam.objects.filter(workspace=request.workspace)
     min_exam_id = qs.values_list('exam_id', flat=True).distinct().order_by('exam_id').first()
     max_exam_id = qs.values_list('exam_id', flat=True).distinct().order_by('-exam_id').first()
     total_exams = qs.values('exam_id').distinct().count()
     # Count exams with question papers from both ExamQuestionPaper and legacy Exam field
-    exam_ids_with_new_pdf = set(ExamQuestionPaper.objects.filter(teacher=teacher).values_list('exam_id', flat=True))
+    exam_ids_with_new_pdf = set(ExamQuestionPaper.objects.filter(workspace=request.workspace).values_list('exam_id', flat=True))
     exam_ids_with_legacy_pdf = set(qs.exclude(question_pdf='').exclude(question_pdf__isnull=True).values_list('exam_id', flat=True).distinct())
     exams_with_pdf = len(exam_ids_with_new_pdf | exam_ids_with_legacy_pdf)
     
@@ -3363,7 +3363,7 @@ def exam_lookup_api(request):
     teacher = get_teacher_for_user(request.user)
     next_url = reverse('exam_lookup')
     # Find exam(s) with the given exam_id, filtered by teacher
-    exams = Exam.objects.filter(exam_id=exam_id, teacher=teacher).select_related('subject', 'exam_type', 'student')
+    exams = Exam.objects.filter(exam_id=exam_id, workspace=request.workspace).select_related('subject', 'exam_type', 'student')
     
     if not exams.exists():
         return JsonResponse({'success': False, 'error': f'No exam found with ID: {exam_id}'})
@@ -3382,7 +3382,7 @@ def exam_lookup_api(request):
     # Get PDF URL if available (check ExamQuestionPaper first, then legacy)
     pdf_url = None
     try:
-        qp = ExamQuestionPaper.objects.get(exam_id=first_exam.exam_id, teacher=teacher)
+        qp = ExamQuestionPaper.objects.get(exam_id=first_exam.exam_id, workspace=request.workspace)
         if qp.question_pdf:
             pdf_url = qp.question_pdf.url
     except ExamQuestionPaper.DoesNotExist:
@@ -3532,12 +3532,12 @@ def delete_account(request):
 
             # Show final confirmation with data summary
             # Calculate what will be deleted
-            students_count = Student.objects.filter(teacher=teacher).count()
-            subjects_count = Subject.objects.filter(teacher=teacher).count()
-            exams_count = Exam.objects.filter(teacher=teacher).values('exam_id').distinct().count()
-            points_spent_count = PointsSpent.objects.filter(teacher=teacher).count()
-            pdfs_count = ExamQuestionPaper.objects.filter(teacher=teacher).count()
-            marked_answer_papers_count = Exam.objects.filter(teacher=teacher).exclude(marked_answer_paper__isnull=True).exclude(marked_answer_paper='').count()
+            students_count = Student.objects.filter(workspace=request.workspace).count()
+            subjects_count = Subject.objects.filter(workspace=request.workspace).count()
+            exams_count = Exam.objects.filter(workspace=request.workspace).values('exam_id').distinct().count()
+            points_spent_count = PointsSpent.objects.filter(workspace=request.workspace).count()
+            pdfs_count = ExamQuestionPaper.objects.filter(workspace=request.workspace).count()
+            marked_answer_papers_count = Exam.objects.filter(workspace=request.workspace).exclude(marked_answer_paper__isnull=True).exclude(marked_answer_paper='').count()
 
             return render(request, 'marks/delete_account_confirm.html', {
                 'step': 3,
@@ -3557,12 +3557,12 @@ def delete_account(request):
             if confirm_text != 'DELETE MY ACCOUNT':
                 messages.error(request, 'Please type "DELETE MY ACCOUNT" exactly to confirm.')
                 # Recalculate counts and show step 3 again
-                students_count = Student.objects.filter(teacher=teacher).count()
-                subjects_count = Subject.objects.filter(teacher=teacher).count()
-                exams_count = Exam.objects.filter(teacher=teacher).values('exam_id').distinct().count()
-                points_spent_count = PointsSpent.objects.filter(teacher=teacher).count()
-                pdfs_count = ExamQuestionPaper.objects.filter(teacher=teacher).count()
-                marked_answer_papers_count = Exam.objects.filter(teacher=teacher).exclude(marked_answer_paper__isnull=True).exclude(marked_answer_paper='').count()
+                students_count = Student.objects.filter(workspace=request.workspace).count()
+                subjects_count = Subject.objects.filter(workspace=request.workspace).count()
+                exams_count = Exam.objects.filter(workspace=request.workspace).values('exam_id').distinct().count()
+                points_spent_count = PointsSpent.objects.filter(workspace=request.workspace).count()
+                pdfs_count = ExamQuestionPaper.objects.filter(workspace=request.workspace).count()
+                marked_answer_papers_count = Exam.objects.filter(workspace=request.workspace).exclude(marked_answer_paper__isnull=True).exclude(marked_answer_paper='').count()
 
                 return render(request, 'marks/delete_account_confirm.html', {
                     'step': 3,
@@ -3619,7 +3619,7 @@ def delete_teacher_account(teacher):
         cloudinary_files_deleted = 0
         try:
             # Get all exams created by this teacher that have PDF files
-            teacher_exams = Exam.objects.filter(teacher=teacher).filter(
+            teacher_exams = Exam.objects.filter(workspace__teacher=teacher).filter(
                 Q(question_pdf__isnull=False) & ~Q(question_pdf='') |
                 Q(marked_answer_paper__isnull=False) & ~Q(marked_answer_paper='')
             )
@@ -3659,29 +3659,29 @@ def delete_teacher_account(teacher):
             print(f"Warning: Failed to delete Cloudinary files for teacher '{teacher.username}': {e}")
 
         # Step 1: Delete PointsSpent records created by this teacher
-        points_spent_deleted, _ = PointsSpent.objects.filter(teacher=teacher).delete()
+        points_spent_deleted, _ = PointsSpent.objects.filter(workspace__teacher=teacher).delete()
 
         # Step 2: Delete Exam records created by this teacher
         # This will also delete related LifetimePoints (via CASCADE)
-        exams_deleted, _ = Exam.objects.filter(teacher=teacher).delete()
+        exams_deleted, _ = Exam.objects.filter(workspace__teacher=teacher).delete()
 
         # Step 3: Delete ExamType records created by this teacher
-        exam_types_deleted, _ = ExamType.objects.filter(teacher=teacher).delete()
+        exam_types_deleted, _ = ExamType.objects.filter(workspace__teacher=teacher).delete()
 
         # Step 4: Delete Subject records created by this teacher
-        subjects_deleted, _ = Subject.objects.filter(teacher=teacher).delete()
+        subjects_deleted, _ = Subject.objects.filter(workspace__teacher=teacher).delete()
 
         # Step 5: Get student User accounts before deleting Student records
         # We need to explicitly delete student User accounts since CASCADE might not work properly in transaction
         student_users = list(
             StudentProfile.objects.filter(
-                student__teacher=teacher
+                student__workspace__teacher=teacher
             ).values_list('user', flat=True)
         )
 
         # Step 6: Delete Student records created by this teacher
         # This will also delete related StudentProfile and LifetimePoints (via CASCADE)
-        students_deleted, _ = Student.objects.filter(teacher=teacher).delete()
+        students_deleted, _ = Student.objects.filter(workspace__teacher=teacher).delete()
 
         # Step 7: Explicitly delete student User accounts
         student_users_deleted = 0
@@ -3691,6 +3691,15 @@ def delete_teacher_account(teacher):
                 student_users_deleted += 1
             except Exception as e:
                 print(f"Warning: Failed to delete student user {user_id}: {e}")
+
+        # Step 7b: Delete Workspaces owned by this teacher.
+        # Because every academic FK is CASCADE FROM the workspace, deleting the
+        # workspace rows is safe to defer until the very end — but workspace
+        # deletion is the keystone that prevents orphan Student/Exam/... rows
+        # surviving teacher deletion. Done after User deletion so a stale
+        # `created_by` doesn't keep students alive.
+        from .models import Workspace as _Workspace
+        workspaces_deleted, _ = _Workspace.objects.filter(teacher=teacher).delete()
 
         # Step 8: Delete the TeacherProfile
         teacher_profile_deleted, _ = TeacherProfile.objects.filter(user=teacher).delete()
@@ -3704,7 +3713,7 @@ def delete_teacher_account(teacher):
               f"Removed: {cloudinary_files_deleted} Cloudinary files, {students_deleted} students, "
               f"{student_users_deleted} student accounts, {subjects_deleted} subjects, {exams_deleted} exams, "
               f"{points_spent_deleted} points records, {exam_types_deleted} exam types, "
-              f"{teacher_profile_deleted} profile, {user_deleted} user account.")
+              f"{workspaces_deleted} workspaces, {teacher_profile_deleted} profile, {user_deleted} user account.")
         
 
 def health(request):

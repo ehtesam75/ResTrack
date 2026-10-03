@@ -170,11 +170,9 @@ def notify_exam_created(exam_center_exam):
     """
     from .models import StudentProfile
 
-    teacher = exam_center_exam.teacher
-
-    # All students enrolled under this teacher who have a user account
+    # All students enrolled in this workspace who have a user account
     student_profiles = StudentProfile.objects.filter(
-        created_by=teacher,
+        student__workspace=exam_center_exam.workspace,
         user__isnull=False,
     ).select_related('user')
 
@@ -201,34 +199,35 @@ def notify_exam_created(exam_center_exam):
     return _send_to_users(user_ids, payload)
 
 
-def notify_result_published(exam_id, student_ids, teacher):
+def notify_result_published(exam_id, student_ids, workspace):
     """
     Notify students when their exam results are published.
 
     Args:
         exam_id: The Exam.exam_id value (shared across bulk entries).
         student_ids: List of Student model IDs who got results.
-        teacher: The teacher User who published the results.
+        workspace: Workspace where the exam was published (scopes the Exam lookup).
     """
     from .models import StudentProfile, Exam, GuestTeacherAccount
 
-    # Get User IDs for the participating students
+    # Get User IDs for the participating students (scoped to this workspace)
     student_profiles = StudentProfile.objects.filter(
         student_id__in=student_ids,
+        student__workspace=workspace,
         user__isnull=False,
     ).select_related('user')
 
     student_user_ids = [sp.user_id for sp in student_profiles]
 
     # Include this teacher's guest account only for result-published alerts.
-    guest_account = GuestTeacherAccount.objects.filter(teacher=teacher).only('guest_user_id').first()
+    guest_account = GuestTeacherAccount.objects.filter(teacher=workspace.teacher).only('guest_user_id').first()
     guest_user_id = guest_account.guest_user_id if guest_account and guest_account.guest_user_id else None
 
     if not student_user_ids and not guest_user_id:
         return 0
 
     # Get exam metadata for the notification body
-    exam_record = Exam.objects.filter(exam_id=exam_id, teacher=teacher).first()
+    exam_record = Exam.objects.filter(exam_id=exam_id, workspace=workspace).first()
     subject_name = exam_record.subject.name if exam_record else "Exam"
 
     student_payload = {
@@ -265,10 +264,8 @@ def notify_exam_edited(exam_center_exam):
     """
     from .models import StudentProfile
 
-    teacher = exam_center_exam.teacher
-
     student_profiles = StudentProfile.objects.filter(
-        created_by=teacher,
+        student__workspace=exam_center_exam.workspace,
         user__isnull=False,
     ).select_related('user')
 
@@ -337,9 +334,8 @@ def notify_exam_reminder_5min(exam_center_exam):
     """
     from .models import StudentProfile
 
-    teacher = exam_center_exam.teacher
     student_profiles = StudentProfile.objects.filter(
-        created_by=teacher,
+        student__workspace=exam_center_exam.workspace,
         user__isnull=False,
     ).select_related('user')
 
@@ -363,9 +359,8 @@ def notify_exam_started(exam_center_exam):
     """
     from .models import StudentProfile
 
-    teacher = exam_center_exam.teacher
     student_profiles = StudentProfile.objects.filter(
-        created_by=teacher,
+        student__workspace=exam_center_exam.workspace,
         user__isnull=False,
     ).select_related('user')
 
@@ -389,9 +384,8 @@ def notify_exam_ending_soon(exam_center_exam):
     """
     from .models import StudentProfile
 
-    teacher = exam_center_exam.teacher
     student_profiles = StudentProfile.objects.filter(
-        created_by=teacher,
+        student__workspace=exam_center_exam.workspace,
         user__isnull=False,
     ).select_related('user')
 
@@ -416,9 +410,8 @@ def notify_exam_ended(exam_center_exam):
     """
     from .models import StudentProfile
 
-    teacher = exam_center_exam.teacher
     student_profiles = StudentProfile.objects.filter(
-        created_by=teacher,
+        student__workspace=exam_center_exam.workspace,
         user__isnull=False,
     ).select_related('user')
 
@@ -456,9 +449,8 @@ def notify_bonus_time_granted(exam_center_exam, minutes, phase):
     """
     from .models import StudentProfile
 
-    teacher = exam_center_exam.teacher
     student_profiles = StudentProfile.objects.filter(
-        created_by=teacher,
+        student__workspace=exam_center_exam.workspace,
         user__isnull=False,
     ).select_related('user')
 

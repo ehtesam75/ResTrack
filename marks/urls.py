@@ -5,6 +5,7 @@ from django.views.generic import TemplateView
 from . import views
 from . import exam_center_views
 from . import push_views
+from . import workspace_views
 
 urlpatterns = [
     # Authentication URLs
@@ -141,4 +142,13 @@ urlpatterns = [
 
     # Cron endpoint (called by cron-job.org)
     path('api/cron/send-exam-reminders/', push_views.cron_send_exam_reminders, name='cron_send_exam_reminders'),
+
+    # Workspace management
+    path('workspaces/', workspace_views.workspace_list, name='workspace_list'),
+    path('workspaces/create/', workspace_views.workspace_create, name='workspace_create'),
+    path('workspaces/<int:pk>/edit/', workspace_views.workspace_edit, name='workspace_edit'),
+    path('workspaces/<int:pk>/archive/', workspace_views.workspace_archive, name='workspace_archive'),
+    path('workspaces/<int:pk>/restore/', workspace_views.workspace_restore, name='workspace_restore'),
+    path('workspaces/<int:pk>/delete/', workspace_views.workspace_delete, name='workspace_delete'),
+    path('workspaces/<int:pk>/switch/', workspace_views.workspace_switch, name='workspace_switch'),
 ]

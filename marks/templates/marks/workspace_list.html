@@ -1,0 +1,147 @@
+{% extends 'marks/base.html' %}
+
+{% block title %}Workspaces{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="mb-6 animate-fade-in-up flex items-end justify-between gap-3">
+        <div>
+            <h1 class="text-xl sm:text-2xl font-bold gradient-text">Workspaces</h1>
+            <p class="text-sm text-gray-600 mt-0.5">Switch between independent sets of students, subjects, and exams.</p>
+        </div>
+        <a href="{% url 'workspace_create' %}"
+           class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl font-medium text-white text-xs sm:text-sm bg-gradient-to-r from-purple-600 to-blue-500 shadow-md hover:shadow-lg hover:from-purple-700 hover:to-blue-600 transition-all">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            New workspace
+        </a>
+    </div>
+
+    {% if messages %}
+        <div class="mb-4 space-y-2">
+            {% for message in messages %}
+                <div class="px-4 py-3 rounded-lg text-sm
+                    {% if message.tags == 'error' %}bg-red-50 text-red-800 border-l-4 border-red-500
+                    {% elif message.tags == 'success' %}bg-green-50 text-green-800 border-l-4 border-green-500
+                    {% elif message.tags == 'warning' %}bg-yellow-50 text-yellow-800 border-l-4 border-yellow-500
+                    {% else %}bg-blue-50 text-blue-800 border-l-4 border-blue-500{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if not workspaces_with_counts %}
+        <!-- Edge case: brand-new teacher with zero workspaces.
+             The middleware auto-creates a default workspace on every request,
+             so this branch is unlikely in practice but kept for safety. -->
+        <div class="glass-effect rounded-xl border border-gray-200 p-8 text-center">
+            <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+            </svg>
+            <p class="text-gray-700 font-medium mb-2">No workspaces yet</p>
+            <a href="{% url 'workspace_create' %}"
+               class="inline-flex items-center gap-1.5 mt-1 px-4 py-2 rounded-xl font-medium text-white text-sm bg-gradient-to-r from-purple-600 to-blue-500 shadow-md hover:shadow-lg transition-all">
+                Create your first workspace
+            </a>
+        </div>
+    {% else %}
+        <div class="space-y-3">
+            {% for item in workspaces_with_counts %}
+                {% with ws=item.workspace %}
+                <div class="glass-effect rounded-xl border p-4 sm:p-5
+                    {% if ws.is_archived %}border-gray-200 opacity-75
+                    {% elif active_workspace and ws.id == active_workspace.id %}border-purple-400 shadow-md shadow-purple-500/10
+                    {% else %}border-gray-200{% endif %}">
+
+                    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h2 class="font-semibold text-gray-900 text-sm sm:text-base truncate">{{ ws.name }}</h2>
+                                {% if ws.is_archived %}
+                                    <span class="px-2 py-0.5 text-[10px] sm:text-xs font-medium rounded-full bg-gray-100 text-gray-600">Archived</span>
+                                {% elif active_workspace and ws.id == active_workspace.id %}
+                                    <span class="px-2 py-0.5 text-[10px] sm:text-xs font-medium rounded-full bg-purple-100 text-purple-700">Active</span>
+                                {% endif %}
+                                <span class="text-[10px] sm:text-xs text-gray-400 font-mono">#{{ ws.slug_number }}</span>
+                            </div>
+                            {% if ws.description %}
+                                <p class="text-xs sm:text-sm text-gray-600 mt-1 break-words">{{ ws.description }}</p>
+                            {% endif %}
+                            <div class="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-[10px] sm:text-xs text-gray-500">
+                                <span><strong class="text-gray-700">{{ item.students }}</strong> student{{ item.students|pluralize }}</span>
+                                <span><strong class="text-gray-700">{{ item.subjects }}</strong> subject{{ item.subjects|pluralize }}</span>
+                                <span><strong class="text-gray-700">{{ item.exam_types }}</strong> exam type{{ item.exam_types|pluralize }}</span>
+                                <span><strong class="text-gray-700">{{ item.exams }}</strong> exam{{ item.exams|pluralize }}</span>
+                                <span><strong class="text-gray-700">{{ item.exam_centers }}</strong> exam center{{ item.exam_centers|pluralize }}</span>
+                            </div>
+                            <div class="text-[10px] sm:text-xs text-gray-400 mt-1">Created {{ ws.created_at|date:"M j, Y" }}</div>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2 shrink-0">
+                            {% if not ws.is_archived %}
+                                {% if not active_workspace or ws.id != active_workspace.id %}
+                                    <form method="post" action="{% url 'workspace_switch' ws.pk %}" class="inline">
+                                        {% csrf_token %}
+                                        <button type="submit"
+                                            class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-purple-700 bg-purple-50 hover:bg-purple-100 transition-colors">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                                            </svg>
+                                            Switch
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            {% endif %}
+                            <a href="{% url 'workspace_edit' ws.pk %}"
+                               class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                                Edit
+                            </a>
+                            {% if ws.is_archived %}
+                                <form method="post" action="{% url 'workspace_restore' ws.pk %}" class="inline">
+                                    {% csrf_token %}
+                                    <button type="submit"
+                                        class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-green-700 bg-green-50 hover:bg-green-100 transition-colors">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h11a8 8 0 018 8v0M3 10l4-4M3 10l4 4"></path>
+                                        </svg>
+                                        Restore
+                                    </button>
+                                </form>
+                            {% else %}
+                                <form method="post" action="{% url 'workspace_archive' ws.pk %}" class="inline">
+                                    {% csrf_token %}
+                                    <button type="submit"
+                                        class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-yellow-700 bg-yellow-50 hover:bg-yellow-100 transition-colors">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+                                        </svg>
+                                        Archive
+                                    </button>
+                                </form>
+                            {% endif %}
+                            <a href="{% url 'workspace_delete' ws.pk %}"
+                               class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-red-700 bg-red-50 hover:bg-red-100 transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2"></path>
+                                </svg>
+                                Delete
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endwith %}
+            {% endfor %}
+        </div>
+
+        <p class="text-[11px] sm:text-xs text-gray-500 mt-4">
+            Archiving hides a workspace from the switcher but keeps its data. Deletion is permanent and cascades to the workspace's students, subjects, exams, and exam center items.
+        </p>
+    {% endif %}
+</div>
+{% endblock %}

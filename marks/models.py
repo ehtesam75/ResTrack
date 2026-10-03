@@ -4,6 +4,45 @@ from django.contrib.auth.models import User
 from cloudinary.models import CloudinaryField
 
 
+class Workspace(models.Model):
+    """
+    A teacher-owned container that isolates a slice of data (students, subjects,
+    exam types, exams, points, exam-center exams) from the teacher's other
+    workspaces. Every teacher gets at least one auto-created workspace on
+    first login (slug_number=1).
+    """
+    teacher = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='workspaces',
+        help_text="Teacher who owns this workspace",
+    )
+    name = models.CharField(max_length=120)
+    description = models.TextField(blank=True, default='')
+    is_archived = models.BooleanField(default=False)
+    # Immutable identifier used in Cloudinary folder paths and public IDs.
+    slug_number = models.PositiveIntegerField(
+        help_text="Immutable per-teacher workspace number (1, 2, 3...)",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Workspace"
+        verbose_name_plural = "Workspaces"
+        ordering = ['slug_number']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['teacher', 'slug_number'],
+                name='unique_workspace_slug_per_teacher',
+            ),
+        ]
+
+    def __str__(self):
+        archived = " (archived)" if self.is_archived else ""
+        return f"{self.name} [{self.teacher.username}#{self.slug_number}]{archived}"
+
+
 class TeacherProfile(models.Model):
     """Profile for teacher accounts"""
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='teacher_profile')
@@ -37,6 +76,14 @@ class GuestTeacherAccount(models.Model):
     """One read-only guest login mapped to exactly one teacher."""
     teacher = models.OneToOneField(User, on_delete=models.CASCADE, related_name='guest_account')
     guest_user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='guest_teacher_account')
+    workspace = models.ForeignKey(
+        Workspace,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='guest_accounts',
+        help_text="Workspace this guest is pinned to (null = all active)",
+    )
     is_publicly_accessible = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -62,6 +109,12 @@ class Student(models.Model):
         null=True,
         blank=True,
         help_text="Teacher who owns this student"
+    )
+    workspace = models.ForeignKey(
+        Workspace,
+        on_delete=models.CASCADE,
+        related_name='students',
+        help_text="Workspace this student belongs to",
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -100,35 +153,46 @@ class Student(models.Model):
         Get the list of (year, month) tuples where this student ranked #1 (excluding current month).
         Handles ties: if multiple students have same average score AND same total marks,
         all of them get credit for the monthly win.
-        
+
+        Scoped to this student's workspace.
+
         Returns:
             list of (year, month) tuples where student ranked first
         """
         from datetime import date
         current_year = date.today().year
         current_month = date.today().month
-        
+
         winning_months = []
-        exam_dates = Exam.objects.values_list('date', flat=True).distinct()
+        workspace_filter = {}
+        if self.workspace_id:
+            workspace_filter['workspace_id'] = self.workspace_id
+        elif self.teacher_id:
+            # Fallback: legacy rows with workspace=NULL — use teacher scoping
+            workspace_filter['teacher_id'] = self.teacher_id
+
+        exam_dates = Exam.objects.filter(**workspace_filter).values_list('date', flat=True).distinct()
         months_set = set()
-        
+
         for exam_date in exam_dates:
             if exam_date:
                 # Only count months that have fully passed
                 if (exam_date.year < current_year) or (exam_date.year == current_year and exam_date.month < current_month):
                     months_set.add((exam_date.year, exam_date.month))
-        
+
         for year, month in months_set:
-            # Get total unique exams conducted in this month
+            # Get total unique exams conducted in this month (workspace-scoped)
             total_month_exams = Exam.objects.filter(
+                **workspace_filter,
                 date__year=year,
-                date__month=month
+                date__month=month,
             ).values('exam_id').distinct().count()
-            
-            # Get all students who had exams in this month
+
+            # Get all students in the same workspace who had exams in this month
             students_in_month = Student.objects.filter(
+                **workspace_filter,
                 exam__date__year=year,
-                exam__date__month=month
+                exam__date__month=month,
             ).distinct()
             
             month_rankings = []
@@ -209,15 +273,19 @@ class Student(models.Model):
     @property
     def rank(self):
         """
-        Calculate student's rank among students belonging to the same teacher.
-        
+        Calculate student's rank among students belonging to the same workspace.
+
         Ranking Rules:
         1. Primary: Ranked by average score (average_percentage)
         2. Tie-breaker: If average scores are equal, rank by total_marks
         3. If both are equal, students share the same rank
         """
-        # Only rank among students of the same teacher
-        students = Student.objects.filter(teacher=self.teacher)
+        # Only rank among students of the same workspace (workspace-scoped)
+        if self.workspace_id:
+            students = Student.objects.filter(workspace_id=self.workspace_id)
+        else:
+            # Fallback: legacy rows without workspace — use teacher scoping
+            students = Student.objects.filter(teacher=self.teacher)
         
         # Sort by average score (primary), then total marks (tie-breaker), both descending
         ranked_students = sorted(
@@ -253,13 +321,17 @@ class Student(models.Model):
     def subject_wise_summary(self):
         """
         Get performance summary for each subject the student has taken.
-        
+
         Returns:
             list: List of dicts containing subject performance data
         """
         summary = []
-        subjects = Subject.objects.filter(exam__student=self).distinct()
-        
+        workspace_filter = {'workspace_id': self.workspace_id} if self.workspace_id else {'teacher': self.teacher}
+        subjects = Subject.objects.filter(
+            **workspace_filter,
+            exam__student=self,
+        ).distinct()
+
         for subject in subjects:
             exams = self.exam_set.filter(subject=subject)
             
@@ -282,13 +354,17 @@ class Student(models.Model):
     def exam_type_summary(self):
         """
         Get performance summary for each exam type the student has taken.
-        
+
         Returns:
             list: List of dicts containing exam type performance data
         """
         summary = []
-        exam_types = ExamType.objects.filter(exam__student=self).distinct()
-        
+        workspace_filter = {'workspace_id': self.workspace_id} if self.workspace_id else {'teacher': self.teacher}
+        exam_types = ExamType.objects.filter(
+            **workspace_filter,
+            exam__student=self,
+        ).distinct()
+
         for exam_type in exam_types:
             exams = self.exam_set.filter(exam_type=exam_type)
             
@@ -322,14 +398,19 @@ class Student(models.Model):
     def get_subject_rank(self, subject):
         """
         Calculate student's rank in a specific subject.
-        
+
         Args:
             subject: Subject instance to calculate rank for
-            
+
         Returns:
             int or None: Rank position (1-indexed) or None if not applicable
         """
-        students_in_subject = Student.objects.filter(exam__subject=subject).distinct()
+        # Scope to the same workspace as the subject so we never compare across teachers.
+        workspace_filter = {'workspace_id': subject.workspace_id} if subject.workspace_id else {'teacher': subject.teacher}
+        students_in_subject = Student.objects.filter(
+            **workspace_filter,
+            exam__subject=subject,
+        ).distinct()
         
         student_averages = []
         for student in students_in_subject:
@@ -372,7 +453,7 @@ class Student(models.Model):
         # Calculate points from individual exams and batch-create transactions
         exam_points = 0
         transactions_to_create = []
-        for exam in self.exam_set.select_related('exam_type', 'subject', 'teacher').all():
+        for exam in self.exam_set.select_related('exam_type', 'subject', 'teacher', 'workspace').all():
             points_earned = exam.points_earned
             exam_points += points_earned
 
@@ -384,6 +465,7 @@ class Student(models.Model):
                 transactions_to_create.append(PointTransaction(
                     student=self,
                     teacher=exam.teacher,
+                    workspace=exam.workspace,
                     transaction_type=transaction_type,
                     points_change=points_earned,
                     description=description,
@@ -409,6 +491,7 @@ class Student(models.Model):
             transactions_to_create.append(PointTransaction(
                 student=self,
                 teacher=self.teacher,
+                workspace=self.workspace,
                 transaction_type='monthly_win',
                 points_change=40,
                 description=f"Monthly winner \u2013 {month_name} {win_year}",
@@ -446,6 +529,12 @@ class Subject(models.Model):
         blank=True,
         help_text="Teacher who owns this subject"
     )
+    workspace = models.ForeignKey(
+        Workspace,
+        on_delete=models.CASCADE,
+        related_name='subjects',
+        help_text="Workspace this subject belongs to",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -474,12 +563,16 @@ class Subject(models.Model):
     def best_student(self):
         """
         Get the best performing student in this subject based on average percentage.
-        
+
         Returns:
             Student or None: Student with highest average percentage
         """
-        students = Student.objects.filter(exam__subject=self).distinct()
-        
+        workspace_filter = {'workspace_id': self.workspace_id} if self.workspace_id else {'teacher': self.teacher}
+        students = Student.objects.filter(
+            **workspace_filter,
+            exam__subject=self,
+        ).distinct()
+
         if not students.exists():
             return None
         
@@ -508,12 +601,18 @@ class ExamType(models.Model):
     """Model representing a type/category of exam (e.g., MCQ, CQ, Midterm)"""
     name = models.CharField(max_length=100)
     teacher = models.ForeignKey(
-        User, 
-        on_delete=models.CASCADE, 
+        User,
+        on_delete=models.CASCADE,
         related_name='exam_types',
         null=True,
         blank=True,
         help_text="Teacher who owns this exam type"
+    )
+    workspace = models.ForeignKey(
+        Workspace,
+        on_delete=models.CASCADE,
+        related_name='exam_types',
+        help_text="Workspace this exam type belongs to",
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -546,11 +645,18 @@ class ExamQuestionPaper(models.Model):
         related_name='exam_question_papers',
         help_text="Teacher who owns this exam"
     )
+    workspace = models.ForeignKey(
+        Workspace,
+        on_delete=models.CASCADE,
+        related_name='exam_question_papers',
+        help_text="Workspace this question paper belongs to",
+    )
 
     def question_pdf_folder_path(instance):
         username = instance.teacher.username if instance.teacher else 'unknown_teacher'
+        workspace_slug = instance.workspace.slug_number if instance.workspace else 'W0'
         exam_id = instance.exam_id if instance.exam_id else 'unknown'
-        return f"ResTrack/{username}/Exam Questions/Exam ID {exam_id}"
+        return f"ResTrack/{username}/W{workspace_slug}/Exam Questions/Exam ID {exam_id}"
 
     question_pdf = CloudinaryField(
         resource_type='raw',
@@ -563,7 +669,12 @@ class ExamQuestionPaper(models.Model):
         verbose_name = "Exam Question Paper"
         verbose_name_plural = "Exam Question Papers"
         ordering = ['-exam_id']
-        unique_together = ['exam_id', 'teacher']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['exam_id', 'workspace'],
+                name='unique_exam_question_paper_per_workspace',
+            ),
+        ]
 
     def __str__(self):
         return f"Question Paper for Exam #{self.exam_id}"
@@ -599,12 +710,18 @@ class Exam(models.Model):
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
     exam_type = models.ForeignKey(ExamType, on_delete=models.CASCADE)
     teacher = models.ForeignKey(
-        User, 
-        on_delete=models.CASCADE, 
+        User,
+        on_delete=models.CASCADE,
         related_name='exams',
         null=True,
         blank=True,
         help_text="Teacher who created this exam"
+    )
+    workspace = models.ForeignKey(
+        Workspace,
+        on_delete=models.CASCADE,
+        related_name='exams',
+        help_text="Workspace this exam belongs to",
     )
     date = models.DateField()
     chapter = models.CharField(max_length=200, blank=True, null=True)
@@ -626,11 +743,12 @@ class Exam(models.Model):
     def exam_pdf_folder_path(instance):
         """
         Returns folder path for exam question PDF in the format:
-        ResTrack/<teacher username>/Exam Questions/Exam ID <exam_id>
+        ResTrack/<teacher username>/W<workspace_slug>/Exam Questions/Exam ID <exam_id>
         """
         username = instance.teacher.username if instance.teacher else 'unknown_teacher'
+        workspace_slug = instance.workspace.slug_number if instance.workspace else 'W0'
         exam_id = instance.exam_id if instance.exam_id else 'unknown'
-        return f"ResTrack/{username}/Exam Questions/Exam ID {exam_id}"
+        return f"ResTrack/{username}/W{workspace_slug}/Exam Questions/Exam ID {exam_id}"
 
     question_pdf = CloudinaryField(
         resource_type='raw',
@@ -669,9 +787,9 @@ class Exam(models.Model):
         if hasattr(self, '_cached_question_paper'):
             return self._cached_question_paper
         result = None
-        if self.exam_id and self.teacher:
+        if self.exam_id and self.workspace_id:
             try:
-                result = ExamQuestionPaper.objects.get(exam_id=self.exam_id, teacher=self.teacher)
+                result = ExamQuestionPaper.objects.get(exam_id=self.exam_id, workspace_id=self.workspace_id)
             except ExamQuestionPaper.DoesNotExist:
                 pass
         self._cached_question_paper = result
@@ -688,11 +806,12 @@ class Exam(models.Model):
     def marked_answer_folder_path(instance):
         """
         Returns folder path for marked answer paper in the format:
-        ResTrack/<teacher username>/Marked Answer Papers/Exam ID <exam_id>
+        ResTrack/<teacher username>/W<workspace_slug>/Marked Answer Papers/Exam ID <exam_id>
         """
         username = instance.teacher.username if instance.teacher else 'unknown_teacher'
+        workspace_slug = instance.workspace.slug_number if instance.workspace else 'W0'
         exam_id = instance.exam_id if instance.exam_id else 'unknown'
-        return f"ResTrack/{username}/Marked Answer Papers/Exam ID {exam_id}"
+        return f"ResTrack/{username}/W{workspace_slug}/Marked Answer Papers/Exam ID {exam_id}"
 
     marked_answer_paper = CloudinaryField(
         resource_type='raw',
@@ -925,6 +1044,12 @@ class PointsSpent(models.Model):
         blank=True,
         help_text="Teacher who recorded this points spent"
     )
+    workspace = models.ForeignKey(
+        Workspace,
+        on_delete=models.CASCADE,
+        related_name='points_spent_records',
+        help_text="Workspace this points-spent entry belongs to",
+    )
     points_spent = models.IntegerField(help_text="Number of points spent")
     description = models.CharField(max_length=15, help_text="How points were used")
     date = models.DateField()
@@ -951,6 +1076,7 @@ class PointsSpent(models.Model):
             description=self.description,
             defaults={
                 'points_change': -self.points_spent,  # Negative for spending
+                'workspace': self.workspace,
                 'exam': None
             }
         )
@@ -1005,6 +1131,12 @@ class PointTransaction(models.Model):
         null=True,
         blank=True,
         help_text="Teacher who recorded this transaction"
+    )
+    workspace = models.ForeignKey(
+        Workspace,
+        on_delete=models.CASCADE,
+        related_name='point_transactions',
+        help_text="Workspace this point transaction belongs to",
     )
     transaction_type = models.CharField(
         max_length=20,
@@ -1080,6 +1212,12 @@ class ExamCenterExam(models.Model):
         related_name='exam_center_exams',
         help_text="Teacher who created this exam"
     )
+    workspace = models.ForeignKey(
+        Workspace,
+        on_delete=models.CASCADE,
+        related_name='exam_center_exams',
+        help_text="Workspace this exam belongs to",
+    )
     exam_display_id = models.CharField(
         max_length=50,
         help_text="Exam identifier displayed to students"
@@ -1127,8 +1265,9 @@ class ExamCenterExam(models.Model):
 
     def _question_pdf_folder(instance):
         username = instance.teacher.username if instance.teacher else 'unknown'
+        workspace_slug = instance.workspace.slug_number if instance.workspace else 'W0'
         exam_id = instance.exam_display_id if instance.exam_display_id else 'unknown'
-        return f"ResTrack/{username}/Exam Center/Questions/Exam ID {exam_id}"
+        return f"ResTrack/{username}/W{workspace_slug}/Exam Center/Questions/Exam ID {exam_id}"
 
     question_pdf = CloudinaryField(
         resource_type='raw',
@@ -1229,16 +1368,28 @@ class ExamCenterExam(models.Model):
     # ---- class-level helpers ---------------------------------------------
 
     @classmethod
+    def active_exams_for_workspace(cls, workspace):
+        """Return non-finished exams for a workspace (DB-filtered to recent exams only)."""
+        import datetime as _dt
+        from django.utils import timezone as _tz
+        cutoff_date = (_tz.now() - _dt.timedelta(days=2)).date()
+        if workspace is None:
+            return []
+        return [e for e in cls.objects.filter(workspace=workspace, exam_date__gte=cutoff_date) if not e.is_finished]
+
+    @classmethod
+    def can_create_exam(cls, workspace):
+        """Whether a new ExamCenterExam can be created in this workspace (3-cap per-workspace)."""
+        return len(cls.active_exams_for_workspace(workspace)) < 3
+
+    # Backwards-compatible teacher-keyed helpers (deprecated — prefer workspace variants).
+    @classmethod
     def active_exams_for_teacher(cls, teacher):
-        """Return non-finished exams for a teacher (DB-filtered to recent exams only)."""
+        """Deprecated. Use ``active_exams_for_workspace`` instead."""
         import datetime as _dt
         from django.utils import timezone as _tz
         cutoff_date = (_tz.now() - _dt.timedelta(days=2)).date()
         return [e for e in cls.objects.filter(teacher=teacher, exam_date__gte=cutoff_date) if not e.is_finished]
-
-    @classmethod
-    def can_create_exam(cls, teacher):
-        return len(cls.active_exams_for_teacher(teacher)) < 3
 
 
 class AnswerSubmission(models.Model):
@@ -1256,8 +1407,9 @@ class AnswerSubmission(models.Model):
 
     def _answer_folder(instance):
         username = instance.exam.teacher.username if instance.exam.teacher else 'unknown'
+        workspace_slug = instance.exam.workspace.slug_number if instance.exam.workspace else 'W0'
         exam_id = instance.exam.exam_display_id if instance.exam.exam_display_id else 'unknown'
-        return f"ResTrack/{username}/Exam Center/Answers/Exam ID {exam_id}"
+        return f"ResTrack/{username}/W{workspace_slug}/Exam Center/Answers/Exam ID {exam_id}"
 
     answer_file = CloudinaryField(
         resource_type='raw',

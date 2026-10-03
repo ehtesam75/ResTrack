@@ -33,10 +33,10 @@ def count_unique_exams(queryset):
     """
     Helper function to count unique exams in a queryset.
     Grouped exams (bulk entries) count as 1, individual exams count as 1 each.
-    
+
     Args:
         queryset: Django QuerySet of Exam objects
-        
+
     Returns:
         int: Count of unique exams
     """
@@ -45,12 +45,17 @@ def count_unique_exams(queryset):
 
 
 class LeaderboardService:
-    """Service class for generating various leaderboards"""
-    
+    """Service class for generating various leaderboards.
+
+    Every method takes a required ``workspace`` argument so leaderboards are
+    strictly contained inside one workspace — and by construction, inside one
+    teacher (every Workspace has exactly one teacher).
+    """
+
     @staticmethod
-    def total_marks_leaderboard():
-        """Generate leaderboard based on total marks"""
-        students = Student.objects.all()
+    def total_marks_leaderboard(*, workspace):
+        """Generate leaderboard based on total marks for one workspace."""
+        students = Student.objects.filter(workspace=workspace)
         leaderboard = [
             {
                 'student': student,
@@ -60,11 +65,11 @@ class LeaderboardService:
             for student in students
         ]
         return sorted(leaderboard, key=lambda x: x['total_marks'], reverse=True)
-    
+
     @staticmethod
-    def average_leaderboard():
-        """Generate leaderboard based on average percentage"""
-        students = Student.objects.all()
+    def average_leaderboard(*, workspace):
+        """Generate leaderboard based on average percentage for one workspace."""
+        students = Student.objects.filter(workspace=workspace)
         leaderboard = [
             {
                 'student': student,
@@ -74,64 +79,70 @@ class LeaderboardService:
             for student in students if student.total_exams > 0
         ]
         return sorted(leaderboard, key=lambda x: x['average'], reverse=True)
-    
+
     @staticmethod
-    def subject_wise_leaderboard(subject_id):
-        """Generate leaderboard for a specific subject"""
+    def subject_wise_leaderboard(*, workspace, subject_id):
+        """Generate leaderboard for a specific subject inside ``workspace``."""
         try:
-            subject = Subject.objects.get(id=subject_id)
+            subject = Subject.objects.get(id=subject_id, workspace=workspace)
         except Subject.DoesNotExist:
             return []
-        
-        students = Student.objects.filter(exam__subject=subject).distinct()
+
+        students = Student.objects.filter(
+            workspace=workspace,
+            exam__subject=subject,
+        ).distinct()
         leaderboard = []
-        
+
         for student in students:
-            exams = student.exam_set.filter(subject=subject)
+            exams = student.exam_set.filter(subject=subject, workspace=workspace)
             total_marks_obtained = sum(float(e.mark_obtained) for e in exams)
             total_possible_marks = sum(float(e.total_marks) for e in exams)
             avg_percentage = (total_marks_obtained * 100 / total_possible_marks) if total_possible_marks > 0 else 0
-            
+
             leaderboard.append({
                 'student': student,
                 'average': round(avg_percentage, 2),
                 'total_marks': total_marks_obtained,
                 'exam_count': exams.count()
             })
-        
+
         return sorted(leaderboard, key=lambda x: x['average'], reverse=True)
-    
+
     @staticmethod
-    def exam_type_leaderboard(exam_type_id):
-        """Generate leaderboard for a specific exam type"""
+    def exam_type_leaderboard(*, workspace, exam_type_id):
+        """Generate leaderboard for a specific exam type inside ``workspace``."""
         try:
-            exam_type = ExamType.objects.get(id=exam_type_id)
+            exam_type = ExamType.objects.get(id=exam_type_id, workspace=workspace)
         except ExamType.DoesNotExist:
             return []
-        
-        students = Student.objects.filter(exam__exam_type=exam_type).distinct()
+
+        students = Student.objects.filter(
+            workspace=workspace,
+            exam__exam_type=exam_type,
+        ).distinct()
         leaderboard = []
-        
+
         for student in students:
-            exams = student.exam_set.filter(exam_type=exam_type)
+            exams = student.exam_set.filter(exam_type=exam_type, workspace=workspace)
             total_marks_obtained = sum(float(e.mark_obtained) for e in exams)
             total_possible_marks = sum(float(e.total_marks) for e in exams)
             avg_percentage = (total_marks_obtained * 100 / total_possible_marks) if total_possible_marks > 0 else 0
-            
+
             leaderboard.append({
                 'student': student,
                 'average': round(avg_percentage, 2),
                 'total_marks': total_marks_obtained,
                 'exam_count': exams.count()
             })
-        
+
         return sorted(leaderboard, key=lambda x: x['average'], reverse=True)
-    
+
     @staticmethod
-    def lifetime_points_leaderboard():
-        """Generate leaderboard based on lifetime points"""
+    def lifetime_points_leaderboard(*, workspace):
+        """Generate leaderboard based on lifetime points for one workspace."""
         from .models import LifetimePoints
-        lifetime_points = LifetimePoints.objects.all()
+        lifetime_points = LifetimePoints.objects.filter(student__workspace=workspace)
         leaderboard = [
             {
                 'student': lp.student,
@@ -145,17 +156,21 @@ class LeaderboardService:
 
 
 class DashboardService:
-    """Service class for generating dashboard data"""
-    
+    """Service class for generating dashboard data.
+
+    All methods are scoped to a single ``workspace`` argument so dashboard
+    summaries cannot leak across teachers.
+    """
+
     @staticmethod
-    def get_dashboard_summary():
-        """Get overall dashboard summary statistics"""
-        total_exams = count_unique_exams(Exam.objects.all())
-        total_subjects = Subject.objects.count()
-        total_students = Student.objects.count()
-        
+    def get_dashboard_summary(*, workspace):
+        """Get overall dashboard summary statistics for one workspace."""
+        total_exams = count_unique_exams(Exam.objects.filter(workspace=workspace))
+        total_subjects = Subject.objects.filter(workspace=workspace).count()
+        total_students = Student.objects.filter(workspace=workspace).count()
+
         # Get highest performers
-        students = Student.objects.all()
+        students = list(Student.objects.filter(workspace=workspace))
         if students:
             highest_marks_student = max(students, key=lambda s: s.total_marks)
             highest_avg_student = max(
@@ -168,7 +183,7 @@ class DashboardService:
             highest_marks_student = None
             highest_avg_student = None
             best_student = None
-        
+
         return {
             'total_exams': total_exams,
             'total_subjects': total_subjects,
@@ -177,63 +192,60 @@ class DashboardService:
             'highest_avg_student': highest_avg_student,
             'best_student': best_student
         }
-    
+
     @staticmethod
-    def get_subject_performance_table():
-        """Get performance data for all subjects"""
-        subjects = Subject.objects.all()
+    def get_subject_performance_table(*, workspace):
+        """Get performance data for all subjects in ``workspace``."""
+        subjects = Subject.objects.filter(workspace=workspace)
         performance_data = []
-        
+
         for subject in subjects:
-            exams = Exam.objects.filter(subject=subject)
+            exams = Exam.objects.filter(subject=subject, workspace=workspace)
             if exams.exists():
                 total_marks_obtained = sum(float(e.mark_obtained) for e in exams)
                 total_possible_marks = sum(float(e.total_marks) for e in exams)
                 avg_percentage = (
-                    (total_marks_obtained * 100 / total_possible_marks) 
+                    (total_marks_obtained * 100 / total_possible_marks)
                     if total_possible_marks > 0 else 0
                 )
-                
+
                 performance_data.append({
                     'subject': subject,
                     'average_percentage': round(avg_percentage, 2),
                     'total_exams': count_unique_exams(exams),
                     'best_student': subject.best_student()
                 })
-        
+
         return sorted(performance_data, key=lambda x: x['average_percentage'], reverse=True)
-    
+
     @staticmethod
-    def get_exam_type_performance_table():
-        """Get performance data for all exam types"""
-        exam_types = ExamType.objects.all()
+    def get_exam_type_performance_table(*, workspace):
+        """Get performance data for all exam types in ``workspace``."""
+        exam_types = ExamType.objects.filter(workspace=workspace)
         performance_data = []
-        
+
         for exam_type in exam_types:
-            exams = Exam.objects.filter(exam_type=exam_type)
+            exams = Exam.objects.filter(exam_type=exam_type, workspace=workspace)
             if exams.exists():
                 total_marks_obtained = sum(float(e.mark_obtained) for e in exams)
                 total_possible_marks = sum(float(e.total_marks) for e in exams)
                 avg_percentage = (
-                    (total_marks_obtained * 100 / total_possible_marks) 
+                    (total_marks_obtained * 100 / total_possible_marks)
                     if total_possible_marks > 0 else 0
                 )
-                
+
                 performance_data.append({
                     'exam_type': exam_type,
                     'average_percentage': round(avg_percentage, 2),
                     'total_exams': count_unique_exams(exams)
                 })
-        
+
         return sorted(performance_data, key=lambda x: x['average_percentage'], reverse=True)
-    
+
     @staticmethod
-    def get_grade_distribution(teacher=None):
-        """Get grade distribution across exams (optionally filtered by teacher)"""
-        if teacher:
-            exams = Exam.objects.filter(teacher=teacher)
-        else:
-            exams = Exam.objects.all()
+    def get_grade_distribution(*, workspace):
+        """Get grade distribution across exams for one workspace."""
+        exams = Exam.objects.filter(workspace=workspace)
         grades = [exam.grade for exam in exams]
         distribution = Counter(grades)
 
@@ -248,30 +260,35 @@ class DashboardService:
                 'color': color
             })
         return grade_data
-    
+
     @staticmethod
-    def get_recent_exams(limit=10):
-        """Get most recent exams"""
-        return Exam.objects.all().order_by('-date', '-exam_id')[:limit]
+    def get_recent_exams(*, workspace, limit=10):
+        """Get most recent exams for one workspace."""
+        return Exam.objects.filter(workspace=workspace).order_by('-date', '-exam_id')[:limit]
 
 
 class ChartDataService:
-    """Service class for generating chart data"""
-    
+    """Service class for generating chart data.
+
+    All public methods take a required ``workspace`` argument so chart data
+    never crosses workspace (and therefore teacher) boundaries. Object lookups
+    also re-validate ownership against the workspace before use.
+    """
+
     @staticmethod
-    def marks_over_time(student_id):
-        """Generate line chart data for student marks over time"""
+    def marks_over_time(*, workspace, student_id):
+        """Generate line chart data for student marks over time."""
         try:
-            student = Student.objects.get(id=student_id)
+            student = Student.objects.get(id=student_id, workspace=workspace)
         except Student.DoesNotExist:
             return {'labels': [], 'data': []}
-        
-        exams = student.exam_set.all().order_by('date')
+
+        exams = student.exam_set.filter(workspace=workspace).order_by('date')
         labels = [f"{exam.subject.name} ({exam.date.strftime('%m/%d')})" for exam in exams]
         data = [float(exam.percentage) for exam in exams]
-        
+
         return {'labels': labels, 'data': data}
-    
+
     @staticmethod
     def shorten_subject_name(name):
         """Shorten subject name for chart labels"""
@@ -296,11 +313,11 @@ class ChartDataService:
             'General Science': 'Gen Sci',
             'Social Science': 'Soc Sci',
         }
-        
+
         # Check for exact match first
         if name in abbreviations:
             return abbreviations[name]
-        
+
         # Check for partial matches
         name_lower = name.lower()
         if '1st paper' in name_lower:
@@ -309,19 +326,19 @@ class ChartDataService:
         if '2nd paper' in name_lower:
             prefix = name.split()[0][:3]
             return f"{prefix} 2nd"
-        
+
         # If name is already short, return as is
         if len(name) <= 8:
             return name
-        
+
         # Otherwise truncate
         return name[:7] + '.'
-    
+
     @staticmethod
-    def subject_performance_chart(student_id):
-        """Generate chart data for per-subject performance"""
+    def subject_performance_chart(*, workspace, student_id):
+        """Generate chart data for per-subject performance."""
         try:
-            student = Student.objects.get(id=student_id)
+            student = Student.objects.get(id=student_id, workspace=workspace)
         except Student.DoesNotExist:
             return {'labels': [], 'data': [], 'fullLabels': []}
 
@@ -331,12 +348,12 @@ class ChartDataService:
         data = [float(item['average_percentage']) for item in subject_summary]
 
         return {'labels': labels, 'data': data, 'fullLabels': full_labels}
-    
+
     @staticmethod
-    def grade_distribution_chart(student_id):
-        """Generate chart data for grade distribution"""
+    def grade_distribution_chart(*, workspace, student_id):
+        """Generate chart data for grade distribution."""
         try:
-            student = Student.objects.get(id=student_id)
+            student = Student.objects.get(id=student_id, workspace=workspace)
         except Student.DoesNotExist:
             return {'labels': [], 'data': [], 'colors': []}
 
@@ -350,20 +367,23 @@ class ChartDataService:
         for grade_name in labels:
             colors.append(color_map.get(grade_name, '#000000'))
         return {'labels': labels, 'data': data, 'colors': colors}
-    
+
     @staticmethod
-    def student_comparison_chart(subject_id):
-        """Generate chart comparing all students in a subject"""
+    def student_comparison_chart(*, workspace, subject_id):
+        """Generate chart comparing all students in a subject within ``workspace``."""
         try:
-            subject = Subject.objects.get(id=subject_id)
+            subject = Subject.objects.get(id=subject_id, workspace=workspace)
         except Subject.DoesNotExist:
             return {'labels': [], 'data': []}
-        
-        students = Student.objects.filter(exam__subject=subject).distinct()
+
+        students = Student.objects.filter(
+            workspace=workspace,
+            exam__subject=subject,
+        ).distinct()
         comparison_data = []
-        
+
         for student in students:
-            exams = student.exam_set.filter(subject=subject)
+            exams = student.exam_set.filter(subject=subject, workspace=workspace)
             if exams.exists():
                 total_marks_obtained = sum(float(e.mark_obtained) for e in exams)
                 total_possible_marks = sum(float(e.total_marks) for e in exams)
@@ -372,17 +392,17 @@ class ChartDataService:
                     'student': student.name,
                     'average': round(avg_percentage, 2)
                 })
-        
+
         comparison_data = sorted(comparison_data, key=lambda x: x['average'], reverse=True)
         labels = [item['student'] for item in comparison_data]
         data = [float(item['average']) for item in comparison_data]
-        
+
         return {'labels': labels, 'data': data}
-    
+
     @staticmethod
-    def overall_grade_distribution(teacher=None):
-        """Generate chart for overall grade distribution (optionally filtered by teacher)"""
-        grade_data = DashboardService.get_grade_distribution(teacher=teacher)
+    def overall_grade_distribution(*, workspace):
+        """Generate chart for overall grade distribution in ``workspace``."""
+        grade_data = DashboardService.get_grade_distribution(workspace=workspace)
         labels = [item['grade'] for item in grade_data]
         data = [item['count'] for item in grade_data]
         colors = [item['color'] for item in grade_data]

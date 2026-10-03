@@ -2,6 +2,24 @@
 const CACHE_NAME = 'restrack-v2.1.0';
 const STATIC_CACHE_NAME = 'restrack-static-v2.1.0';
 
+// ---------------------------------------------------------------------------
+// Local development mode
+// ---------------------------------------------------------------------------
+// In production, /static/ URLs are content-hashed by WhiteNoise's
+// ManifestStaticFilesStorage (e.g. custom.a1b2c3.css), so a cache-first
+// strategy is safe: changing a file changes its URL, which misses the cache.
+//
+// During local development there are no hashes — it is always
+// /static/css/custom.css — so cache-first pins the very first copy the browser
+// ever saw and no amount of refreshing will replace it. That is what makes
+// edits appear to "not show up" on localhost.
+//
+// So on localhost we disable caching entirely and let the browser talk to the
+// dev server directly. Production behaviour is completely unchanged.
+const DEV_HOSTNAMES = ['localhost', '127.0.0.1', '[::1]', '::1', '0.0.0.0'];
+const IS_DEV = DEV_HOSTNAMES.includes(self.location.hostname);
+
+
 // Static assets to cache - same-origin ONLY, no CDN/external URLs
 const STATIC_ASSETS = [
   '/static/manifest.json',
@@ -25,10 +43,20 @@ const STATIC_ASSETS = [
 // Install event - cache static assets
 self.addEventListener('install', event => {
   console.log('Service Worker installing.');
+
+  if (IS_DEV) {
+    // Don't pre-cache anything locally, and activate immediately so a stale
+    // worker from an earlier session is replaced on the very next load.
+    console.log('[dev] Skipping static asset pre-cache.');
+    event.waitUntil(self.skipWaiting());
+    return;
+  }
+
   event.waitUntil(
     caches.open(STATIC_CACHE_NAME)
       .then(async cache => {
         console.log('Caching static assets...');
+
         const results = await Promise.allSettled(
           STATIC_ASSETS.map(asset => cache.add(asset))
         );
@@ -51,8 +79,15 @@ self.addEventListener('activate', event => {
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
+          // Locally, drop every cache — including the current one, which may
+          // hold stale entries written by a previous (pre-fix) worker.
+          if (IS_DEV) {
+            console.log('[dev] Deleting cache:', cacheName);
+            return caches.delete(cacheName);
+          }
           // Delete all old caches to ensure fresh icons and manifest
           if (cacheName !== STATIC_CACHE_NAME) {
+
             console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
@@ -78,9 +113,16 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  // Locally, never serve anything from the cache. Going straight to the
+  // network means an edited CSS/JS/icon shows up on a plain refresh.
+  if (IS_DEV) {
+    return;
+  }
+
   // Only cache same-origin assets under /static/ — nothing else
   // Avoids catching PDF.js blob workers, inline scripts, or dynamic API routes
   if (url.pathname.startsWith('/static/')) {
+
     event.respondWith(
       caches.match(event.request)
         .then(cachedResponse => {

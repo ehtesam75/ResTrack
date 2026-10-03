@@ -68,6 +68,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'marks.middleware.GuestReadOnlyMiddleware',
+    'marks.workspace_middleware.WorkspaceMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
@@ -90,6 +91,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'marks.context_processors.guest_session_context',
+                'marks.context_processors.workspace_context',
             ],
         },
     },
