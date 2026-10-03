@@ -431,6 +431,12 @@ class WorkspaceResolutionTests(TestCase):
 		ws = get_active_workspace(req)
 		self.assertEqual(ws.pk, ws1.pk)
 
+	def test_new_default_workspace_has_no_description(self):
+		workspace = get_workspace_for_user(self.teacher)
+
+		self.assertEqual(workspace.name, 'Default Workspace')
+		self.assertEqual(workspace.description, '')
+
 	def test_session_workspace_takes_precedence(self):
 		_make_workspace(self.teacher, slug_number=1, name='First')
 		ws2 = _make_workspace(self.teacher, slug_number=2, name='Second')

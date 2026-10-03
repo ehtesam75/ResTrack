@@ -80,7 +80,6 @@ def _ensure_default_workspace(user):
         slug_number=1,
         defaults={
             'name': 'Default Workspace',
-            'description': 'Your original ResTrack data.',
         },
     )
     return ws
