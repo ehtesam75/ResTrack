@@ -755,6 +755,49 @@ class WorkspaceManagementUITests(TestCase):
 		self.assertContains(response, 'data-popup-message')
 		self.assertEqual(self.client.session[ACTIVE_WORKSPACE_SESSION_KEY], ws2.pk)
 
+	def test_workspace_list_shows_net_points_awarded_per_workspace(self):
+		ws1 = _make_workspace(self.teacher, slug_number=1, name='Class 7')
+		ws2 = _make_workspace(self.teacher, slug_number=2, name='Class 8')
+		student1 = Student.objects.create(
+			first_name='Alice', roll='1', class_name='7',
+			teacher=self.teacher, workspace=ws1,
+		)
+		student2 = Student.objects.create(
+			first_name='Bob', roll='1', class_name='8',
+			teacher=self.teacher, workspace=ws2,
+		)
+
+		PointTransaction.objects.create(
+			student=student1, teacher=self.teacher, workspace=ws1,
+			transaction_type='exam_bonus', points_change=75,
+			description='Exam bonus', date=date.today(),
+		)
+		PointTransaction.objects.create(
+			student=student1, teacher=self.teacher, workspace=ws1,
+			transaction_type='spent', points_change=-20,
+			description='Points spent', date=date.today(),
+		)
+		PointTransaction.objects.create(
+			student=student2, teacher=self.teacher, workspace=ws2,
+			transaction_type='exam_bonus', points_change=40,
+			description='Exam bonus', date=date.today(),
+		)
+		PointTransaction.objects.create(
+			student=student2, teacher=self.teacher, workspace=ws2,
+			transaction_type='spent', points_change=-7,
+			description='Points spent', date=date.today(),
+		)
+
+		response = self.client.get(reverse('workspace_list'))
+
+		self.assertEqual(response.status_code, 200)
+		workspace_stats = {
+			item['workspace'].pk: item['net_points_awarded']
+			for item in response.context['workspaces_with_counts']
+		}
+		self.assertEqual(workspace_stats[ws1.pk], 55)
+		self.assertEqual(workspace_stats[ws2.pk], 33)
+
 	def test_teacher_can_create_workspace(self):
 		response = self.client.post(reverse('workspace_create'), data={'name': 'Renamed', 'description': 'desc'}, follow=True)
 		self.assertEqual(response.status_code, 200)

@@ -19,6 +19,7 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
+from django.db.models import Sum
 from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -29,7 +30,7 @@ from .models import (
     Exam,
     ExamCenterExam,
     ExamType,
-    PointsSpent,
+    PointTransaction,
     Student,
     StudentProfile,
     Subject,
@@ -85,22 +86,31 @@ def workspace_list(request):
     if active and active.teacher_id != teacher.id:
         active = None
 
-    # Per-workspace counts pre-computed into a list of dicts so templates can iterate without filters.
+    net_points_by_workspace = {
+        row['workspace_id']: row['net_points_awarded'] or 0
+        for row in (
+            PointTransaction.objects
+            .filter(workspace__teacher=teacher)
+            .values('workspace_id')
+            .annotate(net_points_awarded=Sum('points_change'))
+        )
+    }
+
+    # Per-workspace statistics are pre-computed so templates can iterate without filters.
     workspaces_with_counts = []
     for ws in all_ws:
         workspaces_with_counts.append({
             'workspace': ws,
             'students': Student.objects.filter(workspace=ws).count(),
             'subjects': Subject.objects.filter(workspace=ws).count(),
-            'exam_types': ExamType.objects.filter(workspace=ws).count(),
             'exams': Exam.objects.filter(workspace=ws).count(),
             'exam_centers': ExamCenterExam.objects.filter(workspace=ws).count(),
+            'net_points_awarded': net_points_by_workspace.get(ws.pk, 0),
         })
 
     context = {
         'workspaces_with_counts': workspaces_with_counts,
         'active_workspace': active,
-        'total_points_spent': PointsSpent.objects.filter(workspace__teacher=teacher).count(),
     }
     return render(request, 'marks/workspace_list.html', context)
 

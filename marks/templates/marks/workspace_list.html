@@ -11,11 +11,8 @@
             <p class="text-sm text-gray-600 mt-0.5">Switch between independent sets of students, subjects, and exams.</p>
         </div>
         <a href="{% url 'workspace_create' %}"
-           class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl font-medium text-white text-xs sm:text-sm bg-gradient-to-r from-purple-600 to-blue-500 shadow-md hover:shadow-lg hover:from-purple-700 hover:to-blue-600 transition-all">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>
-            New workspace
+           class="hide-mobile bg-purple-100 text-purple-700 px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md hover:bg-purple-200 transform hover:-translate-y-0.5 transition-all duration-200">
+            New Workspace
         </a>
     </div>
 
@@ -58,10 +55,10 @@
                             {% endif %}
                             <div class="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-[10px] sm:text-xs text-gray-500">
                                 <span><strong class="text-gray-700">{{ item.students }}</strong> student{{ item.students|pluralize }}</span>
-                                <span><strong class="text-gray-700">{{ item.subjects }}</strong> subject{{ item.subjects|pluralize }}</span>
-                                <span><strong class="text-gray-700">{{ item.exam_types }}</strong> exam type{{ item.exam_types|pluralize }}</span>
+                                <span class="hide-mobile"><strong class="text-gray-700">{{ item.subjects }}</strong> subject{{ item.subjects|pluralize }}</span>
                                 <span><strong class="text-gray-700">{{ item.exams }}</strong> exam{{ item.exams|pluralize }}</span>
-                                <span><strong class="text-gray-700">{{ item.exam_centers }}</strong> exam center{{ item.exam_centers|pluralize }}</span>
+                                <span class="hide-mobile"><strong class="text-gray-700">{{ item.exam_centers }}</strong> exam center{{ item.exam_centers|pluralize }}</span>
+                                <span><strong class="text-gray-700">{{ item.net_points_awarded|default:"0" }}</strong> net points awarded</span>
                             </div>
                             <div class="text-[10px] sm:text-xs text-gray-400 mt-1">Created {{ ws.created_at|date:"M j, Y" }}</div>
                         </div>
@@ -71,52 +68,52 @@
                                 {% if not active_workspace or ws.id != active_workspace.id %}
                                     <form method="post" action="{% url 'workspace_switch' ws.pk %}" class="inline">
                                         {% csrf_token %}
-                                        <button type="submit"
+                                        <button type="submit" aria-label="Switch workspace" title="Switch workspace"
                                             class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-purple-700 bg-purple-50 hover:bg-purple-100 transition-colors">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
                                             </svg>
-                                            Switch
+                                            <span class="hide-mobile">Switch</span>
                                         </button>
                                     </form>
                                 {% endif %}
                             {% endif %}
-                            <a href="{% url 'workspace_edit' ws.pk %}"
+                            <a href="{% url 'workspace_edit' ws.pk %}" aria-label="Edit workspace" title="Edit workspace"
                                class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 transition-colors">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                 </svg>
-                                Edit
+                                <span class="hide-mobile">Edit</span>
                             </a>
                             {% if ws.is_archived %}
                                 <form method="post" action="{% url 'workspace_restore' ws.pk %}" class="inline">
                                     {% csrf_token %}
-                                    <button type="submit"
+                                    <button type="submit" aria-label="Restore workspace" title="Restore workspace"
                                         class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-green-700 bg-green-50 hover:bg-green-100 transition-colors">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h11a8 8 0 018 8v0M3 10l4-4M3 10l4 4"></path>
                                         </svg>
-                                        Restore
+                                        <span class="hide-mobile">Restore</span>
                                     </button>
                                 </form>
                             {% else %}
                                 <form method="post" action="{% url 'workspace_archive' ws.pk %}" class="inline">
                                     {% csrf_token %}
-                                    <button type="submit"
+                                    <button type="submit" aria-label="Archive workspace" title="Archive workspace"
                                         class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-yellow-700 bg-yellow-50 hover:bg-yellow-100 transition-colors">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
                                         </svg>
-                                        Archive
+                                        <span class="hide-mobile">Archive</span>
                                     </button>
                                 </form>
                             {% endif %}
-                            <a href="{% url 'workspace_delete' ws.pk %}"
+                            <a href="{% url 'workspace_delete' ws.pk %}" aria-label="Delete workspace" title="Delete workspace"
                                class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-red-700 bg-red-50 hover:bg-red-100 transition-colors">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2"></path>
                                 </svg>
-                                Delete
+                                <span class="hide-mobile">Delete</span>
                             </a>
                         </div>
                     </div>
@@ -125,7 +122,7 @@
             {% endfor %}
         </div>
 
-        <p class="text-[11px] sm:text-xs text-gray-500 mt-4">
+        <p class="hide-mobile text-[11px] sm:text-xs text-gray-500 mt-4">
             Archiving hides a workspace from the switcher but keeps its data. Deletion is permanent and cascades to the workspace's students, subjects, exams, and exam center items.
         </p>
     {% endif %}
