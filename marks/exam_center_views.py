@@ -30,7 +30,7 @@ from .push_views import CRON_NO_EXAMS_CACHE_KEY
 # Helpers
 # ---------------------------------------------------------------------------
 
-def _get_ordered_active_exams(teacher):
+def _get_ordered_active_exams(workspace):
     """Return non-finished exams ordered by priority (running first, then latest upcoming).
     
     Filters at DB level to only fetch exams from the last 2 days onwards,
@@ -39,7 +39,10 @@ def _get_ordered_active_exams(teacher):
     import datetime as _dt
     from django.utils import timezone as _tz
     cutoff_date = (_tz.now() - _dt.timedelta(days=2)).date()
-    recent_exams = ExamCenterExam.objects.filter(workspace=request.workspace, exam_date__gte=cutoff_date)
+    recent_exams = ExamCenterExam.objects.filter(
+        workspace=workspace,
+        exam_date__gte=cutoff_date,
+    )
     running = []
     submission = []
     upcoming = []
@@ -56,9 +59,9 @@ def _get_ordered_active_exams(teacher):
     return running + submission + upcoming
 
 
-def _get_finished_exams(teacher):
+def _get_finished_exams(workspace):
     """Return finished exams, newest first."""
-    all_exams = ExamCenterExam.objects.filter(workspace=request.workspace)
+    all_exams = ExamCenterExam.objects.filter(workspace=workspace)
     finished = [e for e in all_exams if e.is_finished]
     finished.sort(key=lambda e: e.final_end_datetime, reverse=True)
     return finished
@@ -83,9 +86,9 @@ def exam_center(request):
         messages.error(request, 'Unable to determine your teacher account.')
         return redirect('dashboard')
 
-    active_exams = _get_ordered_active_exams(teacher)
-    finished_exams = _get_finished_exams(teacher)
-    can_create = ExamCenterExam.can_create_exam(teacher)
+    active_exams = _get_ordered_active_exams(request.workspace)
+    finished_exams = _get_finished_exams(request.workspace)
+    can_create = ExamCenterExam.can_create_exam(request.workspace)
     active_count = len(active_exams)
 
     context = {

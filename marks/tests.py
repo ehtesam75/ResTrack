@@ -582,6 +582,32 @@ class WorkspaceQueryScopingTests(TestCase):
 		self.assertFalse(ExamCenterExam.can_create_exam(ws1))
 		self.assertTrue(ExamCenterExam.can_create_exam(ws2))
 
+	def test_exam_center_page_uses_active_workspace(self):
+		import datetime as _dt
+
+		ws1 = _make_workspace(self.teacher, slug_number=1, name='A')
+		ws2 = _make_workspace(self.teacher, slug_number=2, name='B')
+		future_date = _tz.now().date() + _dt.timedelta(days=1)
+
+		for workspace, exam_id, subject in (
+			(ws1, '101', 'Math-A'),
+			(ws2, '201', 'Science-B'),
+		):
+			ExamCenterExam.objects.create(
+				teacher=self.teacher, workspace=workspace,
+				exam_display_id=exam_id, class_number=7, subject=subject, chapter='1',
+				exam_mode='online', exam_type='cq', total_marks=100,
+				exam_date=future_date, start_time=_time(9, 0),
+				duration_minutes=30, submission_duration_minutes=10,
+			)
+
+		_set_session(self.client, **{ACTIVE_WORKSPACE_SESSION_KEY: ws1.pk})
+		response = self.client.get(reverse('exam_center'))
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, 'Math-A')
+		self.assertNotContains(response, 'Science-B')
+
 	def test_cloudinary_folder_includes_workspace_slug(self):
 		ws1 = _make_workspace(self.teacher, slug_number=1, name='A')
 		ws7 = _make_workspace(self.teacher, slug_number=7, name='G')
