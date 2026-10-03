@@ -337,6 +337,7 @@ def workspace_switch(request, pk):
         return redirect('workspace_list')
 
     set_active_workspace(request, ws)
+    messages.success(request, f'Workspace switched to "{ws.name}".')
     next_url = request.POST.get('next') or reverse('dashboard')
     # Only allow same-site redirects.
     if not next_url.startswith('/'):

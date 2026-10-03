@@ -728,6 +728,33 @@ class WorkspaceManagementUITests(TestCase):
 		self.assertContains(response, 'Manage Workspaces')
 		self.assertContains(response, reverse('workspace_list'))
 
+	def test_workspace_messages_use_global_popup_style(self):
+		response = self.client.post(
+			reverse('workspace_create'),
+			data={'name': '', 'description': ''},
+		)
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, 'Workspace name is required.')
+		self.assertContains(response, 'data-popup-message')
+		self.assertContains(response, 'fixed right-4')
+
+	def test_switch_workspace_shows_success_popup(self):
+		ws1 = _make_workspace(self.teacher, slug_number=1, name='Class 7')
+		ws2 = _make_workspace(self.teacher, slug_number=2, name='Class 8')
+		_set_session(self.client, **{ACTIVE_WORKSPACE_SESSION_KEY: ws1.pk})
+
+		response = self.client.post(
+			reverse('workspace_switch', args=[ws2.pk]),
+			data={'next': reverse('workspace_list')},
+			follow=True,
+		)
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, 'Workspace switched to &quot;Class 8&quot;.')
+		self.assertContains(response, 'data-popup-message')
+		self.assertEqual(self.client.session[ACTIVE_WORKSPACE_SESSION_KEY], ws2.pk)
+
 	def test_teacher_can_create_workspace(self):
 		response = self.client.post(reverse('workspace_create'), data={'name': 'Renamed', 'description': 'desc'}, follow=True)
 		self.assertEqual(response.status_code, 200)
