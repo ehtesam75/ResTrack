@@ -9,7 +9,7 @@
         <h1 class="text-xl sm:text-2xl font-bold gradient-text">
             {% if form_mode == 'create' %}Create a new workspace{% else %}Edit workspace{% endif %}
         </h1>
-        <p class="text-sm text-gray-600 mt-0.5">
+        <p class="text-xs sm:text-sm text-gray-600 mt-1">
             {% if form_mode == 'create' %}
                 A workspace is an isolated set of students, subjects, exams, and exam center items. Cloudinary uploads for this workspace will live under <code class="text-xs font-mono text-gray-700">W&lt;slug&gt;</code>.
             {% else %}
