@@ -721,6 +721,13 @@ class WorkspaceManagementUITests(TestCase):
 		TeacherProfile.objects.create(user=self.teacher, institution='X')
 		self.client.force_login(self.teacher)
 
+	def test_manage_page_links_to_workspace_management(self):
+		response = self.client.get(reverse('manage'))
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, 'Manage Workspaces')
+		self.assertContains(response, reverse('workspace_list'))
+
 	def test_teacher_can_create_workspace(self):
 		response = self.client.post(reverse('workspace_create'), data={'name': 'Renamed', 'description': 'desc'}, follow=True)
 		self.assertEqual(response.status_code, 200)

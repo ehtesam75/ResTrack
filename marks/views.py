@@ -410,6 +410,7 @@ def manage(request):
         'recent_students': teacher_students.order_by('-created_at')[:5],
         'recent_exams': teacher_exams.order_by('-date', '-id')[:100],
         'guest_account_exists': guest_account_exists,
+        'can_manage_workspaces': is_teacher(request.user) and not is_guest_session(request),
     }
     return render(request, 'marks/manage.html', context)
 
